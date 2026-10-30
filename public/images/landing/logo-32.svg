@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon" clip-path="url(#clip0_0_32)">
+<path id="Vector" d="M18.28 2.4L5.96 11.2L18.28 37.6" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round" stroke="url(#paint0_linear_0_32)"/>
+<path id="Vector_2" d="M34.28 7.84L18.92 17.12L34.28 30.72" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round" stroke="url(#paint1_linear_0_32)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_32" x1="5.96" y1="2.4" x2="5.96" y2="1410.4" gradientUnits="userSpaceOnUse">
+<stop stop-color="#B987FF"/>
+<stop offset="1" stop-color="#4D2FF5"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_32" x1="18.92" y1="7.84" x2="18.92" y2="923.04" gradientUnits="userSpaceOnUse">
+<stop stop-color="#B987FF"/>
+<stop offset="1" stop-color="#4D2FF5"/>
+</linearGradient>
+<clipPath id="clip0_0_32">
+<rect width="32" height="32" fill="white"/>
+</clipPath>
+</defs>
+</svg>

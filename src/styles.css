@@ -1,1 +1,142 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles: Kodikalab palette, Angular Material dark system tokens and shared component tokens. */
+
+:root {
+  color-scheme: dark;
+
+  /* Kodikalab palette (from Figma) */
+  --kl-bg: #04030a;
+  --kl-bg-alt: #06050d;
+  --kl-surface: #080711;
+  --kl-surface-inset: #07060d;
+  --kl-surface-raised: #1b1830;
+  --kl-border: #1e1b2b;
+  --kl-border-strong: #2c2a3a;
+  --kl-divider: #15131f;
+  --kl-text: #ffffff;
+  --kl-text-heading: #f1eeff;
+  --kl-text-body: #cfcbe0;
+  --kl-text-soft: #b9b5cc;
+  --kl-text-muted: #a39fb8;
+  --kl-text-faint: #8f8ba5;
+  --kl-text-inactive: #9a96ad;
+  --kl-accent: #7357f3;
+  --kl-accent-strong: #6e52f2;
+  --kl-accent-bar: #8a6cff;
+  --kl-accent-text: #a98bff;
+  --kl-accent-link: #9b7dff;
+  --kl-danger: #f87171;
+
+  --kl-font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --kl-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Angular Material system tokens (dark) */
+  --mat-sys-primary: var(--kl-accent);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #4b36b8;
+  --mat-sys-on-primary-container: #ffffff;
+  --mat-sys-secondary-container: var(--kl-surface-raised);
+  --mat-sys-on-secondary-container: #ffffff;
+  --mat-sys-surface: var(--kl-surface);
+  --mat-sys-on-surface: var(--kl-text-heading);
+  --mat-sys-on-surface-variant: var(--kl-text-body);
+  --mat-sys-surface-container-low: var(--kl-surface);
+  --mat-sys-surface-container-highest: var(--kl-surface-raised);
+  --mat-sys-outline: #34304a;
+  --mat-sys-outline-variant: var(--kl-border);
+  --mat-sys-error: var(--kl-danger);
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #3b1219;
+  --mat-sys-on-error-container: var(--kl-danger);
+  --mat-sys-shadow: #000000;
+  --mat-sys-hover-state-layer-opacity: 0.08;
+  --mat-sys-focus-state-layer-opacity: 0.1;
+  --mat-sys-pressed-state-layer-opacity: 0.1;
+  --mat-sys-corner-medium: 12px;
+  --mat-sys-corner-large: 16px;
+  --mat-sys-corner-extra-large: 24px;
+  --mat-sys-corner-full: 9999px;
+  --mat-sys-level0: none;
+  --mat-sys-level1: none;
+  --mat-sys-level2: none;
+  --mat-sys-level3: none;
+  --mat-sys-level4: none;
+
+  --mat-sys-body-large-font: var(--kl-font-body);
+  --mat-sys-body-large-size: 16px;
+  --mat-sys-body-large-line-height: 24px;
+  --mat-sys-body-large-weight: 400;
+  --mat-sys-body-large-tracking: normal;
+  --mat-sys-body-medium-font: var(--kl-font-body);
+  --mat-sys-body-medium-size: 15px;
+  --mat-sys-body-medium-line-height: 22px;
+  --mat-sys-body-medium-weight: 400;
+  --mat-sys-body-medium-tracking: normal;
+  --mat-sys-body-small-font: var(--kl-font-body);
+  --mat-sys-body-small-size: 13px;
+  --mat-sys-body-small-line-height: 18px;
+  --mat-sys-body-small-weight: 400;
+  --mat-sys-body-small-tracking: normal;
+  --mat-sys-label-large-font: var(--kl-font-body);
+  --mat-sys-label-large-size: 16px;
+  --mat-sys-label-large-line-height: 20px;
+  --mat-sys-label-large-weight: 500;
+  --mat-sys-label-large-tracking: normal;
+  --mat-sys-title-medium-font: var(--kl-font-body);
+  --mat-sys-title-medium-size: 16px;
+  --mat-sys-title-medium-line-height: 24px;
+  --mat-sys-title-medium-weight: 500;
+  --mat-sys-title-medium-tracking: normal;
+  --mat-sys-title-large-font: var(--kl-font-display);
+  --mat-sys-title-large-size: 22px;
+  --mat-sys-title-large-line-height: 28px;
+  --mat-sys-title-large-weight: 700;
+  --mat-sys-title-large-tracking: normal;
+
+  /* Shared Angular Material component tokens */
+  --mat-button-filled-container-color: var(--kl-accent);
+  --mat-button-filled-label-text-color: #ffffff;
+  --mat-button-filled-container-shape: 10px;
+  --mat-button-filled-label-text-font: var(--kl-font-body);
+  --mat-button-filled-label-text-weight: 500;
+  --mat-button-filled-disabled-container-color: rgba(115, 87, 243, 0.35);
+  --mat-button-filled-disabled-label-text-color: rgba(255, 255, 255, 0.55);
+  --mat-button-outlined-label-text-color: #ffffff;
+  --mat-button-outlined-outline-color: var(--kl-border-strong);
+  --mat-button-outlined-container-shape: 10px;
+  --mat-button-outlined-label-text-font: var(--kl-font-body);
+  --mat-button-outlined-label-text-weight: 500;
+  --mat-button-outlined-state-layer-color: #ffffff;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--kl-bg);
+  color: var(--kl-text);
+  font-family: var(--kl-font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img {
+  vertical-align: middle;
+}
+
+/* Material buttons with a leading/trailing icon image */
+.mdc-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

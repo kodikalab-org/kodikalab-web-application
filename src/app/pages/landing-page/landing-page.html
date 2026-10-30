@@ -1,0 +1,264 @@
+<div class="page">
+  <!-- Hero -->
+  <section class="hero" id="inicio">
+    <picture class="hero__bg" aria-hidden="true">
+      <source media="(max-width: 767px)" srcset="images/landing/hero-bg-mobile.svg" />
+      <img src="images/landing/hero-bg-web.svg" alt="" />
+    </picture>
+
+    <mat-toolbar class="header">
+      <a class="brand" routerLink="/" aria-label="Kodikalab, inicio">
+        <picture>
+          <source media="(max-width: 767px)" srcset="images/landing/logo-32.svg" />
+          <img src="images/landing/logo-40.svg" alt="" width="40" height="40" />
+        </picture>
+        <span class="brand__name">Kodikalab</span>
+      </a>
+
+      <nav class="header__nav" aria-label="Principal">
+        @for (link of navLinks; track link.label) {
+          <a class="header__link" [class.header__link--active]="$first" routerLink="/" [fragment]="link.fragment">
+            {{ link.label }}
+          </a>
+        }
+      </nav>
+
+      <div class="header__actions">
+        <div class="lang" role="group" aria-label="Idioma">
+          <span class="lang__option lang__option--active" aria-current="true">ES</span>
+          <span class="lang__option">EN</span>
+        </div>
+        <a mat-stroked-button class="header__login" routerLink="/login">Iniciar sesión</a>
+        <a mat-flat-button class="header__signup" routerLink="/registro">
+          Registrarse
+          <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+        </a>
+        <button type="button" class="header__menu" aria-label="Abrir menú">
+          <img src="images/landing/menu-20.svg" alt="" width="20" height="20" />
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <div class="hero__content">
+      <mat-chip-set aria-label="Descripción de la plataforma">
+        <mat-chip class="badge" disableRipple>
+          <span class="badge__dot" aria-hidden="true"></span>
+          <span class="badge__strong">GPC UPC</span>
+          <span class="badge__text">Plataforma de entrenamiento en programación competitiva</span>
+        </mat-chip>
+      </mat-chip-set>
+
+      <h1 class="hero__title">
+        Entrena.<br />
+        Analiza.<br />
+        <span class="hero__title-accent">Compite.</span>
+      </h1>
+      <p class="hero__text">
+        Un entorno completo para la práctica, análisis y preparación en programación competitiva,
+        impulsado por la comunidad del GPC UPC.
+      </p>
+      <div class="hero__actions">
+        <a mat-flat-button class="btn btn--lg" routerLink="/registro">
+          Comenzar ahora
+          <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+        </a>
+        <button mat-stroked-button class="btn btn--lg btn--outline" type="button">
+          <img src="images/landing/play-18.svg" alt="" width="18" height="18" />
+          Ver video
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats" aria-label="Cifras de la plataforma">
+    @for (stat of stats; track stat.label) {
+      <div class="stats__item">
+        <p class="stats__value">{{ stat.value }}</p>
+        <p class="stats__label">{{ stat.label }}</p>
+      </div>
+    }
+  </section>
+
+  <!-- Características -->
+  <section class="features section" id="caracteristicas">
+    <div class="features__head">
+      <div>
+        <p class="eyebrow"><span class="eyebrow__bar"></span>Características</p>
+        <h2 class="title">
+          Todo lo que necesitas<br class="title__break" />
+          para llegar <span class="title__accent">más lejos</span>
+        </h2>
+      </div>
+      <div class="features__intro">
+        <p>Herramientas, análisis y acompañamiento diseñados para la comunidad competitiva.</p>
+        <a class="link" routerLink="/" fragment="caracteristicas">
+          Conocer todas
+          <img src="images/landing/arrow-right-14-link.svg" alt="" width="14" height="14" />
+        </a>
+      </div>
+    </div>
+
+    <div class="features__grid">
+      @for (feature of features; track feature.title) {
+        <mat-card appearance="outlined" class="feature">
+          <div class="feature__icon" [style.background-image]="feature.gradient">
+            <img [src]="feature.icon" alt="" width="24" height="24" />
+          </div>
+          <div class="feature__body">
+            <h3 class="feature__title">{{ feature.title }}</h3>
+            <p class="feature__text">{{ feature.description }}</p>
+          </div>
+          <span class="feature__arrow" aria-hidden="true">
+            <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+          </span>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <!-- Comunidad -->
+  <section class="community section" id="comunidad">
+    <div class="community__copy">
+      <p class="eyebrow"><span class="eyebrow__bar"></span>GPC UPC</p>
+      <h2 class="title">
+        Más que una plataforma,<br class="title__break" />
+        una <span class="title__accent">comunidad.</span>
+      </h2>
+      <p class="community__text">
+        Entrena junto a personas que comparten tu pasión por la programación competitiva. Participa
+        en entrenamientos, contests internos y accede a recursos creados por y para el GPC UPC.
+      </p>
+      <a mat-flat-button class="btn btn--md community__cta" routerLink="/">
+        Conocer la comunidad
+        <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+      </a>
+    </div>
+
+    <mat-card appearance="outlined" class="quote">
+      <div class="quote__people">
+        <div class="avatars">
+          @for (avatar of avatars; track avatar.letter) {
+            <span class="avatar" [style.background-image]="avatar.gradient">{{ avatar.letter }}</span>
+          }
+        </div>
+        <mat-chip-set aria-label="Miembros de la comunidad">
+          <mat-chip class="count" disableRipple>+150</mat-chip>
+        </mat-chip-set>
+      </div>
+      <blockquote class="quote__text">
+        “Kodikalab nos permite entrenar en equipo, seguir nuestro progreso y prepararnos mejor para
+        las competencias.”
+      </blockquote>
+      <div class="quote__footer">
+        <div class="dots" aria-hidden="true">
+          <span class="dots__item"></span>
+          <span class="dots__item dots__item--dim"></span>
+        </div>
+        <div class="quote__controls">
+          <button type="button" class="round-btn" aria-label="Testimonio anterior">
+            <img src="images/landing/chevron-left-14.svg" alt="" width="14" height="14" />
+          </button>
+          <button type="button" class="round-btn round-btn--accent" aria-label="Testimonio siguiente">
+            <img src="images/landing/arrow-right-14-carousel.svg" alt="" width="14" height="14" />
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </section>
+
+  <!-- Plataformas integradas -->
+  <section class="platforms" id="plataformas">
+    <img class="platforms__bg" src="images/landing/platforms-bg.svg" alt="" aria-hidden="true" />
+    <div class="platforms__inner">
+      <p class="eyebrow"><span class="eyebrow__bar"></span>Plataformas integradas</p>
+      <h2 class="title">Practica en un solo lugar</h2>
+      <p class="platforms__text">
+        Conecta tus cuentas y visualiza tu progreso en las principales plataformas de programación
+        competitiva.
+      </p>
+      <div class="platforms__list">
+        @for (platform of platforms; track platform.name) {
+          <mat-card appearance="outlined" class="platform">
+            <img [src]="platform.icon" alt="" width="40" height="40" />
+            <span class="platform__name">{{ platform.name }}</span>
+          </mat-card>
+        }
+      </div>
+    </div>
+    <p class="platforms__note">
+      Sincroniza tu progreso automáticamente
+      <img class="platforms__note-arrow" src="images/landing/curved-arrow.svg" alt="" width="60" height="40" />
+    </p>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <picture class="cta__bg" aria-hidden="true">
+      <source media="(max-width: 767px)" srcset="images/landing/cta-bg-mobile.svg" />
+      <img src="images/landing/cta-bg-web.svg" alt="" />
+    </picture>
+    <div class="cta__content">
+      <p class="eyebrow"><span class="eyebrow__bar"></span>¿Listo para comenzar?</p>
+      <h2 class="title title--center">Únete a <span class="title__accent">Kodikalab</span></h2>
+      <p class="cta__text">
+        Forma parte del entorno de entrenamiento del GPC UPC y lleva tu preparación al siguiente
+        nivel.
+      </p>
+      <div class="cta__actions">
+        <a mat-flat-button class="btn btn--lg" routerLink="/registro">
+          Crear mi cuenta
+          <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+        </a>
+        <button mat-stroked-button class="btn btn--lg btn--outline" type="button">Ver planes</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <div class="footer__logo">
+          <picture>
+            <source media="(max-width: 767px)" srcset="images/landing/logo-footer-28.svg" />
+            <img src="images/landing/logo-footer-32.svg" alt="" width="32" height="32" />
+          </picture>
+          <span class="footer__name">Kodikalab</span>
+        </div>
+        <p class="footer__text">
+          Plataforma de entrenamiento en programación competitiva del GPC UPC.
+        </p>
+      </div>
+
+      <nav class="footer__nav" aria-label="Pie de página">
+        @for (link of navLinks; track link.label) {
+          <a routerLink="/" [fragment]="link.fragment">{{ link.label }}</a>
+        }
+      </nav>
+
+      <div class="footer__social">
+        @for (social of socials; track social.label) {
+          <img [src]="social.icon" [alt]="social.label" width="20" height="20" />
+        }
+      </div>
+    </div>
+
+    <mat-divider class="footer__divider"></mat-divider>
+
+    <div class="footer__bottom">
+      <div class="footer__legal">
+        <span>© 2026 Kodikalab. Todos los derechos reservados.</span>
+        <span>Términos de Servicio</span>
+        <span>Política de privacidad</span>
+      </div>
+      <div class="footer__lang">
+        <div class="lang lang--sm" role="group" aria-label="Idioma">
+          <span class="lang__option lang__option--active" aria-current="true">ES</span>
+          <span class="lang__option">EN</span>
+        </div>
+        <span>GPC UPC</span>
+      </div>
+    </div>
+  </footer>
+</div>

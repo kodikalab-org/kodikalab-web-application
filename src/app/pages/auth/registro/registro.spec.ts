@@ -24,6 +24,13 @@ describe('Registro', () => {
     return { fixture, root, submit, input, type };
   }
 
+  it('keeps the interface in Spanish without a language selector', async () => {
+    const { root } = await setup();
+    expect(root.querySelector('[aria-label="Idioma"]')).toBeNull();
+    expect(root.querySelector('h1')?.textContent).toContain('Crear cuenta');
+    expect(root.querySelector('.back')).not.toBeNull();
+  });
+
   it('starts with the submit button disabled and no errors shown', async () => {
     const { root, submit } = await setup();
     expect(submit().disabled).toBe(true);

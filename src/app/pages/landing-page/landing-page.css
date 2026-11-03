@@ -90,40 +90,6 @@
   background: var(--kl-surface-inset);
 }
 
-.lang {
-  display: flex;
-  padding: 2px;
-  border: 1px solid var(--kl-border-strong);
-  border-radius: 10px;
-  background: var(--kl-surface-inset);
-}
-
-.lang__option {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 36px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--kl-text-inactive);
-}
-
-.lang__option--active {
-  background: var(--kl-surface-raised);
-  color: var(--kl-text);
-}
-
-.lang--sm {
-  border-color: var(--kl-border);
-}
-
-.lang--sm .lang__option {
-  width: 34px;
-  height: 28px;
-}
-
 /* Hero */
 .hero {
   position: relative;
@@ -249,45 +215,8 @@
   text-align: center;
 }
 
-.badge {
-  --mat-chip-container-height: 38px;
-  --mat-chip-container-shape-radius: 9999px;
-  --mat-chip-elevated-container-color: #06050c;
-  --mat-chip-outline-color: #2e2b3d;
-  --mat-chip-outline-width: 1px;
-  --mat-chip-label-text-color: var(--kl-text-body);
-  --mat-chip-label-text-size: 13px;
-  --mat-chip-label-text-font: var(--kl-font-body);
-  --mat-chip-label-text-weight: 400;
-  border: 1px solid #2e2b3d;
-}
-
-.badge ::ng-deep .mdc-evolution-chip__text-label,
-.badge ::ng-deep .mat-mdc-chip-action-label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.badge__dot {
-  width: 9px;
-  height: 9px;
-  flex: none;
-  border-radius: 50%;
-  background: #b394ff;
-}
-
-.badge__strong {
-  font-weight: 500;
-  color: var(--kl-text);
-}
-
-.badge__text {
-  color: var(--kl-text-body);
-}
-
 .hero__title {
-  margin: 26px 0 0;
+  margin: 0;
   font-family: var(--kl-font-display);
   font-size: 86px;
   font-weight: 800;
@@ -757,12 +686,6 @@
   gap: 22px;
 }
 
-.footer__lang {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 /* Tablet */
 @media (max-width: 1100px) {
   :host {
@@ -845,11 +768,6 @@
     gap: 10px;
   }
 
-  .header__actions .lang__option {
-    width: 32px;
-    height: 30px;
-  }
-
   .header__menu {
     display: flex;
   }
@@ -862,23 +780,7 @@
     padding: 48px 24px 0;
   }
 
-  .badge {
-    --mat-chip-container-height: 32px;
-    --mat-chip-label-text-size: 11px;
-    max-width: 342px;
-    height: auto;
-    padding-block: 7px;
-  }
-
-  .badge ::ng-deep .mdc-evolution-chip__text-label,
-  .badge ::ng-deep .mat-mdc-chip-action-label {
-    gap: 8px;
-    white-space: normal;
-    text-align: left;
-  }
-
   .hero__title {
-    margin-top: 22px;
     font-size: 52px;
     line-height: 50px;
     letter-spacing: -2px;

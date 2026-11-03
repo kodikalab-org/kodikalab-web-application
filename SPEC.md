@@ -1,0 +1,90 @@
+# KodikaLab
+
+Aplicación web responsiva para el entrenamiento en programación competitiva de la comunidad GPC UPC.
+
+> Este documento describe la fase de interfaces del frontend. `AGENTS.md` contiene las instrucciones detalladas y prevalece si hay alguna diferencia.
+
+## Datos
+
+- **Referencia visual:** [Figma de KodikaLab](https://www.figma.com/design/prt67vzvXGvuuIORZvSH3A/kodikalab_design?node-id=61-22&t=383KuKl3iCnZOKtH-1).
+- **Frontend:** Angular 22, componentes standalone y CSS.
+- **UI:** Angular Material y CDK.
+- **Paquetes:** npm; ejecutar los comandos desde esta carpeta, donde está `package.json`.
+- **Renderizado:** conservar la configuración existente de SSR e hidratación.
+- **Estilos:** reutilizar la paleta, tipografías y tokens de `src/styles.css`.
+
+## Cómo trabajar
+
+Haz solo las pantallas que se soliciten. Antes de programar, revisa el proyecto y los frames correspondientes del Figma, incluida la versión móvil si existe. Si falta una referencia importante o no puedes abrirla, pide una captura o un enlace; no inventes el diseño.
+
+Reutiliza rutas, estilos y layouts existentes sin modificarlos. Si para conectar una pantalla hace falta cambiarlos o alterar el tema global, explica el cambio mínimo y solicita autorización. Al terminar, indica los archivos creados o modificados, las verificaciones y lo pendiente.
+
+## Estructura
+
+La siguiente es una **propuesta de organización**, adaptada al formato de la plantilla para los roles y funcionalidades de KodikaLab. Un grupo reúne pantallas que comparten un layout; los nombres y rutas pendientes deben confirmarse con el Figma y la tarea solicitada.
+
+```text
+src/app/
+├── app.routes.ts                    # / carga la landing; grupos mediante rutas hijas
+├── pages/
+│   ├── landing-page/                # Landing actual en /, con cabecera y pie propios
+│   │   └── landing-page.ts · landing-page.html · landing-page.css
+│   ├── registro/                    # Registro actual en /registro
+│   ├── auth/                        # Propuesto: pantallas de acceso
+│   │   ├── auth.routes.ts           # Rutas del grupo
+│   │   └── login/                   # Inicio de sesión
+│   ├── practicante/                 # Propuesto: pantallas del practicante
+│   │   ├── practicante.routes.ts    # Rutas del grupo
+│   │   ├── perfil/                  # Perfil y plataformas competitivas
+│   │   ├── equipos/                 # Equipos y solicitudes de ingreso
+│   │   ├── problemas/               # Problemas asignados y resoluciones
+│   │   └── progreso/                # Progreso por tema
+│   └── coach/                       # Propuesto: pantallas del coach
+│       ├── coach.routes.ts          # Rutas del grupo
+│       ├── equipos/                 # Creación y gestión de equipos
+│       ├── postulantes/             # Solicitudes de ingreso
+│       ├── asignaciones/           # Asignación de problemas
+│       └── analitica/               # Ranking y desempeño del equipo
+└── layouts/                         # Propuestos, si los grupos los necesitan
+    ├── auth-layout/
+    ├── practicante-layout/
+    └── coach-layout/
+```
+
+**Estado actual:** solo existen `landing-page/`, `registro/` y las rutas `/` y `/registro`. El resto del árbol es orientativo, no indica pantallas implementadas ni autoriza crearlas o reorganizar las actuales. La interfaz enlaza a `/login` y `/registro-exitoso`, pero esas rutas todavía no existen. El formulario de registro es una maqueta sin conexión al backend; las funciones y plataformas mostradas en la landing son contenido visual.
+
+Para trabajo nuevo, sigue la estructura existente y usa `src/app/pages/<nombre-de-pantalla>/`, salvo que se acuerde otra organización. No cambies rutas o layouts existentes sin autorización ni crees abstracciones innecesarias.
+
+## Alcance
+
+Por defecto, esta fase es de **maquetación y navegación**, no de lógica de negocio. Usa los textos y datos de ejemplo del Figma; representa las listas con datos fijos.
+
+- **Sí:** formularios con Reactive Forms y validaciones sencillas, mensajes de error, listas con `@for` y enlaces con `routerLink` entre las pantallas solicitadas.
+- **No, salvo solicitud expresa:** autenticación real, pagos, peticiones HTTP, almacenamiento, servicios, modelos, interfaces de datos o funciones de negocio. No agregues `signals`, `computed`, `inject()` ni navegación programática con `Router` para resolver una maqueta.
+- Buscadores, filtros y contadores se dibujan sin buscar, filtrar ni calcular resultados. Si una función real queda pendiente, indícalo sin simular que funciona.
+- No generes contenido como códigos QR por código: usa un recurso estático del diseño y aclara que es de ejemplo.
+- No crees rutas nuevas para estados de error, vacío o rechazo. Por ahora, implementa únicamente los errores de formulario solicitados.
+
+## Reglas
+
+- **Angular:** componentes standalone, un `.ts`, `.html` y `.css` por pantalla; nombres en minúsculas separados por guiones.
+- **Control de flujo:** usa `@if`, `@for` con `track` y `@switch`; no uses `*ngIf`, `*ngFor` ni `ngSwitch`.
+- **UI:** usa los controles de Angular Material según el diseño, como `mat-toolbar`, `mat-card`, `mat-form-field`, `matInput`, botones, chips, listas y divisores. Revisa `package.json` antes de instalar dependencias y no actualices Angular ni otras dependencias sin autorización.
+- **Fechas, listas y gráficos:** utiliza `mat-datepicker` con adaptador e idioma configurados en la ruta correspondiente; usa `mat-paginator` solo para listas largas. Para gráficos no solicitados, deja un bloque con «Aquí irá un gráfico».
+- **Formularios:** usa `FormGroup`, `FormControl` y `formControlName`; no uses Signal Forms ni `ngModel`. Todo campo o selección editable, incluidas fechas, cantidades y chips, pertenece a un `FormGroup`.
+- **Validaciones:** aplica validaciones simples según el diseño, como `required`, `email` o `minLength`. Cada campo validado lleva un `<mat-error>` en el idioma de la interfaz, visible después de tocarlo; el botón principal usa `[disabled]="form.invalid"`.
+- **Navegación:** usa `routerLink` en botones y enlaces de navegación, incluido el botón principal de formulario. Los controles propios de Material, como abrir un calendario, no son enlaces. Si el destino no existe, indícalo sin crear otra pantalla por tu cuenta.
+- **Diseño y accesibilidad:** respeta el Figma y las variables de `src/styles.css`; verifica escritorio y móvil sin texto cortado, solapamientos ni desplazamiento horizontal innecesario. Conserva el orden de lectura y las etiquetas accesibles.
+- **SSR:** no accedas directamente a `window`, `document` ni `localStorage` desde el código de las pantallas.
+- **Si dudas, pregunta:** no implementes pantallas ni cambios fuera del alcance pedido.
+
+## Verificación
+
+Desde esta carpeta:
+
+```bash
+npm run build
+npm start
+```
+
+Comprueba en el navegador las vistas de escritorio y móvil, los enlaces y las validaciones. Si modificas un comportamiento que ya tiene pruebas, ejecuta las pruebas correspondientes. Una compilación correcta no sustituye la revisión visual ni de navegación.

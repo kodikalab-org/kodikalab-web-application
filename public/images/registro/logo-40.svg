@@ -1,19 +1,14 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Icon" clip-path="url(#clip0_0_31)">
-<path id="Vector" d="M18.28 2.4L5.96 11.2L18.28 37.6" stroke-width="5.44" stroke-linecap="round" stroke-linejoin="round" stroke="url(#paint0_linear_0_31)"/>
-<path id="Vector_2" d="M34.28 7.84L18.92 17.12L34.28 30.72" stroke-width="5.44" stroke-linecap="round" stroke-linejoin="round" stroke="url(#paint1_linear_0_31)"/>
-</g>
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.23 3.07001L6.37903 11.535L18.23 36.93" stroke="url(#paint0_linear_0_31)" stroke-width="5.44"/>
+<path d="M33.6207 8.30292L18.8457 17.2299L33.6207 30.3119" stroke="url(#paint1_linear_0_31)" stroke-width="5.44"/>
 <defs>
-<linearGradient id="paint0_linear_0_31" x1="5.96" y1="2.4" x2="5.96" y2="1410.4" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint0_linear_0_31" x1="6.37903" y1="3.07001" x2="6.37903" y2="1357.47" gradientUnits="userSpaceOnUse">
 <stop stop-color="#B987FF"/>
 <stop offset="1" stop-color="#4D2FF5"/>
 </linearGradient>
-<linearGradient id="paint1_linear_0_31" x1="18.92" y1="7.84" x2="18.92" y2="923.04" gradientUnits="userSpaceOnUse">
+<linearGradient id="paint1_linear_0_31" x1="18.8457" y1="8.30292" x2="18.8457" y2="888.663" gradientUnits="userSpaceOnUse">
 <stop stop-color="#B987FF"/>
 <stop offset="1" stop-color="#4D2FF5"/>
 </linearGradient>
-<clipPath id="clip0_0_31">
-<rect width="40" height="40" fill="white"/>
-</clipPath>
 </defs>
 </svg>

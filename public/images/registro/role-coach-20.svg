@@ -1,13 +1,6 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Icon" clip-path="url(#clip0_0_4)">
-<path id="Vector" d="M12.5 8C12.5 9.933 10.933 11.5 9 11.5C7.067 11.5 5.5 9.933 5.5 8C5.5 6.067 7.067 4.5 9 4.5C10.933 4.5 12.5 6.067 12.5 8Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#A39FB8"/>
-<path id="Vector_2" d="M2.5 20C2.5 16 5.5 14 9 14C12.5 14 15.5 16 15.5 20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#A39FB8"/>
-<path id="Vector_3" d="M19.8 9C19.8 10.5464 18.5464 11.8 17 11.8C15.4536 11.8 14.2 10.5464 14.2 9C14.2 7.4536 15.4536 6.2 17 6.2C18.5464 6.2 19.8 7.4536 19.8 9Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#A39FB8"/>
-<path id="Vector_4" d="M17 14C19.5 14 21.5 15.5 21.5 19" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#A39FB8"/>
-</g>
-<defs>
-<clipPath id="clip0_0_4">
-<rect width="20" height="20" fill="white"/>
-</clipPath>
-</defs>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M7.23718 9.30882C9.01718 9.30882 10.4602 7.86582 10.4602 6.08582C10.4602 4.30482 9.01718 2.86182 7.23718 2.86182C5.45618 2.86182 4.01318 4.30482 4.01318 6.08582C4.01318 7.86582 5.45618 9.30882 7.23718 9.30882Z" stroke="#A39FB8" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M1.25 17.1378C1.25 13.4538 4.013 11.6118 7.237 11.6118C10.461 11.6118 13.224 13.4538 13.224 17.1378" stroke="#A39FB8" stroke-width="1.8"/>
+<path d="M14.6054 9.58561C16.0294 9.58561 17.1844 8.43061 17.1844 7.00661C17.1844 5.58261 16.0294 4.42761 14.6054 4.42761C13.1814 4.42761 12.0264 5.58261 12.0264 7.00661C12.0264 8.43061 13.1814 9.58561 14.6054 9.58561Z" stroke="#A39FB8" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M14.6052 11.6118C16.9082 11.6118 18.7502 12.9938 18.7502 16.2168" stroke="#A39FB8" stroke-width="1.8" stroke-linejoin="round"/>
 </svg>

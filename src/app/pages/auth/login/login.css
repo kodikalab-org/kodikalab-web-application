@@ -1,0 +1,433 @@
+:host {
+  display: block;
+  color: var(--kl-text);
+  font-family: var(--kl-font-body);
+}
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Un píxel menos que el viewport para que el redondeo subpíxel de dvh
+     (habitual con zoom del navegador) no genere una barra de scroll. */
+  min-height: calc(100dvh - 1px);
+  overflow: hidden;
+  background: var(--kl-bg);
+}
+
+.page__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  pointer-events: none;
+}
+
+/* Header */
+.header {
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+  --mat-toolbar-standard-height: 68px;
+  position: relative;
+  z-index: 1;
+  justify-content: space-between;
+  padding-inline: 56px;
+  border-bottom: 1px solid var(--kl-divider);
+  font-family: var(--kl-font-body);
+}
+
+.brand,
+.card__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand__name {
+  font-size: 25px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+  color: var(--kl-text);
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--kl-text-body);
+}
+
+/* Card */
+.main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.card {
+  --mat-card-outlined-container-color: transparent;
+  --mat-card-outlined-outline-color: #5b44c9;
+  --mat-card-outlined-container-shape: 24px;
+  align-items: center;
+  width: 100%;
+  max-width: 540px;
+  padding: 36px 40px;
+  background-image: linear-gradient(
+    180deg,
+    rgba(32, 20, 84, 0.75) 0%,
+    rgba(20, 13, 52, 0.82) 50%,
+    rgba(10, 7, 26, 0.9) 100%
+  );
+  box-shadow:
+    0 0 40px rgba(100, 60, 255, 0.35),
+    inset 0 0 1px rgba(120, 90, 255, 0.25);
+}
+
+.brand__name--card {
+  font-size: 30px;
+}
+
+.card__title {
+  margin: 18px 0 0;
+  font-family: var(--kl-font-display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 38px;
+  letter-spacing: -1px;
+  text-align: center;
+  color: var(--kl-text);
+}
+
+.card__subtitle {
+  margin: 10px 0 0;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 24px;
+  text-align: center;
+  color: var(--kl-text-body);
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  padding-top: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--kl-text-body);
+}
+
+.field mat-form-field {
+  --mat-form-field-container-height: 50px;
+  --mat-form-field-container-vertical-padding: 13px;
+  --mat-form-field-outlined-container-shape: 12px;
+  --mat-form-field-outlined-outline-color: #34304a;
+  --mat-form-field-outlined-hover-outline-color: #4c4670;
+  --mat-form-field-outlined-focus-outline-color: #9b7dff;
+  --mat-form-field-outlined-outline-width: 1px;
+  --mat-form-field-outlined-focus-outline-width: 1px;
+  --mat-form-field-outlined-error-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-error-hover-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-error-focus-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-input-text-color: var(--kl-text-heading);
+  --mat-form-field-outlined-input-text-placeholder-color: #8d89a3;
+  --mat-form-field-outlined-caret-color: var(--kl-accent-text);
+  --mat-form-field-outlined-error-caret-color: var(--kl-danger);
+  width: 100%;
+  font-size: 15px;
+}
+
+.field mat-form-field ::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: none;
+}
+
+/* Evita que se sume el outline nativo del navegador al borde del campo. */
+.field mat-form-field:focus-within,
+.field mat-form-field ::ng-deep input.mat-mdc-input-element:focus {
+  outline: none;
+}
+
+.field mat-form-field ::ng-deep .mat-mdc-form-field-icon-prefix,
+.field mat-form-field ::ng-deep .mat-mdc-form-field-icon-suffix {
+  display: flex;
+  align-items: center;
+}
+
+.field mat-form-field ::ng-deep .mat-mdc-form-field-icon-prefix {
+  padding: 0 12px 0 16px;
+}
+
+.field mat-form-field ::ng-deep .mat-mdc-form-field-icon-suffix {
+  padding: 0 16px 0 12px;
+}
+
+.field mat-form-field ::ng-deep .mat-mdc-form-field-error-wrapper {
+  padding: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Quita el recuadro que dibuja el navegador al enfocar con el ratón y deja
+   un anillo de foco solo para la navegación con teclado. */
+.toggle:focus {
+  outline: none;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--kl-accent-bar);
+  outline-offset: 2px;
+}
+
+.toggle img {
+  display: block;
+}
+
+mat-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding-top: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--kl-danger);
+}
+
+mat-error img {
+  flex: none;
+  margin-top: 1.5px;
+}
+
+/* Options */
+.options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 20px;
+}
+
+.remember {
+  --mat-checkbox-unselected-icon-color: #6b6585;
+  --mat-checkbox-unselected-hover-icon-color: var(--kl-accent-text);
+  --mat-checkbox-unselected-focus-icon-color: var(--kl-accent-text);
+  --mat-checkbox-selected-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-hover-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-focus-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-checkmark-color: #ffffff;
+  --mat-checkbox-label-text-color: #e7e3f5;
+  --mat-checkbox-label-text-size: 14px;
+  --mat-checkbox-label-text-font: var(--kl-font-body);
+  --mat-checkbox-state-layer-size: 20px;
+  --mat-checkbox-touch-target-size: 20px;
+}
+
+.remember ::ng-deep .mdc-checkbox {
+  padding: 0;
+  margin: 0;
+}
+
+.remember ::ng-deep .mdc-checkbox__background {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.remember ::ng-deep .mdc-label {
+  margin-left: 10px;
+}
+
+.forgot {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--kl-accent-text);
+  white-space: nowrap;
+}
+
+/* Submit */
+.submit {
+  --mat-button-filled-container-height: 54px;
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-label-text-size: 16px;
+  width: 100%;
+  background-image: linear-gradient(180deg, #8d6df8 0%, #6244e8 100%);
+  filter: drop-shadow(0 2px 7px rgba(168, 129, 254, 0.55));
+}
+
+.submit[disabled] {
+  filter: none;
+  opacity: 0.55;
+}
+
+.separator {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(52, 48, 74, 0), #34304a 50%, rgba(52, 48, 74, 0));
+}
+
+.register {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 54px;
+  border: 1px solid #34304a;
+  border-radius: 12px;
+  font-size: 15px;
+  color: #e7e3f5;
+}
+
+.register__link {
+  font-weight: 500;
+  color: var(--kl-accent-text);
+}
+
+.legal {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 16px 22px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--kl-text-faint);
+}
+
+.legal__link {
+  color: var(--kl-accent-text);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .header {
+    padding-inline: 16px;
+  }
+
+  .brand__name {
+    font-size: 22px;
+  }
+
+  .back {
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .header__actions {
+    gap: 10px;
+  }
+
+  .card {
+    padding: 28px 20px;
+  }
+
+  .card__title {
+    font-size: 30px;
+    line-height: 34px;
+  }
+
+  .options {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 460px) {
+  .back__text {
+    display: none;
+  }
+}
+
+/* Pantallas bajas (portátiles con zoom alto): compacta la tarjeta para que
+   cabecera, formulario y pie legal entren completos sin scroll. */
+@media (max-height: 760px) {
+  .main {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 24px 32px;
+  }
+
+  .brand__name--card {
+    font-size: 26px;
+  }
+
+  .card__title {
+    margin-top: 12px;
+    font-size: 28px;
+    line-height: 32px;
+  }
+
+  .card__subtitle {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .form {
+    gap: 10px;
+    padding-top: 16px;
+  }
+
+  .field mat-form-field {
+    --mat-form-field-container-height: 46px;
+    --mat-form-field-container-vertical-padding: 11px;
+  }
+
+  .options {
+    min-height: 18px;
+  }
+
+  .submit {
+    --mat-button-filled-container-height: 48px;
+  }
+
+  .register {
+    height: 48px;
+  }
+
+  .legal {
+    padding-bottom: 12px;
+  }
+}
+
+@media (max-height: 760px) and (max-width: 640px) {
+  .card {
+    padding: 24px 20px;
+  }
+}

@@ -18,10 +18,13 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   ],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.css',
+  host: {
+    '(document:keydown.escape)': 'closeMenu()',
+  },
 })
 export class LandingPage {
   protected readonly navLinks = [
-    { label: 'Inicio', fragment: undefined },
+    { label: 'Inicio', fragment: 'inicio' },
     { label: 'Características', fragment: 'caracteristicas' },
     { label: 'Comunidad', fragment: 'comunidad' },
     { label: 'Recursos', fragment: undefined },
@@ -69,6 +72,12 @@ export class LandingPage {
     { letter: 'D', gradient: 'linear-gradient(135deg, #b32e63 0%, #f06c9b 100%)' },
   ];
 
+  // Testimonios de ejemplo: el diseño muestra dos indicadores en el carrusel.
+  protected readonly testimonials = [
+    'Kodikalab nos permite entrenar en equipo, seguir nuestro progreso y prepararnos mejor para las competencias.',
+    'Tener los problemas, los equipos y el progreso en un solo lugar nos ayuda a enfocarnos en lo que hay que mejorar.',
+  ];
+
   protected readonly platforms = [
     { name: 'Codeforces', icon: 'images/landing/platform-codeforces.svg' },
     { name: 'AtCoder', icon: 'images/landing/platform-atcoder.svg' },
@@ -81,4 +90,34 @@ export class LandingPage {
     { label: 'GitHub', icon: 'images/landing/social-github.svg' },
     { label: 'Red social 3', icon: 'images/landing/social-3.svg' },
   ];
+
+  protected menuOpen = false;
+  protected activeLink = 'Inicio';
+  protected currentTestimonial = 0;
+
+  protected toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  protected closeMenu(): void {
+    this.menuOpen = false;
+  }
+
+  protected selectLink(label: string): void {
+    this.activeLink = label;
+    this.closeMenu();
+  }
+
+  protected previousTestimonial(): void {
+    const total = this.testimonials.length;
+    this.currentTestimonial = (this.currentTestimonial - 1 + total) % total;
+  }
+
+  protected nextTestimonial(): void {
+    this.currentTestimonial = (this.currentTestimonial + 1) % this.testimonials.length;
+  }
+
+  protected goToTestimonial(index: number): void {
+    this.currentTestimonial = index;
+  }
 }

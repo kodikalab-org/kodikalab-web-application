@@ -17,7 +17,14 @@
 
       <nav class="header__nav" aria-label="Principal">
         @for (link of navLinks; track link.label) {
-          <a class="header__link" [class.header__link--active]="$first" routerLink="/" [fragment]="link.fragment">
+          <a
+            class="header__link"
+            [class.header__link--active]="link.label === activeLink"
+            [attr.aria-current]="link.label === activeLink ? 'page' : null"
+            routerLink="/"
+            [fragment]="link.fragment"
+            (click)="selectLink(link.label)"
+          >
             {{ link.label }}
           </a>
         }
@@ -29,11 +36,50 @@
           Registrarse
           <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
         </a>
-        <button type="button" class="header__menu" aria-label="Abrir menú">
-          <img src="images/landing/menu-20.svg" alt="" width="20" height="20" />
+        <button
+          type="button"
+          class="header__menu"
+          [attr.aria-label]="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
+          [attr.aria-expanded]="menuOpen"
+          aria-controls="menu-movil"
+          (click)="toggleMenu()"
+        >
+          <img
+            [src]="menuOpen ? 'images/landing/close-20.svg' : 'images/landing/menu-20.svg'"
+            alt=""
+            width="20"
+            height="20"
+          />
         </button>
       </div>
     </mat-toolbar>
+
+    @if (menuOpen) {
+      <nav class="mobile-menu" id="menu-movil" aria-label="Menú móvil">
+        @for (link of navLinks; track link.label) {
+          <a
+            class="mobile-menu__link"
+            [class.mobile-menu__link--active]="link.label === activeLink"
+            [attr.aria-current]="link.label === activeLink ? 'page' : null"
+            routerLink="/"
+            [fragment]="link.fragment"
+            (click)="selectLink(link.label)"
+          >
+            {{ link.label }}
+          </a>
+        }
+        <mat-divider class="mobile-menu__divider"></mat-divider>
+        <div class="mobile-menu__actions">
+          <a mat-stroked-button class="btn btn--lg btn--outline" routerLink="/login" (click)="closeMenu()">
+            Iniciar sesión
+          </a>
+          <a mat-flat-button class="btn btn--lg" routerLink="/registro" (click)="closeMenu()">
+            Registrarse
+            <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+          </a>
+        </div>
+      </nav>
+    }
 
     <div class="hero__content">
       <h1 class="hero__title">
@@ -134,20 +180,37 @@
           <mat-chip class="count" disableRipple>+150</mat-chip>
         </mat-chip-set>
       </div>
-      <blockquote class="quote__text">
-        “Kodikalab nos permite entrenar en equipo, seguir nuestro progreso y prepararnos mejor para
-        las competencias.”
+      <blockquote class="quote__text" aria-live="polite">
+        “{{ testimonials[currentTestimonial] }}”
       </blockquote>
       <div class="quote__footer">
-        <div class="dots" aria-hidden="true">
-          <span class="dots__item"></span>
-          <span class="dots__item dots__item--dim"></span>
+        <div class="dots">
+          @for (testimonial of testimonials; track $index) {
+            <button
+              type="button"
+              class="dots__item"
+              [class.dots__item--dim]="$index !== currentTestimonial"
+              [attr.aria-label]="'Ver testimonio ' + ($index + 1)"
+              [attr.aria-current]="$index === currentTestimonial ? 'true' : null"
+              (click)="goToTestimonial($index)"
+            ></button>
+          }
         </div>
         <div class="quote__controls">
-          <button type="button" class="round-btn" aria-label="Testimonio anterior">
+          <button
+            type="button"
+            class="round-btn"
+            aria-label="Testimonio anterior"
+            (click)="previousTestimonial()"
+          >
             <img src="images/landing/chevron-left-14.svg" alt="" width="14" height="14" />
           </button>
-          <button type="button" class="round-btn round-btn--accent" aria-label="Testimonio siguiente">
+          <button
+            type="button"
+            class="round-btn round-btn--accent"
+            aria-label="Testimonio siguiente"
+            (click)="nextTestimonial()"
+          >
             <img src="images/landing/arrow-right-14-carousel.svg" alt="" width="14" height="14" />
           </button>
         </div>
@@ -221,7 +284,9 @@
 
       <nav class="footer__nav" aria-label="Pie de página">
         @for (link of navLinks; track link.label) {
-          <a routerLink="/" [fragment]="link.fragment">{{ link.label }}</a>
+          <a routerLink="/" [fragment]="link.fragment" (click)="selectLink(link.label)">
+            {{ link.label }}
+          </a>
         }
       </nav>
 

@@ -1,32 +1,81 @@
-<div class="page">
-  <img class="page__bg" src="images/login/bg.svg" alt="" aria-hidden="true" />
+<div
+  class="page relative flex min-h-[calc(100dvh-1px)] flex-col overflow-hidden bg-kl-bg font-body text-kl-text"
+  #pageStart
+>
+  <img
+    class="page__bg pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
+    src="images/login/bg.svg"
+    alt=""
+    aria-hidden="true"
+  />
 
-  <mat-toolbar class="header">
-    <a class="brand" routerLink="/" aria-label="Kodikalab, inicio">
+  <mat-toolbar
+    class="header auth-header relative z-10 justify-between border-0 border-b border-solid border-kl-divider px-14 font-body max-[641px]:px-4"
+  >
+    <a
+      class="brand inline-flex items-center gap-2.5"
+      routerLink="/"
+      aria-label="Kodikalab, inicio"
+      (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+    >
       <img src="images/login/logo-40.svg" alt="" width="40" height="40" />
-      <span class="brand__name">Kodikalab</span>
+      <span class="brand__name text-[25px] font-medium tracking-[-.4px] max-[641px]:text-[22px]"
+        >Kodikalab</span
+      >
     </a>
-    <div class="header__actions">
-      <a class="back" routerLink="/" aria-label="Volver al inicio">
+    <div class="header__actions flex items-center gap-5 max-[641px]:gap-2.5">
+      <a
+        class="back inline-flex items-center gap-2 text-[15px] text-kl-body hover:text-kl-accent-text max-[641px]:gap-1.5 max-[641px]:text-[13px]"
+        routerLink="/"
+        aria-label="Volver al inicio"
+        (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+      >
         <img src="images/login/arrow-left-18.svg" alt="" width="18" height="18" />
-        <span class="back__text">Volver al inicio</span>
+        <span class="back__text max-[461px]:hidden">Volver al inicio</span>
       </a>
     </div>
   </mat-toolbar>
 
-  <main class="main">
-    <mat-card class="card" appearance="outlined">
-      <div class="card__brand">
+  <main
+    class="main relative z-10 flex flex-1 items-center justify-center px-4 py-8 [@media(max-height:760px)]:p-4"
+  >
+    <mat-card
+      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[#201454]/75 via-[#140d34]/82 to-[#0a071a]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7 [@media(max-height:760px)]:px-8 [@media(max-height:760px)]:py-6 [@media(max-height:760px)_and_(max-width:640px)]:px-5"
+      appearance="outlined"
+    >
+      <div class="card__brand inline-flex items-center gap-2.5">
         <img src="images/login/logo-48.svg" alt="" width="48" height="48" />
-        <span class="brand__name brand__name--card">Kodikalab</span>
+        <span
+          class="brand__name brand__name--card text-[30px] font-medium tracking-[-.4px] [@media(max-height:760px)]:text-[26px]"
+          >Kodikalab</span
+        >
       </div>
-      <h1 class="card__title">Iniciar sesión</h1>
-      <p class="card__subtitle">Accede a tu espacio de entrenamiento competitivo</p>
+      <h1
+        class="card__title mt-[18px] mb-0 text-center font-display text-[34px] leading-[38px] font-bold tracking-[-1px] max-[641px]:text-[30px] max-[641px]:leading-[34px] [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:text-[28px] [@media(max-height:760px)]:leading-8"
+      >
+        Iniciar sesión
+      </h1>
+      <p
+        class="card__subtitle mt-2.5 mb-0 text-center text-base leading-6 font-light text-kl-body [@media(max-height:760px)]:mt-1.5 [@media(max-height:760px)]:text-sm [@media(max-height:760px)]:leading-5"
+      >
+        Accede a tu espacio de entrenamiento competitivo
+      </p>
 
-      <form class="form" [formGroup]="form" novalidate (submit)="$event.preventDefault()">
-        <div class="field">
-          <label class="field__label" for="email">Correo institucional</label>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <form
+        class="form flex w-full flex-col gap-3.5 pt-6 [@media(max-height:760px)]:gap-2.5 [@media(max-height:760px)]:pt-4"
+        [formGroup]="form"
+        novalidate
+        (submit)="$event.preventDefault()"
+      >
+        <div class="field flex min-w-0 flex-col gap-1.5">
+          <label class="field__label text-[13px] font-medium text-kl-body" for="email"
+            >Correo institucional</label
+          >
+          <mat-form-field
+            class="auth-field w-full text-[15px]"
+            appearance="outline"
+            subscriptSizing="dynamic"
+          >
             <img matPrefix src="images/login/mail-20.svg" alt="" width="20" height="20" />
             <input
               matInput
@@ -44,9 +93,15 @@
           </mat-form-field>
         </div>
 
-        <div class="field">
-          <label class="field__label" for="password">Contraseña</label>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <div class="field flex min-w-0 flex-col gap-1.5">
+          <label class="field__label text-[13px] font-medium text-kl-body" for="password"
+            >Contraseña</label
+          >
+          <mat-form-field
+            class="auth-field w-full text-[15px]"
+            appearance="outline"
+            subscriptSizing="dynamic"
+          >
             <img matPrefix src="images/login/lock-20.svg" alt="" width="20" height="20" />
             <input
               matInput
@@ -60,7 +115,7 @@
             <button
               matSuffix
               type="button"
-              class="toggle"
+              class="toggle flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
               (click)="togglePassword()"
               [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
               [attr.aria-pressed]="showPassword"
@@ -79,28 +134,49 @@
           </mat-form-field>
         </div>
 
-        <div class="options">
-          <mat-checkbox formControlName="remember" class="remember">Recordarme</mat-checkbox>
-          <span class="forgot">¿Olvidaste tu contraseña?</span>
+        <div
+          class="options flex min-h-5 items-center justify-between gap-3 max-[641px]:flex-wrap [@media(max-height:760px)]:min-h-[18px]"
+        >
+          <mat-checkbox formControlName="remember" class="remember auth-check"
+            >Recordarme</mat-checkbox
+          >
+          <span class="forgot text-sm font-medium whitespace-nowrap text-kl-accent-text"
+            >¿Olvidaste tu contraseña?</span
+          >
         </div>
 
-        <button mat-flat-button class="submit" type="submit" [disabled]="form.invalid">
+        <button
+          mat-flat-button
+          class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+          type="submit"
+          [disabled]="form.invalid"
+        >
           Ingresar
           <img src="images/login/arrow-right-18.svg" alt="" width="18" height="18" />
         </button>
 
-        <div class="separator" aria-hidden="true"></div>
+        <div
+          class="separator h-px bg-linear-to-r from-transparent via-[#34304a] to-transparent"
+          aria-hidden="true"
+        ></div>
 
-        <a class="register" routerLink="/registro">
+        <a
+          class="register flex h-[54px] items-center justify-center gap-2 rounded-xl border border-solid border-[#34304a] text-[15px] text-[#e7e3f5] transition-colors hover:border-kl-accent [@media(max-height:760px)]:h-12"
+          routerLink="/registro"
+          (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+        >
           <span class="register__text">¿No tienes cuenta?</span>
-          <span class="register__link">Regístrate</span>
+          <span class="register__link font-medium text-kl-accent-text">Regístrate</span>
           <img src="images/login/arrow-right-accent-18.svg" alt="" width="18" height="18" />
         </a>
       </form>
     </mat-card>
   </main>
 
-  <p class="legal">
-    © 2026 Kodikalab · <span class="legal__link">Términos de Servicio</span> · Política de privacidad
+  <p
+    class="legal relative z-10 m-0 px-4 pb-[22px] text-center text-xs text-kl-faint [@media(max-height:760px)]:pb-3"
+  >
+    © 2026 Kodikalab · <span class="legal__link text-kl-accent-text">Términos de Servicio</span> ·
+    Política de privacidad
   </p>
 </div>

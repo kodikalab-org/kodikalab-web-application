@@ -1,33 +1,73 @@
-<div class="page">
-  <img class="page__bg" src="images/registro/bg.svg" alt="" aria-hidden="true" />
+<div
+  class="page relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text"
+  #pageStart
+>
+  <img
+    class="page__bg pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
+    src="images/registro/bg.svg"
+    alt=""
+    aria-hidden="true"
+  />
 
-  <mat-toolbar class="header">
-    <a class="brand" routerLink="/" aria-label="Kodikalab, inicio">
+  <mat-toolbar
+    class="header auth-header relative z-10 justify-between border-0 border-b border-solid border-kl-divider px-14 font-body max-[641px]:px-4"
+  >
+    <a
+      class="brand inline-flex items-center gap-2.5"
+      routerLink="/"
+      aria-label="Kodikalab, inicio"
+      (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+    >
       <img src="images/registro/logo-40.svg" alt="" width="40" height="40" />
-      <span class="brand__name">Kodikalab</span>
+      <span class="brand__name text-[25px] font-medium tracking-[-.4px] max-[641px]:text-[22px]"
+        >Kodikalab</span
+      >
     </a>
-    <div class="header__actions">
-      <a class="back" routerLink="/">
+    <div class="header__actions flex items-center gap-5 max-[641px]:gap-2.5">
+      <a
+        class="back inline-flex items-center gap-2 text-[15px] text-kl-body hover:text-kl-accent-text max-[641px]:gap-1.5 max-[641px]:text-[13px]"
+        routerLink="/"
+        (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+      >
         <img src="images/registro/arrow-left-18.svg" alt="" width="18" height="18" />
         Volver al inicio
       </a>
     </div>
   </mat-toolbar>
 
-  <main class="main">
-    <mat-card class="card" appearance="outlined">
-      <div class="card__brand">
+  <main class="main relative z-10 flex flex-1 items-center justify-center px-4 py-8">
+    <mat-card
+      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[#201454]/75 via-[#140d34]/82 to-[#0a071a]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7"
+      appearance="outlined"
+    >
+      <div class="card__brand inline-flex items-center gap-2.5">
         <img src="images/registro/logo-40.svg" alt="" width="40" height="40" />
-        <span class="brand__name">Kodikalab</span>
+        <span class="brand__name text-[25px] font-medium tracking-[-.4px] max-[641px]:text-[22px]"
+          >Kodikalab</span
+        >
       </div>
-      <h1 class="card__title">Crear cuenta</h1>
-      <p class="card__subtitle">Únete a la plataforma de entrenamiento del GPC UPC</p>
+      <h1
+        class="card__title m-0 pt-3.5 text-center font-display text-[30px] leading-[34px] font-bold tracking-[-1px]"
+      >
+        Crear cuenta
+      </h1>
+      <p
+        class="card__subtitle mt-1.5 mb-0 text-center text-[15px] leading-[22px] font-light text-kl-body"
+      >
+        Únete a la plataforma de entrenamiento del GPC UPC
+      </p>
 
-      <form class="form" [formGroup]="form" novalidate>
-        <div class="form__row">
-          <div class="field">
-            <label class="field__label" for="firstName">Nombre</label>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <form class="form flex w-full flex-col gap-3.5 pt-6" [formGroup]="form" novalidate>
+        <div class="form__row grid grid-cols-2 gap-3 max-[641px]:grid-cols-1">
+          <div class="field flex min-w-0 flex-col gap-1.5">
+            <label class="field__label text-[13px] font-medium text-kl-body" for="firstName"
+              >Nombre</label
+            >
+            <mat-form-field
+              class="auth-field w-full text-[15px]"
+              appearance="outline"
+              subscriptSizing="dynamic"
+            >
               <img matPrefix src="images/registro/user-20.svg" alt="" width="20" height="20" />
               <input
                 matInput
@@ -45,9 +85,15 @@
             </mat-form-field>
           </div>
 
-          <div class="field">
-            <label class="field__label" for="lastName">Apellido</label>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <div class="field flex min-w-0 flex-col gap-1.5">
+            <label class="field__label text-[13px] font-medium text-kl-body" for="lastName"
+              >Apellido</label
+            >
+            <mat-form-field
+              class="auth-field w-full text-[15px]"
+              appearance="outline"
+              subscriptSizing="dynamic"
+            >
               <img matPrefix src="images/registro/user-20.svg" alt="" width="20" height="20" />
               <input
                 matInput
@@ -66,9 +112,15 @@
           </div>
         </div>
 
-        <div class="field">
-          <label class="field__label" for="email">Correo institucional</label>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <div class="field flex min-w-0 flex-col gap-1.5">
+          <label class="field__label text-[13px] font-medium text-kl-body" for="email"
+            >Correo institucional</label
+          >
+          <mat-form-field
+            class="auth-field w-full text-[15px]"
+            appearance="outline"
+            subscriptSizing="dynamic"
+          >
             <img matPrefix src="images/registro/mail-20.svg" alt="" width="20" height="20" />
             <input
               matInput
@@ -86,9 +138,15 @@
           </mat-form-field>
         </div>
 
-        <div class="field">
-          <label class="field__label" for="password">Contraseña</label>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <div class="field flex min-w-0 flex-col gap-1.5">
+          <label class="field__label text-[13px] font-medium text-kl-body" for="password"
+            >Contraseña</label
+          >
+          <mat-form-field
+            class="auth-field w-full text-[15px]"
+            appearance="outline"
+            subscriptSizing="dynamic"
+          >
             <img matPrefix src="images/registro/lock-20.svg" alt="" width="20" height="20" />
             <input
               matInput
@@ -111,9 +169,15 @@
           </mat-form-field>
         </div>
 
-        <div class="field">
-          <label class="field__label" for="confirmPassword">Confirmar contraseña</label>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <div class="field flex min-w-0 flex-col gap-1.5">
+          <label class="field__label text-[13px] font-medium text-kl-body" for="confirmPassword"
+            >Confirmar contraseña</label
+          >
+          <mat-form-field
+            class="auth-field w-full text-[15px]"
+            appearance="outline"
+            subscriptSizing="dynamic"
+          >
             <img matPrefix src="images/registro/lock-20.svg" alt="" width="20" height="20" />
             <input
               matInput
@@ -137,10 +201,12 @@
           </mat-form-field>
         </div>
 
-        <div class="field">
-          <span class="field__label" id="role-label">Mi rol en el GPC UPC</span>
+        <div class="field flex min-w-0 flex-col gap-1.5">
+          <span class="field__label text-[13px] font-medium text-kl-body" id="role-label"
+            >Mi rol en el GPC UPC</span
+          >
           <mat-button-toggle-group
-            class="role"
+            class="role auth-role w-full rounded-xl border border-solid border-[#34304a] bg-white/3 p-[3px]"
             formControlName="role"
             aria-labelledby="role-label"
             hideSingleSelectionIndicator
@@ -156,13 +222,25 @@
           </mat-button-toggle-group>
         </div>
 
-        <div class="terms">
-          <mat-checkbox formControlName="terms" class="terms__checkbox">
-            Acepto los <span class="terms__link">Términos de Servicio</span>
+        <div class="terms flex flex-col gap-1.5">
+          <mat-checkbox formControlName="terms" class="terms__checkbox auth-check">
+            Acepto los
+            <span class="terms__link font-medium text-kl-accent-text underline"
+              >Términos de Servicio</span
+            >
           </mat-checkbox>
           @if (form.controls.terms.touched && form.controls.terms.invalid) {
-            <p class="error" role="alert">
-              <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+            <p
+              class="error m-0 flex items-start gap-1.5 text-[13px] leading-[18px] text-kl-danger"
+              role="alert"
+            >
+              <img
+                class="mt-[1.5px] shrink-0"
+                src="images/registro/alert-15.svg"
+                alt=""
+                width="15"
+                height="15"
+              />
               Debes aceptar los Términos de Servicio para continuar
             </p>
           }
@@ -170,7 +248,7 @@
 
         <button
           mat-flat-button
-          class="submit"
+          class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
           type="button"
           routerLink="/registro-exitoso"
           [disabled]="form.invalid"
@@ -179,25 +257,42 @@
           <img src="images/registro/arrow-right-18.svg" alt="" width="18" height="18" />
         </button>
 
-        <p class="note">
-          <img src="images/registro/info-16.svg" alt="" width="13.2812" height="16" />
+        <p
+          class="note m-0 flex items-start justify-center gap-2 text-center text-xs leading-[17px] text-kl-muted"
+        >
+          <img
+            class="shrink-0"
+            src="images/registro/info-16.svg"
+            alt=""
+            width="13.2812"
+            height="16"
+          />
           <span>
             Al registrarte recibirás un código de recuperación. Guárdalo: lo necesitarás si olvidas
             tu contraseña.
           </span>
         </p>
 
-        <div class="separator" aria-hidden="true"></div>
+        <div
+          class="separator h-px bg-linear-to-r from-transparent via-[#34304a] to-transparent"
+          aria-hidden="true"
+        ></div>
 
-        <p class="login">
+        <p class="login m-0 flex flex-wrap justify-center gap-2 text-[15px] text-[#e7e3f5]">
           ¿Ya tienes cuenta?
-          <a class="login__link" routerLink="/login">Inicia sesión</a>
+          <a
+            class="login__link font-medium text-kl-accent-text hover:underline"
+            routerLink="/login"
+            (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+            >Inicia sesión</a
+          >
         </p>
       </form>
     </mat-card>
   </main>
 
-  <p class="legal">
-    © 2026 Kodikalab · <span class="legal__link">Términos de Servicio</span> · Política de privacidad
+  <p class="legal relative z-10 m-0 px-4 pb-5 text-center text-xs text-kl-faint">
+    © 2026 Kodikalab · <span class="legal__link text-kl-accent-text">Términos de Servicio</span> ·
+    Política de privacidad
   </p>
 </div>

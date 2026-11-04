@@ -1,4 +1,34 @@
-/* Global styles: Kodikalab palette, Angular Material dark system tokens and shared component tokens. */
+/* No Preflight: preserve Angular Material's controls and the existing browser reset. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) important source('./app');
+
+@theme inline {
+  --color-kl-bg: var(--kl-bg);
+  --color-kl-bg-alt: var(--kl-bg-alt);
+  --color-kl-surface: var(--kl-surface);
+  --color-kl-inset: var(--kl-surface-inset);
+  --color-kl-raised: var(--kl-surface-raised);
+  --color-kl-border: var(--kl-border);
+  --color-kl-border-strong: var(--kl-border-strong);
+  --color-kl-divider: var(--kl-divider);
+  --color-kl-text: var(--kl-text);
+  --color-kl-heading: var(--kl-text-heading);
+  --color-kl-body: var(--kl-text-body);
+  --color-kl-soft: var(--kl-text-soft);
+  --color-kl-muted: var(--kl-text-muted);
+  --color-kl-faint: var(--kl-text-faint);
+  --color-kl-inactive: var(--kl-text-inactive);
+  --color-kl-accent: var(--kl-accent);
+  --color-kl-accent-text: var(--kl-accent-text);
+  --color-kl-accent-link: var(--kl-accent-link);
+  --color-kl-danger: var(--kl-danger);
+  --font-body: var(--kl-font-body);
+  --font-display: var(--kl-font-display);
+  --spacing-gutter: var(--gutter);
+}
+
+/* Kodikalab palette, Angular Material dark tokens and shared component tokens. */
 
 :root {
   color-scheme: dark;
@@ -119,6 +149,29 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Shared Material integration. Layout belongs to Tailwind in the templates. */
+app-landing-page,
+app-login,
+app-registro {
+  display: block;
+}
+
+:where(a, button):focus-visible {
+  outline: 2px solid var(--kl-accent-text);
+  outline-offset: 4px;
+}
+
 app-root {
   display: block;
 }
@@ -143,4 +196,121 @@ img {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Material internals are shared here, scoped to explicit auth integration classes.
+   This replaces duplicated ::ng-deep rules in login and registro. */
+.auth-header {
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+  --mat-toolbar-standard-height: 68px;
+}
+
+.auth-card {
+  --mat-card-outlined-container-color: transparent;
+  --mat-card-outlined-outline-color: #5b44c9;
+  --mat-card-outlined-container-shape: 24px;
+}
+
+.auth-field {
+  --mat-form-field-container-height: var(--auth-field-height);
+  --mat-form-field-container-vertical-padding: var(--auth-field-padding);
+  --mat-form-field-outlined-container-shape: 12px;
+  --mat-form-field-outlined-outline-color: #34304a;
+  --mat-form-field-outlined-hover-outline-color: #4c4670;
+  --mat-form-field-outlined-focus-outline-color: var(--auth-focus-color);
+  --mat-form-field-outlined-outline-width: 1px;
+  --mat-form-field-outlined-focus-outline-width: 1px;
+  --mat-form-field-outlined-error-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-error-hover-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-error-focus-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-input-text-color: var(--auth-input-color);
+  --mat-form-field-outlined-input-text-placeholder-color: #8d89a3;
+  --mat-form-field-outlined-caret-color: var(--kl-accent-text);
+  --mat-form-field-outlined-error-caret-color: var(--kl-danger);
+}
+
+.auth-field .mat-mdc-text-field-wrapper {
+  @apply rounded-xl bg-white/4 shadow-none;
+}
+.auth-field:focus-within,
+.auth-field input:focus {
+  outline: none;
+}
+.auth-field .mat-mdc-form-field-icon-prefix {
+  @apply flex items-center py-0 pr-3 pl-4;
+}
+.auth-field .mat-mdc-form-field-icon-suffix {
+  @apply flex items-center py-0 pr-4 pl-3;
+}
+.auth-field .mat-mdc-form-field-error-wrapper {
+  @apply p-0;
+}
+.auth-field mat-error {
+  @apply flex items-start gap-1.5 pt-1.5 text-[13px] leading-[18px] text-kl-danger;
+}
+.auth-field mat-error img {
+  @apply mt-[1.5px] shrink-0;
+}
+
+.auth-check {
+  --mat-checkbox-unselected-icon-color: #6b6585;
+  --mat-checkbox-unselected-hover-icon-color: var(--kl-accent-text);
+  --mat-checkbox-unselected-focus-icon-color: var(--kl-accent-text);
+  --mat-checkbox-selected-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-hover-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-focus-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-checkmark-color: #ffffff;
+  --mat-checkbox-label-text-color: #e7e3f5;
+  --mat-checkbox-label-text-size: 14px;
+  --mat-checkbox-label-text-font: var(--kl-font-body);
+  --mat-checkbox-state-layer-size: 20px;
+}
+
+app-login .auth-check {
+  --mat-checkbox-touch-target-size: 20px;
+}
+app-login .auth-check .mdc-checkbox {
+  @apply m-0 p-0;
+}
+app-login .auth-check .mdc-checkbox__background {
+  @apply size-5 rounded-md;
+}
+app-login .auth-check .mdc-label {
+  @apply ml-2.5;
+}
+.auth-check.ng-invalid.ng-touched {
+  --mat-checkbox-unselected-icon-color: var(--kl-danger);
+}
+
+.auth-role {
+  --mat-button-toggle-background-color: rgba(255, 255, 255, 0.03);
+  --mat-button-toggle-text-color: var(--kl-text-body);
+  --mat-button-toggle-selected-state-background-color: transparent;
+  --mat-button-toggle-selected-state-text-color: var(--kl-text);
+  --mat-button-toggle-divider-color: transparent;
+  --mat-button-toggle-height: 40px;
+  --mat-button-toggle-shape: 12px;
+}
+
+.auth-role .mat-button-toggle {
+  @apply flex-1 rounded-[9px] border-0 bg-transparent font-body text-[15px];
+}
+.auth-role .mat-button-toggle + .mat-button-toggle {
+  @apply border-l-0;
+}
+.auth-role .mat-button-toggle-button {
+  @apply rounded-[9px];
+}
+.auth-role .mat-button-toggle-label-content {
+  @apply flex h-10 items-center justify-center gap-2 px-4 py-0 leading-normal;
+}
+.auth-role .mat-button-toggle-checked {
+  @apply border border-solid border-kl-accent-text bg-linear-to-b from-[#4b36b8] to-[#3a2a98];
+}
+
+.auth-submit {
+  --mat-button-filled-container-height: var(--auth-submit-height);
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-label-text-size: 16px;
 }

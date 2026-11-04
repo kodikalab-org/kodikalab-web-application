@@ -6,12 +6,20 @@ Aplicación web responsiva para el entrenamiento en programación competitiva de
 
 ## Datos
 
-- **Referencia visual:** [Figma de KodikaLab](https://www.figma.com/design/prt67vzvXGvuuIORZvSH3A/kodikalab_design?node-id=61-22&t=383KuKl3iCnZOKtH-1).
-- **Frontend:** Angular 22, componentes standalone y CSS.
+- **Referencia visual:** [Landing web](https://www.figma.com/design/prt67vzvXGvuuIORZvSH3A/kodikalab_design?node-id=50-2) y [landing móvil](https://www.figma.com/design/prt67vzvXGvuuIORZvSH3A/kodikalab_design?node-id=51-2); [pantallas de la aplicación](https://www.figma.com/design/prt67vzvXGvuuIORZvSH3A/kodikalab_design?node-id=61-22).
+- **Frontend:** Angular 22, componentes standalone y Tailwind CSS 4.
 - **UI:** Angular Material y CDK.
 - **Paquetes:** npm; ejecutar los comandos desde esta carpeta, donde está `package.json`.
 - **Renderizado:** conservar la configuración existente de SSR e hidratación.
 - **Estilos:** reutilizar la paleta, tipografías y tokens de `src/styles.css`.
+
+### Convención de estilos
+
+- Usa utilidades Tailwind en los templates para maquetación, espaciado, tipografía, responsive y estados interactivos. Los colores `kl-*` y las fuentes `font-body` / `font-display` reutilizan los tokens existentes.
+- Conserva Angular Material para los controles. Los `.css` de las pantallas solo contienen sus tokens específicos de Material; la integración compartida de formularios está en `src/styles.css`, con clases `auth-*` explícitas y sin `::ng-deep`.
+- Tailwind no carga Preflight para no alterar los controles existentes. Las utilidades tienen prioridad sobre los estilos internos de Material. No dupliques las utilidades con reglas CSS de maquetación.
+- Tailwind detecta las clases dentro de `src/app/`; no construyas nombres de utilidades concatenando strings. La configuración PostCSS está en `.postcssrc.json`.
+- La landing tiene cabecera fija, sección activa sincronizada con el scroll y movimiento reducido según la preferencia del usuario. La portada ocupa como mínimo el alto visible de la pantalla con `min-h-dvh`; las cifras quedan debajo, fuera de la vista inicial. En pantallas bajas el contenido puede crecer sin recortarse. Incluye planes Free (S/0) y GO (S/20 mensuales), con diseño autorizado siguiendo el estilo existente. Sus botones llevan al registro, sin activar ni cobrar una suscripción. Video, recursos, carrusel y contratación siguen pendientes; no deben simular funciones disponibles.
 
 ## Cómo trabajar
 
@@ -29,10 +37,9 @@ src/app/
 ├── pages/
 │   ├── landing-page/                # Landing actual en /, con cabecera y pie propios
 │   │   └── landing-page.ts · landing-page.html · landing-page.css
-│   ├── registro/                    # Registro actual en /registro
-│   ├── auth/                        # Propuesto: pantallas de acceso
-│   │   ├── auth.routes.ts           # Rutas del grupo
-│   │   └── login/                   # Inicio de sesión
+│   ├── auth/                        # Pantallas de acceso existentes
+│   │   ├── login/                   # Inicio de sesión en /login
+│   │   └── registro/                # Registro en /registro
 │   ├── practicante/                 # Propuesto: pantallas del practicante
 │   │   ├── practicante.routes.ts    # Rutas del grupo
 │   │   ├── perfil/                  # Perfil y plataformas competitivas
@@ -51,7 +58,7 @@ src/app/
     └── coach-layout/
 ```
 
-**Estado actual:** solo existen `landing-page/`, `registro/` y las rutas `/` y `/registro`. El resto del árbol es orientativo, no indica pantallas implementadas ni autoriza crearlas o reorganizar las actuales. La interfaz enlaza a `/login` y `/registro-exitoso`, pero esas rutas todavía no existen. El formulario de registro es una maqueta sin conexión al backend; las funciones y plataformas mostradas en la landing son contenido visual.
+**Estado actual:** están implementadas `landing-page/`, `auth/login/` y `auth/registro/`, con las rutas `/`, `/login` y `/registro`. El resto del árbol es orientativo, no indica pantallas implementadas ni autoriza crearlas o reorganizar las actuales. La interfaz de registro enlaza a `/registro-exitoso`, pero esa ruta todavía no existe. Los formularios son maquetas sin conexión al backend; las funciones y plataformas mostradas en la landing son contenido visual.
 
 Para trabajo nuevo, sigue la estructura existente y usa `src/app/pages/<nombre-de-pantalla>/`, salvo que se acuerde otra organización. No cambies rutas o layouts existentes sin autorización ni crees abstracciones innecesarias.
 
@@ -81,6 +88,8 @@ Por defecto, esta fase es de **maquetación y navegación**, no de lógica de ne
 ## Verificación
 
 Desde esta carpeta:
+
+Si necesitas reinstalar dependencias, usa `npm ci --legacy-peer-deps`: el proyecto conserva un desajuste previo entre versiones de paquetes Angular. La migración a Tailwind no actualiza Angular. Vite está declarado explícitamente para que Vitest pueda resolver su dependencia de ejecución.
 
 ```bash
 npm run build

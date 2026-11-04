@@ -1,0 +1,33 @@
+import { AsyncPipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { map } from 'rxjs';
+
+@Component({
+  selector: 'app-plataformas-competitivas',
+  imports: [AsyncPipe, RouterLink, MatButtonModule, MatToolbarModule],
+  templateUrl: './plataformas-competitivas.html',
+  styleUrl: './plataformas-competitivas.css',
+})
+export class PlataformasCompetitivas {
+  protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
+  protected readonly plataformas = [
+    {
+      nombre: 'Codeforces',
+      usuario: 'camila_rc',
+      pendiente: true,
+    },
+    {
+      nombre: 'AtCoder',
+      usuario: 'camila_upc',
+      pendiente: false,
+    },
+  ];
+
+  /** Estado de maqueta (`?estado=confirmada`): Codeforces validó el identificador. */
+  protected readonly estado$ = inject(ActivatedRoute).queryParamMap.pipe(
+    map((params) => params.get('estado')),
+  );
+}

@@ -1,0 +1,14 @@
+/* Only Material tokens remain local; visual layout uses Tailwind utilities. */
+:host {
+  display: block;
+  --mat-button-filled-container-color: #6419ff;
+  --mat-button-filled-container-height: 44px;
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-label-text-size: 15px;
+  --mat-button-filled-label-text-weight: 700;
+  --mat-button-outlined-container-height: 44px;
+  --mat-button-outlined-container-shape: 12px;
+  --mat-button-outlined-outline-color: #525252;
+  --mat-button-outlined-label-text-size: 15px;
+  --mat-button-outlined-label-text-weight: 700;
+}

@@ -1,0 +1,552 @@
+@if (vista$ | async; as vista) {
+  <div class="relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text">
+    @switch (vista.pestania) {
+      @case ('ajustes') {
+        <img
+          class="profile-background"
+          src="images/perfil-coach/bg-960.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      }
+      @default {
+        <img
+          class="profile-background"
+          src="images/perfil-coach/bg-900.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      }
+    }
+
+    <mat-toolbar
+      class="auth-header relative z-10 h-[68px] justify-between border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1000px]:px-6 max-[641px]:h-[60px] max-[641px]:px-4"
+    >
+      <div class="flex items-center gap-14 max-[1200px]:gap-8">
+        <a class="inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
+          <img
+            class="max-[641px]:size-8"
+            src="images/perfil-coach/logo-40.svg"
+            alt=""
+            width="40"
+            height="40"
+          />
+          <span class="text-[25px] font-medium tracking-[-.4px] max-[641px]:text-xl"
+            >Kodikalab</span
+          >
+        </a>
+        <nav class="max-[1280px]:hidden" aria-label="Principal">
+          <ul class="m-0 flex list-none items-center gap-9 p-0 text-[15px] font-normal">
+            @for (enlace of enlaces; track enlace) {
+              <li>{{ enlace }}</li>
+            }
+          </ul>
+        </nav>
+      </div>
+      <div class="flex items-center gap-[22px] max-[641px]:gap-3">
+        <div
+          class="flex h-10 w-[400px] items-center gap-3 rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5 max-[1400px]:w-[260px] max-[1000px]:hidden"
+          role="search"
+          aria-label="Buscador"
+        >
+          <img src="images/perfil-coach/search-18.svg" alt="" width="18" height="18" />
+          <span class="flex-1 truncate text-sm text-[#8d89a3]"
+            >Buscar problemas, usuarios, concursos…</span
+          >
+          <span
+            class="rounded-md border border-solid border-[#34304a] px-[7px] py-[3px] font-mono text-[11px] text-[#8d89a3]"
+            >⌘ K</span
+          >
+        </div>
+        <button
+          class="inline-flex cursor-pointer border-0 bg-transparent p-0"
+          type="button"
+          aria-label="Notificaciones"
+        >
+          <img src="images/perfil-coach/bell-22.svg" alt="" width="22" height="22" />
+        </button>
+        <button
+          class="inline-flex cursor-pointer border-0 bg-transparent p-0 max-[641px]:hidden"
+          type="button"
+          aria-label="Cambiar tema"
+        >
+          <img src="images/perfil-coach/moon-22.svg" alt="" width="22" height="22" />
+        </button>
+        <button
+          class="inline-flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-kl-text"
+          type="button"
+          aria-label="Menú de {{ perfil.nombre }}"
+        >
+          <span
+            class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
+            aria-hidden="true"
+            >{{ perfil.iniciales }}</span
+          >
+          <img src="images/perfil-coach/chevron-down-16.svg" alt="" width="16" height="16" />
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <main
+      class="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-5 px-14 pt-7 pb-10 max-[1000px]:px-6 max-[641px]:px-4"
+    >
+      <header class="flex items-start justify-between gap-4 max-[900px]:flex-col">
+        <div class="flex flex-col gap-1.5">
+          <h1 class="m-0 font-display text-[34px] leading-10 font-bold tracking-[-1px]">Perfil</h1>
+          <p class="m-0 text-base font-light text-kl-body">
+            Gestiona tu perfil de coach, tus equipos y las solicitudes de ingreso.
+          </p>
+        </div>
+        <nav
+          class="flex shrink-0 gap-1 rounded-[14px] border border-solid border-[#3b3480] bg-[#14103c]/70 p-[5px] max-[641px]:w-full"
+          aria-label="Modo del perfil"
+        >
+          <a
+            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] bg-linear-to-b from-[#7357f3] to-[#5a3fe0] text-[15px] font-medium max-[641px]:w-auto max-[641px]:flex-1"
+            routerLink="/coach/perfil"
+            aria-current="page"
+            >Visualizar perfil</a
+          >
+          <a
+            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] text-[15px] font-medium text-kl-body max-[641px]:w-auto max-[641px]:flex-1"
+            routerLink="/coach/perfil/editar"
+            >Editar perfil</a
+          >
+        </nav>
+      </header>
+
+      @if (vista.estado === 'actualizado' && vista.pestania === 'info') {
+        <div class="profile-notice" role="status">
+          <img src="images/perfil-coach/check-22.svg" alt="" width="22" height="22" />
+          <div class="flex min-w-0 flex-col gap-1 text-[#bbf7d0]">
+            <p class="m-0 text-sm font-semibold">Perfil actualizado correctamente</p>
+            <p class="m-0 text-[13px]">Tus cambios ya están visibles en tu perfil.</p>
+          </div>
+        </div>
+      }
+
+      <nav
+        class="flex flex-wrap gap-x-11 gap-y-3 border-0 border-b border-solid border-[#1f1c44] max-[641px]:gap-x-6"
+        aria-label="Secciones del perfil"
+      >
+        @for (pestania of pestanias; track pestania.id) {
+          <a
+            class="inline-flex shrink-0 items-center gap-2.5 border-0 border-b-2 border-solid px-1 pb-3.5 text-[15px] whitespace-nowrap"
+            [class]="
+              pestania.id === vista.pestania
+                ? 'border-[#7357f3] font-semibold text-kl-accent-text'
+                : 'border-transparent text-kl-body'
+            "
+            routerLink="/coach/perfil"
+            [queryParams]="{ tab: pestania.id }"
+            [attr.aria-current]="pestania.id === vista.pestania ? 'page' : null"
+          >
+            <img
+              [src]="pestania.id === vista.pestania ? pestania.iconoActivo : pestania.iconoInactivo"
+              alt=""
+              width="20"
+              height="20"
+            />
+            {{ pestania.etiqueta }}
+          </a>
+        }
+      </nav>
+
+      @switch (vista.pestania) {
+        @case ('info') {
+          <div
+            class="grid grid-cols-1 items-start gap-5 min-[1280px]:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] [&>section]:min-w-0"
+          >
+            <section
+              class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              aria-labelledby="info-titulo"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span
+                    class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                  >
+                    <img
+                      src="images/perfil-coach/user-20-active.svg"
+                      alt=""
+                      width="20"
+                      height="20"
+                    />
+                  </span>
+                  <h2
+                    class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                    id="info-titulo"
+                  >
+                    Información personal
+                  </h2>
+                </div>
+                <a
+                  mat-stroked-button
+                  class="h-10 rounded-[10px] border border-solid border-[#6b52e0] bg-[#7357f3]/12 px-4 text-sm whitespace-nowrap text-[#e7e3f5]"
+                  routerLink="/coach/perfil/editar"
+                >
+                  <img src="images/perfil-coach/pencil-16.svg" alt="" width="16" height="16" />
+                  Editar perfil
+                </a>
+              </div>
+
+              <div class="flex items-center gap-6 max-[641px]:flex-col max-[641px]:items-start max-[641px]:gap-4">
+                <span
+                  class="flex size-[118px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#8d6df8] to-[#4d2ff5] max-[641px]:size-24"
+                >
+                  <span
+                    class="flex size-28 items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold max-[641px]:size-[90px] max-[641px]:text-[32px]"
+                    aria-hidden="true"
+                    >{{ perfil.iniciales }}</span
+                  >
+                </span>
+                <div class="flex min-w-0 flex-col gap-2">
+                  <p class="m-0 font-display text-2xl font-bold tracking-[-.4px]">
+                    {{ perfil.nombre }}
+                  </p>
+                  <div class="flex flex-wrap items-center gap-2.5">
+                    <span class="text-sm text-kl-body">{{ perfil.usuario }}</span>
+                    <span
+                      class="inline-flex items-center gap-1.5 rounded-full border border-solid border-[#c2692a] bg-[#fb923c]/14 px-3 py-1 text-[13px] font-medium text-[#fdba74]"
+                    >
+                      <img
+                        src="images/perfil-coach/badge-coach-14.svg"
+                        alt=""
+                        width="14"
+                        height="14"
+                      />
+                      {{ perfil.rol }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <ul class="m-0 flex list-none flex-col gap-2.5 p-0">
+                @for (dato of datosPerfil; track dato.texto) {
+                  <li class="flex items-center gap-3 text-sm text-[#e7e3f5]">
+                    <img [src]="dato.icono" alt="" width="18" height="18" />
+                    {{ dato.texto }}
+                  </li>
+                }
+              </ul>
+
+              <p class="m-0 text-sm leading-[21px] font-light text-[#d7d3e8]">
+                {{ perfil.presentacion }}
+              </p>
+            </section>
+
+            <section
+              class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              aria-labelledby="equipos-titulo"
+            >
+              <div class="flex items-center gap-3">
+                <span
+                  class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                >
+                  <img
+                    src="images/perfil-coach/users-20-active.svg"
+                    alt=""
+                    width="20"
+                    height="20"
+                  />
+                </span>
+                <h2
+                  class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                  id="equipos-titulo"
+                >
+                  Mis equipos
+                </h2>
+              </div>
+
+              <ul class="m-0 flex list-none gap-3 p-0 max-[641px]:flex-col">
+                @for (estadistica of estadisticas(); track estadistica.etiqueta) {
+                  <li
+                    class="flex min-w-0 flex-1 items-center gap-3.5 rounded-[14px] border border-solid border-[#26224d] bg-white/3 px-4 py-3.5"
+                  >
+                    <span
+                      class="flex size-[46px] shrink-0 items-center justify-center rounded-xl"
+                      [class]="estadistica.fondo"
+                    >
+                      <img [src]="estadistica.icono" alt="" width="24" height="24" />
+                    </span>
+                    <span class="flex flex-col">
+                      <span
+                        class="font-display text-2xl leading-7 font-semibold tracking-[-.5px]"
+                        >{{ estadistica.valor }}</span
+                      >
+                      <span class="text-[13px] text-kl-body">{{ estadistica.etiqueta }}</span>
+                    </span>
+                  </li>
+                }
+              </ul>
+
+              <ul class="m-0 flex list-none flex-col p-0">
+                @for (equipo of equipos; track equipo.nombre; let ultimo = $last) {
+                  <li
+                    class="flex items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
+                    [class]="ultimo ? '' : 'border-b'"
+                  >
+                    <span
+                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-sm font-semibold"
+                      aria-hidden="true"
+                      >{{ equipo.iniciales }}</span
+                    >
+                    <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
+                      <span class="text-base font-semibold">{{ equipo.nombre }}</span>
+                      <span class="text-[13px] text-kl-muted"
+                        >{{ equipo.integrantes }}/{{ equipo.capacidad }} integrantes ·
+                        {{ equipo.horario }}</span
+                      >
+                    </span>
+                    <img
+                      src="images/perfil-coach/chevron-right-18.svg"
+                      alt=""
+                      width="18"
+                      height="18"
+                    />
+                  </li>
+                }
+              </ul>
+
+              <div>
+                <button
+                  mat-flat-button
+                  class="h-[46px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] max-[641px]:w-full"
+                  type="button"
+                >
+                  Crear equipo
+                  <img src="images/perfil-coach/plus-white-18.svg" alt="" width="18" height="18" />
+                </button>
+              </div>
+            </section>
+          </div>
+        }
+
+        @case ('solicitudes') {
+          <section
+            class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+            aria-labelledby="solicitudes-titulo"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-3">
+                <span
+                  class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                >
+                  <img
+                    src="images/perfil-coach/users-20-active.svg"
+                    alt=""
+                    width="20"
+                    height="20"
+                  />
+                </span>
+                <h2
+                  class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                  id="solicitudes-titulo"
+                >
+                  Solicitudes de ingreso
+                </h2>
+              </div>
+              <p class="m-0 text-[13px] text-kl-muted">Pendiente → Aceptada o Rechazada</p>
+            </div>
+
+            @if (vista.estado === 'vacio' || solicitudes.length === 0) {
+              <div class="flex flex-col items-center gap-3 px-2 py-[70px] text-center">
+                <span
+                  class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
+                >
+                  <img src="images/perfil-coach/inbox-34.svg" alt="" width="34" height="34" />
+                </span>
+                <p class="m-0 font-display text-xl font-semibold">
+                  No tienes solicitudes pendientes
+                </p>
+                <p class="m-0 max-w-[420px] text-sm text-kl-muted">
+                  Cuando un practicante solicite unirse a tus equipos, aparecerá aquí para que lo
+                  aceptes o lo rechaces.
+                </p>
+              </div>
+            } @else {
+              <form [formGroup]="formFiltros" novalidate>
+                <mat-chip-listbox
+                  class="onb-chips"
+                  formControlName="filtro"
+                  aria-label="Filtrar solicitudes"
+                  [hideSingleSelectionIndicator]="true"
+                >
+                  @for (filtro of filtros; track filtro) {
+                    <mat-chip-option [value]="filtro">
+                      {{ filtro }}{{ filtro === 'Pendientes' ? ' ' + pendientes() : '' }}
+                    </mat-chip-option>
+                  }
+                </mat-chip-listbox>
+              </form>
+
+              <ul class="m-0 flex list-none flex-col p-0">
+                @for (solicitud of solicitudes; track solicitud.nombre; let ultima = $last) {
+                  <li
+                    class="flex flex-wrap items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
+                    [class]="ultima ? '' : 'border-b'"
+                  >
+                    <span
+                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-sm font-semibold"
+                      aria-hidden="true"
+                      >{{ solicitud.iniciales }}</span
+                    >
+                    <span class="flex min-w-[200px] flex-1 flex-col gap-[3px]">
+                      <span class="text-base font-semibold">{{ solicitud.nombre }}</span>
+                      <span class="text-[13px] text-kl-muted"
+                        >Solicita unirse a {{ solicitud.equipo }} · Nivel
+                        {{ solicitud.nivel }}</span
+                      >
+                    </span>
+                    <span class="w-[120px] shrink-0 text-sm text-kl-body">{{
+                      solicitud.fecha
+                    }}</span>
+                    @switch (solicitud.estado) {
+                      @case ('pendiente') {
+                        <div class="flex items-center gap-4">
+                          <button
+                            mat-stroked-button
+                            class="h-[42px] rounded-xl border border-solid border-[#f87171]/50 px-5 text-[15px] text-[#fca5a5]"
+                            type="button"
+                            [attr.aria-label]="'Rechazar a ' + solicitud.nombre"
+                            (click)="resolver(solicitud, 'rechazada')"
+                          >
+                            Rechazar
+                          </button>
+                          <button
+                            mat-flat-button
+                            class="h-[42px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-[22px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
+                            type="button"
+                            [attr.aria-label]="'Aceptar a ' + solicitud.nombre"
+                            (click)="resolver(solicitud, 'aceptada')"
+                          >
+                            Aceptar
+                          </button>
+                        </div>
+                      }
+                      @case ('aceptada') {
+                        <span
+                          class="inline-flex h-[42px] w-[176px] items-center justify-center rounded-xl border border-solid border-[#4ade80]/50 bg-[#4ade80]/12 text-[15px] text-[#bbf7d0]"
+                          role="status"
+                          >Aceptada</span
+                        >
+                      }
+                      @case ('rechazada') {
+                        <span
+                          class="inline-flex h-[42px] w-[176px] items-center justify-center rounded-xl border border-solid border-[#f87171]/50 bg-[#f87171]/10 text-[15px] text-[#fca5a5]"
+                          role="status"
+                          >Rechazada</span
+                        >
+                      }
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        }
+
+        @case ('ajustes') {
+          <section
+            class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+            aria-labelledby="ajustes-titulo"
+          >
+            <div class="flex items-center gap-3">
+              <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                <img
+                  src="images/perfil-coach/settings-20-active.svg"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+              </span>
+              <h2
+                class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                id="ajustes-titulo"
+              >
+                Ajustes generales
+              </h2>
+            </div>
+
+            <form class="flex flex-col" [formGroup]="formAjustes" novalidate>
+              @for (fila of filas; track fila.titulo; let ultima = $last) {
+                <div
+                  class="flex flex-wrap items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
+                  [class]="ultima ? '' : 'border-b'"
+                >
+                  <span
+                    class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                  >
+                    <img [src]="fila.icono" alt="" width="22" height="22" />
+                  </span>
+                  <span class="flex min-w-[140px] flex-1 flex-col gap-[3px]">
+                    <span class="text-base font-semibold">{{ fila.titulo }}</span>
+                    <span class="text-[13px] text-kl-muted">{{ fila.descripcion }}</span>
+                  </span>
+                  @switch (fila.tipo) {
+                    @case ('interruptor') {
+                      <mat-slide-toggle
+                        class="ajuste-interruptor"
+                        [formControlName]="fila.campo"
+                        [aria-label]="fila.titulo"
+                        hideIcon
+                      />
+                    }
+                    @case ('idioma') {
+                      <mat-form-field
+                        class="auth-field w-[130px] text-sm"
+                        appearance="outline"
+                        subscriptSizing="dynamic"
+                      >
+                        <mat-select
+                          formControlName="idioma"
+                          aria-label="Idioma"
+                          panelClass="onb-select-panel"
+                        >
+                          <mat-option value="es">Español</mat-option>
+                          <mat-option value="en">English</mat-option>
+                        </mat-select>
+                        <img
+                          matSuffix
+                          src="images/perfil-coach/chevron-down-14.svg"
+                          alt=""
+                          width="14"
+                          height="14"
+                        />
+                      </mat-form-field>
+                    }
+                    @case ('codigo') {
+                      <button
+                        mat-stroked-button
+                        class="h-10 rounded-[10px] border border-solid border-[#6b52e0] bg-[#7357f3]/12 px-4 text-sm text-[#e7e3f5]"
+                        type="button"
+                      >
+                        <img src="images/perfil-coach/key-16.svg" alt="" width="16" height="16" />
+                        Ver mi código
+                      </button>
+                    }
+                    @case ('salir') {
+                      <a
+                        mat-stroked-button
+                        class="h-[38px] rounded-[10px] border border-solid border-[#f87171]/50 bg-white/4 px-3.5 text-sm text-[#fca5a5]"
+                        routerLink="/login"
+                      >
+                        <img
+                          src="images/perfil-coach/logout-16-danger.svg"
+                          alt=""
+                          width="16"
+                          height="16"
+                        />
+                        Cerrar sesión
+                      </a>
+                    }
+                  }
+                </div>
+              }
+            </form>
+          </section>
+        }
+      }
+    </main>
+  </div>
+}

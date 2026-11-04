@@ -49,6 +49,14 @@ describe('LandingPage', () => {
     expect(root.querySelector('a[href="/#contenido"]')?.textContent).toContain('Saltar');
   });
 
+  it('reserves the full initial viewport for the hero and keeps the stats after it', async () => {
+    const { root } = await setup();
+    const hero = root.querySelector('.hero')!;
+    expect(hero.classList.contains('min-h-dvh')).toBe(true);
+    expect(hero.nextElementSibling?.classList.contains('stats')).toBe(true);
+    expect(hero.querySelector('.stats')).toBeNull();
+  });
+
   it('opens an accessible mobile menu with the existing auth destinations', async () => {
     const { fixture, root } = await setup();
     const trigger = root.querySelector<HTMLButtonElement>('.header__menu')!;

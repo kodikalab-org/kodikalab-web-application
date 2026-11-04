@@ -19,7 +19,7 @@ Aplicación web responsiva para el entrenamiento en programación competitiva de
 - Conserva Angular Material para los controles. Los `.css` de las pantallas solo contienen sus tokens específicos de Material; la integración compartida de formularios está en `src/styles.css`, con clases `auth-*` explícitas y sin `::ng-deep`.
 - Tailwind no carga Preflight para no alterar los controles existentes. Las utilidades tienen prioridad sobre los estilos internos de Material. No dupliques las utilidades con reglas CSS de maquetación.
 - Tailwind detecta las clases dentro de `src/app/`; no construyas nombres de utilidades concatenando strings. La configuración PostCSS está en `.postcssrc.json`.
-- La landing tiene cabecera fija, sección activa sincronizada con el scroll y movimiento reducido según la preferencia del usuario. Incluye planes Free (S/0) y GO (S/20 mensuales), con diseño autorizado siguiendo el estilo existente. Sus botones llevan al registro, sin activar ni cobrar una suscripción. Video, recursos, carrusel y contratación siguen pendientes; no deben simular funciones disponibles.
+- La landing tiene cabecera fija, sección activa sincronizada con el scroll y movimiento reducido según la preferencia del usuario. La portada ocupa como mínimo el alto visible de la pantalla con `min-h-dvh`; las cifras quedan debajo, fuera de la vista inicial. En pantallas bajas el contenido puede crecer sin recortarse. Incluye planes Free (S/0) y GO (S/20 mensuales), con diseño autorizado siguiendo el estilo existente. Sus botones llevan al registro, sin activar ni cobrar una suscripción. Video, recursos, carrusel y contratación siguen pendientes; no deben simular funciones disponibles.
 
 ## Cómo trabajar
 

@@ -1,19 +1,14 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Icon" clip-path="url(#clip0_0_37)">
-<path id="Vector" d="M18.28 2.4L5.96 11.2L18.28 37.6" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round" stroke="url(#paint0_linear_0_37)"/>
-<path id="Vector_2" d="M34.28 7.84L18.92 17.12L34.28 30.72" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round" stroke="url(#paint1_linear_0_37)"/>
-</g>
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.23 3.0698L6.379 11.5348L18.23 36.9298" stroke="url(#kl-logo-40-a)" stroke-width="5.44" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M33.6207 8.3027L18.8457 17.2297L33.6207 30.3117" stroke="url(#kl-logo-40-b)" stroke-width="5.44" stroke-linecap="round" stroke-linejoin="round"/>
 <defs>
-<linearGradient id="paint0_linear_0_37" x1="5.96" y1="2.4" x2="5.96" y2="1410.4" gradientUnits="userSpaceOnUse">
+<linearGradient id="kl-logo-40-a" x1="6.379" y1="3.0698" x2="6.379" y2="1357.47" gradientUnits="userSpaceOnUse">
 <stop stop-color="#B987FF"/>
 <stop offset="1" stop-color="#4D2FF5"/>
 </linearGradient>
-<linearGradient id="paint1_linear_0_37" x1="18.92" y1="7.84" x2="18.92" y2="923.04" gradientUnits="userSpaceOnUse">
+<linearGradient id="kl-logo-40-b" x1="18.8457" y1="8.3027" x2="18.8457" y2="888.663" gradientUnits="userSpaceOnUse">
 <stop stop-color="#B987FF"/>
 <stop offset="1" stop-color="#4D2FF5"/>
 </linearGradient>
-<clipPath id="clip0_0_37">
-<rect width="40" height="40" fill="white"/>
-</clipPath>
 </defs>
 </svg>

@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AsyncPipe } from '@angular/common';
+import { map } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +12,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 @Component({
   selector: 'app-rendimiento-equipo',
   imports: [
+    AsyncPipe,
     RouterLink,
     ReactiveFormsModule,
     MatButtonModule,
@@ -22,6 +25,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   styleUrl: './rendimiento-equipo.css',
 })
 export class RendimientoEquipo {
+  protected readonly estado$;
+  constructor(route: ActivatedRoute) {
+    this.estado$ = route.queryParamMap.pipe(map((params) => params.get('estado') ?? ''));
+  }
   protected readonly form = new FormGroup({
     primero: new FormControl('Teoría de números', {
       nonNullable: true,

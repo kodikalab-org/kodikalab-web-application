@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 
 @Component({
   selector: 'app-crear-grupo',
@@ -29,6 +29,7 @@ import { map } from 'rxjs';
   styleUrl: './crear-grupo.css',
 })
 export class CrearGrupo {
+  protected readonly estado$;
   protected readonly paso$;
   protected readonly pasos = ['Información general', 'Horario', 'Acceso y visibilidad', 'Resumen'];
   protected readonly ayudas = [
@@ -71,6 +72,25 @@ export class CrearGrupo {
   });
 
   constructor(route: ActivatedRoute) {
+    this.estado$ = route.queryParamMap.pipe(
+      map((params) => params.get('estado') ?? ''),
+      tap((estado) => {
+        if (
+          ['borrador', 'creando', 'perfil-incompleto', 'conexion'].includes(estado) &&
+          !this.general.controls.nombre.value &&
+          this.general.pristine
+        ) {
+          this.general.patchValue({
+            nombre: 'Entrenamiento de Grafos',
+            descripcion:
+              'Preparación para competencias ICPC con enfoque en grafos y programación dinámica.',
+            nivel: 'Intermedio',
+            cupo: 15,
+          });
+          this.acceso.patchValue({ visibilidad: estado === 'borrador' ? 'Público' : 'Protegido' });
+        }
+      }),
+    );
     this.paso$ = route.queryParamMap.pipe(
       map((params) => {
         const paso = params.get('paso');

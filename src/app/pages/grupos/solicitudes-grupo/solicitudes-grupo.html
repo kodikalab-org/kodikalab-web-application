@@ -1,6 +1,7 @@
 @let aceptada = (aceptada$ | async) === true;
+@let vista = (vista$ | async) ?? '';
 <div inert><app-inicio-dashboard /></div>
-@for (estadoDialogo of [aceptada]; track 'solicitud-' + estadoDialogo) {
+@for (estadoDialogo of [vista]; track 'solicitud-' + estadoDialogo) {
   <main
     class="fixed inset-0 z-50 overflow-y-auto bg-black/75 px-4 py-[12vh] font-body text-kl-text"
     (keydown.escape)="cerrar.click()"
@@ -20,7 +21,20 @@
         class="absolute top-5 right-5 flex size-8 items-center justify-center rounded-lg text-xl text-kl-body"
         ><img src="/images/grupos/415-20383-imgIcon19.svg" width="22" height="22" alt=""
       /></a>
-      @if (!aceptada) {
+      @if (vista === 'rechazada') {
+        <div class="text-center">
+          <h1 id="solicitud-titulo" class="mt-4 font-display text-2xl">Solicitud rechazada</h1>
+          <p class="text-sm text-kl-body">
+            La solicitud de <strong>Valeria Núñez</strong> fue rechazada. Podrá volver a solicitar
+            ingreso más adelante.
+          </p>
+          <span
+            class="rounded-full border border-solid border-kl-danger px-3 py-1 text-xs text-kl-danger"
+            >Rechazada</span
+          >
+          <div class="mt-6"><a mat-flat-button routerLink="/coach/inicio">Listo</a></div>
+        </div>
+      } @else if (!aceptada) {
         <h1 id="solicitud-titulo" class="mt-0 mb-5 pr-7 font-display text-xl font-bold">
           Revisar solicitud
         </h1>
@@ -36,6 +50,17 @@
             </p>
           </div>
         </div>
+        @if (vista === 'atendida') {
+          <section
+            role="alert"
+            class="mb-4 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+          >
+            <strong>Esta solicitud ya fue atendida</strong>
+            <p class="mb-0">
+              Actualizamos la lista para mostrar su estado actual. No se aplicó otra decisión.
+            </p>
+          </section>
+        }
         <dl class="m-0 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-4 text-sm">
           @for (
             fila of [
@@ -62,20 +87,30 @@
         <div class="mt-5 flex flex-wrap justify-end gap-3">
           <button
             mat-stroked-button
-            disabled
+            routerLink="."
+            [queryParams]="{ vista: 'rechazada' }"
+            [disabled]="vista === 'atendida'"
             title="Decisión real pendiente de backend"
             class="border-red-400/50 text-red-300"
           >
             Rechazar</button
-          ><a mat-flat-button routerLink="." [queryParams]="{ vista: 'aceptada' }"
+          ><a
+            mat-flat-button
+            routerLink="."
+            [queryParams]="{ vista: 'aceptada' }"
+            [disabled]="vista === 'atendida'"
             >Aceptar solicitud</a
           >
         </div>
-        <a
-          routerLink="/coach/grupos/seguimiento"
-          class="mt-4 block text-right text-sm text-kl-accent-text"
-          >Solicitar aclaración</a
-        >
+        @if (vista !== 'atendida') {
+          <a
+            routerLink="/coach/grupos/seguimiento"
+            class="mt-4 block text-right text-sm text-kl-accent-text"
+            >Solicitar aclaración</a
+          >
+        } @else {
+          <a mat-stroked-button routerLink="/coach/inicio" class="mt-4">Volver a solicitudes</a>
+        }
       } @else {
         <div class="text-center">
           <span
@@ -102,6 +137,13 @@
       <p class="mt-5 mb-0 text-xs text-kl-muted">
         Vista de ejemplo: no se registra ninguna decisión ni se modifica la membresía.
       </p>
+      <nav
+        aria-label="Estados de solicitud"
+        class="mt-4 flex flex-wrap gap-3 text-xs text-kl-accent-text"
+      >
+        <a routerLink="." [queryParams]="{ vista: 'rechazada' }">Rechazo de ejemplo</a
+        ><a routerLink="." [queryParams]="{ vista: 'atendida' }">Ya atendida</a>
+      </nav>
     </section>
   </main>
 }

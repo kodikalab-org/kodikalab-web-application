@@ -16,82 +16,112 @@
     </div>
     <p class="mt-2 mb-0 text-xs text-kl-muted">Gestión de postulaciones</p>
   </div>
-  <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-    <mat-card
-      appearance="outlined"
-      class="rounded-2xl bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
-      ><h2 class="mt-0 mb-4 font-display text-2xl font-bold">Camila Rojas</h2>
-      <p class="mt-0 mb-4 text-sm leading-5 text-kl-muted">
-        Practicante · Ingeniería de Software · Nivel intermedio
-      </p>
-      <div
-        role="status"
-        class="mb-4 rounded-xl border border-solid p-4 text-sm leading-5"
-        [class]="guardado ? 'border-green-400 bg-[#102a19]' : 'border-[#60b0ff] bg-[#0e2238]'"
-      >
-        <strong class="block" [class]="guardado ? 'text-green-400' : 'text-[#60b0ff]'">{{
-          guardado ? 'Aclaración solicitada' : 'La postulación seguirá pendiente'
-        }}</strong>
-        <p class="mt-2 mb-0">
-          {{
-            guardado
-              ? 'Guardamos tu observación y notificamos a Camila para que complete su disponibilidad. No se aceptó ni rechazó la solicitud.'
-              : 'Puedes pedir información adicional sin registrar todavía una decisión.'
-          }}
-        </p>
-      </div>
-      <form [formGroup]="form" (submit)="$event.preventDefault()">
-        <label for="observacion" class="mb-2 block text-sm font-medium"
-          >Observación para la postulante *</label
-        ><mat-form-field appearance="outline" class="auth-field w-full" subscriptSizing="dynamic">
-          <textarea
-            matInput
-            id="observacion"
-            formControlName="observacion"
-            rows="2"
-            [readonly]="guardado"
-          ></textarea
-          ><mat-error>Ingresa una observación para la postulante.</mat-error></mat-form-field
-        >
-        <p class="mt-2 mb-4 text-xs leading-4 text-kl-muted">
-          La observación se guarda en el seguimiento de esta solicitud.
-        </p>
-        @if (guardado) {
-          <div
-            class="mb-4 rounded-xl border border-solid border-kl-border-strong bg-white/5 p-4 text-sm"
-          >
-            <strong>Último seguimiento</strong>
-            <p class="mt-2 mb-1 text-kl-muted">Marco Paredes · 2 nov. 2026, 19:20</p>
-            <p class="my-1 text-kl-muted">Se solicitó confirmar la disponibilidad del jueves.</p>
-            <span class="font-mono text-xs text-kl-accent-text"
-              >Pendiente · A la espera de respuesta</span
-            >
-          </div>
-          <a mat-flat-button routerLink="/coach/grupos/solicitudes">Volver a solicitudes</a>
-        } @else {
-          <div class="flex flex-col gap-3 sm:flex-row">
-            <button
-              mat-flat-button
-              routerLink="."
-              [queryParams]="{ vista: 'guardado' }"
-              [disabled]="form.invalid"
-            >
-              Guardar y solicitar aclaración</button
-            ><a mat-stroked-button routerLink="/coach/grupos/solicitudes">Cancelar</a>
-          </div>
-        }
-      </form>
-    </mat-card>
-    <aside
-      class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
+  @if (error$ | async; as error) {
+    <section
+      role="alert"
+      class="mb-6 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
     >
-      <h2 class="mt-0 mb-4 text-xl font-bold">Estado actual</h2>
-      <p class="m-0 text-sm leading-5 text-kl-muted">
-        Postulación pendiente<br />Sin cambio de membresía<br />La solicitante podrá completar la
-        información antes de que se registre una decisión.
-      </p>
-    </aside>
-  </div>
+      <strong class="text-kl-danger">{{ error.titulo }}</strong>
+      <p class="mb-0">{{ error.detalle }}</p>
+    </section>
+    <mat-card class="gap-3 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface p-6"
+      ><article class="rounded-xl bg-[#1e1536] p-4">
+        <h2 class="mt-0 text-sm font-bold">Camila Rojas</h2>
+        <p class="text-sm text-kl-muted">Información de la postulación sin decisión aplicada.</p>
+        <span class="font-mono text-xs text-kl-accent-text">{{ error.estado }}</span>
+      </article></mat-card
+    >
+    <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+      <a mat-flat-button routerLink="/coach/grupos/solicitudes">Actualizar listado</a
+      ><a mat-stroked-button routerLink="/coach/inicio" fragment="grupos">Volver a mis equipos</a>
+    </div>
+  } @else {
+    <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <mat-card
+        appearance="outlined"
+        class="rounded-2xl bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
+        ><h2 class="mt-0 mb-4 font-display text-2xl font-bold">Camila Rojas</h2>
+        <p class="mt-0 mb-4 text-sm leading-5 text-kl-muted">
+          Practicante · Ingeniería de Software · Nivel intermedio
+        </p>
+        <div
+          role="status"
+          class="mb-4 rounded-xl border border-solid p-4 text-sm leading-5"
+          [class]="guardado ? 'border-green-400 bg-[#102a19]' : 'border-[#60b0ff] bg-[#0e2238]'"
+        >
+          <strong class="block" [class]="guardado ? 'text-green-400' : 'text-[#60b0ff]'">{{
+            guardado ? 'Aclaración solicitada' : 'La postulación seguirá pendiente'
+          }}</strong>
+          <p class="mt-2 mb-0">
+            {{
+              guardado
+                ? 'Guardamos tu observación y notificamos a Camila para que complete su disponibilidad. No se aceptó ni rechazó la solicitud.'
+                : 'Puedes pedir información adicional sin registrar todavía una decisión.'
+            }}
+          </p>
+        </div>
+        <form [formGroup]="form" (submit)="$event.preventDefault()">
+          <label for="observacion" class="mb-2 block text-sm font-medium"
+            >Observación para la postulante *</label
+          ><mat-form-field appearance="outline" class="auth-field w-full" subscriptSizing="dynamic">
+            <textarea
+              matInput
+              id="observacion"
+              formControlName="observacion"
+              rows="2"
+              [readonly]="guardado"
+            ></textarea
+            ><mat-error>Ingresa una observación para la postulante.</mat-error></mat-form-field
+          >
+          <p class="mt-2 mb-4 text-xs leading-4 text-kl-muted">
+            La observación se guarda en el seguimiento de esta solicitud.
+          </p>
+          @if (guardado) {
+            <div
+              class="mb-4 rounded-xl border border-solid border-kl-border-strong bg-white/5 p-4 text-sm"
+            >
+              <strong>Último seguimiento</strong>
+              <p class="mt-2 mb-1 text-kl-muted">Marco Paredes · 2 nov. 2026, 19:20</p>
+              <p class="my-1 text-kl-muted">Se solicitó confirmar la disponibilidad del jueves.</p>
+              <span class="font-mono text-xs text-kl-accent-text"
+                >Pendiente · A la espera de respuesta</span
+              >
+            </div>
+            <a mat-flat-button routerLink="/coach/grupos/solicitudes">Volver a solicitudes</a>
+          } @else {
+            <div class="flex flex-col gap-3 sm:flex-row">
+              <button
+                mat-flat-button
+                routerLink="."
+                [queryParams]="{ vista: 'guardado' }"
+                [disabled]="form.invalid"
+              >
+                Guardar y solicitar aclaración</button
+              ><a mat-stroked-button routerLink="/coach/grupos/solicitudes">Cancelar</a>
+            </div>
+          }
+        </form>
+      </mat-card>
+      <aside
+        class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
+      >
+        <h2 class="mt-0 mb-4 text-xl font-bold">Estado actual</h2>
+        <p class="m-0 text-sm leading-5 text-kl-muted">
+          Postulación pendiente<br />Sin cambio de membresía<br />La solicitante podrá completar la
+          información antes de que se registre una decisión.
+        </p>
+      </aside>
+    </div>
+  }
+  <nav
+    aria-label="Estados del seguimiento"
+    class="mt-6 flex flex-wrap gap-3 text-xs text-kl-accent-text"
+  >
+    @for (vista of ['sin-vigencia', 'sin-vacantes', 'sin-autorizacion']; track vista) {
+      <a routerLink="." [queryParams]="{ vista: vista }">{{ vista }}</a>
+    }
+    <a routerLink=".">Solicitar aclaración</a>
+  </nav>
   <p class="mt-6 text-xs leading-5 text-kl-muted">
     Maqueta con datos de ejemplo. Guardar y notificar están pendientes de integración; no se envía
     ninguna notificación.

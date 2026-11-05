@@ -1,5 +1,7 @@
 @let paso = (paso$ | async) ?? 1;
+@let estado = (estado$ | async) ?? '';
 <main
+  [attr.aria-busy]="estado === 'creando' ? 'true' : null"
   class="mx-auto flex min-h-[calc(100dvh-148px)] w-full max-w-[1600px] flex-col px-4 pt-6 lg:min-h-[916px] lg:px-14"
 >
   <div class="mb-5 flex items-center gap-4">
@@ -19,487 +21,572 @@
       </p>
     </div>
   </div>
-  <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(290px,372px)]">
-    <div class="min-w-0">
-      <ol
-        aria-label="Pasos para crear un grupo"
-        class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-[#2b2760] bg-[#0e0a28]/70 p-0 xl:grid-cols-4"
+  @if (estado === 'sin-permisos') {
+    <mat-card
+      class="mx-auto my-16 w-full max-w-[560px] gap-4 rounded-2xl border border-solid border-kl-accent bg-kl-surface p-6 text-center"
+    >
+      <h2 class="m-0 text-2xl font-bold">No tienes permisos para crear grupos</h2>
+      <p class="m-0 text-sm text-kl-muted">
+        Solo los coaches pueden crear grupos de entrenamiento. Puedes explorar los grupos
+        disponibles y solicitar tu ingreso.
+      </p>
+      <a mat-stroked-button routerLink="/coach/inicio">Volver al inicio</a
+      ><a mat-flat-button routerLink="/coach/inicio" fragment="grupos">Explorar grupos</a>
+    </mat-card>
+  } @else {
+    @if (estado === 'borrador') {
+      <section
+        role="status"
+        class="mb-4 self-end rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
       >
-        @for (titulo of pasos; track titulo; let i = $index) {
-          <li
-            [attr.aria-current]="paso === i + 1 ? 'step' : null"
-            class="flex min-h-16 items-center gap-3 border-0 border-r border-b border-solid border-[#1f1c44] p-3 text-xs"
-            [class.bg-kl-accent/20]="paso === i + 1"
+        <strong>Borrador guardado</strong>
+        <p class="mb-0">Se guardó en este dispositivo. Puedes retomarlo cuando quieras.</p>
+        <p class="mb-0 text-xs">Estado visual de ejemplo: no se ha almacenado información.</p>
+      </section>
+    }
+    <div class="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(290px,372px)]">
+      <div class="min-w-0">
+        <ol
+          aria-label="Pasos para crear un grupo"
+          class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-[#2b2760] bg-[#0e0a28]/70 p-0 xl:grid-cols-4"
+        >
+          @for (titulo of pasos; track titulo; let i = $index) {
+            <li
+              [attr.aria-current]="paso === i + 1 ? 'step' : null"
+              class="flex min-h-16 items-center gap-3 border-0 border-r border-b border-solid border-[#1f1c44] p-3 text-xs"
+              [class.bg-kl-accent/20]="paso === i + 1"
+            >
+              <span
+                class="flex size-8 shrink-0 items-center justify-center rounded-full border border-solid border-kl-border-strong text-sm"
+                [class.bg-kl-accent]="paso >= i + 1"
+              >
+                @if (paso > i + 1) {
+                  <img
+                    src="/images/grupos/paso-listo.svg"
+                    width="16"
+                    height="16"
+                    alt="Completado"
+                  />
+                } @else {
+                  {{ i + 1 }}
+                }</span
+              ><span
+                ><strong class="block text-[13px]">{{ titulo }}</strong
+                ><span class="mt-1 block text-[11px] text-kl-muted">{{ ayudas[i] }}</span></span
+              >
+            </li>
+          }
+        </ol>
+        @if (estado === 'perfil-incompleto' || estado === 'conexion') {
+          <section
+            role="alert"
+            class="mb-4 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
           >
-            <span
-              class="flex size-8 shrink-0 items-center justify-center rounded-full border border-solid border-kl-border-strong text-sm"
-              [class.bg-kl-accent]="paso >= i + 1"
-            >
-              @if (paso > i + 1) {
-                <img src="/images/grupos/paso-listo.svg" width="16" height="16" alt="Completado" />
-              } @else {
-                {{ i + 1 }}
-              }</span
-            ><span
-              ><strong class="block text-[13px]">{{ titulo }}</strong
-              ><span class="mt-1 block text-[11px] text-kl-muted">{{ ayudas[i] }}</span></span
-            >
-          </li>
-        }
-      </ol>
-      <mat-card
-        appearance="outlined"
-        class="rounded-[18px] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
-      >
-        <div class="mb-6 flex items-center gap-3.5">
-          <span
-            class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-kl-accent/25"
-            ><img
-              [src]="
-                '/images/grupos/' +
-                (paso === 1
-                  ? 'etiqueta'
-                  : paso === 2
-                    ? 'horario'
-                    : paso === 3
-                      ? 'candado'
-                      : 'resumen') +
-                '.svg'
-              "
-              width="22"
-              height="22"
-              alt=""
-          /></span>
-          <div>
-            <h2 class="m-0 font-display text-xl font-bold">{{ pasos[paso - 1] }}</h2>
-            <p class="mt-1 mb-0 text-sm text-kl-body">
+            <strong class="text-amber-400">{{
+              estado === 'perfil-incompleto'
+                ? 'Completa tu perfil de coach para crear grupos'
+                : 'No pudimos crear el grupo'
+            }}</strong>
+            <p class="mb-0">
               {{
-                paso === 1
-                  ? 'Define la identidad y el propósito de tu grupo.'
-                  : paso === 2
-                    ? 'Define cuándo se reunirán y con qué frecuencia.'
-                    : paso === 3
-                      ? 'Controla cómo se puede unir al grupo y quién puede verlo.'
-                      : 'Revisa la información antes de crear el grupo.'
+                estado === 'perfil-incompleto'
+                  ? 'Necesitamos tu especialidad y tus años de experiencia antes de crear un grupo.'
+                  : 'Revisa tu conexión e inténtalo de nuevo. Tus datos se conservan.'
               }}
             </p>
+            @if (estado === 'perfil-incompleto') {
+              <a routerLink="/coach/perfil/editar" class="mt-2 block text-kl-accent-text"
+                >Completar perfil →</a
+              >
+            }
+          </section>
+        }
+        <mat-card
+          appearance="outlined"
+          class="rounded-[18px] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
+        >
+          <div class="mb-6 flex items-center gap-3.5">
+            <span
+              class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-kl-accent/25"
+              ><img
+                [src]="
+                  '/images/grupos/' +
+                  (paso === 1
+                    ? 'etiqueta'
+                    : paso === 2
+                      ? 'horario'
+                      : paso === 3
+                        ? 'candado'
+                        : 'resumen') +
+                  '.svg'
+                "
+                width="22"
+                height="22"
+                alt=""
+            /></span>
+            <div>
+              <h2 class="m-0 font-display text-xl font-bold">{{ pasos[paso - 1] }}</h2>
+              <p class="mt-1 mb-0 text-sm text-kl-body">
+                {{
+                  paso === 1
+                    ? 'Define la identidad y el propósito de tu grupo.'
+                    : paso === 2
+                      ? 'Define cuándo se reunirán y con qué frecuencia.'
+                      : paso === 3
+                        ? 'Controla cómo se puede unir al grupo y quién puede verlo.'
+                        : 'Revisa la información antes de crear el grupo.'
+                }}
+              </p>
+            </div>
           </div>
-        </div>
-        @switch (paso) {
-          @case (1) {
-            <form
-              [formGroup]="general"
-              class="flex flex-col gap-5"
-              aria-label="Información general"
-              (submit)="$event.preventDefault()"
-            >
-              <div>
-                <label for="grupo-nombre" class="mb-1.5 block text-[13px] text-kl-body"
-                  >Nombre del grupo <span class="text-kl-accent-text">*</span></label
-                ><mat-form-field
-                  appearance="outline"
-                  class="auth-field w-full"
-                  subscriptSizing="dynamic"
-                  ><img
-                    matPrefix
-                    src="/images/grupos/nombre.svg"
-                    width="20"
-                    height="20"
-                    alt=""
-                  /><input
-                    matInput
-                    id="grupo-nombre"
-                    formControlName="nombre"
-                    placeholder="Ej. Entrenamiento de Grafos"
-                    maxlength="120"
-                  /><mat-error
-                    >Ingresa un nombre de hasta 120 caracteres.</mat-error
-                  ></mat-form-field
-                >
-                <p class="mt-1.5 mb-0 flex justify-between gap-2 text-xs text-kl-muted">
-                  <span>Máximo 120 caracteres.</span><span>0/120</span>
-                </p>
-              </div>
-              <div>
-                <label for="grupo-descripcion" class="mb-1.5 block text-[13px] text-kl-body"
-                  >Descripción <span class="text-kl-faint">(opcional)</span></label
-                ><mat-form-field
-                  appearance="outline"
-                  class="auth-field w-full"
-                  subscriptSizing="dynamic"
-                >
-                  <textarea
-                    matInput
-                    id="grupo-descripcion"
-                    formControlName="descripcion"
-                    rows="4"
-                    maxlength="500"
-                    placeholder="Describe el objetivo del grupo, la dinámica de trabajo, a quién está dirigido, etc."
-                  ></textarea
-                  ><mat-error
-                    >La descripción no debe superar 500 caracteres.</mat-error
-                  ></mat-form-field
-                >
-                <p class="mt-1.5 mb-0 flex justify-between gap-2 text-xs text-kl-muted">
-                  <span>Cuéntales a los practicantes el objetivo y la dinámica del grupo.</span
-                  ><span>0/500</span>
-                </p>
-              </div>
-              <div class="grid gap-5 sm:grid-cols-2">
+          @switch (paso) {
+            @case (1) {
+              <form
+                [formGroup]="general"
+                class="flex flex-col gap-5"
+                aria-label="Información general"
+                (submit)="$event.preventDefault()"
+              >
                 <div>
-                  <label id="grupo-nivel-label" class="mb-1.5 block text-[13px] text-kl-body"
-                    >Nivel objetivo *</label
+                  <label for="grupo-nombre" class="mb-1.5 block text-[13px] text-kl-body"
+                    >Nombre del grupo <span class="text-kl-accent-text">*</span></label
                   ><mat-form-field
                     appearance="outline"
                     class="auth-field w-full"
                     subscriptSizing="dynamic"
                     ><img
                       matPrefix
-                      src="/images/grupos/nivel.svg"
+                      src="/images/grupos/nombre.svg"
                       width="20"
                       height="20"
                       alt=""
-                    /><mat-select
-                      id="grupo-nivel"
-                      aria-labelledby="grupo-nivel-label"
-                      formControlName="nivel"
-                      placeholder="Selecciona un nivel"
-                      panelClass="onb-select-panel"
-                    >
-                      @for (nivel of ['Principiante', 'Intermedio', 'Avanzado']; track nivel) {
-                        <mat-option [value]="nivel">{{ nivel }}</mat-option>
-                      }</mat-select
-                    ><mat-error>Selecciona un nivel objetivo.</mat-error></mat-form-field
+                    /><input
+                      matInput
+                      id="grupo-nombre"
+                      formControlName="nombre"
+                      placeholder="Ej. Entrenamiento de Grafos"
+                      maxlength="120"
+                    /><mat-error
+                      >Ingresa un nombre de hasta 120 caracteres.</mat-error
+                    ></mat-form-field
                   >
-                  <p class="mt-1.5 mb-0 text-xs text-kl-muted">
-                    Define el nivel promedio de los integrantes.
+                  <p class="mt-1.5 mb-0 flex justify-between gap-2 text-xs text-kl-muted">
+                    <span>Máximo 120 caracteres.</span><span>0/120</span>
                   </p>
                 </div>
                 <div>
-                  <label for="grupo-cupo" class="mb-1.5 block text-[13px] text-kl-body"
-                    >Cupo máximo *</label
+                  <label for="grupo-descripcion" class="mb-1.5 block text-[13px] text-kl-body"
+                    >Descripción <span class="text-kl-faint">(opcional)</span></label
+                  ><mat-form-field
+                    appearance="outline"
+                    class="auth-field w-full"
+                    subscriptSizing="dynamic"
                   >
-                  <div class="flex items-start gap-2">
-                    <button
-                      mat-icon-button
-                      type="button"
-                      (click)="ajustarCupo(-1)"
-                      aria-label="Reducir cupo"
-                      [disabled]="general.controls.cupo.value === 1"
-                      class="mt-1 rounded-xl border border-solid border-kl-border-strong"
-                    >
-                      <img src="/images/grupos/menos.svg" width="18" height="18" alt="" /></button
-                    ><mat-form-field
-                      appearance="outline"
-                      class="auth-field w-[120px] min-w-0"
-                      subscriptSizing="dynamic"
-                      ><input
-                        matInput
-                        id="grupo-cupo"
-                        type="number"
-                        formControlName="cupo"
-                        min="1"
-                        max="1000"
-                        step="1"
-                        placeholder="—"
-                        class="text-center"
-                      /><mat-error>Entre 1 y 1000 integrantes.</mat-error></mat-form-field
-                    ><button
-                      mat-icon-button
-                      type="button"
-                      (click)="ajustarCupo(1)"
-                      aria-label="Aumentar cupo"
-                      [disabled]="general.controls.cupo.value === 1000"
-                      class="mt-1 rounded-xl border border-solid border-kl-border-strong"
-                    >
-                      <img src="/images/grupos/mas.svg" width="18" height="18" alt="" />
-                    </button>
-                  </div>
-                  <p class="mt-1.5 mb-0 text-xs text-kl-muted">Entre 1 y 1000 integrantes.</p>
+                    <textarea
+                      matInput
+                      id="grupo-descripcion"
+                      formControlName="descripcion"
+                      rows="4"
+                      maxlength="500"
+                      placeholder="Describe el objetivo del grupo, la dinámica de trabajo, a quién está dirigido, etc."
+                    ></textarea
+                    ><mat-error
+                      >La descripción no debe superar 500 caracteres.</mat-error
+                    ></mat-form-field
+                  >
+                  <p class="mt-1.5 mb-0 flex justify-between gap-2 text-xs text-kl-muted">
+                    <span>Cuéntales a los practicantes el objetivo y la dinámica del grupo.</span
+                    ><span>0/500</span>
+                  </p>
                 </div>
-              </div>
-            </form>
-          }
-          @case (2) {
-            <form
-              [formGroup]="horario"
-              class="flex flex-col gap-6"
-              aria-label="Horario"
-              (submit)="$event.preventDefault()"
-            >
-              <div>
-                <span id="dias-label" class="mb-2 block text-[13px] text-kl-body"
-                  >Días de entrenamiento *</span
-                ><mat-chip-listbox
-                  class="onb-chips"
-                  formControlName="dias"
-                  multiple
-                  aria-labelledby="dias-label"
-                >
-                  @for (dia of dias; track dia) {
-                    <mat-chip-option [value]="dia">{{ dia }}</mat-chip-option>
-                  }
-                </mat-chip-listbox>
-                @if (horario.controls.dias.touched && horario.controls.dias.invalid) {
-                  <mat-error class="mt-2 text-xs">Selecciona al menos un día.</mat-error>
-                }
-                <p class="mt-2 mb-0 text-xs text-kl-muted">
-                  El horario se repetirá semanalmente los días seleccionados.
-                </p>
-              </div>
-              <div class="grid gap-4 sm:grid-cols-2">
-                @for (campo of ['inicio', 'fin']; track campo) {
+                <div class="grid gap-5 sm:grid-cols-2">
                   <div>
-                    <label [for]="'hora-' + campo" class="mb-1.5 block text-[13px] text-kl-body"
-                      >Hora de {{ campo }} *</label
+                    <label id="grupo-nivel-label" class="mb-1.5 block text-[13px] text-kl-body"
+                      >Nivel objetivo *</label
                     ><mat-form-field
                       appearance="outline"
                       class="auth-field w-full"
                       subscriptSizing="dynamic"
                       ><img
                         matPrefix
-                        src="/images/grupos/reloj.svg"
+                        src="/images/grupos/nivel.svg"
                         width="20"
                         height="20"
                         alt=""
-                      /><input
-                        matInput
-                        [id]="'hora-' + campo"
-                        type="time"
-                        [formControlName]="campo"
-                      /><mat-error>Selecciona la hora de {{ campo }}.</mat-error></mat-form-field
-                    >
-                  </div>
-                }
-              </div>
-              @if (
-                horario.hasError('orden') &&
-                (horario.controls.fin.touched || horario.controls.inicio.touched)
-              ) {
-                <mat-error class="text-sm"
-                  >La hora de fin debe ser posterior a la hora de inicio.</mat-error
-                >
-              }
-              <div
-                class="rounded-[14px] border border-solid border-kl-border-strong bg-white/2 p-4"
-              >
-                <p class="m-0 text-[13px] text-kl-body">Así se mostrará en el grupo</p>
-                <p class="my-2 font-mono text-sm">Martes y jueves de 19:00 a 21:00</p>
-                <p class="m-0 text-xs text-kl-muted">
-                  Se guarda como texto de horario (máx. 150 caracteres). Vista de ejemplo.
-                </p>
-              </div>
-            </form>
-          }
-          @case (3) {
-            <form
-              [formGroup]="acceso"
-              class="flex flex-col gap-6"
-              aria-label="Acceso y visibilidad"
-              (submit)="$event.preventDefault()"
-            >
-              <div>
-                <span id="visibilidad-label" class="mb-2 block text-[13px] text-kl-body"
-                  >Visibilidad *</span
-                ><mat-radio-group
-                  formControlName="visibilidad"
-                  aria-labelledby="visibilidad-label"
-                  class="grid gap-4 sm:grid-cols-2"
-                >
-                  @for (tipo of ['Público', 'Protegido']; track tipo) {
-                    <mat-radio-button
-                      [value]="tipo"
-                      class="onb-radio rounded-[14px] border border-solid border-kl-border-strong bg-white/3 p-4"
-                      ><span class="block"
-                        ><img
-                          [src]="
-                            '/images/grupos/' +
-                            (tipo === 'Público' ? 'publico' : 'protegido') +
-                            '.svg'
-                          "
-                          width="24"
-                          height="24"
-                          alt=""
-                        /><strong class="my-2 block text-base">{{ tipo }}</strong
-                        ><span
-                          class="block text-[13px] leading-[18px] whitespace-normal text-kl-muted"
-                          >{{
-                            tipo === 'Público'
-                              ? 'Aparece en el explorador y los practicantes ingresan directamente.'
-                              : 'Aparece en el explorador. Ingresan con el código de invitación o envían una solicitud que tú apruebas.'
-                          }}</span
-                        ></span
-                      ></mat-radio-button
-                    >
-                  }
-                </mat-radio-group>
-              </div>
-              <div>
-                <span class="mb-2 block text-[13px] text-kl-body">Código de invitación</span>
-                <div
-                  class="rounded-xl border border-solid border-kl-border-strong bg-white/4 p-4 text-sm text-kl-faint opacity-60"
-                >
-                  Se generará automáticamente al crear el grupo
-                </div>
-                <p class="mt-2 mb-0 text-xs text-kl-muted">
-                  Podrás consultarlo en “Mis equipos” y compartirlo con quien quieras que ingrese
-                  directamente.
-                </p>
-              </div>
-              <div
-                class="rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-4 text-sm"
-              >
-                <strong>El grupo se crea con estado Activo</strong>
-                <p class="mt-1 mb-0 text-kl-body">
-                  Aparecerá en el listado de grupos disponibles apenas lo crees.
-                </p>
-              </div>
-            </form>
-          }
-          @case (4) {
-            <div class="flex flex-col gap-6 text-sm">
-              @for (seccion of [1, 2, 3]; track seccion) {
-                <section>
-                  <div class="mb-2 flex items-center justify-between">
-                    <h3 class="m-0 text-base font-medium">{{ pasos[seccion - 1] }}</h3>
-                    <a routerLink="." [queryParams]="{ paso: seccion }" class="text-kl-accent-text"
-                      >Editar</a
-                    >
-                  </div>
-                  <dl class="m-0">
-                    @for (
-                      fila of seccion === 1
-                        ? [
-                            ['Nombre', general.controls.nombre.value || 'Entrenamiento de Grafos'],
-                            [
-                              'Descripción',
-                              general.controls.descripcion.value ||
-                                'Preparación para competencias ICPC con enfoque en grafos y programación dinámica.',
-                            ],
-                            ['Nivel objetivo', general.controls.nivel.value || 'Intermedio'],
-                            ['Cupo máximo', (general.controls.cupo.value ?? 15) + ' integrantes'],
-                          ]
-                        : seccion === 2
-                          ? [['Días y horas', 'Martes y jueves de 19:00 a 21:00']]
-                          : [
-                              ['Visibilidad', acceso.controls.visibilidad.value],
-                              ['Estado al crear', 'Activo'],
-                              ['Código de invitación', 'Se genera al crear'],
-                            ];
-                      track fila[0]
-                    ) {
-                      <div
-                        class="grid gap-2 border-0 border-b border-solid border-kl-divider py-3 sm:grid-cols-[140px_1fr]"
+                      /><mat-select
+                        id="grupo-nivel"
+                        aria-labelledby="grupo-nivel-label"
+                        formControlName="nivel"
+                        placeholder="Selecciona un nivel"
+                        panelClass="onb-select-panel"
                       >
-                        <dt class="text-kl-muted">{{ fila[0] }}</dt>
-                        <dd class="m-0 break-words sm:text-right">{{ fila[1] }}</dd>
-                      </div>
-                    }
-                  </dl>
-                </section>
-              }
-              <p
-                class="m-0 rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-3 text-xs text-kl-body"
+                        @for (nivel of ['Principiante', 'Intermedio', 'Avanzado']; track nivel) {
+                          <mat-option [value]="nivel">{{ nivel }}</mat-option>
+                        }</mat-select
+                      ><mat-error>Selecciona un nivel objetivo.</mat-error></mat-form-field
+                    >
+                    <p class="mt-1.5 mb-0 text-xs text-kl-muted">
+                      Define el nivel promedio de los integrantes.
+                    </p>
+                  </div>
+                  <div>
+                    <label for="grupo-cupo" class="mb-1.5 block text-[13px] text-kl-body"
+                      >Cupo máximo *</label
+                    >
+                    <div class="flex items-start gap-2">
+                      <button
+                        mat-icon-button
+                        type="button"
+                        (click)="ajustarCupo(-1)"
+                        aria-label="Reducir cupo"
+                        [disabled]="general.controls.cupo.value === 1"
+                        class="mt-1 rounded-xl border border-solid border-kl-border-strong"
+                      >
+                        <img src="/images/grupos/menos.svg" width="18" height="18" alt="" /></button
+                      ><mat-form-field
+                        appearance="outline"
+                        class="auth-field w-[120px] min-w-0"
+                        subscriptSizing="dynamic"
+                        ><input
+                          matInput
+                          id="grupo-cupo"
+                          type="number"
+                          formControlName="cupo"
+                          min="1"
+                          max="1000"
+                          step="1"
+                          placeholder="—"
+                          class="text-center"
+                        /><mat-error>Entre 1 y 1000 integrantes.</mat-error></mat-form-field
+                      ><button
+                        mat-icon-button
+                        type="button"
+                        (click)="ajustarCupo(1)"
+                        aria-label="Aumentar cupo"
+                        [disabled]="general.controls.cupo.value === 1000"
+                        class="mt-1 rounded-xl border border-solid border-kl-border-strong"
+                      >
+                        <img src="/images/grupos/mas.svg" width="18" height="18" alt="" />
+                      </button>
+                    </div>
+                    <p class="mt-1.5 mb-0 text-xs text-kl-muted">Entre 1 y 1000 integrantes.</p>
+                  </div>
+                </div>
+              </form>
+            }
+            @case (2) {
+              <form
+                [formGroup]="horario"
+                class="flex flex-col gap-6"
+                aria-label="Horario"
+                (submit)="$event.preventDefault()"
               >
-                Al crear el grupo se genera su código de invitación y quedas como responsable. Esta
-                es una maqueta: no se creará un grupo real.
-              </p>
-            </div>
+                <div>
+                  <span id="dias-label" class="mb-2 block text-[13px] text-kl-body"
+                    >Días de entrenamiento *</span
+                  ><mat-chip-listbox
+                    class="onb-chips"
+                    formControlName="dias"
+                    multiple
+                    aria-labelledby="dias-label"
+                  >
+                    @for (dia of dias; track dia) {
+                      <mat-chip-option [value]="dia">{{ dia }}</mat-chip-option>
+                    }
+                  </mat-chip-listbox>
+                  @if (horario.controls.dias.touched && horario.controls.dias.invalid) {
+                    <mat-error class="mt-2 text-xs">Selecciona al menos un día.</mat-error>
+                  }
+                  <p class="mt-2 mb-0 text-xs text-kl-muted">
+                    El horario se repetirá semanalmente los días seleccionados.
+                  </p>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  @for (campo of ['inicio', 'fin']; track campo) {
+                    <div>
+                      <label [for]="'hora-' + campo" class="mb-1.5 block text-[13px] text-kl-body"
+                        >Hora de {{ campo }} *</label
+                      ><mat-form-field
+                        appearance="outline"
+                        class="auth-field w-full"
+                        subscriptSizing="dynamic"
+                        ><img
+                          matPrefix
+                          src="/images/grupos/reloj.svg"
+                          width="20"
+                          height="20"
+                          alt=""
+                        /><input
+                          matInput
+                          [id]="'hora-' + campo"
+                          type="time"
+                          [formControlName]="campo"
+                        /><mat-error>Selecciona la hora de {{ campo }}.</mat-error></mat-form-field
+                      >
+                    </div>
+                  }
+                </div>
+                @if (
+                  horario.hasError('orden') &&
+                  (horario.controls.fin.touched || horario.controls.inicio.touched)
+                ) {
+                  <mat-error class="text-sm"
+                    >La hora de fin debe ser posterior a la hora de inicio.</mat-error
+                  >
+                }
+                <div
+                  class="rounded-[14px] border border-solid border-kl-border-strong bg-white/2 p-4"
+                >
+                  <p class="m-0 text-[13px] text-kl-body">Así se mostrará en el grupo</p>
+                  <p class="my-2 font-mono text-sm">Martes y jueves de 19:00 a 21:00</p>
+                  <p class="m-0 text-xs text-kl-muted">
+                    Se guarda como texto de horario (máx. 150 caracteres). Vista de ejemplo.
+                  </p>
+                </div>
+              </form>
+            }
+            @case (3) {
+              <form
+                [formGroup]="acceso"
+                class="flex flex-col gap-6"
+                aria-label="Acceso y visibilidad"
+                (submit)="$event.preventDefault()"
+              >
+                <div>
+                  <span id="visibilidad-label" class="mb-2 block text-[13px] text-kl-body"
+                    >Visibilidad *</span
+                  ><mat-radio-group
+                    formControlName="visibilidad"
+                    aria-labelledby="visibilidad-label"
+                    class="grid gap-4 sm:grid-cols-2"
+                  >
+                    @for (tipo of ['Público', 'Protegido']; track tipo) {
+                      <mat-radio-button
+                        [value]="tipo"
+                        class="onb-radio rounded-[14px] border border-solid border-kl-border-strong bg-white/3 p-4"
+                        ><span class="block"
+                          ><img
+                            [src]="
+                              '/images/grupos/' +
+                              (tipo === 'Público' ? 'publico' : 'protegido') +
+                              '.svg'
+                            "
+                            width="24"
+                            height="24"
+                            alt=""
+                          /><strong class="my-2 block text-base">{{ tipo }}</strong
+                          ><span
+                            class="block text-[13px] leading-[18px] whitespace-normal text-kl-muted"
+                            >{{
+                              tipo === 'Público'
+                                ? 'Aparece en el explorador y los practicantes ingresan directamente.'
+                                : 'Aparece en el explorador. Ingresan con el código de invitación o envían una solicitud que tú apruebas.'
+                            }}</span
+                          ></span
+                        ></mat-radio-button
+                      >
+                    }
+                  </mat-radio-group>
+                </div>
+                <div>
+                  <span class="mb-2 block text-[13px] text-kl-body">Código de invitación</span>
+                  <div
+                    class="rounded-xl border border-solid border-kl-border-strong bg-white/4 p-4 text-sm text-kl-faint opacity-60"
+                  >
+                    Se generará automáticamente al crear el grupo
+                  </div>
+                  <p class="mt-2 mb-0 text-xs text-kl-muted">
+                    Podrás consultarlo en “Mis equipos” y compartirlo con quien quieras que ingrese
+                    directamente.
+                  </p>
+                </div>
+                <div
+                  class="rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-4 text-sm"
+                >
+                  <strong>El grupo se crea con estado Activo</strong>
+                  <p class="mt-1 mb-0 text-kl-body">
+                    Aparecerá en el listado de grupos disponibles apenas lo crees.
+                  </p>
+                </div>
+              </form>
+            }
+            @case (4) {
+              <div class="flex flex-col gap-6 text-sm">
+                @for (seccion of [1, 2, 3]; track seccion) {
+                  <section>
+                    <div class="mb-2 flex items-center justify-between">
+                      <h3 class="m-0 text-base font-medium">{{ pasos[seccion - 1] }}</h3>
+                      <a
+                        routerLink="."
+                        [queryParams]="{ paso: seccion }"
+                        class="text-kl-accent-text"
+                        >Editar</a
+                      >
+                    </div>
+                    <dl class="m-0">
+                      @for (
+                        fila of seccion === 1
+                          ? [
+                              [
+                                'Nombre',
+                                general.controls.nombre.value || 'Entrenamiento de Grafos',
+                              ],
+                              [
+                                'Descripción',
+                                general.controls.descripcion.value ||
+                                  'Preparación para competencias ICPC con enfoque en grafos y programación dinámica.',
+                              ],
+                              ['Nivel objetivo', general.controls.nivel.value || 'Intermedio'],
+                              ['Cupo máximo', (general.controls.cupo.value ?? 15) + ' integrantes'],
+                            ]
+                          : seccion === 2
+                            ? [['Días y horas', 'Martes y jueves de 19:00 a 21:00']]
+                            : [
+                                ['Visibilidad', acceso.controls.visibilidad.value],
+                                ['Estado al crear', 'Activo'],
+                                ['Código de invitación', 'Se genera al crear'],
+                              ];
+                        track fila[0]
+                      ) {
+                        <div
+                          class="grid gap-2 border-0 border-b border-solid border-kl-divider py-3 sm:grid-cols-[140px_1fr]"
+                        >
+                          <dt class="text-kl-muted">{{ fila[0] }}</dt>
+                          <dd class="m-0 break-words sm:text-right">{{ fila[1] }}</dd>
+                        </div>
+                      }
+                    </dl>
+                  </section>
+                }
+                <p
+                  class="m-0 rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-3 text-xs text-kl-body"
+                >
+                  Al crear el grupo se genera su código de invitación y quedas como responsable.
+                  Esta es una maqueta: no se creará un grupo real.
+                </p>
+              </div>
+            }
           }
-        }
-      </mat-card>
-    </div>
-    <aside
-      class="rounded-[18px] border border-solid border-[#2b2760] bg-[#0e0a28]/80 p-5 text-[13px]"
-    >
-      <div class="mb-4 flex items-center gap-3">
-        <img src="/images/grupos/resumen.svg" width="20" height="20" alt="" />
-        <div>
-          <h2 class="m-0 font-display text-lg">Resumen</h2>
-          <p class="mt-1 mb-0 text-kl-muted">Vista previa de la configuración del grupo.</p>
-        </div>
+        </mat-card>
       </div>
-      <div
-        class="flex items-start gap-3 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-3"
+      <aside
+        class="rounded-[18px] border border-solid border-[#2b2760] bg-[#0e0a28]/80 p-5 text-[13px]"
       >
-        <span
-          class="flex size-[76px] shrink-0 items-center justify-center rounded-[14px] bg-linear-to-br from-[#2a1c6e] to-[#4b36b8]"
-          ><img src="/images/grupos/grupo.svg" width="36" height="36" alt=""
-        /></span>
-        <div class="min-w-0">
-          <h3 class="m-0 break-words font-display text-base">
-            {{ general.controls.nombre.value || 'Nombre del grupo' }}
-          </h3>
-          <p class="my-2 line-clamp-3 text-xs text-kl-muted">
-            {{ general.controls.descripcion.value || 'La descripción aparecerá aquí.' }}
-          </p>
-          <div class="flex flex-wrap gap-2 text-xs text-kl-body">
-            <span class="rounded-lg border border-solid border-kl-border-strong px-2 py-1"
-              >Nivel: {{ general.controls.nivel.value || '—' }}</span
-            ><span class="rounded-lg border border-solid border-kl-border-strong px-2 py-1"
-              >Cupo: {{ general.controls.cupo.value ?? '—' }}</span
-            >
+        <div class="mb-4 flex items-center gap-3">
+          <img src="/images/grupos/resumen.svg" width="20" height="20" alt="" />
+          <div>
+            <h2 class="m-0 font-display text-lg">Resumen</h2>
+            <p class="mt-1 mb-0 text-kl-muted">Vista previa de la configuración del grupo.</p>
           </div>
         </div>
-      </div>
-      <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
-        <h3 class="m-0 flex items-center gap-2 text-sm">
-          <img src="/images/grupos/calendario.svg" width="16" height="16" alt="" />Horario
-        </h3>
-        <p class="mt-2 mb-0 text-kl-body">
-          {{ paso === 1 ? 'Días y horas sin definir' : 'Martes y jueves de 19:00 a 21:00' }}
-        </p>
-      </div>
-      <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
-        <h3 class="m-0 flex items-center gap-2 text-sm">
-          <img src="/images/grupos/candado.svg" width="16" height="16" alt="" />Acceso y visibilidad
-        </h3>
-        <p class="mt-2 mb-1 text-kl-body">Visibilidad: {{ acceso.controls.visibilidad.value }}</p>
-        <p class="my-1 text-kl-body">Estado al crear: Activo</p>
-        <p class="mt-1 mb-0 text-kl-faint">Código: se genera al crear</p>
-      </div>
-      <div
-        class="mt-4 rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-3"
-      >
-        <strong class="flex items-center gap-2 text-sm text-[#c4b5fd]"
-          ><img src="/images/grupos/info.svg" width="16" height="16" alt="" />Campos
-          obligatorios</strong
+        <div
+          class="flex items-start gap-3 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-3"
         >
-        <p class="mt-2 mb-0 text-xs leading-[17px] text-kl-body">
-          Los campos con * son obligatorios. Si falta información, se marcarán en rojo.
-        </p>
-      </div>
-    </aside>
-  </div>
-  <div
-    class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[#1f1c44] bg-[#060414]/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
-  >
-    <p class="mb-0 text-xs text-kl-muted">
-      Maqueta de interfaces. Guardar borrador y crear un grupo real están pendientes de integración.
-    </p>
-    <div class="flex flex-wrap items-center justify-end gap-3">
-      @if (paso > 1) {
-        <a mat-stroked-button routerLink="." [queryParams]="{ paso: paso - 1 }">Atrás</a>
-      }
-      <button mat-stroked-button disabled title="Persistencia pendiente">
-        <img src="/images/grupos/guardar.svg" width="18" height="18" alt="" />Guardar borrador</button
-      ><button
-        mat-flat-button
-        [routerLink]="paso === 4 ? '/coach/grupos/creado' : '.'"
-        [queryParams]="paso === 4 ? null : { paso: paso + 1 }"
-        [disabled]="
-          paso === 1
-            ? general.invalid
-            : paso === 2
-              ? horario.invalid
-              : paso === 3
-                ? acceso.invalid
-                : general.invalid || horario.invalid || acceso.invalid
-        "
-      >
-        {{ paso === 4 ? 'Crear grupo' : 'Continuar'
-        }}<img src="/images/login/arrow-right-18.svg" width="18" height="18" alt="" />
-      </button>
+          <span
+            class="flex size-[76px] shrink-0 items-center justify-center rounded-[14px] bg-linear-to-br from-[#2a1c6e] to-[#4b36b8]"
+            ><img src="/images/grupos/grupo.svg" width="36" height="36" alt=""
+          /></span>
+          <div class="min-w-0">
+            <h3 class="m-0 break-words font-display text-base">
+              {{ general.controls.nombre.value || 'Nombre del grupo' }}
+            </h3>
+            <p class="my-2 line-clamp-3 text-xs text-kl-muted">
+              {{ general.controls.descripcion.value || 'La descripción aparecerá aquí.' }}
+            </p>
+            <div class="flex flex-wrap gap-2 text-xs text-kl-body">
+              <span class="rounded-lg border border-solid border-kl-border-strong px-2 py-1"
+                >Nivel: {{ general.controls.nivel.value || '—' }}</span
+              ><span class="rounded-lg border border-solid border-kl-border-strong px-2 py-1"
+                >Cupo: {{ general.controls.cupo.value ?? '—' }}</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
+          <h3 class="m-0 flex items-center gap-2 text-sm">
+            <img src="/images/grupos/calendario.svg" width="16" height="16" alt="" />Horario
+          </h3>
+          <p class="mt-2 mb-0 text-kl-body">
+            {{ paso === 1 ? 'Días y horas sin definir' : 'Martes y jueves de 19:00 a 21:00' }}
+          </p>
+        </div>
+        <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
+          <h3 class="m-0 flex items-center gap-2 text-sm">
+            <img src="/images/grupos/candado.svg" width="16" height="16" alt="" />Acceso y
+            visibilidad
+          </h3>
+          <p class="mt-2 mb-1 text-kl-body">Visibilidad: {{ acceso.controls.visibilidad.value }}</p>
+          <p class="my-1 text-kl-body">Estado al crear: Activo</p>
+          <p class="mt-1 mb-0 text-kl-faint">Código: se genera al crear</p>
+        </div>
+        <div
+          class="mt-4 rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-3"
+        >
+          <strong class="flex items-center gap-2 text-sm text-[#c4b5fd]"
+            ><img src="/images/grupos/info.svg" width="16" height="16" alt="" />Campos
+            obligatorios</strong
+          >
+          <p class="mt-2 mb-0 text-xs leading-[17px] text-kl-body">
+            Los campos con * son obligatorios. Si falta información, se marcarán en rojo.
+          </p>
+        </div>
+      </aside>
     </div>
-  </div>
+    <div
+      class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[#1f1c44] bg-[#060414]/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
+    >
+      <p class="mb-0 text-xs text-kl-muted">
+        Maqueta de interfaces. Guardar borrador y crear un grupo real están pendientes de
+        integración.
+      </p>
+      <div class="flex flex-wrap items-center justify-end gap-3">
+        @if (paso > 1) {
+          <a mat-stroked-button routerLink="." [queryParams]="{ paso: paso - 1 }">Atrás</a>
+        }
+        <button
+          mat-stroked-button
+          routerLink="."
+          [queryParams]="{ paso: paso, estado: 'borrador' }"
+          [disabled]="estado === 'creando'"
+          title="Ver estado de ejemplo, sin persistencia"
+        >
+          <img src="/images/grupos/guardar.svg" width="18" height="18" alt="" />Guardar borrador</button
+        ><button
+          mat-flat-button
+          [routerLink]="paso === 4 ? '/coach/grupos/creado' : '.'"
+          [queryParams]="paso === 4 ? null : { paso: paso + 1 }"
+          [disabled]="
+            estado === 'creando' || estado === 'perfil-incompleto'
+              ? true
+              : paso === 1
+                ? general.invalid
+                : paso === 2
+                  ? horario.invalid
+                  : paso === 3
+                    ? acceso.invalid
+                    : general.invalid || horario.invalid || acceso.invalid
+          "
+        >
+          {{ estado === 'creando' ? 'Creando grupo…' : paso === 4 ? 'Crear grupo' : 'Continuar'
+          }}<img src="/images/login/arrow-right-18.svg" width="18" height="18" alt="" />
+        </button>
+      </div>
+    </div>
+  }
+  <nav
+    aria-label="Estados de creación de grupo"
+    class="my-4 flex flex-wrap gap-3 text-xs text-kl-accent-text"
+  >
+    @for (
+      variante of ['borrador', 'creando', 'perfil-incompleto', 'sin-permisos', 'conexion'];
+      track variante
+    ) {
+      <a
+        routerLink="."
+        [queryParams]="{ paso: variante === 'borrador' ? 2 : 4, estado: variante }"
+        >{{ variante }}</a
+      >
+    }
+    <a routerLink=".">Formulario</a>
+  </nav>
 </main>

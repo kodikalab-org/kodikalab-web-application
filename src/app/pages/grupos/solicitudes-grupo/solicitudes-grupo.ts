@@ -13,8 +13,10 @@ import { InicioDashboard } from '../../inicio-dashboard/inicio-dashboard';
   styleUrl: './solicitudes-grupo.css',
 })
 export class SolicitudesGrupo {
+  protected readonly vista$;
   protected readonly aceptada$;
   constructor(route: ActivatedRoute) {
+    this.vista$ = route.queryParamMap.pipe(map((params) => params.get('vista') ?? ''));
     this.aceptada$ = route.queryParamMap.pipe(map((params) => params.get('vista') === 'aceptada'));
   }
 }

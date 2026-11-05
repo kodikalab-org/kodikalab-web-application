@@ -1,4 +1,5 @@
 <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+  @let estado = (estado$ | async) ?? '';
   <div
     class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
   ></div>
@@ -55,13 +56,51 @@
         >Solo se muestran las resoluciones válidas de este equipo.</span
       >
     </div>
+    @if (estado === 'inconsistentes') {
+      <section
+        role="alert"
+        class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+      >
+        <strong class="text-amber-400">No pudimos actualizar el ranking</strong>
+        <p class="mb-0">
+          Faltan resoluciones de 2 integrantes. Las posiciones que ves corresponden al último
+          resultado válido del 2 nov. a las 18:00. No se aplicaron cambios.
+        </p>
+      </section>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <button mat-flat-button disabled>Reintentar actualización</button
+        ><a mat-stroked-button routerLink="/grupos">Volver a mis equipos</a>
+      </div>
+    }
+    @if (estado === 'compartidas') {
+      <section
+        role="status"
+        class="rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
+      >
+        <strong class="text-[#60b0ff]">Dos integrantes comparten el segundo puesto</strong>
+        <p class="mb-0">
+          Camila y Valeria tienen 16 problemas distintos resueltos. Se utiliza posición compartida;
+          el siguiente puesto es el cuarto.
+        </p>
+      </section>
+    }
     <section aria-label="Resumen del ranking" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       @for (indicador of indicadores; track indicador.etiqueta) {
         <mat-card
           class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
           ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
-          ><strong class="font-display text-2xl">{{ indicador.valor }}</strong
-          ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span></mat-card
+          ><strong class="font-display text-2xl">{{
+            estado === 'compartidas' && indicador.etiqueta === 'Tu posición'
+              ? '2.º'
+              : estado === 'inconsistentes' && indicador.etiqueta === 'Actualizado'
+                ? '18:00'
+                : indicador.valor
+          }}</strong
+          ><span class="text-xs text-kl-muted">{{
+            estado === 'inconsistentes' && indicador.etiqueta === 'Actualizado'
+              ? 'Último resultado válido'
+              : indicador.ayuda
+          }}</span></mat-card
         >
       }
     </section>
@@ -69,7 +108,13 @@
       <mat-card
         class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
       >
-        <h2 class="m-0 text-xl font-bold">Clasificación de integrantes</h2>
+        <h2 class="m-0 text-xl font-bold">
+          {{
+            estado === 'inconsistentes'
+              ? 'Última clasificación válida'
+              : 'Clasificación de integrantes'
+          }}
+        </h2>
         <p class="m-0 text-sm text-kl-muted">
           Orden: problemas distintos resueltos · de mayor a menor
         </p>
@@ -87,7 +132,10 @@
             </tr>
           </thead>
           <tbody>
-            @for (integrante of integrantes; track integrante.nombre) {
+            @for (
+              integrante of estado === 'compartidas' ? compartidos : integrantes;
+              track integrante.nombre
+            ) {
               <tr>
                 <td
                   class="rounded-l-xl border-0 border-y border-l border-solid border-kl-border-strong p-3"
@@ -113,7 +161,10 @@
           </tbody>
         </table>
         <ol class="m-0 flex list-none flex-col gap-4 p-0 lg:hidden">
-          @for (integrante of integrantes; track integrante.nombre) {
+          @for (
+            integrante of estado === 'compartidas' ? compartidos : integrantes;
+            track integrante.nombre
+          ) {
             <li
               class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm"
             >
@@ -148,6 +199,11 @@
         >
       </aside>
     </div>
+    <nav aria-label="Estados del ranking" class="flex flex-wrap gap-3 text-xs text-kl-accent-text">
+      <a routerLink="/ranking" [queryParams]="{ estado: 'inconsistentes' }">Datos inconsistentes</a
+      ><a routerLink="/ranking" [queryParams]="{ estado: 'compartidas' }">Posiciones compartidas</a
+      ><a routerLink="/ranking">Ranking actualizado</a>
+    </nav>
     <footer class="flex flex-col gap-2 text-xs text-kl-muted">
       <p role="note" class="m-0">
         Vista de demostración · Ranking fijo del diseño, sin cálculo ni consulta real.

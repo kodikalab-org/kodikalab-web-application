@@ -8,6 +8,18 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
   {
+    path: 'inicio',
+    loadComponent: () =>
+      import('./pages/inicio-dashboard/inicio-dashboard').then((m) => m.InicioDashboard),
+    data: { coach: false },
+  },
+  {
+    path: 'coach/inicio',
+    loadComponent: () =>
+      import('./pages/inicio-dashboard/inicio-dashboard').then((m) => m.InicioDashboard),
+    data: { coach: true },
+  },
+  {
     path: 'onboarding/practicante/datos-academicos',
     loadComponent: () =>
       import('./pages/practicante/onboarding/datos-academicos/datos-academicos').then(

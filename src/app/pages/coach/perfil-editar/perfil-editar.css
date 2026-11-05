@@ -1,0 +1,16 @@
+/* Only Material tokens remain local; visual layout uses Tailwind utilities. */
+:host {
+  display: block;
+  --auth-field-height: 50px;
+  --auth-field-padding: 13px;
+  --auth-input-color: #f1eeff;
+  --auth-focus-color: var(--kl-accent-bar);
+  --mat-form-field-error-text-color: var(--kl-danger);
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-label-text-size: 16px;
+  --mat-button-outlined-container-shape: 12px;
+  --mat-button-outlined-container-height: 48px;
+  --mat-button-outlined-label-text-size: 15px;
+  --mat-button-outlined-outline-color: #34304a;
+  --mat-button-outlined-label-text-color: #e7e3f5;
+}

@@ -1,0 +1,231 @@
+@let estado = estado$ | async;
+<div
+  class="relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text"
+  [attr.data-estado]="estado"
+>
+  <img
+    class="pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
+    src="images/onboarding/bg.svg"
+    alt=""
+    aria-hidden="true"
+  />
+
+  <mat-toolbar
+    class="auth-header relative z-10 justify-between border-0 border-b border-solid border-kl-divider px-14 font-body font-normal max-[641px]:px-4"
+  >
+    <a class="inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
+      <img src="images/registro/logo-40.svg" alt="" width="40" height="40" />
+      <span class="text-[25px] leading-[normal] font-medium tracking-[-.4px] max-[641px]:text-[22px]"
+        >Kodikalab</span
+      >
+    </a>
+    <div class="flex items-center gap-[18px] max-[641px]:gap-3">
+      <div class="flex items-center gap-2.5">
+        <span
+          class="flex size-[34px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
+          aria-hidden="true"
+          >CR</span
+        >
+        <span class="flex flex-col max-[641px]:hidden">
+          <span class="text-sm leading-4 font-normal">Camila Rojas</span>
+          <span class="text-xs leading-[14px] font-normal text-kl-muted">Practicante</span>
+        </span>
+      </div>
+      <a
+        class="inline-flex items-center gap-2 text-sm font-normal text-kl-body hover:text-kl-accent-text"
+        routerLink="/login"
+        aria-label="Cerrar sesión"
+      >
+        <img src="images/onboarding/logout-18.svg" alt="" width="18" height="18" />
+        <span class="max-[641px]:hidden">Cerrar sesión</span>
+      </a>
+    </div>
+  </mat-toolbar>
+
+  <main class="relative z-10 flex flex-1 items-center justify-center px-4 py-10">
+    <mat-card
+      class="auth-card w-full max-w-[820px] font-normal gap-6 bg-linear-to-b from-[#201454]/75 via-[#140d34]/83 to-[#0a071a]/92 px-11 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7"
+      appearance="outlined"
+    >
+      <ol class="m-0 flex list-none items-center gap-3.5 p-0" aria-label="Progreso del perfil">
+        <li class="flex items-center gap-2.5">
+          <span class="flex size-8 shrink-0 items-center justify-center rounded-2xl bg-kl-accent">
+            <img src="images/onboarding/check-16.svg" alt="" width="16" height="16" />
+          </span>
+          <span class="text-sm max-[641px]:sr-only"
+            >Datos académicos<span class="sr-only"> (completado)</span></span
+          >
+        </li>
+        <li class="h-0.5 min-w-4 flex-1 rounded-sm bg-kl-accent" aria-hidden="true"></li>
+        <li class="flex items-center gap-2.5" aria-current="step">
+          <span class="flex size-8 shrink-0 items-center justify-center rounded-2xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] text-sm font-semibold drop-shadow-[0_2px_6px_rgba(168,129,254,.55)]">2</span>
+          <span class="text-sm font-medium">Perfil competitivo</span>
+        </li>
+        <li class="h-0.5 min-w-4 flex-1 rounded-sm bg-[#2a2640]" aria-hidden="true"></li>
+        <li class="flex items-center gap-2.5">
+          <span class="flex size-8 shrink-0 items-center justify-center rounded-2xl border border-solid border-[#3a3552] text-sm text-[#8d89a3]">3</span>
+          <span class="text-sm text-[#8d89a3] max-[641px]:sr-only">Plataformas</span>
+        </li>
+      </ol>
+
+      <div class="flex flex-col">
+        <p class="m-0 font-mono text-xs leading-4 font-bold tracking-[1px] text-kl-accent-text">
+          PASO 2 DE 3
+        </p>
+        <h1 class="m-0 pt-1.5 font-display text-[30px] leading-9 font-bold tracking-[-.8px]">
+          Tu perfil competitivo
+        </h1>
+        <p class="m-0 pt-1.5 text-[15px] leading-[22px] font-light text-kl-body">
+          Nos ayuda a recomendarte equipos y problemas acordes a tu nivel.
+        </p>
+      </div>
+
+      <form class="flex flex-col gap-6" [formGroup]="form" novalidate>
+        <div class="flex flex-col gap-1.5">
+          <span class="text-[13px] leading-4 font-medium text-kl-body" id="nivel-label"
+            >Nivel competitivo <span class="text-kl-accent-text">*</span></span
+          >
+          <mat-button-toggle-group
+            class="onb-level grid w-full grid-cols-3 gap-4 rounded-none border-0 max-[641px]:grid-cols-1"
+            formControlName="nivel"
+            aria-labelledby="nivel-label"
+            hideSingleSelectionIndicator
+            (focusout)="form.controls.nivel.markAsTouched()"
+          >
+            @for (nivel of niveles; track nivel.value) {
+              <mat-button-toggle
+                class="[&.mat-button-toggle-checked]:border-[#8a6cff]"
+                [value]="nivel.value"
+              >
+                <span class="-mx-3 flex flex-col items-start gap-2 self-stretch p-4 text-left whitespace-normal">
+                  <img [src]="nivel.icono" alt="" width="24" height="24" />
+                  <span class="text-base leading-[normal] font-semibold">{{ nivel.titulo }}</span>
+                  <span class="text-[13px] leading-[18px] font-light text-kl-muted">{{
+                    nivel.descripcion
+                  }}</span>
+                </span>
+              </mat-button-toggle>
+            }
+          </mat-button-toggle-group>
+          @if (form.controls.nivel.touched && form.controls.nivel.invalid) {
+            <mat-error
+              class="m-0 flex items-start pt-1.5 text-[13px] leading-[18px] text-kl-danger"
+              role="alert"
+            >
+              <img class="mt-[1.5px] mr-1.5 shrink-0" src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+              Selecciona tu nivel competitivo
+            </mat-error>
+          }
+        </div>
+
+        <div class="grid grid-cols-2 items-start gap-4 max-[641px]:grid-cols-1">
+          <div class="flex min-w-0 flex-col gap-1.5">
+            <label class="text-[13px] leading-4 font-medium text-kl-body" for="experiencia"
+              >Experiencia (meses)</label
+            >
+            <mat-form-field class="auth-field w-full text-[15px]" appearance="outline" subscriptSizing="dynamic">
+              <input
+                matInput
+                id="experiencia"
+                class="[appearance:textfield]"
+                type="number"
+                min="0"
+                formControlName="experiencia"
+                placeholder="Ej. 12"
+                autocomplete="off"
+              />
+              <mat-hint>Tiempo aproximado practicando programación competitiva.</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="flex min-w-0 flex-col gap-1.5">
+            <span class="text-[13px] leading-4 font-medium text-kl-body" id="franja-label"
+              >Franja horaria preferida</span
+            >
+            <mat-chip-listbox
+              class="onb-chips [--mat-chip-elevated-selected-container-color:rgba(115,87,243,.28)]"
+              formControlName="franja"
+              hideSingleSelectionIndicator
+              aria-labelledby="franja-label"
+            >
+              @for (franja of franjas; track franja) {
+                <mat-chip-option
+                  class="my-0 [&_.mat-mdc-chip-action]:px-4 [&_.mat-mdc-chip-graphic]:hidden [&.mat-mdc-chip-selected]:shadow-[inset_0_0_0_1px_#8a6cff]"
+                  [value]="franja"
+                  >{{ franja }}</mat-chip-option>
+              }
+            </mat-chip-listbox>
+            <p class="m-0 text-xs leading-[17px] text-kl-muted">
+              Se guarda junto con los días como tu disponibilidad.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <span class="text-[13px] leading-4 font-medium text-kl-body" id="dias-label">Días disponibles</span>
+          <mat-chip-listbox
+            class="onb-chips [--mat-chip-elevated-selected-container-color:rgba(115,87,243,.28)]"
+            formControlName="dias"
+            aria-labelledby="dias-label"
+            multiple
+          >
+            @for (dia of dias; track dia) {
+              <mat-chip-option
+                class="my-0 [&_.mat-mdc-chip-action]:px-4 [&_.mat-mdc-chip-graphic]:hidden [&.mat-mdc-chip-selected]:shadow-[inset_0_0_0_1px_#8a6cff]"
+                [value]="dia"
+                >{{ dia }}</mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <span class="text-[13px] leading-4 font-medium text-kl-body" id="objetivo-label"
+            >Mi objetivo principal</span
+          >
+          <mat-radio-group
+            class="grid grid-cols-2 gap-x-4 gap-y-1.5 max-[641px]:grid-cols-1"
+            formControlName="objetivo"
+            aria-labelledby="objetivo-label"
+          >
+            @for (objetivo of objetivos; track objetivo) {
+              <mat-radio-button
+                class="onb-radio rounded-xl border border-solid border-[#34304a] bg-white/3 px-3.5 py-[11px] [&.mat-mdc-radio-checked]:border-[#8a6cff] [&.mat-mdc-radio-checked]:bg-[#7357f3]/22"
+                [value]="objetivo"
+                >{{ objetivo }}</mat-radio-button
+              >
+            }
+          </mat-radio-group>
+        </div>
+
+        <div class="flex items-center justify-between gap-4">
+          <button
+            mat-stroked-button
+            class="px-6"
+            type="button"
+            routerLink="/onboarding/practicante/datos-academicos"
+          >
+            <img src="images/onboarding/arrow-left-18.svg" alt="" width="18" height="18" />
+            Atrás
+          </button>
+          <button
+            mat-flat-button
+            class="auth-submit bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-7 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+            type="button"
+            routerLink="/onboarding/practicante/plataformas"
+            [disabled]="form.invalid"
+          >
+            Continuar
+            <img src="images/onboarding/arrow-right-18.svg" alt="" width="18" height="18" />
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </main>
+
+  <p
+    class="relative z-10 mx-0 mt-[-37px] mb-0 h-[37px] px-4 text-center text-xs leading-[15px] text-kl-faint"
+  >
+    © 2026 Kodikalab · <span class="text-kl-accent-text">Términos de Servicio</span> · Política de
+    privacidad
+  </p>
+</div>

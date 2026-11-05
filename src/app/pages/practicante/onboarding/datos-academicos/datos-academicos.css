@@ -1,0 +1,13 @@
+/* Only Material tokens remain local; visual layout uses Tailwind utilities. */
+:host {
+  display: block;
+  --auth-field-height: 48px;
+  --auth-field-padding: 12px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-bar);
+  --auth-submit-height: 50px;
+  --mat-form-field-container-text-size: 15px;
+  --mat-form-field-container-text-line-height: normal;
+  --mat-select-trigger-text-size: 15px;
+  --mat-select-trigger-text-line-height: normal;
+}

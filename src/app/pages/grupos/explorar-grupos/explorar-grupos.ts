@@ -134,7 +134,20 @@ export class ExplorarGrupos {
     this.vista$ = route.queryParamMap.pipe(
       map((params) => {
         const vista = params.get('vista') ?? '';
-        return ['solicitar', 'enviada', 'ingreso', 'codigo', 'estado'].includes(vista) ? vista : '';
+        return [
+          'solicitar',
+          'enviada',
+          'ingreso',
+          'codigo',
+          'estado',
+          'cargando',
+          'sin-resultados',
+          'duplicada',
+          'sin-cupos',
+          'cerradas',
+        ].includes(vista)
+          ? vista
+          : '';
       }),
     );
   }

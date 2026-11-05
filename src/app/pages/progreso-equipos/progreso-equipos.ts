@@ -13,9 +13,11 @@ import { map } from 'rxjs';
   styleUrl: './progreso-equipos.css',
 })
 export class ProgresoEquipos {
+  protected readonly estado$;
   // Solo alterna dos frames de demostración: no consulta ni calcula progreso real.
   protected readonly contexto$;
   constructor(route: ActivatedRoute) {
+    this.estado$ = route.queryParamMap.pipe(map((params) => params.get('estado') ?? ''));
     this.contexto$ = route.queryParamMap.pipe(
       map((params) => (params.get('equipo') === 'grafos-dp' ? this.grafos : this.alfa)),
     );

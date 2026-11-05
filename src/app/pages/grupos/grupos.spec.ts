@@ -1,14 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../../app.routes';
+import { Session } from '../../core/session';
 
 describe('Interfaces de grupos', () => {
+  afterEach(() => TestBed.inject(Session).logout());
   async function abrir(url: string) {
     await TestBed.configureTestingModule({
-      providers: [provideRouter(routes)],
+      providers: [provideRouter(routes), provideHttpClient()],
     }).compileComponents();
+    TestBed.inject(Session).startDemo(url.startsWith('/coach/') ? 'COACH' : 'PRACTICANTE');
     const harness = await RouterTestingHarness.create(url);
     await harness.fixture.whenStable();
     const root = harness.routeNativeElement!;

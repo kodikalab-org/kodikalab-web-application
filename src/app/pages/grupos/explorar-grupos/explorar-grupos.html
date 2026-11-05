@@ -1,0 +1,369 @@
+@let vista = (vista$ | async) ?? '';
+@let seleccionado = (seleccion$ | async) ?? grupos[1];
+<main
+  class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1600px] px-4 pt-7 pb-16 lg:min-h-[1132px] lg:px-14"
+  [attr.inert]="vista ? '' : null"
+>
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="m-0 font-display text-[32px] font-bold tracking-[-0.8px]">Grupos</h1>
+      <p class="mt-1 mb-0 text-[15px] text-kl-body">
+        Únete a grupos de entrenamiento, practica con tu comunidad y mejora tus habilidades.
+      </p>
+    </div>
+    <a mat-stroked-button routerLink="." [queryParams]="{ vista: 'codigo' }"
+      ><img src="/images/grupos/415-19197-imgIconKey.svg" width="18" height="18" alt="" />Ingresar
+      con código</a
+    >
+  </div>
+  <div class="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+    <aside
+      class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6"
+    >
+      <div class="mb-5 flex items-center justify-between">
+        <h2 class="m-0 text-lg font-medium">Filtros</h2>
+        <button mat-button disabled class="text-xs" title="Filtros visuales pendientes de integrar">
+          Limpiar
+        </button>
+      </div>
+      <form [formGroup]="filtros" class="flex flex-col gap-5" (submit)="$event.preventDefault()">
+        <div>
+          <label for="buscar-grupos" class="mb-2 block text-sm">Buscar</label
+          ><mat-form-field appearance="outline" class="auth-field w-full" subscriptSizing="dynamic"
+            ><img
+              matPrefix
+              src="/images/dashboard/0-imgIcon2.svg"
+              width="18"
+              height="18"
+              alt="" /><input
+              matInput
+              id="buscar-grupos"
+              formControlName="buscar"
+              placeholder="Buscar grupos…"
+          /></mat-form-field>
+        </div>
+        @for (
+          seccion of [
+            {
+              titulo: 'Nivel',
+              opciones: [
+                ['principiante', 'Principiante'],
+                ['intermedio', 'Intermedio'],
+                ['avanzado', 'Avanzado'],
+              ],
+            },
+            {
+              titulo: 'Visibilidad',
+              opciones: [
+                ['publico', 'Público'],
+                ['protegido', 'Protegido'],
+              ],
+            },
+            {
+              titulo: 'Mi participación',
+              opciones: [
+                ['miembro', 'Soy miembro'],
+                ['pendiente', 'Solicitud pendiente'],
+              ],
+            },
+          ];
+          track seccion.titulo
+        ) {
+          <fieldset class="m-0 min-w-0 border-0 p-0">
+            <legend class="mb-1 text-sm">{{ seccion.titulo }}</legend>
+            @for (opcion of seccion.opciones; track opcion[0]) {
+              <mat-checkbox class="auth-check block text-sm" [formControlName]="opcion[0]">{{
+                opcion[1]
+              }}</mat-checkbox>
+            }
+          </fieldset>
+        }
+      </form>
+      <p class="mt-4 mb-0 text-xs leading-4 text-kl-muted">
+        Filtros de ejemplo, sin búsqueda ni filtrado real.
+      </p>
+    </aside>
+    <section aria-label="Grupos disponibles" class="min-w-0">
+      <p class="mt-0 mb-3 text-sm text-kl-body">Mostrando 24 grupos</p>
+      <div class="flex flex-col gap-3">
+        @for (grupo of grupos; track grupo.iniciales) {
+          <mat-card
+            appearance="outlined"
+            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_180px_170px]"
+          >
+            <div class="flex items-start gap-4">
+              <span
+                class="mt-2 flex size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-xl font-semibold {{
+                  grupo.tono
+                }}"
+                >{{ grupo.iniciales }}</span
+              >
+              <div class="min-w-0">
+                <h2 class="mt-0 mb-2 text-base font-medium">{{ grupo.nombre }}</h2>
+                <div class="mb-2 flex flex-wrap gap-2 text-[11px]">
+                  <span
+                    class="rounded-full border border-solid border-kl-border-strong bg-white/3 px-2 py-0.5 text-kl-body"
+                    >Nivel: {{ grupo.nivel }}</span
+                  ><span
+                    class="flex items-center gap-1 rounded-full border border-solid border-kl-accent/50 bg-kl-accent/10 px-2 py-0.5"
+                    [class.text-green-400]="grupo.publico"
+                    ><img
+                      [src]="
+                        '/images/grupos/' +
+                        (grupo.publico ? '415-19197-imgIcon6' : '415-19197-imgIcon9') +
+                        '.svg'
+                      "
+                      width="12"
+                      height="12"
+                      alt=""
+                    />{{ grupo.publico ? 'Público' : 'Protegido' }}</span
+                  >
+                </div>
+                <p class="m-0 text-[13px] leading-[18px] text-kl-muted">{{ grupo.descripcion }}</p>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2 text-xs text-kl-body">
+              <span class="flex items-start gap-2"
+                ><img src="/images/grupos/415-19197-imgIcon7.svg" width="16" height="16" alt="" />{{
+                  grupo.horario
+                }}</span
+              ><span class="flex items-center gap-2"
+                ><img
+                  src="/images/grupos/415-19197-imgIcon8.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Cupo máximo: {{ grupo.cupo }}</span
+              >
+            </div>
+            <div class="flex flex-col items-start gap-2">
+              <span
+                class="rounded-full border border-solid px-3 py-1 text-[11px]"
+                [class]="
+                  grupo.estado === 'Solicitud pendiente'
+                    ? 'border-amber-300/50 bg-amber-300/10 text-amber-300'
+                    : grupo.estado === 'Eres miembro'
+                      ? 'border-kl-accent/50 bg-kl-accent/10 text-kl-accent-text'
+                      : 'border-green-400/50 bg-green-400/10 text-green-400'
+                "
+                >{{ grupo.estado }}</span
+              >
+              @if (grupo.estado === 'Eres miembro') {
+                <button
+                  mat-stroked-button
+                  disabled
+                  class="w-full"
+                  title="Detalle del grupo no disponible en Figma"
+                >
+                  Ver grupo
+                </button>
+              } @else if (grupo.estado === 'Solicitud pendiente') {
+                <a
+                  mat-stroked-button
+                  routerLink="."
+                  [queryParams]="{ vista: 'estado', grupo: grupo.iniciales }"
+                  class="w-full"
+                  >Ver estado</a
+                >
+              } @else {
+                <a
+                  mat-flat-button
+                  routerLink="."
+                  [queryParams]="{
+                    vista: grupo.publico ? 'ingreso' : 'solicitar',
+                    grupo: grupo.iniciales,
+                  }"
+                  class="w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] shadow-[0_2px_12px_#a881fe66]"
+                  >{{ grupo.accion }}</a
+                >
+              }
+            </div>
+          </mat-card>
+        }
+      </div>
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <nav aria-label="Paginación de ejemplo" class="flex gap-2">
+          @for (pagina of ['‹', '1', '2', '3', '4', '›']; track $index) {
+            <button
+              mat-icon-button
+              disabled
+              [attr.aria-label]="'Página de ejemplo ' + pagina"
+              [attr.aria-current]="pagina === '1' ? 'page' : null"
+              class="rounded-lg border border-solid border-kl-border-strong text-sm"
+              [class.bg-kl-accent]="pagina === '1'"
+            >
+              @if (pagina === '‹' || pagina === '›') {
+                <img
+                  [src]="
+                    pagina === '‹'
+                      ? '/images/grupos/415-19197-imgIconChevronLeft.svg'
+                      : '/images/grupos/415-19197-imgIconChevronRight.svg'
+                  "
+                  width="16"
+                  height="16"
+                  alt=""
+                />
+              } @else {
+                {{ pagina }}
+              }
+            </button>
+          }
+        </nav>
+        <span class="text-xs text-kl-muted">Mostrando 1–6 de 24 grupos</span>
+      </div>
+      <p class="mt-4 text-xs text-kl-muted">
+        Maqueta con datos fijos. Las confirmaciones muestran el diseño; no crean solicitudes ni
+        membresías reales.
+      </p>
+    </section>
+  </div>
+</main>
+@if (vista) {
+  @for (estadoDialogo of [vista]; track 'dialogo-' + estadoDialogo) {
+    <div
+      class="fixed inset-0 z-50 overflow-y-auto bg-black/75 px-4 py-[15vh]"
+      (keydown.escape)="cerrar.click()"
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialogo-titulo"
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        class="relative mx-auto w-full max-w-[520px] rounded-[22px] border border-solid border-[#7357f3] bg-linear-to-b from-[#1a1446] to-[#09071a] p-7 shadow-[0_0_24px_#643cff55]"
+      >
+        <a
+          #cerrar
+          routerLink="."
+          aria-label="Cerrar diálogo"
+          class="absolute top-5 right-5 flex size-8 items-center justify-center rounded-lg text-xl text-kl-body"
+          ><img src="/images/grupos/415-19572-imgIcon11.svg" width="22" height="22" alt=""
+        /></a>
+        @if (vista === 'solicitar' || vista === 'codigo') {
+          <h2 id="dialogo-titulo" class="mt-0 mb-5 pr-8 font-display text-xl font-bold">
+            {{ vista === 'codigo' ? 'Ingresar con código' : 'Solicitar ingreso' }}
+          </h2>
+          <div
+            class="mb-5 flex items-center gap-3 rounded-[14px] border border-solid border-[#26224d] bg-white/4 p-4"
+          >
+            <span
+              class="flex size-[52px] shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#00a9a4] to-[#54e4cd] font-semibold"
+              >AE</span
+            >
+            <div>
+              <strong class="text-sm">Algoritmos y Estructuras de Datos</strong>
+              <p class="my-1 text-xs text-kl-body">Nivel: Principiante · Protegido</p>
+              <p class="m-0 text-xs text-kl-muted">Lunes de 18:00 a 20:00 · Cupo máximo 20</p>
+            </div>
+          </div>
+          <form [formGroup]="codigo" (submit)="$event.preventDefault()">
+            <label for="invitacion" class="mb-2 block text-[13px] text-kl-body"
+              >Código de invitación {{ vista === 'solicitar' ? '(opcional)' : '*' }}</label
+            ><mat-form-field
+              appearance="outline"
+              class="auth-field w-full"
+              subscriptSizing="dynamic"
+              ><img
+                matPrefix
+                src="/images/grupos/415-19197-imgIconKey.svg"
+                width="20"
+                height="20"
+                alt=""
+              /><input
+                matInput
+                id="invitacion"
+                formControlName="invitacion"
+                placeholder="Ej. A1B2C3D4E5F6"
+                maxlength="12"
+              /><mat-error>Ingresa un código de 12 letras o números.</mat-error></mat-form-field
+            >
+            <p class="mt-2 text-xs text-kl-muted">
+              Con un código válido ingresas directamente; sin código enviamos una solicitud al
+              coach.
+            </p>
+            <p
+              class="my-4 flex items-start gap-2 rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-3 text-sm leading-5 text-kl-body"
+            >
+              <img
+                src="/images/grupos/415-19572-imgIcon13.svg"
+                width="20"
+                height="20"
+                alt=""
+                class="shrink-0"
+              /><span
+                >El coach verá tu perfil: carrera, ciclo, nivel y plataformas vinculadas. No se
+                comparte tu correo.</span
+              >
+            </p>
+            <div class="flex flex-wrap justify-end gap-3">
+              <a mat-stroked-button routerLink=".">Cancelar</a
+              ><button
+                mat-flat-button
+                routerLink="."
+                [queryParams]="{
+                  vista: codigo.controls.invitacion.value ? 'ingreso' : 'enviada',
+                  grupo: seleccionado.iniciales,
+                }"
+                [disabled]="
+                  codigo.invalid || (vista === 'codigo' && !codigo.controls.invitacion.value)
+                "
+              >
+                {{ vista === 'codigo' ? 'Ingresar' : 'Solicitar ingreso' }}
+              </button>
+            </div>
+          </form>
+        } @else {
+          <div class="text-center">
+            <span
+              class="mx-auto mb-4 flex size-[68px] items-center justify-center rounded-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] text-3xl"
+              ><img
+                [src]="
+                  vista === 'ingreso'
+                    ? '/images/grupos/415-23619-confirmacion.svg'
+                    : '/images/grupos/pendiente.svg'
+                "
+                width="34"
+                height="34"
+                alt=""
+            /></span>
+            <h2 id="dialogo-titulo" class="my-3 font-display text-xl font-bold">
+              {{
+                vista === 'ingreso'
+                  ? 'Ya eres parte del grupo'
+                  : vista === 'estado'
+                    ? 'Solicitud pendiente'
+                    : 'Solicitud enviada'
+              }}
+            </h2>
+            <p class="text-sm leading-6 text-kl-body">
+              {{
+                vista === 'ingreso'
+                  ? 'Ingresaste a ' +
+                    seleccionado.nombre +
+                    '. Ya puedes ver sus problemas asignados y su ranking.'
+                  : vista === 'estado'
+                    ? 'El coach de ' +
+                      seleccionado.nombre +
+                      ' revisará tu solicitud. Verás su estado en “Mis equipos”.'
+                    : 'El coach de ' +
+                      seleccionado.nombre +
+                      ' revisará tu solicitud. Verás su estado en “Mis equipos”.'
+              }}
+            </p>
+            <span
+              class="inline-block rounded-full border border-solid border-kl-accent/50 px-3 py-1 text-xs text-kl-accent-text"
+              >{{ vista === 'ingreso' ? 'Membresía activa' : 'Solicitud pendiente' }}</span
+            >
+            <p class="text-xs text-kl-muted">Estado de ejemplo, sin operación real.</p>
+            <div class="mt-4 flex flex-wrap justify-center gap-3">
+              <a mat-stroked-button routerLink="/inicio" fragment="grupos">Ver mis equipos</a
+              ><a mat-flat-button routerLink=".">{{
+                vista === 'ingreso' ? 'Seguir explorando' : 'Entendido'
+              }}</a>
+            </div>
+          </div>
+        }
+      </section>
+    </div>
+  }
+}

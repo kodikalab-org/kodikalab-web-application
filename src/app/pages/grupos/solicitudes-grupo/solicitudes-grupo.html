@@ -1,0 +1,107 @@
+@let aceptada = (aceptada$ | async) === true;
+<div inert><app-inicio-dashboard /></div>
+@for (estadoDialogo of [aceptada]; track 'solicitud-' + estadoDialogo) {
+  <main
+    class="fixed inset-0 z-50 overflow-y-auto bg-black/75 px-4 py-[12vh] font-body text-kl-text"
+    (keydown.escape)="cerrar.click()"
+  >
+    <section
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="solicitud-titulo"
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
+      class="relative mx-auto w-full max-w-[540px] rounded-[22px] border border-solid border-kl-accent bg-linear-to-b from-[#1a1446] to-[#09071a] p-7 shadow-[0_0_24px_#643cff55]"
+    >
+      <a
+        #cerrar
+        routerLink="/coach/inicio"
+        aria-label="Cerrar solicitud"
+        class="absolute top-5 right-5 flex size-8 items-center justify-center rounded-lg text-xl text-kl-body"
+        ><img src="/images/grupos/415-20383-imgIcon19.svg" width="22" height="22" alt=""
+      /></a>
+      @if (!aceptada) {
+        <h1 id="solicitud-titulo" class="mt-0 mb-5 pr-7 font-display text-xl font-bold">
+          Revisar solicitud
+        </h1>
+        <div class="mb-4 flex items-center gap-4">
+          <span
+            class="flex size-[56px] shrink-0 items-center justify-center rounded-[14px] bg-kl-accent/25"
+            >VN</span
+          >
+          <div>
+            <h2 class="m-0 text-lg font-medium">Valeria Núñez</h2>
+            <p class="mt-1 mb-0 text-xs text-kl-muted">
+              Solicita unirse a Equipo Alfa · 14/20 integrantes
+            </p>
+          </div>
+        </div>
+        <dl class="m-0 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-4 text-sm">
+          @for (
+            fila of [
+              ['Carrera', 'Ingeniería de Software · 5.° ciclo'],
+              ['Nivel competitivo', 'Intermedio'],
+              ['Código de estudiante', 'U2020001'],
+              ['Codeforces', 'valeria_cf · rating 1432'],
+              ['AtCoder · VJudge', '—'],
+              ['Solicitó', '12 oct. 2024'],
+            ];
+            track fila[0]
+          ) {
+            <div
+              class="grid gap-1 border-0 border-b border-solid border-kl-divider py-3 sm:grid-cols-[150px_1fr]"
+            >
+              <dt class="text-kl-muted">{{ fila[0] }}</dt>
+              <dd class="m-0 break-words sm:text-right">{{ fila[1] }}</dd>
+            </div>
+          }
+        </dl>
+        <p class="mt-3 text-xs text-kl-muted">
+          Por privacidad no se muestra el correo del postulante.
+        </p>
+        <div class="mt-5 flex flex-wrap justify-end gap-3">
+          <button
+            mat-stroked-button
+            disabled
+            title="Decisión real pendiente de backend"
+            class="border-red-400/50 text-red-300"
+          >
+            Rechazar</button
+          ><a mat-flat-button routerLink="." [queryParams]="{ vista: 'aceptada' }"
+            >Aceptar solicitud</a
+          >
+        </div>
+        <a
+          routerLink="/coach/grupos/seguimiento"
+          class="mt-4 block text-right text-sm text-kl-accent-text"
+          >Solicitar aclaración</a
+        >
+      } @else {
+        <div class="text-center">
+          <span
+            class="mx-auto mb-4 flex size-[68px] items-center justify-center rounded-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] text-3xl"
+            ><img src="/images/grupos/415-20787-confirmacion.svg" width="34" height="34" alt=""
+          /></span>
+          <h1 id="solicitud-titulo" class="my-3 font-display text-xl font-bold">
+            Solicitud aceptada
+          </h1>
+          <p class="text-sm leading-6 text-kl-body">
+            <strong>Valeria Núñez</strong> ya es parte de Equipo Alfa y conserva el rol de miembro.
+            Cupo ocupado: 15/20.
+          </p>
+          <span
+            class="inline-block rounded-full border border-solid border-green-400/50 bg-green-400/10 px-3 py-1 text-xs text-green-300"
+            >Membresía activa</span
+          >
+          <div class="mt-5 flex flex-wrap justify-center gap-3">
+            <a mat-stroked-button routerLink="/coach/inicio" fragment="grupos">Ver equipo</a
+            ><a mat-flat-button routerLink="/coach/inicio">Listo</a>
+          </div>
+        </div>
+      }
+      <p class="mt-5 mb-0 text-xs text-kl-muted">
+        Vista de ejemplo: no se registra ninguna decisión ni se modifica la membresía.
+      </p>
+    </section>
+  </main>
+}

@@ -3,8 +3,14 @@ import { LandingPage } from './pages/landing-page/landing-page';
 import { Login } from './pages/auth/login/login';
 import { Registro } from './pages/auth/registro/registro';
 import { accessGuard, demoGuard } from './core/access-guard';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 
 const appRoutes: Routes = [
+  {
+    path: 'coach/competencias',
+    providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-PE' }],
+    loadComponent: () => import('./pages/competencias/competencias').then((m) => m.Competencias),
+  },
   {
     path: 'progreso',
     loadComponent: () => import('./pages/progreso-tema/progreso-tema').then((m) => m.ProgresoTema),

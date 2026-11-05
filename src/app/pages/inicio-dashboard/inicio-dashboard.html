@@ -574,6 +574,9 @@
                 }
               "
             />
+            @if (coach) {
+              <a mat-stroked-button routerLink="/coach/competencias" class="mb-4 w-full">Registrar participación y resultados</a>
+            }
             @if (nuevo) {
               <ng-container
                 *ngTemplateOutlet="

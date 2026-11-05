@@ -8,6 +8,49 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
   {
+    path: 'coach/grupos/solicitudes',
+    data: { coach: true },
+    loadComponent: () =>
+      import('./pages/grupos/solicitudes-grupo/solicitudes-grupo').then((m) => m.SolicitudesGrupo),
+  },
+  {
+    path: 'grupos',
+    loadComponent: () =>
+      import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/grupos/explorar-grupos/explorar-grupos').then((m) => m.ExplorarGrupos),
+      },
+    ],
+  },
+  {
+    path: 'coach/grupos',
+    data: { coach: true },
+    loadComponent: () =>
+      import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
+    children: [
+      {
+        path: 'crear',
+        loadComponent: () =>
+          import('./pages/grupos/crear-grupo/crear-grupo').then((m) => m.CrearGrupo),
+      },
+      {
+        path: 'creado',
+        loadComponent: () =>
+          import('./pages/grupos/grupo-creado/grupo-creado').then((m) => m.GrupoCreado),
+      },
+      {
+        path: 'seguimiento',
+        loadComponent: () =>
+          import('./pages/grupos/seguimiento-grupo/seguimiento-grupo').then(
+            (m) => m.SeguimientoGrupo,
+          ),
+      },
+    ],
+  },
+  {
     path: 'inicio',
     loadComponent: () =>
       import('./pages/inicio-dashboard/inicio-dashboard').then((m) => m.InicioDashboard),

@@ -1,0 +1,202 @@
+import { AsyncPipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
+import {
+  AJUSTES_COACH_DEMO,
+  EQUIPOS_COACH_DEMO,
+  ESTADISTICAS_COACH_DEMO,
+  PERFIL_COACH_DEMO,
+  crearSolicitudesDemo,
+} from '../../../data/perfil-coach-demo';
+import { EstadoSolicitud, SolicitudIngreso } from '../../../models/perfil-coach';
+
+type Pestania = 'info' | 'solicitudes' | 'ajustes';
+
+interface Vista {
+  readonly pestania: Pestania;
+  readonly estado: string | null;
+}
+
+interface FilaPestania {
+  readonly id: Pestania;
+  readonly etiqueta: string;
+  readonly iconoActivo: string;
+  readonly iconoInactivo: string;
+}
+
+interface FilaAjuste {
+  readonly tipo: 'interruptor' | 'idioma' | 'codigo' | 'salir';
+  readonly campo: 'notificaciones' | 'privacidad' | 'idioma' | 'temaOscuro' | null;
+  readonly icono: string;
+  readonly titulo: string;
+  readonly descripcion: string;
+}
+
+const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
+
+@Component({
+  selector: 'app-coach-perfil',
+  imports: [
+    AsyncPipe,
+    ReactiveFormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatChipsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatToolbarModule,
+  ],
+  templateUrl: './perfil.html',
+  styleUrl: './perfil.css',
+})
+export class CoachPerfil {
+  private readonly ruta = inject(ActivatedRoute);
+
+  /** `?tab=info|solicitudes|ajustes` elige la pestaña; `?estado=vacio|actualizado` elige la variante. */
+  protected readonly vista$ = this.ruta.queryParamMap.pipe(
+    map((params): Vista => {
+      const tab = params.get('tab');
+      return {
+        pestania: PESTANIAS.find((p) => p === tab) ?? 'info',
+        estado: params.get('estado'),
+      };
+    }),
+  );
+
+  protected readonly pestanias: readonly FilaPestania[] = [
+    {
+      id: 'info',
+      etiqueta: 'Información personal',
+      iconoActivo: 'images/perfil-coach/user-20-active.svg',
+      iconoInactivo: 'images/perfil-coach/user-20-muted.svg',
+    },
+    {
+      id: 'solicitudes',
+      etiqueta: 'Solicitudes',
+      iconoActivo: 'images/perfil-coach/users-20-active.svg',
+      iconoInactivo: 'images/perfil-coach/users-20-muted.svg',
+    },
+    {
+      id: 'ajustes',
+      etiqueta: 'Ajustes generales',
+      iconoActivo: 'images/perfil-coach/settings-20-active.svg',
+      iconoInactivo: 'images/perfil-coach/settings-20-muted.svg',
+    },
+  ];
+
+  protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
+
+  protected readonly perfil = PERFIL_COACH_DEMO;
+  protected readonly equipos = EQUIPOS_COACH_DEMO;
+  protected readonly solicitudes: SolicitudIngreso[] = crearSolicitudesDemo();
+  protected readonly filtros = ['Pendientes', 'Todas', 'Equipo Alfa', 'Equipo Beta'];
+
+  protected readonly datosPerfil = [
+    {
+      icono: 'images/perfil-coach/chart-18.svg',
+      texto: `Especialidad: ${this.perfil.especialidad}`,
+    },
+    { icono: 'images/perfil-coach/building-18.svg', texto: this.perfil.organizacion },
+    {
+      icono: 'images/perfil-coach/trophy-18.svg',
+      texto: `${this.perfil.anios} años de experiencia entrenando`,
+    },
+  ];
+
+  protected readonly filas: readonly FilaAjuste[] = [
+    {
+      tipo: 'interruptor',
+      campo: 'notificaciones',
+      icono: 'images/perfil-coach/bell-22-row.svg',
+      titulo: 'Notificaciones',
+      descripcion: 'Recibe avisos de concursos, menciones y actividad importante.',
+    },
+    {
+      tipo: 'interruptor',
+      campo: 'privacidad',
+      icono: 'images/perfil-coach/shield-22.svg',
+      titulo: 'Privacidad del perfil',
+      descripcion: 'Controla quién puede ver tu perfil y tu actividad.',
+    },
+    {
+      tipo: 'idioma',
+      campo: 'idioma',
+      icono: 'images/perfil-coach/globe-22.svg',
+      titulo: 'Idioma',
+      descripcion: 'Elige el idioma de la interfaz (es_419 o en_US).',
+    },
+    {
+      tipo: 'interruptor',
+      campo: 'temaOscuro',
+      icono: 'images/perfil-coach/moon-22-row.svg',
+      titulo: 'Tema oscuro',
+      descripcion: 'Activa o desactiva el tema oscuro.',
+    },
+    {
+      tipo: 'codigo',
+      campo: null,
+      icono: 'images/perfil-coach/key-22.svg',
+      titulo: 'Código de recuperación',
+      descripcion:
+        'Úsalo para recuperar el acceso si olvidas tu contraseña. Se muestra tras confirmar tu contraseña.',
+    },
+    {
+      tipo: 'salir',
+      campo: null,
+      icono: 'images/perfil-coach/logout-22.svg',
+      titulo: 'Cerrar sesión',
+      descripcion: 'Cierra tu sesión en este dispositivo.',
+    },
+  ];
+
+  protected readonly formFiltros = new FormGroup({
+    filtro: new FormControl('Pendientes', { nonNullable: true }),
+  });
+
+  protected readonly formAjustes = new FormGroup({
+    notificaciones: new FormControl(AJUSTES_COACH_DEMO.notificaciones, { nonNullable: true }),
+    privacidad: new FormControl(AJUSTES_COACH_DEMO.privacidad, { nonNullable: true }),
+    idioma: new FormControl<'es' | 'en'>(AJUSTES_COACH_DEMO.idioma, { nonNullable: true }),
+    temaOscuro: new FormControl(AJUSTES_COACH_DEMO.temaOscuro, { nonNullable: true }),
+  });
+
+  protected pendientes(): number {
+    return this.solicitudes.filter((s) => s.estado === 'pendiente').length;
+  }
+
+  protected estadisticas() {
+    return [
+      {
+        valor: this.equipos.length,
+        etiqueta: 'Equipos a cargo',
+        icono: 'images/perfil-coach/stat-teams-24.svg',
+        fondo: 'bg-[rgba(167,139,250,0.14)]',
+      },
+      {
+        valor: ESTADISTICAS_COACH_DEMO.integrantesActivos,
+        etiqueta: 'Integrantes activos',
+        icono: 'images/perfil-coach/stat-members-24.svg',
+        fondo: 'bg-[rgba(74,222,128,0.14)]',
+      },
+      {
+        valor: this.pendientes(),
+        etiqueta: 'Solicitudes pendientes',
+        icono: 'images/perfil-coach/stat-pending-24.svg',
+        fondo: 'bg-[rgba(251,191,36,0.14)]',
+      },
+    ];
+  }
+
+  protected resolver(solicitud: SolicitudIngreso, estado: Exclude<EstadoSolicitud, 'pendiente'>) {
+    solicitud.estado = estado;
+  }
+}

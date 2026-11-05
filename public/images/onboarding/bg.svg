@@ -1,0 +1,48 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1440" height="1100" viewBox="0 0 1440 1100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon" clip-path="url(#clip0_0_14)">
+<path id="Vector" d="M1440 0H0V900H1440V0Z" fill="#04030A"/>
+<path id="Vector_2" d="M60 1040C347.188 1040 580 807.188 580 520C580 232.812 347.188 0 60 0C-227.188 0 -460 232.812 -460 520C-460 807.188 -227.188 1040 60 1040Z" fill="url(#paint0_radial_0_14)"/>
+<path id="Vector_3" d="M1400 540C1665.1 540 1880 351.96 1880 120C1880 -111.96 1665.1 -300 1400 -300C1134.9 -300 920 -111.96 920 120C920 351.96 1134.9 540 1400 540Z" fill="url(#paint1_radial_0_14)"/>
+<path id="Vector_4" d="M0 420C80 520 200 640 330 720C420 776 480 820 520 900" stroke-width="14" stroke-linecap="round" stroke="#9B6DFF" stroke-opacity="0.22"/>
+<path id="Vector_5" d="M0 420C80 520 200 640 330 720C420 776 480 820 520 900" stroke-width="2" stroke-linecap="round" stroke="url(#paint2_linear_0_14)"/>
+<path id="Vector_6" d="M0 560C60 600 130 640 200 650" stroke-width="1.2" stroke-linecap="round" stroke="#7B4DFF" stroke-opacity="0.45"/>
+<path id="Vector_7" d="M1110 0C1180 60 1250 150 1290 240C1330 300 1400 330 1440 330" stroke-width="16" stroke-linecap="round" stroke="#9B6DFF" stroke-opacity="0.25"/>
+<path id="Vector_8" d="M1110 0C1180 60 1250 150 1290 240C1330 300 1400 330 1440 330" stroke-width="2.5" stroke-linecap="round" stroke="url(#paint3_linear_0_14)"/>
+<path id="Vector_9" d="M1180 900C1260 760 1340 640 1440 580" stroke-width="1.2" stroke-linecap="round" stroke="#7B4DFF" stroke-opacity="0.4"/>
+<path id="Vector_10" d="M1440 900H0V1100H1440V900Z" fill="#04030A"/>
+<path id="Vector_11" d="M60 1420C347.188 1420 580 1231.96 580 1000C580 768.04 347.188 580 60 580C-227.188 580 -460 768.04 -460 1000C-460 1231.96 -227.188 1420 60 1420Z" fill="url(#paint4_radial_0_14)"/>
+<path id="Vector_12" d="M520 900C550 950 590 990 640 1100" stroke-width="14" stroke-linecap="round" stroke="#9B6DFF" stroke-opacity="0.22"/>
+<path id="Vector_13" d="M520 900C550 950 590 990 640 1100" stroke-width="2" stroke-linecap="round" stroke="#D2BCFF" stroke-opacity="0.55"/>
+<path id="Vector_14" d="M1180 900C1220 960 1300 1010 1440 1100" stroke-width="1.2" stroke-linecap="round" stroke="#7B4DFF" stroke-opacity="0.4"/>
+</g>
+<defs>
+<radialGradient id="paint0_radial_0_14" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(60 520) scale(520)">
+<stop stop-color="#6419FF" stop-opacity="0.8"/>
+<stop offset="0.5" stop-color="#4B1FE0" stop-opacity="0.3"/>
+<stop offset="1" stop-color="#04030A" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="paint1_radial_0_14" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1400 120) scale(480 420)">
+<stop stop-color="#6419FF" stop-opacity="0.8"/>
+<stop offset="0.5" stop-color="#4B1FE0" stop-opacity="0.3"/>
+<stop offset="1" stop-color="#04030A" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="paint2_linear_0_14" x1="0" y1="420" x2="512.651" y2="586.612" gradientUnits="userSpaceOnUse">
+<stop stop-color="#6A3CFF" stop-opacity="0.2"/>
+<stop offset="0.5" stop-color="#C3A4FF" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#F1E8FF"/>
+</linearGradient>
+<linearGradient id="paint3_linear_0_14" x1="1110" y1="330" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7B4DFF" stop-opacity="0"/>
+<stop offset="0.5" stop-color="#B594FF" stop-opacity="0.9"/>
+<stop offset="1" stop-color="#F1E8FF"/>
+</linearGradient>
+<radialGradient id="paint4_radial_0_14" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(60 1000) scale(520 420)">
+<stop stop-color="#6419FF" stop-opacity="0.8"/>
+<stop offset="0.5" stop-color="#4B1FE0" stop-opacity="0.3"/>
+<stop offset="1" stop-color="#04030A" stop-opacity="0"/>
+</radialGradient>
+<clipPath id="clip0_0_14">
+<rect width="1440" height="1100" fill="white"/>
+</clipPath>
+</defs>
+</svg>

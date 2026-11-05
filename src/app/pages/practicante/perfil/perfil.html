@@ -1,0 +1,999 @@
+<ng-template
+  #selectFiltro
+  let-control="control"
+  let-opciones="opciones"
+  let-ancho="ancho"
+  let-etiqueta="etiqueta"
+>
+  <mat-form-field
+    class="auth-field text-[14px] [--auth-field-height:38px] [--auth-field-padding:7px] [--mat-form-field-outlined-container-shape:10px] [--mat-select-enabled-trigger-text-color:#e7e3f5] [--mat-select-trigger-text-size:14px] [--mat-select-trigger-text-line-height:18px] [--mat-select-trigger-text-weight:400] max-w-full [&_.mdc-text-field--outlined]:pl-3.5 [&_.mdc-text-field--outlined]:pr-0 [&_.mat-mdc-form-field-icon-suffix]:pl-2.5 [&_.mat-mdc-form-field-icon-suffix]:pr-3"
+    [class]="ancho"
+    appearance="outline"
+    subscriptSizing="dynamic"
+  >
+    <mat-select [formControl]="control" [aria-label]="etiqueta" panelClass="onb-select-panel">
+      @for (opcion of opciones; track opcion.valor) {
+        <mat-option [value]="opcion.valor">{{ opcion.etiqueta }}</mat-option>
+      }
+    </mat-select>
+    <img matSuffix src="images/perfil/chevron-down-14.svg" alt="" width="14" height="14" />
+  </mat-form-field>
+</ng-template>
+
+<div class="relative min-h-dvh overflow-hidden bg-kl-bg font-body leading-[1.26] text-kl-text">
+  <img
+    class="profile-background"
+    src="images/perfil/bg-1080.svg"
+    alt=""
+    aria-hidden="true"
+  />
+
+  <mat-toolbar
+    class="auth-header relative z-10 h-[68px] justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
+  >
+    <div class="flex items-center gap-14">
+      <a class="inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
+        <img class="max-[641px]:size-8" src="images/perfil/logo-40.svg" alt="" width="40" height="40" />
+        <span class="text-[25px] font-medium tracking-[-.4px] max-[641px]:text-xl"
+          >Kodikalab</span
+        >
+      </a>
+      <nav class="max-[1280px]:hidden" aria-label="Principal">
+        <ul class="m-0 flex list-none items-center gap-9 p-0 text-[15px] font-normal">
+          @for (enlace of enlaces; track enlace) {
+            <li>{{ enlace }}</li>
+          }
+        </ul>
+      </nav>
+    </div>
+    <div class="flex items-center gap-[22px] max-[641px]:gap-3">
+      <button
+        class="flex h-10 w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5 text-left font-body text-[14px] text-[#8d89a3] max-[1440px]:w-[260px] max-[900px]:hidden"
+        type="button"
+        aria-label="Buscar problemas, usuarios, concursos"
+      >
+        <img src="images/perfil/search-18.svg" alt="" width="18" height="18" />
+        <span class="min-w-0 flex-1 truncate">Buscar problemas, usuarios, concursos…</span>
+        <span
+          class="rounded-md border border-solid border-[#34304a] px-[7px] py-[3px] font-mono text-[11px]"
+          >⌘ K</span
+        >
+      </button>
+      <button
+        class="inline-flex cursor-pointer border-0 bg-transparent p-0"
+        type="button"
+        aria-label="Notificaciones"
+      >
+        <img src="images/perfil/bell-22.svg" alt="" width="22" height="22" />
+      </button>
+      <button
+        class="inline-flex cursor-pointer border-0 bg-transparent p-0 max-[641px]:hidden"
+        type="button"
+        aria-label="Cambiar tema"
+      >
+        <img src="images/perfil/moon-22.svg" alt="" width="22" height="22" />
+      </button>
+      <button
+        class="inline-flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-kl-text"
+        type="button"
+        aria-label="Menú de usuario"
+      >
+        <span
+          class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
+          >{{ info.iniciales }}</span
+        >
+        <img src="images/perfil/chevron-down-16.svg" alt="" width="16" height="16" />
+      </button>
+    </div>
+  </mat-toolbar>
+
+  @if (vista$ | async; as vista) {
+    <main
+      class="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-5 px-14 pt-7 pb-10 max-[1100px]:px-6 max-[641px]:px-4"
+    >
+      <header class="flex items-start justify-between gap-4 max-[900px]:flex-col">
+        <div class="flex flex-col gap-1.5">
+          <h1
+            class="m-0 font-display text-[34px] leading-10 font-bold tracking-[-1px] max-[641px]:text-[28px]"
+          >
+            Perfil
+          </h1>
+          <p class="m-0 text-[16px] font-light text-kl-body">
+            Mira tu progreso, gestiona tu cuenta y forma parte de la comunidad de Kodikalab.
+          </p>
+        </div>
+        <nav
+          class="flex shrink-0 gap-1 rounded-[14px] border border-solid border-[#3b3480] bg-[#14103c]/70 p-[5px] max-[641px]:w-full"
+          aria-label="Vista del perfil"
+        >
+          <a
+            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] bg-linear-to-b from-[#7357f3] to-[#5a3fe0] text-[15px] font-medium text-kl-text max-[641px]:w-auto max-[641px]:flex-1"
+            routerLink="/perfil"
+            aria-current="page"
+            >Visualizar perfil</a
+          >
+          <a
+            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] text-[15px] font-medium text-kl-body max-[641px]:w-auto max-[641px]:flex-1"
+            routerLink="/perfil/editar"
+            >Editar perfil</a
+          >
+        </nav>
+      </header>
+
+      @if (vista.estado === 'actualizado') {
+        <div class="profile-notice" role="status">
+          <img src="images/perfil/toast-check-22.svg" alt="" width="22" height="22" />
+          <div class="flex min-w-0 flex-col gap-1 text-[#bbf7d0]">
+            <p class="m-0 text-[14px] font-semibold">Perfil actualizado correctamente</p>
+            <p class="m-0 text-[13px]">Tus cambios ya están visibles en tu perfil.</p>
+          </div>
+        </div>
+      }
+
+      <div
+        class="flex gap-11 border-0 border-b border-solid border-[#1f1c44] max-[900px]:grid max-[900px]:grid-cols-2 max-[900px]:gap-x-4 max-[900px]:gap-y-2"
+        role="tablist"
+        aria-label="Secciones del perfil"
+      >
+        @for (pestana of pestanas; track pestana.id) {
+          @if (vista.pestana === pestana.id) {
+            <a
+              class="inline-flex items-center gap-2.5 border-0 border-b-2 border-solid border-[#7357f3] px-1 pb-3.5 text-[15px] font-semibold text-kl-accent-text max-[641px]:text-[13px] [&_img]:shrink-0"
+              role="tab"
+              aria-selected="true"
+              aria-controls="panel-perfil"
+              routerLink="/perfil"
+              [queryParams]="{ tab: pestana.id }"
+            >
+              <img [src]="pestana.iconoActivo" alt="" width="20" height="20" />
+              {{ pestana.etiqueta }}
+            </a>
+          } @else {
+            <a
+              class="inline-flex items-center gap-2.5 border-0 border-b-2 border-solid border-transparent px-1 pb-3.5 text-[15px] text-kl-body max-[641px]:text-[13px] [&_img]:shrink-0"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-perfil"
+              routerLink="/perfil"
+              [queryParams]="{ tab: pestana.id }"
+            >
+              <img [src]="pestana.iconoInactivo" alt="" width="20" height="20" />
+              {{ pestana.etiqueta }}
+            </a>
+          }
+        }
+      </div>
+
+      <div id="panel-perfil" role="tabpanel" [attr.aria-busy]="vista.estado === 'cargando'">
+        @switch (vista.pestana) {
+          @case ('info') {
+            <div class="grid grid-cols-1 items-start gap-5 min-[1280px]:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+              <!-- Información personal -->
+              <section
+                class="min-w-0 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+                aria-labelledby="titulo-info"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                    >
+                      <img src="images/perfil/tab-user-active-20.svg" alt="" width="20" height="20" />
+                    </span>
+                    <h2
+                      class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                      id="titulo-info"
+                    >
+                      Información personal
+                    </h2>
+                  </div>
+                  @if (vista.estado !== 'cargando') {
+                    <a
+                      mat-stroked-button
+                      class="shrink-0 whitespace-nowrap bg-[#7357f3]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
+                      routerLink="/perfil/editar"
+                    >
+                      <img src="images/perfil/pencil-16.svg" alt="" width="16" height="16" />
+                      Editar perfil
+                    </a>
+                  }
+                </div>
+
+                @if (vista.estado === 'cargando') {
+                  <div class="mt-4 flex animate-pulse flex-col gap-3.5 motion-reduce:animate-none" aria-hidden="true">
+                    <div class="flex gap-5">
+                      <div class="size-[118px] shrink-0 rounded-full bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                      <div class="flex min-w-0 flex-1 flex-col gap-3">
+                        <div class="h-[22px] w-[223px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                        <div class="h-4 w-[149px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                      </div>
+                    </div>
+                    <div class="h-4 w-[408px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                    <div class="h-4 w-[357px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                    <div class="h-4 w-[306px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                    <div class="h-[90px] w-[510px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                  </div>
+                } @else {
+                  <div class="mt-4 flex items-center gap-6 max-[641px]:flex-col max-[641px]:items-start">
+                    <div
+                      class="size-[118px] shrink-0 rounded-full bg-linear-to-br from-[#8d6df8] to-[#4d2ff5] p-[3px]"
+                    >
+                      <div
+                        class="flex h-[112px] w-full items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold"
+                        aria-hidden="true"
+                      >
+                        {{ info.iniciales }}
+                      </div>
+                    </div>
+                    <div class="flex min-w-0 flex-col gap-2">
+                      <p class="m-0 font-display text-[24px] font-bold tracking-[-.4px]">
+                        {{ info.nombreCompleto }}
+                      </p>
+                      <div class="flex flex-wrap items-center gap-2.5">
+                        <span class="text-[14px] text-kl-body">{{ info.usuario }}</span>
+                        <span
+                          class="inline-flex items-center gap-1.5 rounded-full border border-solid border-[#6b52e0] bg-[#7357f3]/20 px-3 py-1 text-[13px] font-medium text-[#c4b5fd]"
+                        >
+                          <img src="images/perfil/star-14.svg" alt="" width="14" height="14" />
+                          {{ info.rol }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ul class="m-0 mt-4 flex list-none flex-col gap-2.5 p-0 text-[14px] text-[#e7e3f5]">
+                    <li class="flex items-center gap-3">
+                      <img src="images/perfil/info-card-18.svg" alt="" width="18" height="18" />
+                      {{ info.carreraCiclo }}
+                    </li>
+                    <li class="flex items-center gap-3">
+                      <img src="images/perfil/info-building-18.svg" alt="" width="18" height="18" />
+                      {{ info.universidad }}
+                    </li>
+                    <li class="flex items-center gap-3">
+                      <img src="images/perfil/info-pin-18.svg" alt="" width="18" height="18" />
+                      {{ info.ubicacion }}
+                    </li>
+                    <li class="flex items-center gap-3">
+                      <img src="images/perfil/info-bars-18.svg" alt="" width="18" height="18" />
+                      {{ info.nivelCodigo }}
+                    </li>
+                  </ul>
+
+                  <p class="m-0 mt-4 text-[14px] leading-[21px] font-light text-[#d7d3e8]">
+                    {{ info.objetivo }}
+                  </p>
+
+                  <div class="mt-4 flex flex-col gap-2.5">
+                    <h3 class="m-0 text-[14px] font-semibold">Plataformas competitivas</h3>
+                    @if (vista.estado === 'sin-plataformas') {
+                      <div
+                        class="flex flex-col items-center gap-2.5 rounded-[14px] border border-dashed border-[#3b3480] p-[18px] text-center"
+                      >
+                        <p class="m-0 text-[15px] font-medium">Aún no vinculas plataformas</p>
+                        <p class="m-0 text-[13px] text-kl-muted">
+                          Conecta Codeforces, AtCoder o VJudge para ver tu progreso aquí.
+                        </p>
+                        <a
+                          mat-stroked-button
+                          class="mt-1 bg-[#7357f3]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
+                          routerLink="/perfil/editar"
+                          fragment="plataformas"
+                        >
+                          <img src="images/perfil/link-18.svg" alt="" width="18" height="18" />
+                          Vincular plataformas
+                        </a>
+                      </div>
+                    } @else {
+                      <ul
+                        class="m-0 grid list-none gap-3 p-0 min-[700px]:grid-cols-3 min-[1280px]:grid-cols-1 min-[1440px]:grid-cols-3"
+                      >
+                        @for (plataforma of plataformas; track plataforma.nombre) {
+                          <li class="min-w-0">
+                            <a
+                              class="flex items-center gap-2.5 rounded-xl border border-solid border-[#26224d] bg-white/3 px-3.5 py-3"
+                              routerLink="/practicante/plataformas"
+                            >
+                              <img [src]="plataforma.icono" alt="" width="34" height="34" />
+                              <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
+                                <span class="text-[14px] font-semibold">{{ plataforma.nombre }}</span>
+                                <span class="flex items-center gap-[7px] text-[13px] text-kl-body">
+                                  <span class="size-[9px] shrink-0 rounded-full bg-[#4ade80]"></span>
+                                  <span class="truncate">{{ plataforma.usuario }}</span>
+                                </span>
+                              </span>
+                              <img
+                                src="images/perfil/chevron-right-16.svg"
+                                alt=""
+                                width="16"
+                                height="16"
+                              />
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                }
+              </section>
+
+              <!-- Estadísticas -->
+              <section
+                class="min-w-0 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+                aria-labelledby="titulo-estadisticas"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                    <img src="images/perfil/stats-bars-20.svg" alt="" width="20" height="20" />
+                  </span>
+                  <h2
+                    class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                    id="titulo-estadisticas"
+                  >
+                    Estadísticas
+                  </h2>
+                </div>
+
+                @if (vista.estado === 'cargando') {
+                  <div class="mt-4 flex animate-pulse flex-col gap-3.5 motion-reduce:animate-none" aria-hidden="true">
+                    <div class="h-[70px] w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                    <div class="h-3.5 w-[419px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                    <div class="h-[110px] w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                    <div class="h-[110px] w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                  </div>
+                } @else {
+                  <ul class="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 max-[641px]:grid-cols-1">
+                    @for (estadistica of estadisticas; track estadistica.etiqueta) {
+                      <li
+                        class="flex min-h-[95px] items-center gap-3.5 rounded-[14px] border border-solid border-[#26224d] bg-white/3 px-4 py-3.5"
+                      >
+                        <span
+                          class="flex size-[46px] shrink-0 items-center justify-center rounded-xl"
+                          [class]="tonos[estadistica.tono].caja"
+                        >
+                          <img [src]="estadistica.icono" alt="" width="24" height="24" />
+                        </span>
+                        <span class="flex min-w-0 flex-col">
+                          <span
+                            class="font-display text-[24px] leading-7 font-semibold tracking-[-.5px]"
+                            >{{ estadistica.valor }}</span
+                          >
+                          <span class="text-[13px] text-kl-body">{{ estadistica.etiqueta }}</span>
+                          <span
+                            class="flex items-center gap-1.5 pt-1 text-[12px]"
+                            [class]="tonos[estadistica.tono].detalle"
+                          >
+                            <img [src]="estadistica.iconoDetalle" alt="" width="14" height="14" />
+                            {{ estadistica.detalle }}
+                          </span>
+                        </span>
+                      </li>
+                    }
+                  </ul>
+
+                  @for (heatmap of heatmaps; track heatmap.titulo) {
+                    <div
+                      class="mt-4 flex flex-col gap-1.5 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-4"
+                      [formGroup]="heatmap.form"
+                    >
+                      <div class="flex flex-wrap items-center justify-between gap-3">
+                        <h3 class="m-0 text-[15px] font-semibold">{{ heatmap.titulo }}</h3>
+                        <div class="flex max-w-full flex-wrap gap-2.5">
+                          <ng-container
+                            *ngTemplateOutlet="
+                              selectFiltro;
+                              context: {
+                                control: heatmap.form.controls.problemas,
+                                opciones: opcionesProblemas,
+                                ancho: 'w-[181px]',
+                                etiqueta: 'Problemas',
+                              }
+                            "
+                          />
+                          <ng-container
+                            *ngTemplateOutlet="
+                              selectFiltro;
+                              context: {
+                                control: heatmap.form.controls.periodo,
+                                opciones: opcionesPeriodo,
+                                ancho: 'w-[122px]',
+                                etiqueta: 'Periodo',
+                              }
+                            "
+                          />
+                        </div>
+                      </div>
+                      <div class="overflow-x-auto">
+                        <div class="flex min-w-[600px] flex-col gap-1.5" aria-hidden="true">
+                          <div class="flex pl-[31px] text-[11px] leading-3.5 text-kl-faint">
+                            @for (mes of meses; track mes) {
+                              <span class="w-[46px] shrink-0">{{ mes }}</span>
+                            }
+                          </div>
+                          <div class="flex gap-2">
+                            <div
+                              class="grid w-[17px] shrink-0 grid-rows-7 gap-[3px] text-[10px] leading-[11px] text-kl-faint"
+                            >
+                              @for (dia of diasHeatmap; track $index) {
+                                <span>{{ dia }}</span>
+                              }
+                            </div>
+                            <div class="grid grid-flow-col grid-rows-7 gap-[3px]">
+                              @for (nivel of heatmap.celdas; track $index) {
+                                <span
+                                  class="size-[11px] rounded-[2px]"
+                                  [class]="heatmap.clases[nivel]"
+                                ></span>
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                }
+              </section>
+            </div>
+          }
+
+          @case ('solicitudes') {
+            <section
+              class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              aria-labelledby="titulo-solicitudes"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                    <img src="images/perfil/tab-users-active-20.svg" alt="" width="20" height="20" />
+                  </span>
+                  <h2
+                    class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                    id="titulo-solicitudes"
+                  >
+                    Solicitudes recientes
+                  </h2>
+                </div>
+                <p class="m-0 text-[13px] text-kl-muted">
+                  Estados: Pendiente · Aceptada · Rechazada · Retirada
+                </p>
+              </div>
+
+              @if (vista.estado === 'vacio') {
+                <div class="mt-4 flex flex-col items-center gap-3 px-4 py-[70px] text-center">
+                  <span
+                    class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
+                  >
+                    <img src="images/perfil/empty-users-34.svg" alt="" width="34" height="34" />
+                  </span>
+                  <h3 class="m-0 font-display text-[20px] font-semibold">Aún no has enviado solicitudes</h3>
+                  <p class="m-0 max-w-[420px] text-[14px] text-kl-muted">
+                    Cuando solicites unirte a un grupo de entrenamiento, verás aquí su estado.
+                  </p>
+                  <button
+                    mat-flat-button
+                    class="mt-1.5 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-[26px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
+                    type="button"
+                  >
+                    Explorar grupos
+                    <img src="images/onboarding/arrow-right-18.svg" alt="" width="18" height="18" />
+                  </button>
+                </div>
+              } @else {
+                <form
+                  class="mt-4 flex min-h-[38px] flex-wrap items-center justify-between gap-3"
+                  [formGroup]="formSolicitudes"
+                  novalidate
+                >
+                  <mat-chip-listbox
+                    class="onb-chips [--mat-chip-container-height:32px] [--mat-chip-container-shape-radius:9999px] [--mat-chip-label-text-size:13px]"
+                    formControlName="filtro"
+                    hideSingleSelectionIndicator
+                    aria-label="Filtrar solicitudes por estado"
+                  >
+                    @for (filtro of filtrosSolicitud; track filtro.valor) {
+                      <mat-chip-option [value]="filtro.valor">{{ filtro.etiqueta }}</mat-chip-option>
+                    }
+                  </mat-chip-listbox>
+                  <label
+                    class="flex h-[38px] w-[260px] items-center gap-2.5 rounded-[10px] border border-solid border-[#34304a] bg-white/4 px-3.5 max-[641px]:w-full"
+                  >
+                    <img src="images/perfil/search-16-solicitudes.svg" alt="" width="16" height="16" />
+                    <input
+                      class="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[14px] text-[#e7e3f5] outline-none placeholder:text-[#8d89a3]"
+                      type="text"
+                      formControlName="busqueda"
+                      placeholder="Buscar grupo…"
+                      aria-label="Buscar grupo"
+                      autocomplete="off"
+                    />
+                  </label>
+                </form>
+
+                <ul class="m-0 mt-4 flex list-none flex-col gap-4 p-0">
+                  @for (solicitud of solicitudes; track solicitud.grupo) {
+                    <li
+                      class="flex items-center gap-4 border-0 border-b border-solid border-[#1f1c44] px-1 py-3.5"
+                    >
+                      <span
+                        class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-[14px] font-semibold"
+                        aria-hidden="true"
+                        >{{ solicitud.inicial }}</span
+                      >
+                      <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
+                        <span class="truncate text-[16px] font-semibold">{{ solicitud.grupo }}</span>
+                        <span class="truncate text-[13px] text-kl-muted">{{
+                          solicitud.descripcion
+                        }}</span>
+                      </span>
+                      <span class="w-[130px] shrink-0 text-[14px] text-kl-body max-[641px]:hidden">{{
+                        solicitud.fecha
+                      }}</span>
+                      <span
+                        class="flex w-28 shrink-0 items-center justify-center rounded-full border border-solid px-3 py-1 text-[12px] font-medium max-[641px]:w-auto"
+                        [class]="clasesEstadoSolicitud[solicitud.estado]"
+                        >{{ solicitud.estado }}</span
+                      >
+                      <button
+                        class="inline-flex cursor-pointer border-0 bg-transparent p-0 max-[641px]:hidden"
+                        type="button"
+                        [attr.aria-label]="'Más acciones para ' + solicitud.grupo"
+                      >
+                        <img src="images/perfil/dots-20.svg" alt="" width="20" height="20" />
+                      </button>
+                    </li>
+                  }
+                </ul>
+
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3">
+                  <p class="m-0 text-[13px] text-kl-muted">Mostrando 1–6 de 6 solicitudes</p>
+                  <div class="flex gap-2">
+                    <button
+                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      type="button"
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      class="cursor-pointer rounded-full border border-solid border-[#8a6cff] bg-[#7357f3]/30 px-3.5 py-[7px] font-body text-[13px] text-kl-text"
+                      type="button"
+                      aria-current="page"
+                    >
+                      1
+                    </button>
+                    <button
+                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      type="button"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                </div>
+              }
+            </section>
+          }
+
+          @case ('submissions') {
+            <section
+              class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              aria-labelledby="titulo-submissions"
+            >
+              <div class="flex items-center gap-3">
+                <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                  <img src="images/perfil/tab-file-active-20.svg" alt="" width="20" height="20" />
+                </span>
+                <h2
+                  class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                  id="titulo-submissions"
+                >
+                  Submissions recientes
+                </h2>
+              </div>
+
+              @if (vista.estado === 'vacio') {
+                <div class="mt-4 flex flex-col items-center gap-3 px-4 py-[70px] text-center">
+                  <span
+                    class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
+                  >
+                    <img src="images/perfil/empty-file-34.svg" alt="" width="34" height="34" />
+                  </span>
+                  <h3 class="m-0 font-display text-[20px] font-semibold">Aún no tienes submissions</h3>
+                  <p class="m-0 max-w-[440px] text-[14px] text-kl-muted">
+                    Resuelve un problema asignado o del catálogo y tus envíos aparecerán aquí con su
+                    veredicto.
+                  </p>
+                  <button
+                    mat-flat-button
+                    class="mt-1.5 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-[26px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
+                    type="button"
+                  >
+                    Ir al catálogo de problemas
+                    <img src="images/onboarding/arrow-right-18.svg" alt="" width="18" height="18" />
+                  </button>
+                </div>
+              } @else {
+                <form
+                  class="mt-4 flex flex-wrap items-center gap-2.5"
+                  [formGroup]="formSubmissions"
+                  novalidate
+                >
+                  <label
+                    class="flex h-[38px] w-[280px] items-center gap-2.5 rounded-[10px] border border-solid border-[#34304a] bg-white/4 px-3.5 max-[641px]:w-full"
+                  >
+                    <img src="images/perfil/search-16-submissions.svg" alt="" width="16" height="16" />
+                    <input
+                      class="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[14px] text-[#e7e3f5] outline-none placeholder:text-[#8d89a3]"
+                      type="text"
+                      formControlName="busqueda"
+                      placeholder="Buscar problema…"
+                      aria-label="Buscar problema"
+                      autocomplete="off"
+                    />
+                  </label>
+                  @for (filtro of filtrosSubmissions; track filtro.control) {
+                    <ng-container
+                      *ngTemplateOutlet="
+                        selectFiltro;
+                        context: {
+                          control: formSubmissions.controls[filtro.control],
+                          opciones: filtro.opciones,
+                          ancho: filtro.ancho,
+                          etiqueta: filtro.etiqueta,
+                        }
+                      "
+                    />
+                  }
+                </form>
+
+                <div class="mt-4 overflow-x-auto">
+                  <table class="w-full min-w-[760px] border-collapse text-left">
+                    <thead>
+                      <tr>
+                        @for (
+                          columna of ['Problema', 'Lenguaje', 'Veredicto', 'Tiempo', 'Memoria', 'Fecha'];
+                          track columna
+                        ) {
+                          <th
+                            class="border-0 border-b border-solid border-[#1f1c44] px-3 py-2.5 text-[13px] font-medium text-kl-muted"
+                            scope="col"
+                          >
+                            {{ columna }}
+                          </th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (submission of submissions; track submission.problema) {
+                        <tr>
+                          <th
+                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-left text-[14px] font-normal"
+                            scope="row"
+                          >
+                            <button
+                              class="cursor-pointer border-0 bg-transparent p-0 text-left font-body text-[14px] text-kl-accent-text underline"
+                              type="button"
+                            >
+                              {{ submission.problema }}
+                            </button>
+                          </th>
+                          <td
+                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] text-[#e7e3f5]"
+                          >
+                            {{ submission.lenguaje }}
+                          </td>
+                          <td class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3">
+                            <span
+                              class="inline-flex items-center rounded-full border border-solid px-3 py-1 text-[12px] font-medium whitespace-nowrap"
+                              [class]="clasesVeredicto[submission.veredicto]"
+                              >{{ submission.veredicto }}</span
+                            >
+                          </td>
+                          <td
+                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] text-[#e7e3f5]"
+                          >
+                            {{ submission.tiempo }}
+                          </td>
+                          <td
+                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] text-[#e7e3f5]"
+                          >
+                            {{ submission.memoria }}
+                          </td>
+                          <td
+                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] whitespace-nowrap text-[#e7e3f5]"
+                          >
+                            {{ submission.fecha }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                  <p class="m-0 text-[13px] text-kl-muted">Mostrando 1–8 de 248 submissions</p>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      type="button"
+                    >
+                      Anterior
+                    </button>
+                    @for (pagina of paginasSubmissions; track pagina) {
+                      @if ($first) {
+                        <button
+                          class="cursor-pointer rounded-full border border-solid border-[#8a6cff] bg-[#7357f3]/30 px-3.5 py-[7px] font-body text-[13px] text-kl-text"
+                          type="button"
+                          aria-current="page"
+                        >
+                          {{ pagina }}
+                        </button>
+                      } @else {
+                        <button
+                          class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                          type="button"
+                        >
+                          {{ pagina }}
+                        </button>
+                      }
+                    }
+                    <button
+                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      type="button"
+                    >
+                      Siguiente
+                    </button>
+                  </div>
+                </div>
+              }
+            </section>
+          }
+
+          @case ('ajustes') {
+            <section
+              class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              aria-labelledby="titulo-ajustes"
+            >
+              <div class="flex items-center gap-3">
+                <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                  <img
+                    src="images/perfil/tab-settings-active-20.svg"
+                    alt=""
+                    width="20"
+                    height="20"
+                  />
+                </span>
+                <h2
+                  class="m-0 font-display text-[19px] font-semibold tracking-[-.3px]"
+                  id="titulo-ajustes"
+                >
+                  Ajustes generales
+                </h2>
+              </div>
+
+              <form class="mt-4 flex flex-col gap-4" [formGroup]="formAjustes" novalidate>
+                @for (fila of filasAjustes; track fila.titulo) {
+                  <div
+                    class="flex items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5 not-last:border-b max-[641px]:flex-wrap"
+                  >
+                    <span
+                      class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                    >
+                      <img [src]="fila.icono" alt="" width="22" height="22" />
+                    </span>
+                    <span class="flex min-w-0 flex-1 flex-col gap-[3px] max-[641px]:basis-[calc(100%-62px)]">
+                      <span class="text-[16px] font-semibold">{{ fila.titulo }}</span>
+                      <span class="text-[13px] text-kl-muted">{{ fila.descripcion }}</span>
+                    </span>
+                    @switch (fila.tipo) {
+                      @case ('interruptor') {
+                        <mat-slide-toggle
+                          [formControlName]="fila.control"
+                          hideIcon
+                          [aria-label]="fila.titulo"
+                        />
+                      }
+                      @case ('idioma') {
+                        <ng-container
+                          *ngTemplateOutlet="
+                            selectFiltro;
+                            context: {
+                              control: formAjustes.controls.idioma,
+                              opciones: idiomas,
+                              ancho: 'w-[104px]',
+                              etiqueta: 'Idioma',
+                            }
+                          "
+                        />
+                      }
+                      @case ('codigo') {
+                        <a
+                          mat-stroked-button
+                          class="bg-[#7357f3]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
+                          routerLink="/perfil"
+                          [queryParams]="{ tab: 'ajustes', estado: 'ver-codigo' }"
+                        >
+                          <img src="images/perfil/key-16.svg" alt="" width="16" height="16" />
+                          Ver mi código
+                        </a>
+                      }
+                      @case ('salir') {
+                        <a
+                          mat-stroked-button
+                          class="bg-white/4 px-3.5 [--mat-button-outlined-container-height:38px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#fca5a5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:rgba(248,113,113,.5)]"
+                          routerLink="/login"
+                        >
+                          <img src="images/perfil/logout-red-16.svg" alt="" width="16" height="16" />
+                          Cerrar sesión
+                        </a>
+                      }
+                    }
+                  </div>
+                }
+              </form>
+            </section>
+          }
+        }
+      </div>
+    </main>
+
+    @if (vista.estado === 'ver-codigo') {
+      <div
+        class="fixed inset-0 z-50 flex justify-center overflow-y-auto bg-[#03020a]/72 px-4 pt-[230px] pb-8 max-[900px]:pt-16"
+      >
+        <div
+          class="flex h-fit w-[500px] max-w-full flex-col gap-4 rounded-[20px] border border-solid border-[#5b44c9] bg-linear-to-b from-[#1b1450] to-[#0c0922] p-7 drop-shadow-[0_0_20px_rgba(100,60,255,.4)]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titulo-ver-codigo"
+          cdkTrapFocus
+          [cdkTrapFocusAutoCapture]="true"
+          (keydown.escape)="cerrarVerCodigo.click()"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="m-0 font-display text-[22px] font-bold" id="titulo-ver-codigo">
+              Código de recuperación
+            </h2>
+            <a
+              #cerrarVerCodigo
+              class="inline-flex"
+              routerLink="/perfil"
+              [queryParams]="{ tab: 'ajustes' }"
+              aria-label="Cerrar"
+            >
+              <img src="images/perfil/close-20.svg" alt="" width="20" height="20" />
+            </a>
+          </div>
+          <p class="m-0 text-[14px] leading-[21px] font-light text-kl-body">
+            Confirma tu contraseña para ver el código vigente de tu cuenta.
+          </p>
+          <form class="flex flex-col gap-4" [formGroup]="formPassword" novalidate>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[13px] font-medium text-kl-body" for="password-actual"
+                >Contraseña actual</label
+              >
+              <mat-form-field
+                class="auth-field w-full text-[15px] [--auth-field-height:50px] [--auth-field-padding:13px] [--mat-form-field-outlined-outline-color:#9b7dff]"
+                appearance="outline"
+                subscriptSizing="dynamic"
+              >
+                <img matPrefix src="images/perfil/lock-20.svg" alt="" width="20" height="20" />
+                <input
+                  matInput
+                  id="password-actual"
+                  cdkFocusInitial
+                  [type]="mostrarPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Contraseña"
+                  autocomplete="current-password"
+                  required
+                />
+                <button
+                  matSuffix
+                  type="button"
+                  class="flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
+                  (click)="alternarPassword()"
+                  [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="mostrarPassword"
+                >
+                  <img src="images/perfil/eye-20.svg" alt="" width="20" height="20" />
+                </button>
+                <mat-error>
+                  <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                  Ingresa tu contraseña
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex items-start justify-end gap-3">
+              <a
+                mat-stroked-button
+                class="px-[22px] [--mat-button-outlined-container-height:46px] [--mat-button-outlined-container-shape:12px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:15px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#34304a]"
+                routerLink="/perfil"
+                [queryParams]="{ tab: 'ajustes' }"
+              >
+                Cancelar
+              </a>
+              <button
+                mat-flat-button
+                class="bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+                type="button"
+                routerLink="/perfil"
+                [queryParams]="{ tab: 'ajustes', estado: 'codigo-recuperacion' }"
+                [disabled]="formPassword.invalid"
+              >
+                Mostrar código
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    @if (vista.estado === 'codigo-recuperacion') {
+      <div
+        class="fixed inset-0 z-50 flex justify-center overflow-y-auto bg-[#03020a]/72 px-4 pt-[230px] pb-8 max-[900px]:pt-16"
+      >
+        <div
+          class="flex h-fit w-[500px] max-w-full flex-col gap-4 rounded-[20px] border border-solid border-[#5b44c9] bg-linear-to-b from-[#1b1450] to-[#0c0922] p-7 drop-shadow-[0_0_20px_rgba(100,60,255,.4)]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titulo-codigo"
+          cdkTrapFocus
+          [cdkTrapFocusAutoCapture]="true"
+          (keydown.escape)="cerrarCodigo.click()"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="m-0 font-display text-[22px] font-bold" id="titulo-codigo">
+              Código de recuperación
+            </h2>
+            <a
+              #cerrarCodigo
+              class="inline-flex"
+              routerLink="/perfil"
+              [queryParams]="{ tab: 'ajustes' }"
+              aria-label="Cerrar"
+            >
+              <img src="images/perfil/close-20.svg" alt="" width="20" height="20" />
+            </a>
+          </div>
+          <div
+            class="flex items-start gap-2.5 rounded-xl border border-solid border-[#4ade80]/40 bg-[#4ade80]/10 px-3.5 py-3"
+            role="status"
+          >
+            <img src="images/onboarding/check-circle-20.svg" alt="" width="20" height="20" />
+            <p class="m-0 flex-1 text-[14px] leading-5 text-[#bbf7d0]">
+              <strong class="block font-semibold">Contraseña verificada</strong>
+              Este es tu código de recuperación vigente.
+            </p>
+          </div>
+          <div
+            class="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[#8a6cff] bg-[#7357f3]/10 p-4"
+          >
+            <p class="m-0 font-mono text-[15px] font-bold tracking-[1px] break-all">
+              {{ codigoRecuperacion }}
+            </p>
+            <button
+              class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 font-body text-[13px] text-kl-body"
+              type="button"
+            >
+              <img src="images/perfil/copy-16.svg" alt="" width="16" height="16" />
+              Copiar
+            </button>
+          </div>
+          <p class="m-0 text-[12px] leading-[17px] text-[#fde68a]">
+            Guárdalo en un lugar seguro. Si cambias tu contraseña, el código anterior deja de servir.
+          </p>
+          <div class="flex justify-end">
+            <a
+              mat-flat-button
+              class="bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
+              cdkFocusInitial
+              routerLink="/perfil"
+              [queryParams]="{ tab: 'ajustes' }"
+            >
+              Listo
+            </a>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

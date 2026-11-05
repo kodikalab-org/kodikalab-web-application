@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap } from 'rxjs';
+import { ProfileApi } from '../../../../core/profile-api';
+import { Session } from '../../../../core/session';
 
 @Component({
   selector: 'app-onboarding-perfil-competitivo',
@@ -31,6 +33,15 @@ import { map, tap } from 'rxjs';
   styleUrl: './perfil-competitivo.css',
 })
 export class OnboardingPerfilCompetitivo {
+  protected readonly session = inject(Session);
+  private readonly profiles = inject(ProfileApi);
+  constructor() {
+    if (!this.session.demo()) {
+      this.form.patchValue(this.profiles.competitive);
+      for (const control of ['experiencia', 'franja', 'dias', 'objetivo'] as const) this.form.controls[control].disable();
+    }
+  }
+  protected continuar(): void { this.profiles.competitive = { nivel: this.form.controls.nivel.value }; }
   protected readonly niveles = [
     {
       value: 'PRINCIPIANTE',
@@ -79,6 +90,7 @@ export class OnboardingPerfilCompetitivo {
   );
 
   private aplicarEstado(estado: string | null): void {
+    if (!this.session.demo()) return;
     this.form.reset();
     if (estado === 'completo' || estado === 'nivel-sin-seleccionar') {
       this.form.patchValue({

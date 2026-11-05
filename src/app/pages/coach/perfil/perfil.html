@@ -38,7 +38,7 @@
         <nav class="max-[1280px]:hidden" aria-label="Principal">
           <ul class="m-0 flex list-none items-center gap-9 p-0 text-[15px] font-normal">
             @for (enlace of enlaces; track enlace) {
-              <li>{{ enlace }}</li>
+              <li>@if (enlace === 'Inicio') { <a routerLink="/coach/inicio">Inicio</a> } @else { <span aria-disabled="true" title="Pendiente de integrar">{{ enlace }}</span> }</li>
             }
           </ul>
         </nav>
@@ -201,7 +201,7 @@
                   >
                 </span>
                 <div class="flex min-w-0 flex-col gap-2">
-                  <p class="m-0 font-display text-2xl font-bold tracking-[-.4px]">
+                  <p class="m-0 break-all font-display text-2xl font-bold tracking-[-.4px]">
                     {{ perfil.nombre }}
                   </p>
                   <div class="flex flex-wrap items-center gap-2.5">
@@ -313,8 +313,10 @@
                   mat-flat-button
                   class="h-[46px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] max-[641px]:w-full"
                   type="button"
+                  disabled
+                  title="La pantalla de creación de equipos todavía no está integrada"
                 >
-                  Crear equipo
+                  Crear equipo · Próximamente
                   <img src="images/perfil-coach/plus-white-18.svg" alt="" width="18" height="18" />
                 </button>
               </div>
@@ -516,20 +518,24 @@
                       </mat-form-field>
                     }
                     @case ('codigo') {
+                      @if (!session.demo()) { <app-recovery-code /> } @else {
                       <button
                         mat-stroked-button
                         class="h-10 rounded-[10px] border border-solid border-[#6b52e0] bg-[#7357f3]/12 px-4 text-sm text-[#e7e3f5]"
                         type="button"
+                        disabled
                       >
                         <img src="images/perfil-coach/key-16.svg" alt="" width="16" height="16" />
-                        Ver mi código
+                        Código no disponible en demo
                       </button>
+                      }
                     }
                     @case ('salir') {
                       <a
                         mat-stroked-button
                         class="h-[38px] rounded-[10px] border border-solid border-[#f87171]/50 bg-white/4 px-3.5 text-sm text-[#fca5a5]"
                         routerLink="/login"
+                        (click)="salir()"
                       >
                         <img
                           src="images/perfil-coach/logout-16-danger.svg"

@@ -41,7 +41,7 @@
       <nav class="max-[1280px]:hidden" aria-label="Principal">
         <ul class="m-0 flex list-none items-center gap-9 p-0 text-[15px] font-normal">
           @for (enlace of enlaces; track enlace) {
-            <li>{{ enlace }}</li>
+            <li>@if (enlace === 'Inicio') { <a routerLink="/inicio">Inicio</a> } @else { <span aria-disabled="true" title="Pendiente de integrar">{{ enlace }}</span> }</li>
           }
         </ul>
       </nav>
@@ -125,7 +125,7 @@
           <img src="images/perfil/toast-check-22.svg" alt="" width="22" height="22" />
           <div class="flex min-w-0 flex-col gap-1 text-[#bbf7d0]">
             <p class="m-0 text-[14px] font-semibold">Perfil actualizado correctamente</p>
-            <p class="m-0 text-[13px]">Tus cambios ya están visibles en tu perfil.</p>
+            <p class="m-0 text-[13px]">{{ session.demo() ? 'Tus cambios ya están visibles en tu perfil.' : profiles.message() }}</p>
           </div>
         </div>
       }
@@ -165,6 +165,9 @@
       </div>
 
       <div id="panel-perfil" role="tabpanel" [attr.aria-busy]="vista.estado === 'cargando'">
+        @if (!session.demo() && (vista.pestana === 'solicitudes' || vista.pestana === 'submissions')) {
+          <p class="rounded-xl border border-solid border-kl-divider bg-white/3 p-6 text-kl-body">Esta sección está pendiente de integración. No se ha consultado tu actividad al servidor.</p>
+        } @else {
         @switch (vista.pestana) {
           @case ('info') {
             <div class="grid grid-cols-1 items-start gap-5 min-[1280px]:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
@@ -226,7 +229,7 @@
                       </div>
                     </div>
                     <div class="flex min-w-0 flex-col gap-2">
-                      <p class="m-0 font-display text-[24px] font-bold tracking-[-.4px]">
+                      <p class="m-0 break-all font-display text-[24px] font-bold tracking-[-.4px]">
                         {{ info.nombreCompleto }}
                       </p>
                       <div class="flex flex-wrap items-center gap-2.5">
@@ -266,7 +269,7 @@
 
                   <div class="mt-4 flex flex-col gap-2.5">
                     <h3 class="m-0 text-[14px] font-semibold">Plataformas competitivas</h3>
-                    @if (vista.estado === 'sin-plataformas') {
+                    @if (vista.estado === 'sin-plataformas' || (!session.demo() && plataformas.length === 0)) {
                       <div
                         class="flex flex-col items-center gap-2.5 rounded-[14px] border border-dashed border-[#3b3480] p-[18px] text-center"
                       >
@@ -292,7 +295,8 @@
                           <li class="min-w-0">
                             <a
                               class="flex items-center gap-2.5 rounded-xl border border-solid border-[#26224d] bg-white/3 px-3.5 py-3"
-                              routerLink="/practicante/plataformas"
+                              [routerLink]="session.demo() ? '/practicante/plataformas' : '/perfil/editar'"
+                              [fragment]="session.demo() ? undefined : 'plataformas'"
                             >
                               <img [src]="plataforma.icono" alt="" width="34" height="34" />
                               <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
@@ -805,6 +809,7 @@
                         />
                       }
                       @case ('codigo') {
+                        @if (!session.demo()) { <app-recovery-code /> } @else {
                         <a
                           mat-stroked-button
                           class="bg-[#7357f3]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
@@ -812,14 +817,16 @@
                           [queryParams]="{ tab: 'ajustes', estado: 'ver-codigo' }"
                         >
                           <img src="images/perfil/key-16.svg" alt="" width="16" height="16" />
-                          Ver mi código
+                          Ver mi código de ejemplo
                         </a>
+                        }
                       }
                       @case ('salir') {
                         <a
                           mat-stroked-button
                           class="bg-white/4 px-3.5 [--mat-button-outlined-container-height:38px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#fca5a5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:rgba(248,113,113,.5)]"
                           routerLink="/login"
+                          (click)="salir()"
                         >
                           <img src="images/perfil/logout-red-16.svg" alt="" width="16" height="16" />
                           Cerrar sesión
@@ -831,6 +838,7 @@
               </form>
             </section>
           }
+        }
         }
       </div>
     </main>

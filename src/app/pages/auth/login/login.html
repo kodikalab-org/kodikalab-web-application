@@ -65,7 +65,7 @@
         class="form flex w-full flex-col gap-3.5 pt-6 [@media(max-height:760px)]:gap-2.5 [@media(max-height:760px)]:pt-4"
         [formGroup]="form"
         novalidate
-        (submit)="$event.preventDefault()"
+        (ngSubmit)="ingresar()"
       >
         <div class="field flex min-w-0 flex-col gap-1.5">
           <label class="field__label text-[13px] font-medium text-kl-body" for="email"
@@ -140,8 +140,8 @@
           <mat-checkbox formControlName="remember" class="remember auth-check"
             >Recordarme</mat-checkbox
           >
-          <span class="forgot text-sm font-medium whitespace-nowrap text-kl-accent-text"
-            >¿Olvidaste tu contraseña?</span
+          <a routerLink="/recuperar-acceso" class="forgot text-sm font-medium whitespace-nowrap text-kl-accent-text"
+            >¿Olvidaste tu contraseña?</a
           >
         </div>
 
@@ -149,9 +149,9 @@
           mat-flat-button
           class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
           type="submit"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || busy"
         >
-          Ingresar
+          {{ busy ? 'Ingresando…' : 'Ingresar' }}
           <img src="images/login/arrow-right-18.svg" alt="" width="18" height="18" />
         </button>
 
@@ -169,6 +169,12 @@
           <span class="register__link font-medium text-kl-accent-text">Regístrate</span>
           <img src="images/login/arrow-right-accent-18.svg" alt="" width="18" height="18" />
         </a>
+        @if (error) { <p role="alert" class="m-0 rounded-xl border border-solid border-red-400/40 bg-red-400/10 p-3 text-sm text-red-200">{{ error }}</p> }
+        <p class="m-0 text-center text-xs text-kl-muted">Explora sin iniciar sesión. La demo no guarda cambios.</p>
+        <div class="flex flex-wrap justify-center gap-4 text-sm text-kl-accent-text">
+          <a routerLink="/demo/practicante">Ver demo practicante</a>
+          <a routerLink="/demo/coach">Ver demo coach</a>
+        </div>
       </form>
     </mat-card>
   </main>

@@ -102,7 +102,7 @@
         >
           <span
             class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-kl-accent to-[#b780ff] text-xs"
-            >{{ coach ? 'MP' : 'CR' }}</span
+            >{{ iniciales }}</span
           ><img src="/images/dashboard/0-imgIcon5.svg" width="16" height="16" alt="" />
         </button>
         <button
@@ -176,25 +176,27 @@
       <span
         class="flex size-10 shrink-0 items-center justify-center rounded-full bg-kl-accent text-sm font-medium text-white"
         aria-hidden="true"
-        >{{ coach ? 'MP' : 'CR' }}</span
+        >{{ iniciales }}</span
       >
       <div>
         <strong class="block text-sm font-medium text-kl-heading">{{
-          coach ? 'Marco' : 'Camila'
+          nombre
         }}</strong
         ><span class="mt-1 block text-xs text-kl-muted"
-          >{{ coach ? 'Coach' : 'Practicante' }} · Vista de demostración</span
+          >{{ coach ? 'Coach' : 'Practicante' }} · {{ session.demo() ? 'Vista de demostración' : 'Sesión iniciada' }}</span
         >
       </div>
     </div>
-    <button mat-menu-item disabled>Mi perfil · pendiente de integrar</button>
+    <a mat-menu-item [routerLink]="coach ? '/coach/perfil' : '/perfil'">Mi perfil</a>
+    @if (session.demo()) {
     <a mat-menu-item [routerLink]="ruta" [queryParams]="nuevo ? {} : { estado: 'nuevo' }">{{
       nuevo ? 'Ver demo con actividad' : 'Ver demo sin actividad'
     }}</a>
-    <a mat-menu-item [routerLink]="coach ? '/inicio' : '/coach/inicio'">{{
+    <a mat-menu-item [routerLink]="coach ? '/demo/practicante' : '/demo/coach'">{{
       coach ? 'Ver demo de practicante' : 'Ver demo de coach'
     }}</a>
-    <a mat-menu-item routerLink="/login" class="mt-1 border-t border-kl-border-strong"
+    }
+    <a mat-menu-item routerLink="/login" (click)="salir()" class="mt-1 border-t border-kl-border-strong"
       >Volver al acceso</a
     >
   </mat-menu>
@@ -240,8 +242,8 @@
   >
     <div class="mb-6 flex flex-wrap items-center justify-between gap-5">
       <div>
-        <h1 class="m-0 font-display text-[32px] font-bold tracking-[-1px]">
-          Hola, {{ coach ? 'Marco' : 'Camila' }}
+        <h1 class="m-0 break-all font-display text-[32px] font-bold tracking-[-1px]">
+          Hola, {{ nombre }}
         </h1>
         <p class="mb-0 mt-1.5 text-[15px] text-kl-soft">
           {{
@@ -321,11 +323,11 @@
           /></span>
           <div>
             <strong class="block font-display text-2xl">{{
-              nuevo ? (!coach && i === 1 ? '—' : '0') : dato.valor
+              !session.demo() ? '—' : nuevo ? (!coach && i === 1 ? '—' : '0') : dato.valor
             }}</strong
             ><span class="block text-[13px] text-kl-body">{{ dato.etiqueta }}</span
             ><span class="mt-1 block text-xs" [class]="nuevo ? 'text-kl-muted' : dato.tono">{{
-              nuevo ? dato.vacio : dato.detalle
+              !session.demo() ? 'Pendiente de integración' : nuevo ? dato.vacio : dato.detalle
             }}</span>
           </div></mat-card
         >

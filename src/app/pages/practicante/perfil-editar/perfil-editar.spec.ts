@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../core/session';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { PerfilEditar } from './perfil-editar';
@@ -12,6 +13,7 @@ describe('PerfilEditar', () => {
         { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap(params)) } },
       ],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     const fixture = TestBed.createComponent(PerfilEditar);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;

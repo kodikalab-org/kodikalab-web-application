@@ -16,6 +16,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap } from 'rxjs';
+import { ProfileApi } from '../../../../core/profile-api';
+import { Session } from '../../../../core/session';
 
 @Component({
   selector: 'app-onboarding-datos-academicos',
@@ -34,6 +36,15 @@ import { map, tap } from 'rxjs';
   styleUrl: './datos-academicos.css',
 })
 export class OnboardingDatosAcademicos {
+  protected readonly session = inject(Session);
+  private readonly profiles = inject(ProfileApi);
+  constructor() {
+    if (!this.session.demo()) {
+      this.form.patchValue(this.profiles.academic);
+      this.form.controls.distrito.disable();
+    }
+  }
+  protected continuar(): void { this.profiles.academic = this.form.getRawValue(); }
   protected readonly carreras = [
     'Ingeniería de Software',
     'Ciencias de la Computación',
@@ -89,6 +100,7 @@ export class OnboardingDatosAcademicos {
   );
 
   private aplicarEstado(estado: string | null): void {
+    if (!this.session.demo()) return;
     this.codigoOcupado = estado === 'duplicado' ? '20240001' : null;
     this.form.reset();
     if (estado === 'duplicado') {

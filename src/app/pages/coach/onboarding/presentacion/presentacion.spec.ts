@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../../core/session';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { OnboardingPresentacion } from './presentacion';
@@ -11,6 +12,7 @@ describe('OnboardingPresentacion', () => {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingPresentacion }])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('COACH');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/pantalla' + consulta, OnboardingPresentacion);
     await harness.fixture.whenStable();

@@ -2,11 +2,16 @@ import { Routes } from '@angular/router';
 import { LandingPage } from './pages/landing-page/landing-page';
 import { Login } from './pages/auth/login/login';
 import { Registro } from './pages/auth/registro/registro';
+import { accessGuard, demoGuard } from './core/access-guard';
 
-export const routes: Routes = [
+const appRoutes: Routes = [
   { path: '', component: LandingPage },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
+  { path: 'registro-exitoso', loadComponent: () => import('./pages/auth/registro-exitoso/registro-exitoso').then(m => m.RegistroExitoso) },
+  { path: 'recuperar-acceso', loadComponent: () => import('./pages/auth/recuperar-acceso/recuperar-acceso').then(m => m.RecuperarAcceso) },
+  { path: 'demo/practicante', component: Login, canActivate: [demoGuard], data: { role: 'PRACTICANTE' } },
+  { path: 'demo/coach', component: Login, canActivate: [demoGuard], data: { role: 'COACH' } },
   {
     path: 'inicio',
     loadComponent: () =>
@@ -91,4 +96,14 @@ export const routes: Routes = [
         (m) => m.OnboardingCoachCompletado,
       ),
   },
+];
+
+const publicPaths = ['', 'login', 'registro', 'registro-exitoso', 'recuperar-acceso'];
+export const routes: Routes = [
+  ...appRoutes.map(route => publicPaths.includes(route.path ?? '') || route.path?.startsWith('demo/')
+    ? route
+    : { ...route, canActivate: [accessGuard], data: { ...route.data,
+      role: route.path?.includes('coach/') ? 'COACH' : 'PRACTICANTE',
+    } }),
+  { path: '**', redirectTo: '' },
 ];

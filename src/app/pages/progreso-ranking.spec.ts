@@ -1,15 +1,30 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../app.routes';
+import { Session } from '../core/session';
+import { accessGuard } from '../core/access-guard';
 import { RendimientoEquipo } from './rendimiento-equipo/rendimiento-equipo';
 
 describe('Interfaces de progreso y ranking', () => {
+  it('conserva los guards y roles de develop en las cuatro rutas nuevas', () => {
+    for (const path of ['progreso', 'ranking', 'progreso/equipos', 'coach/rendimiento']) {
+      const route = routes.find((item) => item.path === path)!;
+      expect(route.canActivate).toContain(accessGuard);
+      expect(route.data?.['role']).toBe(path.startsWith('coach/') ? 'COACH' : 'PRACTICANTE');
+    }
+    expect(routes.find((route) => route.path === 'grupos')).toBeDefined();
+    expect(routes.find((route) => route.path === 'coach/grupos')).toBeDefined();
+    expect(routes.at(-1)?.path).toBe('**');
+  });
+
   async function setup(url: string) {
     await TestBed.configureTestingModule({
-      providers: [provideRouter(routes)],
+      providers: [provideRouter(routes), provideHttpClient()],
     }).compileComponents();
+    TestBed.inject(Session).startDemo(url.startsWith('/coach/') ? 'COACH' : 'PRACTICANTE');
     const harness = await RouterTestingHarness.create(url);
     await harness.fixture.whenStable();
     return { harness, root: harness.routeNativeElement! };

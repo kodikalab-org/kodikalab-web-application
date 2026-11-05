@@ -1,0 +1,91 @@
+<div class="relative isolate flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text">
+  <img
+    [src]="coach ? '/images/grupos/crear-fondo.svg' : '/images/grupos/415-19197-imgIcon.svg'"
+    alt=""
+    class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-none object-right-top lg:object-cover lg:object-top"
+  />
+  <header class="border-0 border-b border-solid border-[#1b1840] bg-[#060414]/80">
+    <mat-toolbar class="mx-auto flex h-[68px] max-w-[1600px] gap-4 px-4 lg:px-11">
+      <a
+        [routerLink]="coach ? '/coach/inicio' : '/inicio'"
+        aria-label="Kodikalab, inicio"
+        class="flex items-center gap-2.5 text-xl sm:text-[25px]"
+      >
+        <img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab
+      </a>
+      <nav
+        aria-label="Navegación principal"
+        class="ml-8 hidden h-full items-center gap-8 text-[15px] xl:flex"
+      >
+        <a [routerLink]="coach ? '/coach/inicio' : '/inicio'">Inicio</a>
+        <span aria-disabled="true" title="Catálogo pendiente de integrar" class="text-kl-muted"
+          >Problemas</span
+        >
+        <span aria-disabled="true" title="Concursos pendiente de integrar" class="text-kl-muted"
+          >Concursos</span
+        >
+        <a
+          routerLink="/grupos"
+          aria-current="page"
+          class="flex h-full items-center border-0 border-b-2 border-solid border-kl-accent"
+          >Grupos</a
+        >
+        <span aria-disabled="true" title="Recursos pendiente de integrar" class="text-kl-muted"
+          >Recursos</span
+        >
+      </nav>
+      <div class="ml-auto flex items-center gap-3">
+        <div
+          aria-label="Búsqueda global pendiente"
+          class="hidden h-10 items-center gap-3 rounded-xl border border-solid border-kl-border-strong bg-white/4 px-3 text-sm text-kl-faint min-[1400px]:flex"
+        >
+          <img src="/images/dashboard/0-imgIcon2.svg" width="18" height="18" alt="" />Buscar
+          problemas, usuarios, concursos… <kbd class="ml-3 text-xs">⌘ K</kbd>
+        </div>
+        <img
+          src="/images/dashboard/0-imgIcon3.svg"
+          width="22"
+          height="22"
+          alt="Notificaciones pendientes"
+        />
+        <img
+          src="/images/dashboard/0-imgIcon4.svg"
+          width="22"
+          height="22"
+          alt="Tema oscuro"
+          class="hidden sm:block"
+        />
+        <a
+          [routerLink]="coach ? '/coach/perfil' : '/perfil'"
+          aria-label="Ver perfil"
+          class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-kl-accent to-[#b987ff] text-xs"
+          >{{ coach ? 'MP' : 'CR' }}</a
+        >
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="navegacion"
+          aria-label="Abrir navegación de grupos"
+        >
+          <img src="/images/dashboard/0-imgIcon5.svg" width="16" height="16" alt="" />
+        </button>
+      </div>
+    </mat-toolbar>
+    <mat-menu #navegacion="matMenu">
+      <a mat-menu-item routerLink="/grupos">Explorar grupos</a>
+      <a mat-menu-item routerLink="/coach/grupos/crear">Crear grupo · vista coach</a>
+      <a mat-menu-item routerLink="/coach/grupos/solicitudes">Revisar solicitudes · vista coach</a>
+      <a mat-menu-item [routerLink]="coach ? '/coach/inicio' : '/inicio'">Volver al inicio</a>
+    </mat-menu>
+  </header>
+  <div class="flex flex-1 flex-col"><router-outlet /></div>
+  <footer
+    class="flex flex-wrap items-center justify-between gap-4 border-0 border-t border-solid border-kl-border bg-[#060414]/90 px-4 py-5 text-xs text-kl-muted lg:px-11"
+  >
+    <div class="flex flex-wrap items-center gap-5">
+      <a routerLink="/grupos" class="flex items-center gap-2 text-lg text-kl-text"
+        ><img src="/images/dashboard/0-imgIcon1.svg" width="28" height="28" alt="" />Kodikalab</a
+      ><span>© 2026 Kodikalab. Todos los derechos reservados.</span>
+    </div>
+    <span>Términos de Servicio · Política de privacidad</span>
+  </footer>
+</div>

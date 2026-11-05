@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../../core/session';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideRouter } from '@angular/router';
 import { OnboardingDatosAcademicos } from './datos-academicos';
@@ -9,6 +10,7 @@ describe('OnboardingDatosAcademicos', () => {
       imports: [OnboardingDatosAcademicos],
       providers: [provideRouter([])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     const fixture = TestBed.createComponent(OnboardingDatosAcademicos);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -51,6 +53,7 @@ describe('OnboardingDatosAcademicos (estados con ?estado=)', () => {
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingDatosAcademicos }])],
     }).compileComponents();
     const harness = await RouterTestingHarness.create();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     await harness.navigateByUrl('/pantalla' + consulta, OnboardingDatosAcademicos);
     await harness.fixture.whenStable();
     harness.detectChanges();

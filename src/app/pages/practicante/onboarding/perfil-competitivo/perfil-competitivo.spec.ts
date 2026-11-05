@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../../core/session';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideRouter } from '@angular/router';
 import { OnboardingPerfilCompetitivo } from './perfil-competitivo';
@@ -9,6 +10,7 @@ describe('OnboardingPerfilCompetitivo', () => {
       imports: [OnboardingPerfilCompetitivo],
       providers: [provideRouter([])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     const fixture = TestBed.createComponent(OnboardingPerfilCompetitivo);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -52,6 +54,7 @@ describe('OnboardingPerfilCompetitivo (estados con ?estado=)', () => {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingPerfilCompetitivo }])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/pantalla' + consulta, OnboardingPerfilCompetitivo);
     await harness.fixture.whenStable();

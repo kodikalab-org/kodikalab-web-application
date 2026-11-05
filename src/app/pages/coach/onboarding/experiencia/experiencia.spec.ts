@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../../core/session';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideRouter } from '@angular/router';
 import { OnboardingExperiencia } from './experiencia';
@@ -9,6 +10,7 @@ describe('OnboardingExperiencia', () => {
       imports: [OnboardingExperiencia],
       providers: [provideRouter([])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('COACH');
     const fixture = TestBed.createComponent(OnboardingExperiencia);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -73,6 +75,7 @@ describe('OnboardingExperiencia (estados con ?estado=)', () => {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingExperiencia }])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('COACH');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/pantalla' + consulta, OnboardingExperiencia);
     await harness.fixture.whenStable();

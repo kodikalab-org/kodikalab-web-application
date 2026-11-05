@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../core/session';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { CoachPerfil } from './perfil';
@@ -8,6 +9,7 @@ describe('CoachPerfil', () => {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'coach/perfil', component: CoachPerfil }])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('COACH');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl(url, CoachPerfil);
     const root = harness.routeNativeElement as HTMLElement;
@@ -122,7 +124,7 @@ describe('CoachPerfil', () => {
     const toggles = Array.from(root.querySelectorAll<HTMLButtonElement>('button[role="switch"]'));
     expect(toggles.map((t) => t.getAttribute('aria-checked'))).toEqual(['true', 'false', 'true']);
     expect(root.querySelector('mat-select')?.textContent).toContain('Español');
-    expect(botones('Ver mi código').length).toBe(1);
+    expect(botones('Código no disponible en demo').length).toBe(1);
     expect(root.querySelector('a[href="/login"]')?.textContent).toContain('Cerrar sesión');
   });
 

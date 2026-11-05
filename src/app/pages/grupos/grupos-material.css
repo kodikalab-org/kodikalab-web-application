@@ -1,0 +1,15 @@
+:host {
+  --auth-field-height: 50px;
+  --auth-field-padding: 13px;
+  --auth-focus-color: var(--kl-accent-text);
+  --auth-input-color: var(--kl-text-heading);
+  --mat-card-outlined-container-color: transparent;
+  --mat-card-outlined-outline-color: #2b2760;
+  --mat-card-outlined-container-shape: 18px;
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+  --mat-button-filled-container-height: 48px;
+  --mat-button-outlined-container-height: 48px;
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-outlined-container-shape: 12px;
+}

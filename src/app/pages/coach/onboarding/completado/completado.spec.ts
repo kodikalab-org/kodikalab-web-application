@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../../core/session';
 import { provideRouter } from '@angular/router';
 import { OnboardingCoachCompletado } from './completado';
 
@@ -8,6 +9,7 @@ describe('OnboardingCoachCompletado', () => {
       imports: [OnboardingCoachCompletado],
       providers: [provideRouter([])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('COACH');
     const fixture = TestBed.createComponent(OnboardingCoachCompletado);
     await fixture.whenStable();
     return fixture.nativeElement as HTMLElement;

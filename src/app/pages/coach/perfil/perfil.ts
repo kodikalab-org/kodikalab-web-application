@@ -1,5 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { Session } from '../../../core/session';
+import { ProfileApi } from '../../../core/profile-api';
+import { RecoveryCode } from '../../../shared/recovery-code/recovery-code';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -45,6 +48,7 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
 @Component({
   selector: 'app-coach-perfil',
   imports: [
+    RecoveryCode,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -59,6 +63,10 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
   styleUrl: './perfil.css',
 })
 export class CoachPerfil {
+  protected readonly session = inject(Session);
+  private readonly profiles = inject(ProfileApi);
+  constructor() { if (!this.session.demo()) this.formAjustes.disable(); }
+  protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly ruta = inject(ActivatedRoute);
 
   /** `?tab=info|solicitudes|ajustes` elige la pestaña; `?estado=vacio|actualizado` elige la variante. */
@@ -67,7 +75,8 @@ export class CoachPerfil {
       const tab = params.get('tab');
       return {
         pestania: PESTANIAS.find((p) => p === tab) ?? 'info',
-        estado: params.get('estado'),
+        estado: this.session.demo() ? params.get('estado') :
+          params.get('estado') === 'actualizado' && this.profiles.message() ? 'actualizado' : 'vacio',
       };
     }),
   );
@@ -95,12 +104,20 @@ export class CoachPerfil {
 
   protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
 
-  protected readonly perfil = PERFIL_COACH_DEMO;
-  protected readonly equipos = EQUIPOS_COACH_DEMO;
-  protected readonly solicitudes: SolicitudIngreso[] = crearSolicitudesDemo();
+  protected get perfil() {
+    if (this.session.demo()) return PERFIL_COACH_DEMO;
+    const p = this.profiles.profile();
+    return { iniciales: 'KL', nombre: p?.email ?? '', usuario: '', rol: 'Coach',
+      especialidad: p?.role === 'COACH' ? p.especialidadPrincipal : '',
+      organizacion: p?.role === 'COACH' ? p.organizacionClub ?? '' : '',
+      anios: p?.role === 'COACH' ? p.aniosExperiencia : 0,
+      presentacion: p?.role === 'COACH' ? p.presentacion ?? '' : '' };
+  }
+  protected get equipos() { return this.session.demo() ? EQUIPOS_COACH_DEMO : []; }
+  protected readonly solicitudes: SolicitudIngreso[] = this.session.demo() ? crearSolicitudesDemo() : [];
   protected readonly filtros = ['Pendientes', 'Todas', 'Equipo Alfa', 'Equipo Beta'];
 
-  protected readonly datosPerfil = [
+  protected get datosPerfil() { return [
     {
       icono: 'images/perfil-coach/chart-18.svg',
       texto: `Especialidad: ${this.perfil.especialidad}`,
@@ -110,7 +127,7 @@ export class CoachPerfil {
       icono: 'images/perfil-coach/trophy-18.svg',
       texto: `${this.perfil.anios} años de experiencia entrenando`,
     },
-  ];
+  ]; }
 
   protected readonly filas: readonly FilaAjuste[] = [
     {
@@ -176,19 +193,19 @@ export class CoachPerfil {
   protected estadisticas() {
     return [
       {
-        valor: this.equipos.length,
+        valor: this.session.demo() ? this.equipos.length : '—',
         etiqueta: 'Equipos a cargo',
         icono: 'images/perfil-coach/stat-teams-24.svg',
         fondo: 'bg-[rgba(167,139,250,0.14)]',
       },
       {
-        valor: ESTADISTICAS_COACH_DEMO.integrantesActivos,
+        valor: this.session.demo() ? ESTADISTICAS_COACH_DEMO.integrantesActivos : '—',
         etiqueta: 'Integrantes activos',
         icono: 'images/perfil-coach/stat-members-24.svg',
         fondo: 'bg-[rgba(74,222,128,0.14)]',
       },
       {
-        valor: this.pendientes(),
+        valor: this.session.demo() ? this.pendientes() : '—',
         etiqueta: 'Solicitudes pendientes',
         icono: 'images/perfil-coach/stat-pending-24.svg',
         fondo: 'bg-[rgba(251,191,36,0.14)]',

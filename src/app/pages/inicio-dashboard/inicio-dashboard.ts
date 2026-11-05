@@ -1,5 +1,7 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Session } from '../../core/session';
+import { ProfileApi } from '../../core/profile-api';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -24,6 +26,11 @@ import { map } from 'rxjs';
   styleUrl: './inicio-dashboard.css',
 })
 export class InicioDashboard {
+  protected readonly session = inject(Session);
+  private readonly profiles = inject(ProfileApi);
+  protected get nombre(): string { return this.session.demo() ? (this.coach ? 'Marco' : 'Camila') : this.session.account()?.email ?? 'Usuario'; }
+  protected get iniciales(): string { return this.session.demo() ? (this.coach ? 'MP' : 'CR') : 'KL'; }
+  protected salir(): void { this.session.logout(); this.profiles.reset(); }
   protected readonly coach: boolean;
   protected readonly nuevo$;
   protected readonly ruta: string;
@@ -99,7 +106,7 @@ export class InicioDashboard {
   constructor(route: ActivatedRoute) {
     this.coach = route.snapshot.data['coach'] === true;
     this.ruta = this.coach ? '/coach/inicio' : '/inicio';
-    this.nuevo$ = route.queryParamMap.pipe(map((params) => params.get('estado') === 'nuevo'));
+    this.nuevo$ = route.queryParamMap.pipe(map((params) => !this.session.demo() || params.get('estado') === 'nuevo'));
     this.estadisticas = this.coach
       ? [
           {

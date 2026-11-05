@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../core/session';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { CoachPerfilEditar } from './perfil-editar';
@@ -8,6 +9,7 @@ describe('CoachPerfilEditar', () => {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'coach/perfil/editar', component: CoachPerfilEditar }])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('COACH');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl(url, CoachPerfilEditar);
     const root = harness.routeNativeElement as HTMLElement;
@@ -48,11 +50,11 @@ describe('CoachPerfilEditar', () => {
     expect(root.textContent).not.toContain('No pudimos guardar tus cambios');
   });
 
-  it('links Cancelar and the valid Guardar cambios through routerLink', async () => {
+  it('links Cancelar and keeps saving as an explicit action, not an unverified success link', async () => {
     const { root, guardar } = await abrir('/coach/perfil/editar');
     expect(root.querySelector('a[href="/coach/perfil"]')).not.toBeNull();
-    expect(guardar().tagName).toBe('A');
-    expect(guardar().getAttribute('href')).toBe('/coach/perfil?estado=actualizado');
+    expect(guardar().tagName).toBe('BUTTON');
+    expect(guardar().getAttribute('href')).toBeNull();
   });
 
   it('shows "Ingresa tu especialidad principal" when the specialty is empty', async () => {

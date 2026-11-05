@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../core/session';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -16,6 +17,7 @@ describe('InicioDashboard', () => {
         ]),
       ],
     }).compileComponents();
+    TestBed.inject(Session).demo.set(url.includes('coach') ? 'COACH' : 'PRACTICANTE');
     const harness = await RouterTestingHarness.create(url);
     await harness.fixture.whenStable();
     return { harness, root: harness.routeNativeElement! };

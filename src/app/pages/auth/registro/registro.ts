@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -8,7 +8,10 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { Session } from '../../../core/session';
+import { apiError } from '../../../core/api';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
@@ -46,6 +49,24 @@ class ConfirmPasswordMatcher implements ErrorStateMatcher {
   styleUrl: './registro.css',
 })
 export class Registro {
+  private readonly session = inject(Session);
+  private readonly router = inject(Router);
+  protected busy = false;
+  protected error = '';
+
+  protected async registrar(): Promise<void> {
+    if (this.form.invalid || this.busy) return;
+    this.busy = true;
+    this.error = '';
+    const { firstName, lastName, email, password, role } = this.form.getRawValue();
+    try {
+      await firstValueFrom(this.session.register({ firstName, lastName, email, password, role }));
+      this.form.controls.password.reset();
+      this.form.controls.confirmPassword.reset();
+      await this.router.navigateByUrl('/registro-exitoso');
+    } catch (error) { this.error = apiError(error); }
+    finally { this.busy = false; }
+  }
   protected readonly confirmPasswordMatcher = new ConfirmPasswordMatcher();
 
   protected readonly form = new FormGroup(

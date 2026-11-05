@@ -1,1 +1,7 @@
+@if (privatePage) {
+  <aside class="relative z-40 flex flex-wrap items-center justify-between gap-2 border-0 border-b border-solid border-kl-divider bg-kl-bg px-4 py-2 font-body text-xs text-kl-body" aria-label="Estado de la aplicación">
+    <span>{{ session.demo() ? 'Demostración · Datos de ejemplo · No hay autenticación ni se guardan cambios.' : 'Sesión real · Perfil conectado. Métricas, actividad, ajustes y campos deshabilitados: pendientes de integración.' }}</span>
+    <button type="button" class="cursor-pointer border-0 bg-transparent font-body text-kl-accent-text" (click)="salir()">{{ session.demo() ? 'Salir de la demo' : 'Cerrar sesión' }}</button>
+  </aside>
+}
 <router-outlet />

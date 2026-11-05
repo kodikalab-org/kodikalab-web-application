@@ -35,7 +35,7 @@
         <nav class="max-[1280px]:hidden" aria-label="Principal">
           <ul class="m-0 flex list-none items-center gap-9 p-0 text-[15px] font-normal">
             @for (enlace of enlaces; track enlace) {
-              <li>{{ enlace }}</li>
+              <li>@if (enlace === 'Inicio') { <a routerLink="/coach/inicio">Inicio</a> } @else { <span aria-disabled="true" title="Pendiente de integrar">{{ enlace }}</span> }</li>
             }
           </ul>
         </nav>
@@ -291,15 +291,13 @@
               >Cancelar</a
             >
             @if (form.valid) {
-              <a
+              <button type="button" (click)="guardar()" [disabled]="busy"
                 mat-flat-button
                 class="h-[50px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-7 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] max-[641px]:w-full"
-                routerLink="/coach/perfil"
-                [queryParams]="{ estado: 'actualizado' }"
               >
                 <img src="images/perfil-coach/save-18.svg" alt="" width="18" height="18" />
-                Guardar cambios
-              </a>
+                {{ busy ? 'Guardando…' : 'Guardar cambios' }}
+              </button>
             } @else {
               <button
                 mat-flat-button
@@ -311,7 +309,8 @@
               </button>
             }
           </div>
-        </form>
+            @if (error) { <p role="alert" class="text-sm text-red-200">{{ error }}</p> }
+          </form>
       </section>
     </main>
   </div>

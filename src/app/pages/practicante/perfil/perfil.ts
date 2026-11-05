@@ -1,5 +1,8 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { Session } from '../../../core/session';
+import { ProfileApi } from '../../../core/profile-api';
+import { RecoveryCode } from '../../../shared/recovery-code/recovery-code';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
@@ -65,6 +68,7 @@ function aCeldas(filas: string[]): number[] {
 @Component({
   selector: 'app-perfil',
   imports: [
+    RecoveryCode,
     AsyncPipe,
     CdkTrapFocus,
     NgTemplateOutlet,
@@ -82,11 +86,16 @@ function aCeldas(filas: string[]): number[] {
   styleUrl: './perfil.css',
 })
 export class Perfil {
+  protected readonly session = inject(Session);
+  protected readonly profiles = inject(ProfileApi);
+  constructor() { if (!this.session.demo()) this.formAjustes.disable(); }
+  protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly route = inject(ActivatedRoute);
 
   /** Active tab and demo state, read from `?tab=` and `?estado=`. */
   protected readonly vista$ = this.route.queryParamMap.pipe(
-    map((params) => resolverVista(params.get('tab'), params.get('estado'))),
+    map((params) => resolverVista(params.get('tab'), this.session.demo() ? params.get('estado') :
+      params.get('estado') === 'actualizado' && this.profiles.message() ? 'actualizado' : null)),
   );
 
   protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
@@ -123,9 +132,24 @@ export class Perfil {
   ];
 
   // ---- Información personal ----
-  protected readonly info = INFO_PERSONAL_DEMO;
-  protected readonly plataformas = PLATAFORMAS_PERFIL_DEMO;
-  protected readonly estadisticas = ESTADISTICAS_DEMO;
+  protected get info() {
+    if (this.session.demo()) return INFO_PERSONAL_DEMO;
+    const p = this.profiles.profile();
+    return { iniciales: 'KL', nombreCompleto: p?.email ?? '', usuario: '', rol: 'Practicante',
+      carreraCiclo: p?.role === 'PRACTICANTE' ? `${p.carrera} · ${p.cicloAcademico}.º ciclo` : '',
+      universidad: 'Comunidad GPC UPC', ubicacion: 'Ubicación pendiente',
+      nivelCodigo: p?.role === 'PRACTICANTE' ? `${p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
+      objetivo: 'Objetivo pendiente de integración' };
+  }
+  protected get plataformas() {
+    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO;
+    const p = this.profiles.profile();
+    if (p?.role !== 'PRACTICANTE') return [];
+    return PLATAFORMAS_PERFIL_DEMO.map((platform) => ({ ...platform,
+      usuario: (platform.nombre === 'Codeforces' ? p.codeforcesHandle : platform.nombre === 'AtCoder' ? p.atcoderHandle : p.vjudgeHandle) ?? '',
+    })).filter(platform => platform.usuario);
+  }
+  protected get estadisticas() { return this.session.demo() ? ESTADISTICAS_DEMO : []; }
   protected readonly tonos: Record<TonoEstadistica, { caja: string; detalle: string }> = {
     exito: { caja: 'bg-[#4ade80]/14', detalle: 'text-[#4ade80]' },
     alerta: { caja: 'bg-[#fb923c]/14', detalle: 'text-[#fbbf24]' },
@@ -134,7 +158,7 @@ export class Perfil {
   };
   protected readonly meses = MESES_HEATMAP;
   protected readonly diasHeatmap = DIAS_HEATMAP;
-  protected readonly heatmaps = [
+  private readonly heatmapsDemo = [
     {
       titulo: 'Actividad de resolución de problemas',
       celdas: aCeldas(HEATMAP_ACTIVIDAD_DEMO),
@@ -161,12 +185,13 @@ export class Perfil {
       }),
     },
   ];
+  protected get heatmaps() { return this.session.demo() ? this.heatmapsDemo : []; }
   protected readonly opcionesProblemas = PROBLEMAS_FILTRO;
   protected readonly opcionesPeriodo = PERIODOS_FILTRO;
 
   // ---- Solicitudes ----
   protected readonly filtrosSolicitud = FILTROS_SOLICITUD_DEMO;
-  protected readonly solicitudes = SOLICITUDES_DEMO;
+  protected get solicitudes() { return this.session.demo() ? SOLICITUDES_DEMO : []; }
   protected readonly clasesEstadoSolicitud: Record<EstadoSolicitud, string> = {
     Pendiente: 'border-[#fbbf24]/60 bg-[#fbbf24]/10 text-[#fbbf24]',
     Aceptada: 'border-[#4ade80]/60 bg-[#4ade80]/10 text-[#4ade80]',
@@ -178,7 +203,7 @@ export class Perfil {
   });
 
   // ---- Submissions ----
-  protected readonly submissions = SUBMISSIONS_DEMO;
+  protected get submissions() { return this.session.demo() ? SUBMISSIONS_DEMO : []; }
   protected readonly paginasSubmissions = PAGINAS_SUBMISSIONS_DEMO;
   protected readonly clasesVeredicto: Record<VeredictoSubmission, string> = {
     Aceptado: 'border-[#4ade80]/60 bg-[#4ade80]/10 text-[#4ade80]',

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Session } from '../../../../core/session';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideRouter } from '@angular/router';
 import { OnboardingPlataformas } from './plataformas';
@@ -9,6 +10,7 @@ describe('OnboardingPlataformas', () => {
       imports: [OnboardingPlataformas],
       providers: [provideRouter([])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     const fixture = TestBed.createComponent(OnboardingPlataformas);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -53,6 +55,7 @@ describe('OnboardingPlataformas (estados con ?estado=)', () => {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingPlataformas }])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/pantalla' + consulta, OnboardingPlataformas);
     await harness.fixture.whenStable();

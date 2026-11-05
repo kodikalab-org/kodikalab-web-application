@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap } from 'rxjs';
+import { ProfileApi } from '../../../../core/profile-api';
+import { Session } from '../../../../core/session';
 
 const MAX_ANIOS = 60;
 
@@ -29,6 +31,13 @@ const MAX_ANIOS = 60;
   styleUrl: './experiencia.css',
 })
 export class OnboardingExperiencia {
+  protected readonly session = inject(Session);
+  private readonly profiles = inject(ProfileApi);
+  constructor() { if (!this.session.demo()) this.form.patchValue(this.profiles.coach); }
+  protected continuar(): void {
+    const { especialidad, organizacion, anios } = this.form.getRawValue();
+    this.profiles.coach = { especialidad, organizacion, anios };
+  }
   protected readonly sugerencias = [
     'Grafos',
     'Programación dinámica',
@@ -77,6 +86,7 @@ export class OnboardingExperiencia {
   );
 
   private aplicarEstado(estado: string | null): void {
+    if (!this.session.demo()) return;
     this.form.reset();
     if (estado === 'completa') {
       this.form.patchValue({

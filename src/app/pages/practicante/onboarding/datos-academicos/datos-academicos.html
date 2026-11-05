@@ -24,16 +24,17 @@
         <span
           class="flex size-[34px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
           aria-hidden="true"
-          >CR</span
+          >{{ session.demo() ? 'CR' : 'KL' }}</span
         >
         <span class="flex flex-col max-[641px]:hidden">
-          <span class="text-sm leading-4 font-normal">Camila Rojas</span>
+          <span class="text-sm leading-4 font-normal">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
           <span class="text-xs leading-[14px] font-normal text-kl-muted">Practicante</span>
         </span>
       </div>
       <a
         class="inline-flex items-center gap-2 text-sm font-normal text-kl-body hover:text-kl-accent-text"
         routerLink="/login"
+        (click)="session.logout()"
         aria-label="Cerrar sesión"
       >
         <img src="images/onboarding/logout-18.svg" alt="" width="18" height="18" />
@@ -193,6 +194,7 @@
             class="auth-submit bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-7 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none max-[641px]:w-full"
             type="button"
             routerLink="/onboarding/practicante/perfil-competitivo"
+            (click)="continuar()"
             [disabled]="form.invalid"
           >
             Continuar

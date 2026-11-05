@@ -1,0 +1,180 @@
+@if (contexto$ | async; as contexto) {
+  <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+    <div
+      class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
+    ></div>
+    <header class="border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+      <mat-toolbar
+        class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14"
+      >
+        <a routerLink="/inicio" class="flex items-center gap-2 text-xl font-bold"
+          ><picture
+            ><source media="(min-width: 1024px)" srcset="/images/progreso-ranking/logo.svg" />
+            <img src="/images/progreso-ranking/logo-movil.svg" alt="" /></picture
+          >Kodikalab</a
+        >
+        <nav
+          aria-label="Navegación principal"
+          class="mr-auto ml-10 hidden items-center gap-8 text-sm lg:flex"
+        >
+          <a routerLink="/inicio">Inicio</a
+          ><a routerLink="/inicio" fragment="problemas">Problemas</a
+          ><a routerLink="/inicio" fragment="competencias">Concursos</a
+          ><a routerLink="/inicio" fragment="grupos" class="text-kl-accent-text">Grupos</a
+          ><span class="text-kl-muted" title="Próximamente">Recursos</span>
+        </nav>
+        <div class="flex items-center gap-4">
+          <img
+            src="/images/progreso-ranking/campana.svg"
+            alt="Notificaciones no disponibles en esta maqueta"
+          /><a
+            routerLink="/perfil"
+            aria-label="Ver perfil"
+            class="flex size-9 items-center justify-center rounded-full bg-kl-accent text-xs"
+            >CR</a
+          ><img class="lg:hidden" src="/images/progreso-ranking/abajo.svg" alt="" />
+        </div>
+      </mat-toolbar>
+    </header>
+    <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
+      <div>
+        <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
+          <a routerLink="/inicio">Inicio</a> / Mi espacio
+        </p>
+        <h1 class="m-0 font-display text-2xl leading-tight font-bold lg:text-[40px]">
+          Mi progreso por equipo
+        </h1>
+        <p class="mt-2 mb-0 text-base text-kl-muted">
+          Cada grupo conserva sus propias actividades, resoluciones y métricas.
+        </p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <span class="text-sm font-bold">Equipo activo</span>
+        <div
+          class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm"
+        >
+          {{ contexto.nombre }}
+        </div>
+        <span class="text-xs text-kl-muted"
+          >Cambiar de equipo solo cambia el contexto de la consulta.</span
+        >
+      </div>
+      <a
+        mat-flat-button
+        routerLink="/progreso/equipos"
+        [queryParams]="{ equipo: contexto.destino }"
+        class="w-full self-start lg:w-auto"
+        >Cambiar a {{ contexto.otro }}</a
+      >
+      <aside
+        aria-live="polite"
+        class="flex flex-col gap-2 rounded-xl border border-solid border-[#ccb2ff] bg-[#1e1536] p-4 text-sm"
+      >
+        <strong class="text-[#ccb2ff]">Estás consultando {{ contexto.nombre }}</strong
+        ><span>Las cifras y estados de esta pantalla pertenecen únicamente a este grupo.</span>
+      </aside>
+      <section
+        aria-label="Resumen del equipo seleccionado"
+        class="grid grid-cols-2 gap-3 lg:grid-cols-4"
+      >
+        @for (indicador of contexto.indicadores; track indicador.etiqueta) {
+          <mat-card
+            class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+            ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
+            ><strong class="font-display text-2xl">{{ indicador.valor }}</strong
+            ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span></mat-card
+          >
+        }
+      </section>
+      <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <mat-card
+          class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+        >
+          <h2 class="m-0 text-xl font-bold">Actividad en {{ contexto.nombre }}</h2>
+          <table
+            class="hidden w-full table-fixed border-separate border-spacing-y-3 text-left text-sm lg:table"
+          >
+            <caption class="sr-only">
+              Actividad de ejemplo en
+              {{
+                contexto.nombre
+              }}
+            </caption>
+            <thead class="bg-[#1e1536] text-kl-muted">
+              <tr>
+                @for (titulo of ['Problema', 'Plataforma', 'Estado', 'Equipo']; track titulo) {
+                  <th scope="col" class="p-3">{{ titulo }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (fila of contexto.actividad; track fila.problema) {
+                <tr>
+                  <th
+                    scope="row"
+                    class="rounded-l-xl border-0 border-y border-l border-solid border-kl-border-strong p-3 font-normal"
+                  >
+                    {{ fila.problema }}
+                  </th>
+                  <td class="border-0 border-y border-solid border-kl-border-strong p-3">
+                    {{ fila.plataforma }}
+                  </td>
+                  <td class="border-0 border-y border-solid border-kl-border-strong p-3">
+                    {{ fila.estado }}
+                  </td>
+                  <td
+                    class="rounded-r-xl border-0 border-y border-r border-solid border-kl-border-strong p-3"
+                  >
+                    {{ contexto.nombre }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <ul class="m-0 flex list-none flex-col gap-4 p-0 lg:hidden">
+            @for (fila of contexto.actividad; track fila.problema) {
+              <li
+                class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm"
+              >
+                <strong>{{ fila.problema }}</strong
+                ><span class="font-mono text-xs text-[#ccb2ff]">{{ contexto.nombre }}</span
+                ><span class="text-kl-muted">Plataforma: {{ fila.plataforma }}</span
+                ><span class="text-kl-muted">Estado: {{ fila.estado }}</span>
+              </li>
+            }
+          </ul>
+        </mat-card>
+        <aside class="flex min-w-0 flex-col gap-6">
+          <mat-card
+            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            ><h2 class="m-0 text-xl font-bold">Un problema, dos registros</h2>
+            <p class="m-0 text-sm leading-5 text-kl-muted">
+              Theatre Square está asignado en ambos grupos. En Equipo Alfa figura resuelto; en
+              Grafos y DP permanece sin resolver hasta registrar su actividad en ese contexto.
+            </p></mat-card
+          >
+          <mat-card
+            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            ><h2 class="m-0 text-xl font-bold">Qué cambia al seleccionar</h2>
+            <p class="m-0 text-sm leading-5 text-kl-muted">
+              Se actualizan únicamente las asignaciones, el progreso y las métricas del grupo
+              elegido. Las estadísticas del otro equipo permanecen intactas.
+            </p></mat-card
+          >
+        </aside>
+      </div>
+      <nav aria-label="Vistas de progreso" class="flex flex-wrap gap-3">
+        <a mat-stroked-button routerLink="/progreso">Progreso por tema</a
+        ><a mat-stroked-button routerLink="/ranking">Ver ranking de Equipo Alfa</a>
+      </nav>
+      <footer class="flex flex-col gap-2 text-xs text-kl-muted">
+        <p role="note" class="m-0">
+          Vista de demostración · Se alternan dos ejemplos del diseño. Sin consulta, cálculo ni
+          transferencia real de progreso.
+        </p>
+        <p class="m-0">© 2026 Kodikalab · GPC UPC</p>
+        <p class="m-0">Términos de Servicio · Política de privacidad</p>
+      </footer>
+    </main>
+  </div>
+}

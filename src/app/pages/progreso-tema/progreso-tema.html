@@ -1,0 +1,208 @@
+<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+  <div
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
+  ></div>
+  <header class="border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+    <mat-toolbar
+      class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14"
+    >
+      <a routerLink="/inicio" class="flex items-center gap-2 text-xl font-bold"
+        ><picture
+          ><source media="(min-width: 1024px)" srcset="/images/progreso-ranking/logo.svg" />
+          <img src="/images/progreso-ranking/logo-movil.svg" alt="" /></picture
+        >Kodikalab</a
+      >
+      <nav
+        aria-label="Navegación principal"
+        class="mr-auto ml-10 hidden items-center gap-8 text-sm lg:flex"
+      >
+        <a routerLink="/inicio">Inicio</a><a routerLink="/inicio" fragment="problemas">Problemas</a
+        ><a routerLink="/inicio" fragment="competencias">Concursos</a
+        ><a routerLink="/inicio" fragment="grupos">Grupos</a
+        ><span class="text-kl-muted" title="Próximamente">Recursos</span>
+      </nav>
+      <div class="flex items-center gap-4">
+        <img
+          src="/images/progreso-ranking/campana.svg"
+          alt="Notificaciones no disponibles en esta maqueta"
+        /><a
+          routerLink="/perfil"
+          aria-label="Ver perfil"
+          class="flex size-9 items-center justify-center rounded-full bg-kl-accent text-xs"
+          >MP</a
+        ><img class="lg:hidden" src="/images/progreso-ranking/abajo.svg" alt="" />
+      </div>
+    </mat-toolbar>
+  </header>
+  <main
+    class="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 pt-5 pb-14 lg:gap-6 lg:px-[120px] lg:pt-8"
+  >
+    <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+      <div>
+        <h1 class="m-0 font-display text-2xl leading-tight font-bold lg:text-[40px]">
+          Mi progreso por tema
+        </h1>
+        <p class="mt-2 mb-0 text-sm text-kl-muted lg:text-lg">
+          Identifica tus fortalezas y los temas que conviene reforzar.
+        </p>
+      </div>
+      <div class="flex flex-col gap-1.5 lg:w-[280px]">
+        <span class="text-sm font-bold">Equipo</span>
+        <div
+          class="flex h-11 items-center justify-between rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5"
+        >
+          <span>Equipo Alfa</span><img src="/images/progreso-ranking/abajo.svg" alt="" />
+        </div>
+      </div>
+    </div>
+    <section
+      aria-label="Resumen del progreso"
+      class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4"
+    >
+      @for (indicador of indicadores; track indicador.etiqueta) {
+        <mat-card
+          class="gap-1.5 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-3.5 lg:p-5"
+        >
+          <span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
+          ><strong class="font-display text-2xl lg:text-[40px]">{{ indicador.valor }}</strong
+          ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span>
+        </mat-card>
+      }
+    </section>
+    <aside
+      class="flex items-start gap-3 rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
+    >
+      <img src="/images/progreso-ranking/info.svg" alt="" />
+      <div>
+        <strong class="text-[#60b0ff]">1 problema asignado no tiene tema</strong>
+        <p class="mt-1 mb-0">
+          No se incluye en ningún tema, pero sí cuenta en el total de problemas asignados.
+        </p>
+      </div>
+    </aside>
+    <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
+      <mat-card
+        class="min-w-0 gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+      >
+        <h2 class="m-0 text-xl font-bold">Progreso por tema</h2>
+        <p class="m-0 text-sm text-kl-muted">
+          Ordenados del más débil al más fuerte según tu cobertura.
+        </p>
+        @for (tema of temas; track tema.nombre) {
+          <article
+            class="flex flex-col gap-3 rounded-[14px] border border-solid border-[#2b2760] bg-white/3 p-3.5 xl:flex-row xl:items-center xl:gap-4 xl:px-5 xl:py-4"
+          >
+            <div class="min-w-0 flex-1">
+              <h3 class="m-0 text-sm font-bold">{{ tema.nombre }}</h3>
+              <p class="mt-0.5 mb-0 text-xs text-kl-muted">{{ tema.detalle }}</p>
+            </div>
+            <div class="w-full xl:w-[28%]">
+              <div class="mb-1.5 flex justify-between gap-2 font-mono text-xs">
+                <span class="text-kl-muted">Cobertura</span><strong>{{ tema.cobertura }}%</strong>
+              </div>
+              <div
+                role="progressbar"
+                [attr.aria-label]="tema.nombre"
+                [attr.aria-valuenow]="tema.cobertura"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                class="h-2 overflow-hidden rounded-full bg-[#2e2e2e]"
+              >
+                <div
+                  class="h-full rounded-full"
+                  [style.background-color]="
+                    tema.reforzar
+                      ? '#fbbf24'
+                      : tema.cobertura === 100
+                        ? '#4ade80'
+                        : 'var(--kl-accent)'
+                  "
+                  [style.width.%]="tema.cobertura"
+                ></div>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 text-xs xl:w-[132px] xl:flex-col xl:items-start">
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[#60b0ff]"
+                [class.bg-[#0e2238]]="tema.cobertura < 100"
+                [class.bg-[#0f2a1b]]="tema.cobertura === 100"
+                [class.text-green-400]="tema.cobertura === 100"
+                ><img
+                  [src]="
+                    tema.cobertura === 100
+                      ? '/images/progreso-ranking/punto-verde.svg'
+                      : '/images/progreso-ranking/punto-azul.svg'
+                  "
+                  alt=""
+                />{{ tema.cobertura === 100 ? 'Completado' : 'En progreso' }}</span
+              >
+              @if (tema.reforzar) {
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-full bg-[#2e2410] px-3 py-1 text-amber-400"
+                  ><img src="/images/progreso-ranking/punto-amarillo.svg" alt="" />Por
+                  reforzar</span
+                >
+              }
+              @if (tema.verificar) {
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-full bg-[#212121] px-3 py-1 text-kl-muted"
+                  ><img src="/images/progreso-ranking/punto-gris.svg" alt="" />1 por verificar</span
+                >
+              }
+            </div>
+          </article>
+        }
+      </mat-card>
+      <aside class="flex min-w-0 flex-col gap-4">
+        <mat-card
+          class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+          ><h2 class="m-0 text-xl font-bold">Para reforzar</h2>
+          @for (nombre of ['Teoría de números', 'Geometría']; track nombre) {
+            <div
+              class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+            >
+              <strong>{{ nombre }}</strong
+              ><span class="font-mono text-xs text-amber-400">25%</span>
+            </div>
+          }
+          <p class="m-0 text-xs text-kl-muted">
+            Son los temas con menor cobertura. Empieza por ellos.
+          </p></mat-card
+        >
+        <mat-card
+          class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+          ><h2 class="m-0 text-xl font-bold">Fortalezas</h2>
+          <div
+            class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+          >
+            <strong>Búsqueda binaria</strong
+            ><span class="font-mono text-xs text-green-400">100%</span>
+          </div>
+          <div
+            class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+          >
+            <strong>Estructuras de datos</strong
+            ><span class="font-mono text-xs text-green-400">80%</span>
+          </div></mat-card
+        >
+        <mat-card
+          class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+          ><h2 class="m-0 text-xl font-bold">Cómo se calcula</h2>
+          <p class="m-0 text-xs leading-relaxed text-kl-muted">
+            Cobertura = problemas distintos resueltos ÷ asignados a tu equipo. Un problema cuenta
+            una sola vez aunque tenga varios temas. Se marcan para reforzar los temas con la menor
+            cobertura mientras sea menor a 100%.
+          </p></mat-card
+        >
+      </aside>
+    </div>
+    <nav aria-label="Vistas de progreso" class="flex flex-wrap gap-3">
+      <a mat-stroked-button routerLink="/ranking">Ver ranking</a
+      ><a mat-stroked-button routerLink="/progreso/equipos">Progreso por equipo</a>
+    </nav>
+    <p role="note" class="m-0 text-xs text-kl-muted">
+      Vista de demostración · Datos de ejemplo del diseño. La consulta de equipos estará disponible
+      al conectar el backend.
+    </p>
+  </main>
+</div>

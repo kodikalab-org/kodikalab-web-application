@@ -1,0 +1,159 @@
+<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+  <div
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
+  ></div>
+  <header class="border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+    <mat-toolbar
+      class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14"
+    >
+      <a routerLink="/inicio" class="flex items-center gap-2 text-xl font-bold"
+        ><picture
+          ><source media="(min-width: 1024px)" srcset="/images/progreso-ranking/logo.svg" />
+          <img src="/images/progreso-ranking/logo-movil.svg" alt="" /></picture
+        >Kodikalab</a
+      >
+      <nav
+        aria-label="Navegación principal"
+        class="mr-auto ml-10 hidden items-center gap-8 text-sm lg:flex"
+      >
+        <a routerLink="/inicio">Inicio</a><a routerLink="/inicio" fragment="problemas">Problemas</a
+        ><a routerLink="/inicio" fragment="competencias">Concursos</a
+        ><a routerLink="/inicio" fragment="grupos" class="text-kl-accent-text">Grupos</a
+        ><span class="text-kl-muted" title="Próximamente">Recursos</span>
+      </nav>
+      <div class="flex items-center gap-4">
+        <img
+          src="/images/progreso-ranking/campana.svg"
+          alt="Notificaciones no disponibles en esta maqueta"
+        /><a
+          routerLink="/perfil"
+          aria-label="Ver perfil"
+          class="flex size-9 items-center justify-center rounded-full bg-kl-accent text-xs"
+          >CR</a
+        ><img class="lg:hidden" src="/images/progreso-ranking/abajo.svg" alt="" />
+      </div>
+    </mat-toolbar>
+  </header>
+  <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
+    <div>
+      <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
+        <a routerLink="/inicio">Inicio</a> / Mi espacio
+      </p>
+      <h1 class="m-0 font-display text-2xl leading-tight font-bold lg:text-[40px]">
+        Ranking de mi equipo
+      </h1>
+      <p class="mt-2 mb-0 text-base text-kl-muted">
+        Conoce el avance de los integrantes sin mezclar la actividad de otros equipos.
+      </p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-bold">Equipo</span>
+      <div class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm">
+        Equipo Alfa
+      </div>
+      <span class="text-xs text-kl-muted"
+        >Solo se muestran las resoluciones válidas de este equipo.</span
+      >
+    </div>
+    <section aria-label="Resumen del ranking" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      @for (indicador of indicadores; track indicador.etiqueta) {
+        <mat-card
+          class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+          ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
+          ><strong class="font-display text-2xl">{{ indicador.valor }}</strong
+          ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span></mat-card
+        >
+      }
+    </section>
+    <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <mat-card
+        class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+      >
+        <h2 class="m-0 text-xl font-bold">Clasificación de integrantes</h2>
+        <p class="m-0 text-sm text-kl-muted">
+          Orden: problemas distintos resueltos · de mayor a menor
+        </p>
+        <table
+          class="hidden w-full table-fixed border-separate border-spacing-y-3 text-left text-sm lg:table"
+        >
+          <caption class="sr-only">
+            Clasificación de Equipo Alfa, primeros cinco integrantes
+          </caption>
+          <thead class="bg-[#1e1536] text-kl-muted">
+            <tr>
+              @for (titulo of ['Posición', 'Integrante', 'Resueltos', 'Estado']; track titulo) {
+                <th scope="col" class="p-3">{{ titulo }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (integrante of integrantes; track integrante.nombre) {
+              <tr>
+                <td
+                  class="rounded-l-xl border-0 border-y border-l border-solid border-kl-border-strong p-3"
+                >
+                  {{ integrante.posicion }}
+                </td>
+                <th
+                  scope="row"
+                  class="border-0 border-y border-solid border-kl-border-strong p-3 font-normal"
+                >
+                  {{ integrante.nombre }}
+                </th>
+                <td class="border-0 border-y border-solid border-kl-border-strong p-3">
+                  {{ integrante.resueltos }}
+                </td>
+                <td
+                  class="rounded-r-xl border-0 border-y border-r border-solid border-kl-border-strong p-3"
+                >
+                  {{ integrante.estado }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <ol class="m-0 flex list-none flex-col gap-4 p-0 lg:hidden">
+          @for (integrante of integrantes; track integrante.nombre) {
+            <li
+              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm"
+            >
+              <strong>{{ integrante.posicion }}</strong
+              ><span class="font-mono text-xs text-[#ccb2ff]">{{ integrante.estado }}</span
+              ><span class="text-kl-muted">Integrante: {{ integrante.nombre }}</span
+              ><span class="text-kl-muted">Resueltos: {{ integrante.resueltos }}</span>
+            </li>
+          }
+        </ol>
+        <p class="m-0 text-xs text-kl-muted">Mostrando 5 de 14 integrantes</p>
+      </mat-card>
+      <aside class="flex min-w-0 flex-col gap-6">
+        <mat-card
+          class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          ><h2 class="m-0 text-xl font-bold">Cómo se ordena</h2>
+          <p class="m-0 text-sm leading-5 text-kl-muted">
+            Cada problema distinto cuenta una vez por integrante y equipo. Los registros pendientes
+            de verificación no suman. En caso de empate se comparte la posición.
+          </p></mat-card
+        >
+        <mat-card
+          class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          ><h2 class="m-0 text-xl font-bold">Tu avance</h2>
+          <p class="m-0 text-sm leading-5 text-kl-muted">
+            Has resuelto 16 problemas en Equipo Alfa. Tu actividad en Grafos y DP no modifica este
+            ranking.
+          </p></mat-card
+        >
+        <a mat-flat-button routerLink="/progreso" class="w-full self-start lg:w-auto"
+          >Ver mi progreso</a
+        >
+      </aside>
+    </div>
+    <footer class="flex flex-col gap-2 text-xs text-kl-muted">
+      <p role="note" class="m-0">
+        Vista de demostración · Ranking fijo del diseño, sin cálculo ni consulta real.
+      </p>
+      <p class="m-0">© 2026 Kodikalab · GPC UPC</p>
+      <p class="m-0">Términos de Servicio · Política de privacidad</p>
+    </footer>
+  </main>
+</div>

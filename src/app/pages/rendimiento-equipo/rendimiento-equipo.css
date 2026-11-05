@@ -1,0 +1,11 @@
+:host {
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+  --mat-card-elevated-container-color: transparent;
+  --mat-card-elevated-container-shape: 16px;
+  --mat-card-elevated-container-elevation: none;
+  --mat-form-field-filled-container-color: #212121;
+  --mat-form-field-filled-container-shape: 12px;
+  --mat-form-field-container-text-font: var(--kl-font-body);
+  --mat-select-trigger-text-size: 14px;
+}

@@ -4,6 +4,25 @@ import { Login } from './pages/auth/login/login';
 import { Registro } from './pages/auth/registro/registro';
 
 export const routes: Routes = [
+  {
+    path: 'progreso',
+    loadComponent: () => import('./pages/progreso-tema/progreso-tema').then((m) => m.ProgresoTema),
+  },
+  {
+    path: 'ranking',
+    loadComponent: () =>
+      import('./pages/ranking-equipo/ranking-equipo').then((m) => m.RankingEquipo),
+  },
+  {
+    path: 'coach/rendimiento',
+    loadComponent: () =>
+      import('./pages/rendimiento-equipo/rendimiento-equipo').then((m) => m.RendimientoEquipo),
+  },
+  {
+    path: 'progreso/equipos',
+    loadComponent: () =>
+      import('./pages/progreso-equipos/progreso-equipos').then((m) => m.ProgresoEquipos),
+  },
   { path: '', component: LandingPage },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
@@ -75,7 +94,9 @@ export const routes: Routes = [
   {
     path: 'onboarding/coach/experiencia',
     loadComponent: () =>
-      import('./pages/coach/onboarding/experiencia/experiencia').then((m) => m.OnboardingExperiencia),
+      import('./pages/coach/onboarding/experiencia/experiencia').then(
+        (m) => m.OnboardingExperiencia,
+      ),
   },
   {
     path: 'onboarding/coach/presentacion',

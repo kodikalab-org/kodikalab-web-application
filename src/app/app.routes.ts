@@ -7,6 +7,10 @@ import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/cor
 
 const appRoutes: Routes = [
   {
+    path: 'recursos',
+    loadComponent: () => import('./pages/recursos-academicos/recursos-academicos').then((m) => m.RecursosAcademicos),
+  },
+  {
     path: 'coach/competencias',
     providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-PE' }],
     loadComponent: () => import('./pages/competencias/competencias').then((m) => m.Competencias),

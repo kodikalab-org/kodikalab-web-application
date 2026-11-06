@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { apiError } from '../../../core/api';
 import { CoachGroup, Membership, MembershipDecision, TeamsApi } from '../../../core/teams-api';
 
-type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO';
+type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO' | 'EXPULSADO';
 
 /**
  * US06 — El coach revisa las postulaciones del grupo, acepta, rechaza o pide una
@@ -131,6 +131,26 @@ export class SolicitudesGrupo {
       next: (response) => {
         this.guardando.set(false);
         this.confirmandoExpulsion.set(null);
+        this.feedback.set({ tipo: 'ok', texto: response.message });
+        this.cargar();
+        this.api.loadMine().subscribe({ next: () => undefined });
+      },
+      error: (error: unknown) => {
+        this.guardando.set(false);
+        this.feedback.set({ tipo: 'error', texto: apiError(error) });
+      },
+    });
+  }
+
+  /** US06: vuelve a incorporar a alguien que fue expulsado. */
+  protected readmitir(request: Membership): void {
+    const groupId = this.selectedGroupId();
+    if (groupId === null || this.guardando()) return;
+
+    this.guardando.set(true);
+    this.api.decide(groupId, request.membershipId, 'READMITIR').subscribe({
+      next: (response) => {
+        this.guardando.set(false);
         this.feedback.set({ tipo: 'ok', texto: response.message });
         this.cargar();
         this.api.loadMine().subscribe({ next: () => undefined });

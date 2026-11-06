@@ -185,3 +185,52 @@ export function readFieldErrors(error: unknown): Record<string, string> {
 export function httpStatus(error: unknown): number {
   return error instanceof HttpErrorResponse ? error.status : 0;
 }
+
+/** Minúsculas y sin acentos, para comparar textos de usuario y mensajes del backend. */
+export function normalizeText(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function messageOf(error: unknown): string {
+  if (!(error instanceof HttpErrorResponse)) return '';
+  const message = (error.error as { message?: unknown } | null)?.message;
+  return typeof message === 'string' ? message : '';
+}
+
+/** Causa por la que `POST /teams/{id}/join` no registró el ingreso. */
+export type JoinFailure =
+  | 'SOLICITUD_DUPLICADA'
+  | 'YA_ES_MIEMBRO'
+  | 'SIN_CUPO'
+  | 'EXPULSADO'
+  | 'NO_ADMITE'
+  | 'SIN_PERMISO'
+  | 'NO_ENCONTRADO'
+  | 'OTRO';
+
+/**
+ * Clasifica el error del ingreso. Los 409 del backend traen solo un mensaje, así que se
+ * compara sin acentos ni mayúsculas y buscando varias palabras clave por causa.
+ */
+export function classifyJoinError(error: unknown): JoinFailure {
+  const status = httpStatus(error);
+  if (status === 403) return 'SIN_PERMISO';
+  if (status === 404) return 'NO_ENCONTRADO';
+  if (status !== 409) return 'OTRO';
+
+  const message = normalizeText(messageOf(error));
+  if (/expuls/.test(message)) return 'EXPULSADO';
+  if (/cupo|lleno|llena|capacidad|vacante|completo/.test(message)) return 'SIN_CUPO';
+  if (/pendiente|solicitud (activa|previa|registrada)|duplicad/.test(message)) {
+    return 'SOLICITUD_DUPLICADA';
+  }
+  if (/miembro|integrante|pertenec/.test(message)) return 'YA_ES_MIEMBRO';
+  if (/no admite|no acepta|archivad|inactiv|no esta (publicad|disponible|activ)/.test(message)) {
+    return 'NO_ADMITE';
+  }
+  return 'OTRO';
+}

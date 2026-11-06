@@ -13,6 +13,7 @@ import {
   CoachGroup,
   CreateGroupRequest,
   CreateGroupResponse,
+  JoinGroupResponse,
   Membership,
   TeamsApi,
 } from '../../core/teams-api';
@@ -59,20 +60,29 @@ class TeamsStub {
     join: [] as { groupId: number; code: string }[],
     create: [] as CreateGroupRequest[],
     decide: [] as { id: number; decision: string }[],
+    loadGroups: 0,
+    loadMine: 0,
   };
 
   /** Respuestas programables: cada prueba reemplaza la que necesita. */
   createResult: () => Observable<CreateGroupResponse> = () => of(CREADO);
 
+  groupsResult: () => Observable<unknown[]> = () => of(this.groups());
+  mineResult: () => Observable<unknown[]> = () => of(this.mine());
+  joinResult: (groupId: number, code: string) => Observable<JoinGroupResponse> = (groupId) =>
+    of({ message: 'ok', membershipId: 1, groupId, status: 'PENDIENTE' });
+
   loadGroups() {
-    return of(this.groups());
+    this.calls.loadGroups++;
+    return this.groupsResult();
   }
   loadMine() {
-    return of(this.mine());
+    this.calls.loadMine++;
+    return this.mineResult();
   }
   join(groupId: number, code = '') {
     this.calls.join.push({ groupId, code });
-    return of({ message: 'ok', membershipId: 1, groupId, status: 'PENDIENTE' });
+    return this.joinResult(groupId, code);
   }
   create(body: CreateGroupRequest) {
     this.calls.create.push(body);
@@ -92,8 +102,13 @@ const routeStub = {
   queryParamMap: of(convertToParamMap({})),
 };
 
-function configure<T>(component: Type<T>, providers: unknown[] = []) {
+function configure<T>(
+  component: Type<T>,
+  providers: unknown[] = [],
+  prepare?: (stub: TeamsStub) => void,
+) {
   const stub = new TeamsStub();
+  prepare?.(stub);
   TestBed.configureTestingModule({
     imports: [component],
     providers: [
@@ -125,30 +140,6 @@ function boton(root: HTMLElement, texto: string) {
 }
 
 describe('Interfaces de grupos (US04, US05 y US06)', () => {
-  it('muestra los grupos publicados que devuelve la API', async () => {
-    const { fixture } = configure(ExplorarGrupos);
-    await settle(fixture);
-
-    const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('Entrenamiento de Grafos');
-    expect(root.textContent).toContain('Mostrando 1 grupos');
-  });
-
-  it('abre la solicitud y envía el ingreso al grupo elegido', async () => {
-    const { stub, fixture } = configure(ExplorarGrupos);
-    await settle(fixture);
-
-    const root = fixture.nativeElement as HTMLElement;
-    const boton = [...root.querySelectorAll('button')].find(
-      (b) => b.textContent?.includes('Unirme'),
-    );
-    expect(boton).toBeTruthy();
-    boton!.click();
-    await settle(fixture);
-
-    expect(stub.calls.join).toEqual([{ groupId: 1, code: '' }]);
-  });
-
   it('lista las solicitudes pendientes del grupo del coach', async () => {
     const { stub, fixture } = configure(SolicitudesGrupo);
     stub.requests.set([
@@ -602,5 +593,480 @@ describe('Grupo creado (US04)', () => {
     expect(root.textContent).not.toContain('Copiar código');
     expect(root.querySelector('a[href="/coach/grupos/solicitudes"]')).toBeTruthy();
     expect(root.querySelector('a[href="/coach/grupos/crear"]')).toBeTruthy();
+  });
+});
+
+interface ExplorarInternals {
+  filtros: FormGroup;
+  codigo: FormGroup;
+  vista(): string;
+  fallo(): string | null;
+  enviando(): boolean;
+  limpiarFiltros(): void;
+}
+
+function grupoApi(
+  groupId: number,
+  name: string,
+  extra: Partial<{
+    description: string;
+    expectedLevel: string;
+    visibility: 'PUBLICO' | 'PROTEGIDO';
+  }> = {},
+) {
+  return {
+    groupId,
+    name,
+    description: extra.description ?? 'Sin más detalles',
+    expectedLevel: extra.expectedLevel ?? 'INTERMEDIO',
+    maxCapacity: 15,
+    sessionSchedule: 'Mar, Jue de 19:00 a 21:00',
+    status: 'ACTIVO' as const,
+    visibility: extra.visibility ?? ('PUBLICO' as const),
+  };
+}
+
+function membresia(groupId: number, status: string) {
+  return {
+    groupId,
+    membership: { membershipId: groupId * 10, status, teamRole: 'MIEMBRO', joinedAt: null, leftAt: null },
+  };
+}
+
+describe('Explorar grupos (US05)', () => {
+  const CATALOGO = [
+    grupoApi(1, 'Entrenamiento de Grafos', { description: 'Grafos y DP', expectedLevel: 'INTERMEDIO' }),
+    grupoApi(2, 'Introducción a Algoritmos', {
+      description: 'Búsqueda binaria y ordenamiento',
+      expectedLevel: 'PRINCIPIANTE',
+      visibility: 'PROTEGIDO',
+    }),
+    grupoApi(3, 'Maratón Avanzada', {
+      description: 'Problemas de ICPC regional',
+      expectedLevel: 'AVANZADO',
+    }),
+  ];
+
+  function abrir(
+    preparar: (stub: TeamsStub) => void = (stub) => {
+      stub.groups.set(CATALOGO as never);
+      stub.mine.set([membresia(2, 'PENDIENTE'), membresia(3, 'ACTIVO')]);
+    },
+  ) {
+    const { stub, fixture } = configure(ExplorarGrupos, [], preparar);
+    const explorar = fixture.componentInstance as unknown as ExplorarInternals;
+    return { stub, fixture, explorar, root: fixture.nativeElement as HTMLElement };
+  }
+
+  /** Nombres de los grupos que muestra el listado, en orden. */
+  function nombres(root: HTMLElement) {
+    return [...root.querySelectorAll('[data-grupo] h2')].map((h) =>
+      h.textContent?.trim(),
+    );
+  }
+
+  async function filtrar(
+    fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+    explorar: ExplorarInternals,
+    valores: Record<string, unknown>,
+  ) {
+    explorar.filtros.patchValue(valores);
+    await settle(fixture);
+  }
+
+  describe('listado, búsqueda y filtros', () => {
+    it('muestra los grupos publicados con un contador real', async () => {
+      const { fixture, root } = abrir();
+      await settle(fixture);
+
+      expect(nombres(root)).toEqual([
+        'Entrenamiento de Grafos',
+        'Introducción a Algoritmos',
+        'Maratón Avanzada',
+      ]);
+      expect(root.textContent).toContain('Mostrando 3 de 3 grupos');
+    });
+
+    it('busca por texto en nombre y descripción sin distinguir acentos ni mayúsculas', async () => {
+      const { fixture, explorar, root } = abrir();
+      await settle(fixture);
+
+      await filtrar(fixture, explorar, { buscar: 'BUSQUEDA' });
+      expect(nombres(root)).toEqual(['Introducción a Algoritmos']);
+      expect(root.textContent).toContain('Mostrando 1 de 3 grupos');
+
+      await filtrar(fixture, explorar, { buscar: '  maraton ' });
+      expect(nombres(root)).toEqual(['Maratón Avanzada']);
+
+      await filtrar(fixture, explorar, { buscar: 'dp' });
+      expect(nombres(root)).toEqual(['Entrenamiento de Grafos']);
+    });
+
+    it('filtra por nivel y combina varios niveles', async () => {
+      const { fixture, explorar, root } = abrir();
+      await settle(fixture);
+
+      await filtrar(fixture, explorar, { intermedio: true });
+      expect(nombres(root)).toEqual(['Entrenamiento de Grafos']);
+
+      await filtrar(fixture, explorar, { avanzado: true });
+      expect(nombres(root)).toEqual(['Entrenamiento de Grafos', 'Maratón Avanzada']);
+    });
+
+    it('filtra por visibilidad', async () => {
+      const { fixture, explorar, root } = abrir();
+      await settle(fixture);
+
+      await filtrar(fixture, explorar, { protegido: true });
+      expect(nombres(root)).toEqual(['Introducción a Algoritmos']);
+
+      await filtrar(fixture, explorar, { protegido: false, publico: true });
+      expect(nombres(root)).toEqual(['Entrenamiento de Grafos', 'Maratón Avanzada']);
+
+      await filtrar(fixture, explorar, { protegido: true });
+      expect(nombres(root).length).toBe(3);
+    });
+
+    it('filtra por mi participación: miembro, pendiente o ambos', async () => {
+      const { fixture, explorar, root } = abrir();
+      await settle(fixture);
+
+      await filtrar(fixture, explorar, { miembro: true });
+      expect(nombres(root)).toEqual(['Maratón Avanzada']);
+
+      await filtrar(fixture, explorar, { miembro: false, pendiente: true });
+      expect(nombres(root)).toEqual(['Introducción a Algoritmos']);
+
+      await filtrar(fixture, explorar, { miembro: true });
+      expect(nombres(root)).toEqual(['Introducción a Algoritmos', 'Maratón Avanzada']);
+    });
+
+    it('combina filtros, avisa cuando nada coincide y permite limpiarlos', async () => {
+      const { fixture, explorar, root } = abrir();
+      await settle(fixture);
+
+      await filtrar(fixture, explorar, { buscar: 'grafos', avanzado: true });
+      expect(nombres(root)).toEqual([]);
+      expect(root.textContent).toContain('Ningún grupo coincide con tu búsqueda');
+      expect(root.textContent).toContain('Mostrando 0 de 3 grupos');
+
+      boton(root, 'Limpiar filtros')!.click();
+      await settle(fixture);
+      expect(nombres(root).length).toBe(3);
+      expect(explorar.filtros.getRawValue()['buscar']).toBe('');
+    });
+
+    it('filtra al escribir en el buscador', async () => {
+      const { fixture, root } = abrir();
+      await settle(fixture);
+
+      const buscador = root.querySelector('#buscar-grupos') as HTMLInputElement;
+      buscador.value = 'icpc';
+      buscador.dispatchEvent(new Event('input'));
+      await settle(fixture);
+
+      expect(nombres(root)).toEqual(['Maratón Avanzada']);
+      expect((boton(root, 'Limpiar') as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('deshabilita Limpiar mientras no hay filtros activos', async () => {
+      const { fixture, root } = abrir();
+      await settle(fixture);
+
+      expect((boton(root, 'Limpiar') as HTMLButtonElement).disabled).toBe(true);
+    });
+  });
+
+  describe('estados de carga', () => {
+    it('muestra un estado vacío cuando no hay grupos', async () => {
+      const { fixture, root } = abrir((stub) => stub.groups.set([]));
+      await settle(fixture);
+
+      expect(root.textContent).toContain('Todavía no hay grupos disponibles');
+      expect(root.textContent).toContain('Mostrando 0 de 0 grupos');
+    });
+
+    it('ante un error de carga muestra el motivo y reintenta con el botón', async () => {
+      const { stub, fixture, root } = abrir((stub) => {
+        stub.groups.set(CATALOGO as never);
+        stub.groupsResult = () => throwError(() => httpError(500));
+      });
+      await settle(fixture);
+
+      expect(root.textContent).toContain('No pudimos cargar los grupos');
+      expect(root.textContent).not.toContain('Todavía no hay grupos disponibles');
+
+      stub.groupsResult = () => of(CATALOGO);
+      boton(root, 'Reintentar')!.click();
+      await settle(fixture);
+
+      expect(root.textContent).not.toContain('No pudimos cargar los grupos');
+      expect(nombres(root).length).toBe(3);
+    });
+
+    it('si falla la consulta de membresías avisa y sigue mostrando los grupos', async () => {
+      const { fixture, root } = abrir((stub) => {
+        stub.groups.set(CATALOGO as never);
+        stub.mineResult = () => throwError(() => httpError(500));
+      });
+      await settle(fixture);
+
+      expect(root.textContent).toContain('No pudimos consultar tus membresías');
+      expect(nombres(root).length).toBe(3);
+    });
+  });
+
+  describe('acción según el estado de la membresía', () => {
+    async function tarjeta(visibility: 'PUBLICO' | 'PROTEGIDO', estado: string | null) {
+      const { fixture, root } = abrir((stub) => {
+        stub.groups.set([grupoApi(1, 'Grupo de prueba', { visibility })] as never);
+        stub.mine.set(estado ? [membresia(1, estado)] : []);
+      });
+      await settle(fixture);
+      return root;
+    }
+
+    it('sin membresía ofrece Unirme en un grupo público y Solicitar ingreso en uno protegido', async () => {
+      const publico = await tarjeta('PUBLICO', null);
+      expect(boton(publico, 'Unirme')).toBeTruthy();
+      expect(publico.textContent).toContain('Abierto');
+      TestBed.resetTestingModule();
+
+      const protegido = await tarjeta('PROTEGIDO', null);
+      expect(boton(protegido, 'Solicitar ingreso')).toBeTruthy();
+      expect(boton(protegido, 'Unirme')).toBeUndefined();
+    });
+
+    it('con solicitud PENDIENTE muestra Solicitud pendiente y no permite volver a solicitar', async () => {
+      const root = await tarjeta('PROTEGIDO', 'PENDIENTE');
+
+      expect(root.textContent).toContain('Solicitud pendiente');
+      expect(boton(root, 'Solicitar ingreso')).toBeUndefined();
+      expect(boton(root, 'Unirme')).toBeUndefined();
+    });
+
+    it('con membresía ACTIVO muestra Eres miembro y un enlace al grupo', async () => {
+      const root = await tarjeta('PUBLICO', 'ACTIVO');
+
+      expect(root.textContent).toContain('Eres miembro');
+      expect(root.querySelector('a[href^="/inicio"]')?.textContent).toContain('Ver grupo');
+      expect(boton(root, 'Unirme')).toBeUndefined();
+    });
+
+    it('con solicitud RECHAZADA o tras RETIRARSE permite volver a solicitar', async () => {
+      for (const estado of ['RECHAZADO', 'RETIRADO']) {
+        const protegido = await tarjeta('PROTEGIDO', estado);
+        expect(boton(protegido, 'Volver a solicitar'), estado).toBeTruthy();
+        TestBed.resetTestingModule();
+
+        const publico = await tarjeta('PUBLICO', estado);
+        expect(boton(publico, 'Volver a unirme'), estado).toBeTruthy();
+        TestBed.resetTestingModule();
+      }
+    });
+
+    it('con membresía EXPULSADO deshabilita la acción y explica el motivo', async () => {
+      const root = await tarjeta('PUBLICO', 'EXPULSADO');
+
+      const accion = boton(root, 'No disponible') as HTMLButtonElement;
+      expect(accion.disabled).toBe(true);
+      expect(root.textContent).toContain('no puedes volver a solicitar ingreso');
+      expect(boton(root, 'Unirme')).toBeUndefined();
+    });
+  });
+
+  /** Catálogo sin membresías: todos los grupos admiten la acción de ingresar. */
+  const sinMembresias = (stub: TeamsStub) => {
+    stub.groups.set(CATALOGO as never);
+    stub.mine.set([]);
+  };
+
+  describe('ingreso a un grupo', () => {
+    it('un grupo público registra el ingreso al instante y confirma la membresía', async () => {
+      const { stub, fixture, root } = abrir(sinMembresias);
+      stub.joinResult = (groupId) =>
+        of({ message: 'ok', membershipId: 1, groupId, status: 'ACTIVO' });
+      await settle(fixture);
+
+      boton(root, 'Unirme')!.click();
+      await settle(fixture);
+
+      expect(stub.calls.join).toEqual([{ groupId: 1, code: '' }]);
+      expect(root.textContent).toContain('Ya eres parte del grupo');
+    });
+
+    it('un grupo protegido sin código deja la solicitud pendiente', async () => {
+      const { stub, fixture, root } = abrir(sinMembresias);
+      await settle(fixture);
+
+      boton(root, 'Solicitar ingreso')!.click();
+      await settle(fixture);
+      expect(root.querySelector('[role="dialog"]')).toBeTruthy();
+      expect(root.textContent).toContain('Código de invitación (opcional)');
+
+      (root.querySelector('button[type="submit"]') as HTMLButtonElement).click();
+      await settle(fixture);
+
+      expect(stub.calls.join).toEqual([{ groupId: 2, code: '' }]);
+      expect(root.textContent).toContain('Solicitud enviada');
+    });
+
+    it('recorta los espacios del código y lo envía', async () => {
+      const { stub, fixture, root } = abrir(sinMembresias);
+      stub.joinResult = (groupId) =>
+        of({ message: 'ok', membershipId: 1, groupId, status: 'ACTIVO' });
+      await settle(fixture);
+
+      boton(root, 'Solicitar ingreso')!.click();
+      await settle(fixture);
+      const codigo = root.querySelector('#invitacion') as HTMLInputElement;
+      codigo.value = '  A1B2C3  ';
+      codigo.dispatchEvent(new Event('input'));
+      await settle(fixture);
+      (root.querySelector('button[type="submit"]') as HTMLButtonElement).click();
+      await settle(fixture);
+
+      expect(stub.calls.join).toEqual([{ groupId: 2, code: 'A1B2C3' }]);
+      expect(root.textContent).toContain('Ya eres parte del grupo');
+    });
+
+    it('rechaza códigos con símbolos o espacios internos con un mensaje claro', async () => {
+      const { stub, fixture, root } = abrir(sinMembresias);
+      await settle(fixture);
+
+      boton(root, 'Solicitar ingreso')!.click();
+      await settle(fixture);
+      const codigo = root.querySelector('#invitacion') as HTMLInputElement;
+      for (const invalido of ['AB-12', 'AB 12', 'ñandú']) {
+        codigo.value = invalido;
+        codigo.dispatchEvent(new Event('input'));
+        codigo.dispatchEvent(new Event('blur'));
+        await settle(fixture);
+
+        expect(root.querySelector('mat-error')?.textContent, invalido).toContain(
+          'solo puede tener letras y números',
+        );
+        expect((root.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(true);
+      }
+      expect(stub.calls.join).toEqual([]);
+    });
+
+    it('ingresar con código exige elegir el grupo y escribir el código', async () => {
+      const { stub, fixture, explorar, root } = abrir(sinMembresias);
+      stub.joinResult = (groupId) =>
+        of({ message: 'ok', membershipId: 1, groupId, status: 'ACTIVO' });
+      await settle(fixture);
+
+      boton(root, 'Ingresar con código')!.click();
+      await settle(fixture);
+      const enviar = root.querySelector('button[type="submit"]') as HTMLButtonElement;
+      expect(enviar.disabled).toBe(true);
+
+      explorar.codigo.patchValue({ grupo: 2 });
+      await settle(fixture);
+      expect(enviar.disabled).toBe(true);
+      explorar.codigo.patchValue({ invitacion: ' Z9Y8X7 ' });
+      await settle(fixture);
+      expect(enviar.disabled).toBe(false);
+
+      enviar.click();
+      await settle(fixture);
+      expect(stub.calls.join).toEqual([{ groupId: 2, code: 'Z9Y8X7' }]);
+      expect(root.textContent).toContain('Ya eres parte del grupo');
+    });
+
+    it('evita el doble envío mientras se registra el ingreso', async () => {
+      const { stub, fixture, explorar, root } = abrir(sinMembresias);
+      const respuesta = new Subject<JoinGroupResponse>();
+      stub.joinResult = () => respuesta;
+      await settle(fixture);
+
+      boton(root, 'Unirme')!.click();
+      await settle(fixture);
+      expect(explorar.enviando()).toBe(true);
+      expect((boton(root, 'Unirme') as HTMLButtonElement).disabled).toBe(true);
+      boton(root, 'Unirme')!.click();
+
+      expect(stub.calls.join.length).toBe(1);
+    });
+  });
+
+  describe('errores al ingresar', () => {
+    const conflictos: [string, string, string][] = [
+      ['Ya tienes una solicitud pendiente para este grupo', 'duplicada', 'Ya tienes una solicitud pendiente'],
+      ['YA TIENES UNA SOLICITUD PENDIENTE PARA ESTE GRUPO', 'duplicada', 'Ya tienes una solicitud pendiente'],
+      ['Ya eres miembro ACTIVO de este grupo', 'duplicada', 'Ya eres miembro de este grupo'],
+      ['El grupo alcanzó su cupo máximo', 'sin-cupos', 'El grupo no tiene cupo'],
+      ['No hay vacantes: el grupo está LLENO', 'sin-cupos', 'El grupo no tiene cupo'],
+      ['Un integrante EXPULSADO no puede volver a solicitar ingreso', 'no-admite', 'No puedes volver a este grupo'],
+      ['El grupo archivado no admite postulaciones', 'no-admite', 'Este grupo no admite postulaciones'],
+    ];
+
+    for (const [mensaje, vista, titulo] of conflictos) {
+      it(`409 «${mensaje}» muestra «${titulo}»`, async () => {
+        const { stub, fixture, explorar, root } = abrir(sinMembresias);
+        stub.joinResult = () => throwError(() => httpError(409, { message: mensaje }));
+        await settle(fixture);
+        const cargasPrevias = stub.calls.loadGroups;
+
+        boton(root, 'Unirme')!.click();
+        await settle(fixture);
+
+        expect(explorar.vista()).toBe(vista);
+        expect(root.querySelector('[role="dialog"] h2')?.textContent).toContain(titulo);
+        expect(root.querySelector('[role="dialog"] [role="alert"]')?.textContent).toContain(mensaje);
+        // El estado real pudo cambiar: se vuelve a consultar el listado.
+        expect(stub.calls.loadGroups).toBe(cargasPrevias + 1);
+      });
+    }
+
+    it('403 explica que solo los practicantes con perfil pueden unirse', async () => {
+      const { stub, fixture, root } = abrir(sinMembresias);
+      stub.joinResult = () => throwError(() => httpError(403));
+      await settle(fixture);
+
+      boton(root, 'Unirme')!.click();
+      await settle(fixture);
+
+      expect(root.querySelector('[role="dialog"]')?.textContent).toContain(
+        'solo los practicantes con el perfil completo',
+      );
+    });
+
+    it('404 informa que el grupo ya no está disponible', async () => {
+      const { stub, fixture, root } = abrir(sinMembresias);
+      stub.joinResult = () => throwError(() => httpError(404));
+      await settle(fixture);
+
+      boton(root, 'Unirme')!.click();
+      await settle(fixture);
+
+      expect(root.querySelector('[role="dialog"] h2')?.textContent).toContain(
+        'El grupo ya no está disponible',
+      );
+    });
+
+    it('un error de red permite reintentar el mismo ingreso', async () => {
+      const { stub, fixture, root } = abrir(sinMembresias);
+      stub.joinResult = () => throwError(() => httpError(0));
+      await settle(fixture);
+
+      boton(root, 'Unirme')!.click();
+      await settle(fixture);
+      expect(root.querySelector('[role="dialog"]')?.textContent).toContain(
+        'No pudimos conectar con el servidor',
+      );
+
+      stub.joinResult = (groupId) =>
+        of({ message: 'ok', membershipId: 1, groupId, status: 'ACTIVO' });
+      boton(root, 'Reintentar')!.click();
+      await settle(fixture);
+
+      expect(stub.calls.join).toEqual([
+        { groupId: 1, code: '' },
+        { groupId: 1, code: '' },
+      ]);
+      expect(root.textContent).toContain('Ya eres parte del grupo');
+    });
   });
 });

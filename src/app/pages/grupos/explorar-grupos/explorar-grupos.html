@@ -1,6 +1,8 @@
 @let vistaActual = vista();
 @let grupo = seleccionado();
-@let modal = ['solicitar', 'enviada', 'ingreso', 'codigo', 'estado', 'duplicada', 'sin-cupos', 'error'].includes(vistaActual);
+@let modal = vistaActual !== '';
+@let enFormulario = vistaActual === 'solicitar' || vistaActual === 'codigo';
+@let enResultado = vistaActual === 'duplicada' || vistaActual === 'sin-cupos' || vistaActual === 'no-admite' || vistaActual === 'error';
 <main
   class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1600px] px-4 pt-7 pb-16 lg:min-h-[1132px] lg:px-14"
   [attr.inert]="modal ? '' : null"
@@ -12,16 +14,23 @@
         Únete a grupos de entrenamiento, practica con tu comunidad y mejora tus habilidades.
       </p>
     </div>
-    <button mat-stroked-button type="button" (click)="abrirConCodigo()">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="abrirConCodigo()"
+      [disabled]="grupos().length === 0"
+    >
       <img src="/images/grupos/415-19197-imgIconKey.svg" width="18" height="18" alt="" />Ingresar
       con código</button
     >
   </div>
 
-  @if (error()) {
-    <section role="alert" class="mb-6 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
-      <strong class="text-kl-danger">No pudimos cargar los grupos</strong>
-      <p class="mb-0">{{ error() }}</p>
+  @if (avisoMembresias()) {
+    <section
+      role="status"
+      class="mb-6 rounded-xl border border-solid border-amber-400/60 bg-[#2e2410] p-4 text-sm"
+    >
+      {{ avisoMembresias() }}
     </section>
   }
 
@@ -34,9 +43,9 @@
         <button
           mat-button
           type="button"
-          disabled
           class="text-xs"
-          title="Filtros visuales pendientes de integrar"
+          [disabled]="!hayFiltros()"
+          (click)="limpiarFiltros()"
         >
           Limpiar
         </button>
@@ -54,7 +63,8 @@
               matInput
               id="buscar-grupos"
               formControlName="buscar"
-              placeholder="Buscar grupos…"
+              placeholder="Nombre o descripción"
+              autocomplete="off"
           /></mat-form-field>
         </div>
         @for (
@@ -94,9 +104,6 @@
           </fieldset>
         }
       </form>
-      <p class="mt-4 mb-0 text-xs leading-4 text-kl-muted">
-        Filtros visuales: todavía no filtran el listado.
-      </p>
     </aside>
 
     <section aria-label="Grupos disponibles" class="min-w-0">
@@ -116,22 +123,46 @@
             </div>
           }
         </div>
+      } @else if (errorCarga()) {
+        <mat-card
+          role="alert"
+          class="items-center gap-4 rounded-2xl border border-solid border-kl-danger bg-[#34161a] px-6 py-12 text-center"
+          ><h2 class="m-0 text-xl">No pudimos cargar los grupos</h2>
+          <p class="m-0 text-sm">{{ errorCarga() }}</p>
+          <button mat-flat-button type="button" (click)="cargar()">Reintentar</button></mat-card
+        >
       } @else if (grupos().length === 0) {
-        <p class="mt-0 text-sm text-kl-muted">Mostrando 0 grupos</p>
+        <p class="mt-0 text-sm text-kl-muted">Mostrando 0 de 0 grupos</p>
         <mat-card
           class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-16 text-center"
-          ><h2 class="m-0 text-xl">Todavía no hay grupos publicados</h2>
+          ><h2 class="m-0 text-xl">Todavía no hay grupos disponibles</h2>
           <p class="m-0 text-sm text-kl-muted">
-            Cuando un coach publique un grupo aparecerá aquí para que puedas solicitar ingreso.
+            Cuando un coach cree un grupo aparecerá aquí para que puedas solicitar ingreso.
           </p>
           <a mat-stroked-button routerLink="/inicio">Volver al inicio</a></mat-card
         >
       } @else {
-        <p class="mt-0 mb-3 text-sm text-kl-body">Mostrando {{ total() }} grupos</p>
+        <p role="status" class="mt-0 mb-3 text-sm text-kl-body">
+          Mostrando {{ visibles().length }} de {{ grupos().length }}
+          {{ grupos().length === 1 ? 'grupo' : 'grupos' }}
+        </p>
+        @if (visibles().length === 0) {
+          <mat-card
+            class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+            ><h2 class="m-0 text-xl">Ningún grupo coincide con tu búsqueda</h2>
+            <p class="m-0 text-sm text-kl-muted">
+              Prueba con otro texto o quita algunos filtros.
+            </p>
+            <button mat-stroked-button type="button" (click)="limpiarFiltros()">
+              Limpiar filtros
+            </button></mat-card
+          >
+        }
         <div class="flex flex-col gap-3">
-          @for (item of grupos(); track item.id) {
+          @for (item of visibles(); track item.id) {
             <mat-card
               appearance="outlined"
+              [attr.data-grupo]="item.id"
               class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_180px_170px]"
             >
               <div class="flex items-start gap-4">
@@ -186,31 +217,53 @@
                 <span
                   class="rounded-full border border-solid px-3 py-1 text-[11px]"
                   [class]="
-                    item.estado === 'Solicitud pendiente'
+                    item.membresia === 'PENDIENTE'
                       ? 'border-amber-300/50 bg-amber-300/10 text-amber-300'
-                      : item.estado === 'Eres miembro'
+                      : item.membresia === 'ACTIVO'
                         ? 'border-kl-accent/50 bg-kl-accent/10 text-kl-accent-text'
-                        : 'border-green-400/50 bg-green-400/10 text-green-400'
+                        : item.membresia === 'EXPULSADO' || item.membresia === 'RECHAZADO'
+                          ? 'border-kl-danger/50 bg-kl-danger/10 text-kl-danger'
+                          : item.membresia === 'RETIRADO'
+                            ? 'border-kl-border-strong bg-white/3 text-kl-body'
+                            : 'border-green-400/50 bg-green-400/10 text-green-400'
                   "
                   >{{ item.estado }}</span
                 >
-                @if (item.estado === 'Eres miembro') {
-                  <a mat-stroked-button routerLink="/inicio" fragment="grupos" class="w-full"
-                    >Ver grupo</a
-                  >
-                } @else if (item.estado === 'Solicitud pendiente') {
-                  <button mat-stroked-button type="button" class="w-full" (click)="verEstado(item)">
-                    Ver estado
-                  </button>
-                } @else {
-                  <button
-                    mat-flat-button
-                    type="button"
-                    class="w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] shadow-[0_2px_12px_#a881fe66]"
-                    (click)="abrirSolicitud(item)"
-                  >
-                    {{ item.accion }}
-                  </button>
+                @switch (item.accion) {
+                  @case ('miembro') {
+                    <a mat-stroked-button routerLink="/inicio" fragment="grupos" class="w-full"
+                      >Ver grupo</a
+                    >
+                  }
+                  @case ('pendiente') {
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      class="w-full"
+                      (click)="verEstado(item)"
+                    >
+                      Solicitud pendiente
+                    </button>
+                  }
+                  @case ('bloqueado') {
+                    <button mat-stroked-button type="button" class="w-full" disabled>
+                      No disponible
+                    </button>
+                  }
+                  @default {
+                    <button
+                      mat-flat-button
+                      type="button"
+                      class="w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] shadow-[0_2px_12px_#a881fe66]"
+                      [disabled]="enviando()"
+                      (click)="abrirAccion(item)"
+                    >
+                      {{ item.etiquetaAccion }}
+                    </button>
+                  }
+                }
+                @if (item.nota) {
+                  <p class="m-0 text-[11px] leading-4 text-kl-muted">{{ item.nota }}</p>
                 }
               </div>
             </mat-card>
@@ -240,57 +293,51 @@
         <img src="/images/grupos/415-19572-imgIcon11.svg" width="22" height="22" alt="" />
       </button>
 
-      @if (vistaActual === 'solicitar' || vistaActual === 'codigo' || vistaActual === 'duplicada' || vistaActual === 'sin-cupos' || vistaActual === 'error') {
+      @if (enFormulario) {
         <h2 id="dialogo-titulo" class="mt-0 mb-5 pr-8 font-display text-xl font-bold">
           {{ vistaActual === 'codigo' ? 'Ingresar con código' : 'Solicitar ingreso' }}
         </h2>
 
-        @if (vistaActual === 'codigo') {
-          <label for="grupo-codigo" class="mb-2 block text-[13px] text-kl-body">Grupo</label>
-          <mat-form-field appearance="outline" class="auth-field mb-4 w-full" subscriptSizing="dynamic">
-            <mat-select
-              id="grupo-codigo"
-              [value]="grupoCodigo()"
-              (selectionChange)="grupoCodigo.set($event.value)"
-              placeholder="Elige un grupo"
-            >
-              @for (opcion of grupos(); track opcion.id) {
-                <mat-option [value]="opcion.id">{{ opcion.nombre }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        } @else if (grupo) {
-          <div
-            class="mb-5 flex items-center gap-3 rounded-[14px] border border-solid border-[#26224d] bg-white/4 p-4"
-          >
-            <span
-              class="flex size-[52px] shrink-0 items-center justify-center rounded-xl bg-linear-to-br font-semibold {{ grupo.tono }}"
-              >{{ grupo.iniciales }}</span
-            >
-            <div>
-              <strong class="text-sm">{{ grupo.nombre }}</strong>
-              <p class="my-1 text-xs text-kl-body">
-                Nivel: {{ grupo.nivel }} · {{ grupo.publico ? 'Público' : 'Protegido' }}
-              </p>
-              <p class="m-0 text-xs text-kl-muted">
-                {{ grupo.horario }} · Cupo máximo {{ grupo.cupo ?? 'sin definir' }}
-              </p>
-            </div>
-          </div>
-        }
-
         <form [formGroup]="codigo" (ngSubmit)="enviar()">
-          @if (vistaActual === 'duplicada' || vistaActual === 'sin-cupos' || vistaActual === 'error') {
-            <section role="alert" class="mb-4 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm">
-              <strong>{{
-                vistaActual === 'duplicada'
-                  ? 'Ya tienes una solicitud activa'
-                  : vistaActual === 'sin-cupos'
-                    ? 'No puedes ingresar a este grupo'
-                    : 'No pudimos registrar tu solicitud'
-              }}</strong>
-              <p class="mb-0">{{ error() }}</p>
-            </section>
+          @if (vistaActual === 'codigo') {
+            <label id="grupo-codigo-label" class="mb-2 block text-[13px] text-kl-body"
+              >Grupo *</label
+            >
+            <mat-form-field
+              appearance="outline"
+              class="auth-field mb-4 w-full"
+              subscriptSizing="dynamic"
+            >
+              <mat-select
+                id="grupo-codigo"
+                aria-labelledby="grupo-codigo-label"
+                formControlName="grupo"
+                placeholder="Elige un grupo"
+              >
+                @for (opcion of grupos(); track opcion.id) {
+                  <mat-option [value]="opcion.id">{{ opcion.nombre }}</mat-option>
+                }
+              </mat-select>
+              <mat-error>Elige el grupo al que quieres ingresar.</mat-error>
+            </mat-form-field>
+          } @else if (grupo) {
+            <div
+              class="mb-5 flex items-center gap-3 rounded-[14px] border border-solid border-[#26224d] bg-white/4 p-4"
+            >
+              <span
+                class="flex size-[52px] shrink-0 items-center justify-center rounded-xl bg-linear-to-br font-semibold {{ grupo.tono }}"
+                >{{ grupo.iniciales }}</span
+              >
+              <div>
+                <strong class="text-sm">{{ grupo.nombre }}</strong>
+                <p class="my-1 text-xs text-kl-body">
+                  Nivel: {{ grupo.nivel }} · {{ grupo.publico ? 'Público' : 'Protegido' }}
+                </p>
+                <p class="m-0 text-xs text-kl-muted">
+                  {{ grupo.horario }} · Cupo máximo {{ grupo.cupo ?? 'sin definir' }}
+                </p>
+              </div>
+            </div>
           }
 
           <label for="invitacion" class="mb-2 block text-[13px] text-kl-body"
@@ -306,8 +353,12 @@
               id="invitacion"
               formControlName="invitacion"
               placeholder="Ej. A1B2C3D4E5F6"
-              maxlength="12"
-            /><mat-error>Ingresa un código de 12 letras o números.</mat-error></mat-form-field
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+            /><mat-error>{{
+              mensajeCodigo(codigo.controls.invitacion, mensajesCodigo)
+            }}</mat-error></mat-form-field
           >
           <p class="mt-2 text-xs text-kl-muted">
             Con un código válido ingresas directamente; sin código enviamos una solicitud al coach.
@@ -328,19 +379,47 @@
           </p>
           <div class="flex flex-wrap justify-end gap-3">
             <button mat-stroked-button type="button" (click)="cerrar()">Cancelar</button>
-            <button
-              mat-flat-button
-              type="submit"
-              [disabled]="
-                enviando() ||
-                codigo.invalid ||
-                (vistaActual === 'codigo' && !codigo.controls.invitacion.value)
-              "
-            >
-              {{ vistaActual === 'codigo' ? 'Ingresar' : 'Solicitar ingreso' }}
+            <button mat-flat-button type="submit" [disabled]="enviando() || codigo.invalid">
+              {{
+                enviando()
+                  ? 'Enviando…'
+                  : vistaActual === 'codigo'
+                    ? 'Ingresar'
+                    : 'Solicitar ingreso'
+              }}
             </button>
           </div>
         </form>
+      } @else if (enResultado) {
+        <div class="text-center">
+          <h2 id="dialogo-titulo" class="mt-0 mb-3 pr-8 font-display text-xl font-bold">
+            {{ tituloFallo() }}
+          </h2>
+          <section
+            role="alert"
+            class="mb-4 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm"
+          >
+            <p class="m-0">{{ mensajeFallo() }}</p>
+            @if (grupo) {
+              <p class="mt-2 mb-0 text-xs text-kl-body">
+                Grupo: {{ grupo.nombre }} · Estado actual: {{ grupo.estado }}
+              </p>
+            }
+          </section>
+          <div class="flex flex-wrap justify-center gap-3">
+            @if (vistaActual === 'error' && fallo() === 'OTRO') {
+              <button
+                mat-stroked-button
+                type="button"
+                [disabled]="enviando()"
+                (click)="reintentar()"
+              >
+                Reintentar
+              </button>
+            }
+            <button mat-flat-button type="button" (click)="cerrar()">Entendido</button>
+          </div>
+        </div>
       } @else {
         <div class="text-center">
           <span
@@ -367,9 +446,11 @@
           <p class="text-sm leading-6 text-kl-body">
             {{
               vistaActual === 'ingreso'
-                ? 'Ingresaste a ' + (grupo?.nombre ?? 'el grupo') + '. Ya puedes ver sus problemas asignados y su ranking.'
+                ? 'Ingresaste a ' +
+                  nombreGrupo() +
+                  '. Ya puedes ver sus problemas asignados y su ranking.'
                 : 'El coach de ' +
-                  (grupo?.nombre ?? 'el grupo') +
+                  nombreGrupo() +
                   ' revisará tu solicitud. Verás su estado en “Mis equipos”.'
             }}
           </p>

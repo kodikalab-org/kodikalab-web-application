@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { API_URL } from './api';
-import { TeamsApi, httpStatus, readFieldErrors } from './teams-api';
+import { TeamsApi, classifyJoinError, httpStatus, normalizeText, readFieldErrors } from './teams-api';
 
 const BASE = 'http://localhost:8080/api';
 
@@ -149,5 +149,47 @@ describe('readFieldErrors y httpStatus', () => {
   it('devuelve 0 cuando no hubo respuesta HTTP', () => {
     expect(httpStatus(new Error('red'))).toBe(0);
     expect(httpStatus(new HttpErrorResponse({ status: 0 }))).toBe(0);
+  });
+});
+
+describe('classifyJoinError', () => {
+  const conflicto = (message: string) =>
+    new HttpErrorResponse({ status: 409, error: { message } });
+
+  const casos: [string, string][] = [
+    ['Ya tienes una solicitud pendiente para este grupo', 'SOLICITUD_DUPLICADA'],
+    ['YA TIENES UNA SOLICITUD PENDIENTE', 'SOLICITUD_DUPLICADA'],
+    ['Solicitud duplicada', 'SOLICITUD_DUPLICADA'],
+    ['Ya eres miembro de este grupo', 'YA_ES_MIEMBRO'],
+    ['Ya eres MIEMBRO activo', 'YA_ES_MIEMBRO'],
+    ['El grupo alcanzó su cupo máximo', 'SIN_CUPO'],
+    ['El grupo está lleno', 'SIN_CUPO'],
+    ['No hay vacantes disponibles', 'SIN_CUPO'],
+    ['El grupo llegó a su capacidad', 'SIN_CUPO'],
+    ['Un integrante expulsado no puede volver a solicitar ingreso', 'EXPULSADO'],
+    ['USTED FUE EXPULSADO', 'EXPULSADO'],
+    ['El grupo archivado no admite postulaciones', 'NO_ADMITE'],
+    ['El grupo no está publicado', 'NO_ADMITE'],
+    ['Algo inesperado', 'OTRO'],
+    ['', 'OTRO'],
+  ];
+  for (const [mensaje, esperado] of casos) {
+    it(`409 «${mensaje}» es ${esperado}`, () => {
+      expect(classifyJoinError(conflicto(mensaje))).toBe(esperado);
+    });
+  }
+
+  it('clasifica por código cuando no es un conflicto', () => {
+    expect(classifyJoinError(new HttpErrorResponse({ status: 403 }))).toBe('SIN_PERMISO');
+    expect(classifyJoinError(new HttpErrorResponse({ status: 404 }))).toBe('NO_ENCONTRADO');
+    expect(classifyJoinError(new HttpErrorResponse({ status: 500 }))).toBe('OTRO');
+    expect(classifyJoinError(new HttpErrorResponse({ status: 409, error: null }))).toBe('OTRO');
+    expect(classifyJoinError(new Error('red'))).toBe('OTRO');
+  });
+});
+
+describe('normalizeText', () => {
+  it('quita acentos, pasa a minúsculas y recorta', () => {
+    expect(normalizeText('  Búsqueda BINARIA Ñandú ')).toBe('busqueda binaria nandu');
   });
 });

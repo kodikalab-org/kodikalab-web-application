@@ -1,6 +1,7 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Session } from '../../core/session';
+import { CoachGroup, TeamsApi } from '../../core/teams-api';
 import { navigationFor } from '../../core/navigation';
 import { HeaderNavigation } from '../../shared/header-navigation/header-navigation';
 import { UserMenu } from '../../shared/user-menu/user-menu';
@@ -33,6 +34,7 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
 })
 export class InicioDashboard {
   protected readonly session = inject(Session);
+  private readonly api = inject(TeamsApi);
   protected get nombre(): string { return this.session.demo() ? (this.coach ? 'Marco' : 'Camila') : this.session.account()?.email ?? 'Usuario'; }
   protected get iniciales(): string { return this.session.demo() ? (this.coach ? 'MP' : 'CR') : 'KL'; }
   protected readonly coach: boolean;
@@ -112,84 +114,136 @@ export class InicioDashboard {
     { nombre: 'Maratón interna UPC', grupo: 'Grafos y DP', fecha: 'Dom 9 nov · 9:00 a. m.' },
     { nombre: 'Contest de práctica', grupo: 'Equipo Alfa', fecha: 'Sáb 15 nov · 7:00 p. m.' },
   ];
-  protected readonly estadisticas;
   protected readonly temas;
-  protected readonly grupos;
+  /** Grupos reales del coach; `null` mientras la petición está en curso. */
+  protected readonly misGrupos = signal<CoachGroup[] | null>(null);
+
+  /** Pasos completados: cuenta y perfil siempre; grupo e integrantes según datos reales. */
+  protected readonly pasosCompletados = computed(() => {
+    if (!this.coach) return 2;
+    const grupos = this.misGrupos() ?? [];
+    const conGrupo = grupos.length > 0;
+    const conIntegrantes = grupos.some((grupo) => grupo.activeMembers > 0);
+    return 2 + (conGrupo ? 1 : 0) + (conIntegrantes ? 1 : 0);
+  });
+
+  protected readonly estadisticas = computed(() => {
+    if (this.coach) {
+      const grupos = this.misGrupos();
+      if (grupos === null) {
+        return [
+          { valor: '—', etiqueta: 'Equipos a cargo', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon7', tono: 'text-kl-muted' },
+          { valor: '—', etiqueta: 'Integrantes activos', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon8', tono: 'text-kl-muted' },
+          { valor: '—', etiqueta: 'Solicitudes pendientes', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon9', tono: 'text-kl-muted' },
+          { valor: '—', etiqueta: 'Competencias', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon10', tono: 'text-kl-muted' },
+        ];
+      }
+      const integrantes = grupos.reduce((total, grupo) => total + grupo.activeMembers, 0);
+      const pendientes = grupos.reduce((total, grupo) => total + grupo.pendingRequests, 0);
+      return [
+        {
+          valor: String(grupos.length),
+          etiqueta: 'Equipos a cargo',
+          detalle: grupos.length ? 'Tus grupos de entrenamiento' : 'Crea tu primer grupo',
+          vacio: 'Crea tu primer grupo',
+          icono: '2-imgIcon7',
+          tono: 'text-kl-muted',
+        },
+        {
+          valor: String(integrantes),
+          etiqueta: 'Integrantes activos',
+          detalle: integrantes ? 'En todos tus grupos' : 'Aún no hay integrantes',
+          vacio: 'Aún no hay integrantes',
+          icono: '2-imgIcon8',
+          tono: integrantes ? 'text-green-400' : 'text-kl-muted',
+        },
+        {
+          valor: String(pendientes),
+          etiqueta: 'Solicitudes pendientes',
+          detalle: pendientes ? 'Requieren tu respuesta' : 'Todo al día',
+          vacio: 'Todo al día',
+          icono: '2-imgIcon9',
+          tono: pendientes ? 'text-amber-300' : 'text-kl-muted',
+        },
+        {
+          valor: '0',
+          etiqueta: 'Competencias',
+          detalle: 'Sin competencias registradas',
+          vacio: 'Ninguna programada',
+          icono: '2-imgIcon10',
+          tono: 'text-kl-muted',
+        },
+      ];
+    }
+
+    if (!this.session.demo()) {
+      return [
+        { valor: '—', etiqueta: 'Problemas resueltos', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon6', tono: 'text-kl-muted' },
+        { valor: '—', etiqueta: 'Rating Codeforces', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon7', tono: 'text-kl-muted' },
+        { valor: '—', etiqueta: 'Mis grupos', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon8', tono: 'text-kl-muted' },
+        { valor: '—', etiqueta: 'Problemas pendientes', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon9', tono: 'text-kl-muted' },
+      ];
+    }
+
+    return [
+      { valor: '569', etiqueta: 'Problemas resueltos', detalle: '+12 este mes', vacio: 'Empieza con tu primer problema', icono: '0-imgIcon6', tono: 'text-green-400' },
+      { valor: '1984', etiqueta: 'Rating Codeforces', detalle: '+35 este mes', vacio: 'Vincula tu cuenta en el perfil', icono: '0-imgIcon7', tono: 'text-green-400' },
+      { valor: '3', etiqueta: 'Mis grupos', detalle: '2 activos · 1 pendiente', vacio: 'Únete a uno para entrenar', icono: '0-imgIcon8', tono: 'text-kl-muted' },
+      { valor: '6', etiqueta: 'Problemas pendientes', detalle: '1 vence mañana', vacio: 'Aún no tienes asignaciones', icono: '0-imgIcon9', tono: 'text-amber-300' },
+    ];
+  });
+
+  protected readonly grupos = computed(() => {
+    if (this.coach) {
+      const reales = this.misGrupos();
+      if (reales !== null) {
+        return reales.map((grupo) => ({
+          iniciales: this.inicialesDe(grupo.name),
+          nombre: grupo.name,
+          detalle: `${grupo.activeMembers}/${grupo.maxCapacity ?? '—'} integrantes · ${grupo.sessionSchedule ?? 'horario por definir'}`,
+          estado:
+            grupo.status === 'BORRADOR'
+              ? 'Borrador'
+              : grupo.pendingRequests > 0
+                ? `${grupo.pendingRequests} pendiente${grupo.pendingRequests === 1 ? '' : 's'}`
+                : 'Sin pendientes',
+        }));
+      }
+      return [
+        {
+          iniciales: 'EA',
+          nombre: 'Equipo Alfa',
+          detalle: '14/20 integrantes · Mar y jue 7:00 p. m.',
+          estado: '2 pendientes',
+        },
+        {
+          iniciales: 'EB',
+          nombre: 'Equipo Beta',
+          detalle: '10/20 integrantes · Mié 6:00 p. m.',
+          estado: '1 pendiente',
+        },
+      ];
+    }
+
+    return [
+      { iniciales: 'EA', nombre: 'Equipo Alfa', detalle: 'Intermedio', estado: 'Miembro' },
+      { iniciales: 'GD', nombre: 'Grafos y DP', detalle: 'Avanzado', estado: 'Miembro' },
+      { iniciales: 'SC', nombre: 'Sprint Coders', detalle: 'Todos los niveles', estado: 'Pendiente' },
+    ];
+  });
+
   protected readonly pasos;
 
   constructor(route: ActivatedRoute) {
     this.coach = route.snapshot.data['coach'] === true;
     this.ruta = this.coach ? '/coach/inicio' : '/inicio';
     this.nuevo$ = route.queryParamMap.pipe(map((params) => !this.session.demo() || params.get('estado') === 'nuevo'));
-    this.estadisticas = this.coach
-      ? [
-          {
-            valor: '2',
-            etiqueta: 'Equipos a cargo',
-            detalle: 'Alfa y Beta',
-            vacio: 'Crea tu primer grupo',
-            icono: '2-imgIcon7',
-            tono: 'text-kl-muted',
-          },
-          {
-            valor: '24',
-            etiqueta: 'Integrantes activos',
-            detalle: '+3 este mes',
-            vacio: 'Aún no hay integrantes',
-            icono: '2-imgIcon8',
-            tono: 'text-green-400',
-          },
-          {
-            valor: '3',
-            etiqueta: 'Solicitudes pendientes',
-            detalle: 'Requieren tu respuesta',
-            vacio: 'Todo al día',
-            icono: '2-imgIcon9',
-            tono: 'text-amber-300',
-          },
-          {
-            valor: '2',
-            etiqueta: 'Competencias',
-            detalle: 'Próxima: sáb 1 nov',
-            vacio: 'Ninguna programada',
-            icono: '2-imgIcon10',
-            tono: 'text-kl-muted',
-          },
-        ]
-      : [
-          {
-            valor: '569',
-            etiqueta: 'Problemas resueltos',
-            detalle: '+12 este mes',
-            vacio: 'Empieza con tu primer problema',
-            icono: '0-imgIcon6',
-            tono: 'text-green-400',
-          },
-          {
-            valor: '1984',
-            etiqueta: 'Rating Codeforces',
-            detalle: '+35 este mes',
-            vacio: 'Vincula tu cuenta en el perfil',
-            icono: '0-imgIcon7',
-            tono: 'text-green-400',
-          },
-          {
-            valor: '3',
-            etiqueta: 'Mis grupos',
-            detalle: '2 activos · 1 pendiente',
-            vacio: 'Únete a uno para entrenar',
-            icono: '0-imgIcon8',
-            tono: 'text-kl-muted',
-          },
-          {
-            valor: '6',
-            etiqueta: 'Problemas pendientes',
-            detalle: '1 vence mañana',
-            vacio: 'Aún no tienes asignaciones',
-            icono: '0-imgIcon9',
-            tono: 'text-amber-300',
-          },
-        ];
+    if (this.coach && !this.session.demo()) {
+      this.api.loadMine().subscribe({
+        next: (mine) => this.misGrupos.set(mine.filter((g): g is CoachGroup => 'activeMembers' in g)),
+        error: () => this.misGrupos.set([]),
+      });
+    }
     this.temas = this.coach
       ? [
           { nombre: 'Teoría de números', valor: 22 },
@@ -202,31 +256,6 @@ export class InicioDashboard {
           { nombre: 'Programación dinámica', valor: 72 },
           { nombre: 'Grafos', valor: 58 },
           { nombre: 'Teoría de números', valor: 33 },
-        ];
-    this.grupos = this.coach
-      ? [
-          {
-            iniciales: 'EA',
-            nombre: 'Equipo Alfa',
-            detalle: '14/20 integrantes · Mar y jue 7:00 p. m.',
-            estado: '2 pendientes',
-          },
-          {
-            iniciales: 'EB',
-            nombre: 'Equipo Beta',
-            detalle: '10/20 integrantes · Mié 6:00 p. m.',
-            estado: '1 pendiente',
-          },
-        ]
-      : [
-          { iniciales: 'EA', nombre: 'Equipo Alfa', detalle: 'Intermedio', estado: 'Miembro' },
-          { iniciales: 'GD', nombre: 'Grafos y DP', detalle: 'Avanzado', estado: 'Miembro' },
-          {
-            iniciales: 'SC',
-            nombre: 'Sprint Coders',
-            detalle: 'Todos los niveles',
-            estado: 'Pendiente',
-          },
         ];
     this.pasos = [
       { nombre: 'Crea tu cuenta', detalle: 'Listo, ya estás dentro.' },
@@ -249,5 +278,14 @@ export class InicioDashboard {
           : 'Tu coach te asignará problemas para practicar.',
       },
     ];
+  }
+
+  private inicialesDe(nombre: string): string {
+    return nombre
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((palabra) => palabra[0]?.toUpperCase() ?? '')
+      .join('');
   }
 }

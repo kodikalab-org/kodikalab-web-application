@@ -59,12 +59,6 @@ const appRoutes: Routes = [
   { path: 'demo/practicante', component: Login, canActivate: [demoGuard], data: { role: 'PRACTICANTE' } },
   { path: 'demo/coach', component: Login, canActivate: [demoGuard], data: { role: 'COACH' } },
   {
-    path: 'coach/grupos/solicitudes',
-    data: { coach: true },
-    loadComponent: () =>
-      import('./pages/grupos/solicitudes-grupo/solicitudes-grupo').then((m) => m.SolicitudesGrupo),
-  },
-  {
     path: 'grupos',
     loadComponent: () =>
       import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
@@ -83,6 +77,13 @@ const appRoutes: Routes = [
       import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'crear' },
+      {
+        path: 'solicitudes',
+        loadComponent: () =>
+          import('./pages/grupos/solicitudes-grupo/solicitudes-grupo').then(
+            (m) => m.SolicitudesGrupo,
+          ),
+      },
       {
         path: 'crear',
         loadComponent: () =>

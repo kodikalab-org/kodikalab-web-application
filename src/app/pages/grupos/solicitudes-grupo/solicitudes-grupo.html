@@ -56,6 +56,7 @@
       >
         <mat-button-toggle value="PENDIENTE">Pendientes</mat-button-toggle>
         <mat-button-toggle value="ACLARACION_SOLICITADA">Aclaración solicitada</mat-button-toggle>
+        <mat-button-toggle value="ACTIVO">Integrantes</mat-button-toggle>
       </mat-button-toggle-group>
       @if (selectedGroup(); as group) {
         <p class="m-0 text-xs text-kl-muted">
@@ -67,7 +68,11 @@
 
     @if (requests().length === 0) {
       <p class="rounded-2xl bg-kl-surface-raised p-10 text-center text-sm text-kl-muted">
-        No hay solicitudes en este estado para el grupo seleccionado.
+        @if (estado() === 'ACTIVO') {
+          Este grupo todavía no tiene integrantes activos.
+        } @else {
+          No hay solicitudes en este estado para el grupo seleccionado.
+        }
       </p>
     } @else {
       <div class="flex flex-col gap-3">
@@ -95,15 +100,25 @@
               </div>
             </div>
             <div class="text-xs text-kl-body">
-              <p class="m-0">Solicitó el {{ fecha(request.requestedAt) }}</p>
-              @if (request.clarification; as clarification) {
-                <p class="mt-1 mb-0 text-kl-muted">
-                  {{ clarification.response ? 'Aclaración respondida' : 'Esperando respuesta' }}
-                </p>
+              @if (estado() === 'ACTIVO') {
+                <p class="m-0">Miembro desde el {{ fecha(request.requestedAt) }}</p>
+              } @else {
+                <p class="m-0">Solicitó el {{ fecha(request.requestedAt) }}</p>
+                @if (request.clarification; as clarification) {
+                  <p class="mt-1 mb-0 text-kl-muted">
+                    {{ clarification.response ? 'Aclaración respondida' : 'Esperando respuesta' }}
+                  </p>
+                }
               }
             </div>
             <div class="flex justify-start lg:justify-end">
-              <button mat-stroked-button type="button" (click)="ver(request)">Revisar</button>
+              @if (estado() === 'ACTIVO') {
+                <span class="rounded-full border border-solid border-green-400/50 bg-green-400/10 px-3 py-1 text-[11px] text-green-300">
+                  Integrante activo
+                </span>
+              } @else {
+                <button mat-stroked-button type="button" (click)="ver(request)">Revisar</button>
+              }
             </div>
           </mat-card>
         }

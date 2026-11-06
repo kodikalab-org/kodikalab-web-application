@@ -4,7 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Session, homeFor, onboardingFor } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
-import { Role, apiError, isConnectionError } from '../../../core/api';
+import { Role, authApiError, isConnectionError } from '../../../core/api';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, map } from 'rxjs';
 import { emailRule, normalizeEmail, passwordBytesRule } from '../auth-rules';
@@ -87,7 +87,7 @@ export class Login {
       // The login succeeded but the profile could not be loaded: not a credentials failure.
       this.error = error instanceof HttpErrorResponse && error.status === 401
         ? 'Tu sesión ha expirado. Inicia sesión de nuevo.'
-        : apiError(error);
+        : authApiError(error);
     } finally {
       this.busy = false;
       this.cdr.markForCheck();
@@ -108,7 +108,7 @@ export class Login {
     if (isConnectionError(error)) {
       // The password is kept so the user can retry without typing it again.
       this.failure = 'connection';
-      this.error = apiError(error);
+      this.error = authApiError(error);
       return;
     }
     // Any rejected attempt clears the password and keeps the email.
@@ -119,7 +119,7 @@ export class Login {
       return;
     }
     this.failure = null;
-    this.error = apiError(error);
+    this.error = authApiError(error);
   }
 
   private async routeAfterLogin(role: Role): Promise<void> {

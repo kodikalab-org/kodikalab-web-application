@@ -11,7 +11,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { firstValueFrom } from 'rxjs';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
-import { apiError, fieldErrors, isConnectionError } from '../../../core/api';
+import { authApiError, fieldErrors, isConnectionError } from '../../../core/api';
 import {
   emailRule,
   formatRecoveryCode,
@@ -84,7 +84,7 @@ export class RecuperarAcceso {
   private showError(error: unknown): void {
     this.connectionError = isConnectionError(error);
     if (this.connectionError) {
-      this.error = apiError(error);
+      this.error = authApiError(error);
       return;
     }
     // A rejected attempt clears the new password; the email and the code stay as typed.
@@ -102,7 +102,7 @@ export class RecuperarAcceso {
     } else if (error instanceof HttpErrorResponse && error.status === 401) {
       this.error = 'Datos de recuperación inválidos';
     } else {
-      this.error = apiError(error);
+      this.error = authApiError(error);
     }
   }
 

@@ -43,7 +43,25 @@ export function isConnectionError(error: unknown): boolean {
   return error instanceof Error && error.name === 'TimeoutError';
 }
 
+/**
+ * Shared error text for every module except the auth screens. Its output is unchanged
+ * from `origin/develop`: 401 and 403 keep their fixed messages and never show the body.
+ */
 export function apiError(error: unknown): string {
+  if (!(error instanceof HttpErrorResponse)) return 'No pudimos completar la operación. Inténtalo de nuevo.';
+  if (error.status === 0 || error.status >= 500) return CONNECTION_MESSAGE;
+  if (error.status === 401) return 'Credenciales o datos de recuperación inválidos.';
+  if (error.status === 403) return 'No tienes permiso para realizar esta acción.';
+  const body = error.error;
+  if (typeof body?.message === 'string') return body.message;
+  return error.status === 409 ? 'Los datos ya están registrados en otra cuenta.' : 'Revisa los datos ingresados.';
+}
+
+/**
+ * Error text for the auth screens (register, login, recovery): the backend message wins for
+ * 400, 401, 403 and 409, and timeouts count as connection failures.
+ */
+export function authApiError(error: unknown): string {
   if (isConnectionError(error)) return CONNECTION_MESSAGE;
   if (!(error instanceof HttpErrorResponse)) return 'No pudimos completar la operación. Inténtalo de nuevo.';
   const body = error.error;

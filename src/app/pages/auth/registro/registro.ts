@@ -12,7 +12,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Session } from '../../../core/session';
-import { Role, apiError, fieldErrors, isConnectionError } from '../../../core/api';
+import { Role, authApiError, fieldErrors, isConnectionError } from '../../../core/api';
 import {
   emailRule,
   fullNameRule,
@@ -125,7 +125,7 @@ export class Registro {
   private showError(error: unknown): void {
     this.connectionError = isConnectionError(error);
     if (this.connectionError) {
-      this.error = apiError(error);
+      this.error = authApiError(error);
       return;
     }
     // The server rejected the data: the password is never kept, everything else stays as typed.
@@ -139,7 +139,7 @@ export class Registro {
       control.markAsTouched();
       shownOnField = true;
     }
-    this.error = shownOnField ? '' : apiError(error);
+    this.error = shownOnField ? '' : authApiError(error);
   }
 
   private serverControl(key: string): AbstractControl | null {

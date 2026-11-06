@@ -36,7 +36,9 @@ describe('PlataformasCompetitivas', () => {
       'Validamos camila_rc en Codeforces. La plataforma quedó vinculada sin modificar los demás datos del perfil.',
     );
     expect(root.textContent).not.toContain('Pendiente de validación externa');
-    expect(root.textContent?.match(/Estado:\s*Vinculada/g)?.length).toBe(2);
+    expect(root.textContent?.match(/Estado:\s*Vinculada/g)?.length).toBe(1);
+    expect(root.textContent).toContain('AtCoder · En mantenimiento');
+    expect(root.textContent).toContain('VJudge · En mantenimiento');
     expect(buttons(root)).not.toContain('Reintentar vinculación');
     expect(buttons(root)).toContain('Ver mi perfil');
   });

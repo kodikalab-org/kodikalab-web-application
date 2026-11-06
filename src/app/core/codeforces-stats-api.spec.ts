@@ -23,4 +23,11 @@ describe('CodeforcesStatsApi', () => {
     expect(days.filter(day => day.count > 0)).toHaveLength(1);
     expect(calendar.findIndex(day => !day.padding)).toBe(4);
   });
+
+  it('clamps leap day before adding a day to match the backend annual window', () => {
+    const days = activityCalendar([], new Date('2028-02-29T23:00:00Z')).filter(day => !day.padding);
+    expect(days).toHaveLength(366);
+    expect(days[0].date).toBe('2027-03-01');
+    expect(days.at(-1)?.date).toBe('2028-02-29');
+  });
 });

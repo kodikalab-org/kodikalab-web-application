@@ -29,7 +29,7 @@
   />
 
   <mat-toolbar
-    class="auth-header relative z-10 flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
   >
     <div class="flex min-w-0 items-center gap-2 xl:gap-14">
       <a class="inline-flex items-center gap-2.5" routerLink="/inicio" aria-label="Kodikalab, inicio">
@@ -265,7 +265,7 @@
                       >
                         <p class="m-0 text-[15px] font-medium">Aún no vinculas plataformas</p>
                         <p class="m-0 text-[13px] text-kl-muted">
-                          Conecta Codeforces, AtCoder o VJudge para ver tu progreso aquí.
+                          Conecta Codeforces para ver tu progreso aquí.
                         </p>
                         <a
                           mat-stroked-button
@@ -307,6 +307,14 @@
                         }
                       </ul>
                     }
+                    <ul class="m-0 mt-3 grid list-none gap-3 p-0 sm:grid-cols-2">
+                      @for (platform of ['AtCoder', 'VJudge']; track platform) {
+                        <li aria-disabled="true" class="rounded-xl border border-kl-divider bg-white/3 p-3 text-sm text-kl-muted">
+                          <span class="font-semibold">{{ platform }}</span>
+                          <span class="block text-xs">En mantenimiento</span>
+                        </li>
+                      }
+                    </ul>
                   </div>
                 }
               </section>

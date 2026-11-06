@@ -69,6 +69,8 @@ export class PerfilEditar {
   protected busy = false;
   protected error = '';
   constructor() {
+    this.form.controls.atcoder.disable();
+    this.form.controls.vjudge.disable();
     if (this.session.demo()) return;
     const p = this.profiles.profile();
     this.form.reset();

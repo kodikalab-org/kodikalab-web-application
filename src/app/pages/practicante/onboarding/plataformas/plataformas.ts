@@ -41,6 +41,10 @@ export class OnboardingPlataformas {
   private readonly router = inject(Router);
   protected busy = false;
   protected error = '';
+  constructor() {
+    this.form.controls.atcoder.disable();
+    this.form.controls.vjudge.disable();
+  }
   protected async guardar(omitir = false): Promise<void> {
     if (this.busy || (!omitir && this.form.invalid)) return;
     if (this.session.demo()) { await this.router.navigateByUrl('/onboarding/practicante/completado'); return; }
@@ -57,8 +61,8 @@ export class OnboardingPlataformas {
         cicloAcademico: Number.parseInt(academic.ciclo, 10),
         nivelCompetitivo: nivel as PractitionerProfile['nivelCompetitivo'],
         codeforcesHandle: omitir ? null : handles.codeforces || null,
-        atcoderHandle: omitir ? null : handles.atcoder || null,
-        vjudgeHandle: omitir ? null : handles.vjudge || null,
+        atcoderHandle: null,
+        vjudgeHandle: null,
       }));
       await this.router.navigateByUrl('/onboarding/practicante/completado');
     } catch (error) { this.error = apiError(error); }

@@ -7,7 +7,7 @@
   />
 
   <mat-toolbar
-    class="auth-header relative z-10 flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
   >
     <div class="flex min-w-0 items-center gap-2 xl:gap-14">
       <a class="inline-flex items-center gap-2.5" routerLink="/inicio" aria-label="Kodikalab, inicio">
@@ -333,6 +333,9 @@
                     [attr.for]="'handle-' + plataforma.control"
                     >{{ plataforma.nombre }}</label
                   >
+                  @if (plataforma.control !== 'codeforces') {
+                    <span class="text-xs text-kl-muted">En mantenimiento</span>
+                  }
                   <mat-form-field
                     class="auth-field min-w-0 flex-1 text-[15px] [--auth-field-height:44px] [--auth-field-padding:10px] max-[641px]:basis-full"
                     appearance="outline"

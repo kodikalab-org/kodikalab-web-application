@@ -29,7 +29,10 @@ export class CodeforcesStatsApi {
 export function activityCalendar(activity: CodeforcesStats['activity'], today = new Date()) {
   const end = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
   const startDate = new Date(end);
+  const month = startDate.getUTCMonth();
   startDate.setUTCFullYear(startDate.getUTCFullYear() - 1);
+  // Match LocalDate.minusYears: clamp leap day before adding the first included day.
+  if (startDate.getUTCMonth() !== month) startDate.setUTCDate(0);
   startDate.setUTCDate(startDate.getUTCDate() + 1);
   const start = startDate.getTime();
   const counts = new Map(activity.map(day => [day.date, day.count]));

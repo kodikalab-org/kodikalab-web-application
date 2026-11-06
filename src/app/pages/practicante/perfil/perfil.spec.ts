@@ -23,6 +23,19 @@ describe('Perfil', () => {
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
 
+  it('pins the outer toolbar with important utilities and no scroll-container ancestor', async () => {
+    const { root } = await setup();
+    const toolbar = root.querySelector('mat-toolbar')!;
+    for (const utility of ['sticky', 'top-0', 'z-40', 'backdrop-blur-xl']) {
+      expect(toolbar.classList.contains(utility)).toBe(true);
+    }
+    expect(toolbar.classList.contains('relative')).toBe(false);
+    expect(toolbar.classList.contains('z-10')).toBe(false);
+    expect(toolbar.parentElement!.classList.contains('overflow-clip')).toBe(true);
+    expect(toolbar.closest('.overflow-hidden')).toBeNull();
+    expect(root.querySelector('app-header-navigation')?.classList.contains('sticky')).toBe(false);
+  });
+
   async function setupLive() {
     const response = new Subject<CodeforcesStats>();
     const load = vi.fn().mockReturnValue(response);
@@ -115,7 +128,9 @@ describe('Perfil', () => {
     expect(contenido).toContain('Problemas resueltos');
     expect(contenido).toContain('Actividad de resolución de problemas');
     expect(contenido).toContain('Heatmap por rating');
-    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(3);
+    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(1);
+    expect(root.querySelectorAll('li[aria-disabled="true"]').length).toBe(2);
+    expect(contenido.match(/En mantenimiento/g)?.length).toBe(2);
     expect(contenido).not.toContain('Aún no vinculas plataformas');
   });
 

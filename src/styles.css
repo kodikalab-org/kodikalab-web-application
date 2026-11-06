@@ -214,24 +214,7 @@ a {
 
 /* Material internals are shared here, scoped to explicit auth integration classes.
    This replaces duplicated ::ng-deep rules in login and registro. */
-/* Page wrappers must not become scroll containers around sticky navigation. */
-div.overflow-hidden:has(> mat-toolbar.auth-header),
-div.overflow-hidden:has(> header app-header-navigation) {
-  overflow: clip;
-}
-
-mat-toolbar:has(app-header-navigation):not(header mat-toolbar) {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  backdrop-filter: blur(16px);
-}
-
 .auth-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  backdrop-filter: blur(16px);
   --mat-toolbar-container-background-color: transparent;
   --mat-toolbar-container-text-color: var(--kl-text);
   --mat-toolbar-standard-height: 68px;

@@ -164,11 +164,11 @@ export class Perfil {
       objetivo: p?.role === 'PRACTICANTE' ? p.goal || 'Objetivo no indicado' : '' };
   }
   protected get plataformas() {
-    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO;
+    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO.filter(platform => platform.nombre === 'Codeforces');
     const p = this.profiles.profile();
     if (p?.role !== 'PRACTICANTE') return [];
-    return PLATAFORMAS_PERFIL_DEMO.map((platform) => ({ ...platform,
-      usuario: (platform.nombre === 'Codeforces' ? p.codeforcesHandle : platform.nombre === 'AtCoder' ? p.atcoderHandle : p.vjudgeHandle) ?? '',
+    return PLATAFORMAS_PERFIL_DEMO.filter(platform => platform.nombre === 'Codeforces').map((platform) => ({ ...platform,
+      usuario: p.codeforcesHandle ?? '',
     })).filter(platform => platform.usuario);
   }
   protected get estadisticas() {

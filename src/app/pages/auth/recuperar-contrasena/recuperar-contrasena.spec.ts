@@ -1,16 +1,28 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../../../app.routes';
+import { API_URL } from '../../../core/api';
+import { authInterceptor } from '../../../core/auth-interceptor';
+import { PasswordResetApi } from '../../../core/password-reset-api';
 import { PasswordResetFlow } from '../../../core/password-reset-flow';
+import { Session } from '../../../core/session';
 import { maskEmail } from './recuperar-contrasena';
+
+const API = 'http://api.test';
+const EMAIL = 'camila.rojas@upc.edu.pe';
 
 describe('Password reset screens', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
-      providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+        { provide: API_URL, useValue: API },
+      ],
     }),
   );
   afterEach(() => {
@@ -22,21 +34,35 @@ describe('Password reset screens', () => {
     const harness = await RouterTestingHarness.create(url);
     await harness.fixture.whenStable();
     const root = harness.routeNativeElement as HTMLElement;
+    const http = TestBed.inject(HttpTestingController);
+    const settle = async () => {
+      harness.detectChanges();
+      await harness.fixture.whenStable();
+    };
     const type = async (id: string, value: string, blur = true) => {
       const input = root.querySelector<HTMLInputElement>(`#${id}`)!;
       input.value = value;
       input.dispatchEvent(new Event('input'));
       if (blur) input.dispatchEvent(new Event('blur'));
-      harness.detectChanges();
-      await harness.fixture.whenStable();
+      await settle();
     };
     const submit = async () => {
       root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
-      harness.detectChanges();
-      await harness.fixture.whenStable();
+      await settle();
+    };
+    /** Answers the pending request of one step and lets the screen react to it. */
+    const answer = async (step: 'request' | 'verify' | 'confirm', body: unknown, status = 200, message = '') => {
+      const call = http.expectOne(`${API}/auth/password-reset/${step}`);
+      expect(call.request.method).toBe('POST');
+      expect(call.request.headers.has('Authorization')).toBe(false);
+      if (status === 200) call.flush({ message: 'ok' });
+      else call.flush({ message }, { status, statusText: 'error' });
+      await settle();
+      return call.request.body;
     };
     const button = () => root.querySelector<HTMLButtonElement>('button.submit')!;
-    return { harness, root, type, submit, button };
+    const alert = () => root.querySelector('[role=alert]')?.textContent?.replace(/\s+/g, ' ').trim();
+    return { harness, root, type, submit, answer, button, alert, http, settle };
   }
 
   it('explains the three steps and asks only for the email on the first screen', async () => {
@@ -51,34 +77,60 @@ describe('Password reset screens', () => {
     expect(root.querySelectorAll('input')).toHaveLength(1);
     expect(button().textContent).toContain('Enviar código por correo');
     expect(button().disabled).toBe(true);
+    expect(root.textContent).not.toContain('Vista de ejemplo');
   });
 
-  it('validates the email before sending the code', async () => {
-    const { root, type, button } = await open('/recuperar-contrasena');
+  it('validates the email before sending the code and sends nothing while it is invalid', async () => {
+    const { root, type, submit, button, http } = await open('/recuperar-contrasena');
     await type('recovery-email', '');
     expect(root.textContent).toContain('Ingresa tu correo institucional');
     await type('recovery-email', 'no-es-un-correo');
     expect(root.textContent).toContain('Ingresa un correo válido');
     expect(button().disabled).toBe(true);
-    await type('recovery-email', 'camila.rojas@upc.edu.pe');
+    await submit();
+    http.expectNone(`${API}/auth/password-reset/request`);
+    await type('recovery-email', EMAIL);
     expect(button().disabled).toBe(false);
   });
 
-  it('goes to the code step with a normalized, masked email', async () => {
-    const { harness, type, submit } = await open('/recuperar-contrasena');
+  it('requests the code with a normalized email and shows it masked on the next step', async () => {
+    const { harness, type, submit, answer, button } = await open('/recuperar-contrasena');
     await type('recovery-email', '  Camila.Rojas@UPC.edu.pe ');
     await submit();
+    expect(button().disabled).toBe(true);
+    expect(button().textContent).toContain('Enviando código');
+    const body = await answer('request', null);
+    expect(body).toEqual({ email: EMAIL });
     expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena/codigo');
-    expect(TestBed.inject(PasswordResetFlow).email()).toBe('camila.rojas@upc.edu.pe');
+    expect(TestBed.inject(PasswordResetFlow).email()).toBe(EMAIL);
     const root = harness.routeNativeElement as HTMLElement;
     expect(root.textContent).toContain('Paso 2 de 3');
     expect(root.textContent).toContain('ca***@upc.edu.pe');
-    expect(root.textContent).not.toContain('camila.rojas@upc.edu.pe');
+    expect(root.textContent).not.toContain(EMAIL);
   });
 
-  it('asks for a six digit code and moves on to the new password step', async () => {
-    TestBed.inject(PasswordResetFlow).email.set('camila.rojas@upc.edu.pe');
-    const { root, type, submit, button } = await open('/recuperar-contrasena/codigo');
+  it('stays on the first step and shows the backend message when the code cannot be sent', async () => {
+    const { type, submit, answer, alert, button } = await open('/recuperar-contrasena');
+    await type('recovery-email', EMAIL);
+    await submit();
+    await answer('request', null, 429, 'Espera un minuto antes de pedir otro código');
+    expect(alert()).toBe('Espera un minuto antes de pedir otro código');
+    expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena');
+    expect(button().disabled).toBe(false);
+    expect(TestBed.inject(PasswordResetFlow).email()).toBe('');
+  });
+
+  it('explains that the email service is unavailable', async () => {
+    const { type, submit, answer, alert } = await open('/recuperar-contrasena');
+    await type('recovery-email', EMAIL);
+    await submit();
+    await answer('request', null, 503, 'El envío de correos no está configurado');
+    expect(alert()).toBe('No podemos enviar correos en este momento. Inténtalo más tarde.');
+  });
+
+  it('checks the six digit code with the backend before moving on', async () => {
+    TestBed.inject(PasswordResetFlow).email.set(EMAIL);
+    const { root, type, submit, answer, button } = await open('/recuperar-contrasena/codigo');
     expect(button().textContent).toContain('Verificar código');
     expect(button().disabled).toBe(true);
     await type('recovery-code', '');
@@ -91,28 +143,73 @@ describe('Password reset screens', () => {
     await type('recovery-code', '123 456');
     expect(button().disabled).toBe(false);
     await submit();
+    const flow = TestBed.inject(PasswordResetFlow);
+    expect(flow.codeVerified()).toBe(false);
+    const body = await answer('verify', null);
+    expect(body).toEqual({ email: EMAIL, code: '123456' });
     expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena/nueva');
-    expect(TestBed.inject(PasswordResetFlow).codeVerified()).toBe(true);
+    expect(flow.codeVerified()).toBe(true);
+    expect(flow.code()).toBe('123456');
   });
 
-  it('lets the user resend the code or go back to change the email', async () => {
-    TestBed.inject(PasswordResetFlow).email.set('camila.rojas@upc.edu.pe');
-    const { harness, root } = await open('/recuperar-contrasena/codigo');
+  it('keeps the user on the code step when the code is wrong and offers a new one', async () => {
+    TestBed.inject(PasswordResetFlow).email.set(EMAIL);
+    const { root, type, submit, answer, alert } = await open('/recuperar-contrasena/codigo');
+    await type('recovery-code', '000000');
+    await submit();
+    await answer('verify', null, 401, 'Código inválido o vencido');
+    expect(alert()).toContain('Código inválido o vencido');
+    expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena/codigo');
+    expect(TestBed.inject(PasswordResetFlow).codeVerified()).toBe(false);
+    expect(root.querySelector('[role=alert] a[href="/recuperar-contrasena"]')?.textContent).toContain(
+      'Pedir un código nuevo',
+    );
+  });
+
+  it('shows the lock message after too many wrong codes', async () => {
+    TestBed.inject(PasswordResetFlow).email.set(EMAIL);
+    const { type, submit, answer, alert } = await open('/recuperar-contrasena/codigo');
+    await type('recovery-code', '111111');
+    await submit();
+    await answer('verify', null, 429, 'Demasiados intentos. Espera unos minutos y pide un código nuevo');
+    expect(alert()).toContain('Demasiados intentos');
+  });
+
+  it('resends the code and tells the user, without leaving the step', async () => {
+    TestBed.inject(PasswordResetFlow).email.set(EMAIL);
+    const { root, answer } = await open('/recuperar-contrasena/codigo');
     expect(root.querySelector('a[href="/recuperar-contrasena"]')?.textContent).toContain('Cambiar correo');
     expect(root.querySelector('[role=status]')).toBeNull();
     Array.from(root.querySelectorAll<HTMLButtonElement>('button'))
       .find((b) => b.textContent?.includes('Reenviar código'))!
       .click();
-    harness.detectChanges();
-    await harness.fixture.whenStable();
+    const body = await answer('request', null);
+    expect(body).toEqual({ email: EMAIL });
+    expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena/codigo');
     expect(root.querySelector('[role=status]')?.textContent).toContain('Te enviamos un código nuevo a ca***@upc.edu.pe');
   });
 
-  it('applies the password policy and requires both passwords to match', async () => {
+  it('does not tell the user a new code was sent when the resend fails', async () => {
+    TestBed.inject(PasswordResetFlow).email.set(EMAIL);
+    const { root, answer, alert } = await open('/recuperar-contrasena/codigo');
+    Array.from(root.querySelectorAll<HTMLButtonElement>('button'))
+      .find((b) => b.textContent?.includes('Reenviar código'))!
+      .click();
+    await answer('request', null, 429, 'Espera un minuto antes de pedir otro código');
+    expect(alert()).toBe('Espera un minuto antes de pedir otro código Pedir un código nuevo');
+    expect(root.querySelector('[role=status]')).toBeNull();
+  });
+
+  async function openNewPassword() {
     const flow = TestBed.inject(PasswordResetFlow);
-    flow.email.set('camila.rojas@upc.edu.pe');
+    flow.email.set(EMAIL);
+    flow.code.set('123456');
     flow.codeVerified.set(true);
-    const { root, type, button } = await open('/recuperar-contrasena/nueva');
+    return open('/recuperar-contrasena/nueva');
+  }
+
+  it('applies the password policy and requires both passwords to match', async () => {
+    const { root, type, button } = await openNewPassword();
     expect(root.querySelector('h1')?.textContent).toContain('Crea tu nueva contraseña');
     expect(root.textContent).toContain('Paso 3 de 3');
     expect(button().textContent).toContain('Cambiar contraseña');
@@ -127,19 +224,50 @@ describe('Password reset screens', () => {
     expect(button().disabled).toBe(false);
   });
 
-  it('finishes by returning to the login with a confirmation and clears the flow', async () => {
+  it('sets the new password with the code, clears the flow and returns to the login with a confirmation', async () => {
     const flow = TestBed.inject(PasswordResetFlow);
-    flow.email.set('camila.rojas@upc.edu.pe');
-    flow.codeVerified.set(true);
-    const { harness, type, submit } = await open('/recuperar-contrasena/nueva');
+    const { harness, type, submit, answer } = await openNewPassword();
     await type('new-password', 'Nueva2026');
     await type('repeat-password', 'Nueva2026');
     await submit();
+    const body = await answer('confirm', null);
+    expect(body).toEqual({ email: EMAIL, code: '123456', newPassword: 'Nueva2026' });
     expect(TestBed.inject(Router).url).toBe('/login?motivo=contrasena-actualizada');
     expect(flow.email()).toBe('');
+    expect(flow.code()).toBe('');
     expect(flow.codeVerified()).toBe(false);
     const root = harness.routeNativeElement as HTMLElement;
     expect(root.querySelector('[role=status]')?.textContent).toContain('Contraseña actualizada');
+  });
+
+  it('keeps the flow and shows the backend message when the code expired before the password was set', async () => {
+    const flow = TestBed.inject(PasswordResetFlow);
+    const { type, submit, answer, alert } = await openNewPassword();
+    await type('new-password', 'Nueva2026');
+    await type('repeat-password', 'Nueva2026');
+    await submit();
+    await answer('confirm', null, 401, 'Código inválido o vencido');
+    expect(alert()).toContain('Código inválido o vencido');
+    expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena/nueva');
+    expect(flow.email()).toBe(EMAIL);
+  });
+
+  it('shows the backend message for a rejected password', async () => {
+    const { type, submit, answer, alert } = await openNewPassword();
+    await type('new-password', 'Nueva2026');
+    await type('repeat-password', 'Nueva2026');
+    await submit();
+    await answer('confirm', null, 400, 'La contraseña debe contener al menos 8 caracteres, una mayúscula y un número');
+    expect(alert()).toContain('La contraseña debe contener al menos 8 caracteres');
+  });
+
+  it('sends one request at a time', async () => {
+    const { type, submit, http } = await openNewPassword();
+    await type('new-password', 'Nueva2026');
+    await type('repeat-password', 'Nueva2026');
+    await submit();
+    await submit();
+    http.expectOne(`${API}/auth/password-reset/confirm`);
   });
 
   it('does not let a later step be opened directly', async () => {
@@ -147,7 +275,11 @@ describe('Password reset screens', () => {
     expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena');
     await harness.navigateByUrl('/recuperar-contrasena/nueva');
     expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena');
-    TestBed.inject(PasswordResetFlow).email.set('camila.rojas@upc.edu.pe');
+    const flow = TestBed.inject(PasswordResetFlow);
+    flow.email.set(EMAIL);
+    await harness.navigateByUrl('/recuperar-contrasena/nueva');
+    expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena/codigo');
+    flow.codeVerified.set(true);
     await harness.navigateByUrl('/recuperar-contrasena/nueva');
     expect(TestBed.inject(Router).url).toBe('/recuperar-contrasena/codigo');
   });
@@ -160,9 +292,50 @@ describe('Password reset screens', () => {
   });
 });
 
+describe('Password reset requests and the auth interceptor', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+        { provide: API_URL, useValue: API },
+      ],
+    }),
+  );
+
+  it('sends the three public steps without a token and does not log the user out on a 401', () => {
+    const session = TestBed.inject(Session);
+    session.account.set({
+      token: 'token-de-otra-sesion',
+      email: 'otra@upc.edu.pe',
+      role: 'PRACTICANTE',
+      expiresAt: Date.now() + 60_000,
+    });
+    const api = TestBed.inject(PasswordResetApi);
+    const http = TestBed.inject(HttpTestingController);
+    for (const step of ['request', 'verify', 'confirm'] as const) {
+      const call =
+        step === 'request'
+          ? api.request(EMAIL)
+          : step === 'verify'
+            ? api.verify(EMAIL, '123456')
+            : api.confirm(EMAIL, '123456', 'Nueva2026');
+      let failed = 0;
+      call.subscribe({ error: () => failed++ });
+      const req = http.expectOne(`${API}/auth/password-reset/${step}`);
+      expect(req.request.headers.has('Authorization')).toBe(false);
+      req.flush({ message: 'Código inválido o vencido' }, { status: 401, statusText: 'Unauthorized' });
+      expect(failed).toBe(1);
+    }
+    expect(session.token()).toBe('token-de-otra-sesion');
+    http.verify();
+  });
+});
+
 describe('maskEmail', () => {
   it('keeps the first two letters and the domain', () => {
-    expect(maskEmail('camila.rojas@upc.edu.pe')).toBe('ca***@upc.edu.pe');
+    expect(maskEmail(EMAIL)).toBe('ca***@upc.edu.pe');
     expect(maskEmail('a@upc.edu.pe')).toBe('a***@upc.edu.pe');
   });
 

@@ -1,5 +1,6 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -17,7 +18,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { Observable, finalize, map } from 'rxjs';
+import { authApiError } from '../../../core/api';
+import { PasswordResetApi } from '../../../core/password-reset-api';
 import { PasoRecuperacion, PasswordResetFlow } from '../../../core/password-reset-flow';
 import { emailRule, normalizeEmail, passwordBytesRule, passwordPolicyRule } from '../auth-rules';
 
@@ -39,6 +42,14 @@ class ConfirmPasswordMatcher implements ErrorStateMatcher {
   }
 }
 
+/** A 503 means the server cannot send emails: say so without exposing how the server is configured. */
+function resetError(error: unknown): string {
+  if (error instanceof HttpErrorResponse && error.status === 503) {
+    return 'No podemos enviar correos en este momento. Inténtalo más tarde.';
+  }
+  return authApiError(error);
+}
+
 /** "ca***@upc.edu.pe": shows enough of the address to recognize it without exposing it. */
 export function maskEmail(email: string): string {
   const [local, domain] = email.split('@');
@@ -47,8 +58,8 @@ export function maskEmail(email: string): string {
 }
 
 /**
- * Basic password reset flow in three steps (email → code → new password). It is a UI-only flow:
- * no email is sent and no password is changed until the backend offers an endpoint for it.
+ * Password reset in three steps (email → code → new password) against `/auth/password-reset/*`.
+ * The email carries a six digit code; the backend checks it again when the new password is set.
  */
 @Component({
   selector: 'app-recuperar-contrasena',
@@ -67,12 +78,16 @@ export function maskEmail(email: string): string {
 })
 export class RecuperarContrasena {
   private readonly router = inject(Router);
+  private readonly api = inject(PasswordResetApi);
   protected readonly flow = inject(PasswordResetFlow);
   protected readonly paso$ = inject(ActivatedRoute).data.pipe(map((data) => data['paso'] as PasoRecuperacion));
   protected readonly codeLength = CODE_LENGTH;
   protected readonly confirmPasswordMatcher = new ConfirmPasswordMatcher();
   protected showPassword = false;
-  protected resent = false;
+  // The app runs without zone.js: state that changes after an HTTP answer lives in signals.
+  protected readonly busy = signal(false);
+  protected readonly error = signal('');
+  protected readonly resent = signal(false);
 
   protected readonly correoForm = new FormGroup({
     email: new FormControl('', { nonNullable: true, validators: [emailRule] }),
@@ -98,25 +113,48 @@ export class RecuperarContrasena {
 
   protected enviarCodigo(): void {
     if (this.correoForm.invalid) return;
-    this.flow.email.set(normalizeEmail(this.correoForm.controls.email.value));
-    this.flow.codeVerified.set(false);
-    this.resent = false;
-    void this.router.navigateByUrl('/recuperar-contrasena/codigo');
+    const email = normalizeEmail(this.correoForm.controls.email.value);
+    this.run(this.api.request(email), () => {
+      this.flow.email.set(email);
+      this.flow.code.set('');
+      this.flow.codeVerified.set(false);
+      this.resent.set(false);
+      void this.router.navigateByUrl('/recuperar-contrasena/codigo');
+    });
   }
 
   protected reenviarCodigo(): void {
-    this.resent = true;
+    this.resent.set(false);
+    this.run(this.api.request(this.flow.email()), () => this.resent.set(true));
   }
 
   protected verificarCodigo(): void {
     if (this.codigoForm.invalid) return;
-    this.flow.codeVerified.set(true);
-    void this.router.navigateByUrl('/recuperar-contrasena/nueva');
+    const code = this.codigoForm.controls.code.value.replace(/\s+/g, '');
+    this.run(this.api.verify(this.flow.email(), code), () => {
+      this.flow.code.set(code);
+      this.flow.codeVerified.set(true);
+      void this.router.navigateByUrl('/recuperar-contrasena/nueva');
+    });
   }
 
   protected cambiarContrasena(): void {
     if (this.nuevaForm.invalid) return;
-    this.flow.reset();
-    void this.router.navigate(['/login'], { queryParams: { motivo: 'contrasena-actualizada' } });
+    const { password } = this.nuevaForm.getRawValue();
+    this.run(this.api.confirm(this.flow.email(), this.flow.code(), password), () => {
+      this.flow.reset();
+      void this.router.navigate(['/login'], { queryParams: { motivo: 'contrasena-actualizada' } });
+    });
+  }
+
+  /** Sends one request at a time, shows the backend message when it fails and runs `onSuccess` otherwise. */
+  private run(request: Observable<unknown>, onSuccess: () => void): void {
+    if (this.busy()) return;
+    this.busy.set(true);
+    this.error.set('');
+    request.pipe(finalize(() => this.busy.set(false))).subscribe({
+      next: onSuccess,
+      error: (error: unknown) => this.error.set(resetError(error)),
+    });
   }
 }

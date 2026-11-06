@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const session = inject(Session);
   const router = inject(Router);
   const profiles = inject(ProfileApi);
-  const publicAuth = /\/auth\/(login|register)$/.test(request.url);
+  const publicAuth = /\/auth\/(login|register|password-reset\/(request|verify|confirm))$/.test(request.url);
   if (session.demo() && !publicAuth) {
     return throwError(() => new Error('La demostración no realiza operaciones contra la API.'));
   }

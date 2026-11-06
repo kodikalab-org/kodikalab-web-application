@@ -43,23 +43,6 @@
           <img src="/images/dashboard/0-imgIcon2.svg" width="18" height="18" alt="" />Ir a una
           sección del dashboard…
         </button>
-        <button
-          mat-icon-button
-          [matMenuTriggerFor]="notificaciones"
-          aria-label="Notificaciones"
-          matTooltip="Notificaciones y actividad"
-        >
-          <img src="/images/dashboard/0-imgIcon3.svg" width="22" height="22" alt="" />
-        </button>
-        <button
-          mat-icon-button
-          [matMenuTriggerFor]="apariencia"
-          aria-label="Apariencia"
-          matTooltip="Apariencia"
-          class="hidden sm:inline-flex"
-        >
-          <img src="/images/dashboard/0-imgIcon4.svg" width="22" height="22" alt="" />
-        </button>
         <app-user-menu
           [coach]="coach"
           [nombre]="nombre"
@@ -89,29 +72,6 @@
     }
     <button mat-menu-item disabled>Búsqueda global · próximamente</button>
   </mat-menu>
-  <mat-menu #notificaciones="matMenu" [class]="clasesMenu" [overlapTrigger]="false">
-    <div class="max-w-[280px] px-4 py-3 text-sm text-kl-body" role="note">
-      Las notificaciones en tiempo real todavía no están conectadas. Puedes revisar la actividad de
-      ejemplo:
-    </div>
-    <a
-      mat-menu-item
-      [routerLink]="coach ? '/coach/grupos/solicitudes' : ruta"
-      [fragment]="coach ? undefined : 'problemas'"
-      (click)="!coach && irASeccion(problemasSeccion)"
-      >{{ coach ? 'Revisar solicitudes' : 'Ver problemas asignados' }}</a
-    >
-    <a
-      mat-menu-item
-      [routerLink]="coach ? '/coach/competencias' : ruta"
-      [fragment]="coach ? undefined : 'competencias'"
-      (click)="!coach && irASeccion(competenciasSeccion)"
-      >Ver próximas competencias</a
-    >
-  </mat-menu>
-  <mat-menu #apariencia="matMenu" [class]="clasesMenu" [overlapTrigger]="false"
-    ><button mat-menu-item disabled>Tema oscuro · tema claro próximamente</button></mat-menu
-  >
 
   <main
     #contenido

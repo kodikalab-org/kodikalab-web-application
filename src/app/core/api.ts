@@ -14,7 +14,6 @@ export interface AuthResponse {
   token?: string;
   tokenType?: string;
   expiresIn?: number;
-  recoveryCode?: string;
 }
 export interface RegisterRequest {
   firstName: string; lastName: string; email: string; password: string; role: Role;
@@ -33,7 +32,6 @@ export type Profile = PractitionerProfile | CoachProfile;
 export type PractitionerRequest = Omit<PractitionerProfile, 'email' | 'role' | 'codeforcesRating'>;
 export type CoachRequest = Omit<CoachProfile, 'email' | 'role'>;
 export interface ProfileResponse { message: string; profile: Profile; }
-export interface RecoveryResponse { message: string; recoveryCode: string; }
 
 const CONNECTION_MESSAGE = 'No pudimos conectar con el servidor. Inténtalo de nuevo.';
 
@@ -58,7 +56,7 @@ export function apiError(error: unknown): string {
 }
 
 /**
- * Error text for the auth screens (register, login, recovery): the backend message wins for
+ * Error text for the auth screens (register and login): the backend message wins for
  * 400, 401, 403 and 409, and timeouts count as connection failures.
  */
 export function authApiError(error: unknown): string {

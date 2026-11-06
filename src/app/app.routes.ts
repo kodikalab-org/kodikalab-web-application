@@ -38,8 +38,6 @@ const appRoutes: Routes = [
   { path: '', component: LandingPage },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
-  { path: 'registro-exitoso', loadComponent: () => import('./pages/auth/registro-exitoso/registro-exitoso').then(m => m.RegistroExitoso) },
-  { path: 'recuperar-acceso', loadComponent: () => import('./pages/auth/recuperar-acceso/recuperar-acceso').then(m => m.RecuperarAcceso) },
   { path: 'demo/practicante', component: Login, canActivate: [demoGuard], data: { role: 'PRACTICANTE' } },
   { path: 'demo/coach', component: Login, canActivate: [demoGuard], data: { role: 'COACH' } },
   {
@@ -172,7 +170,7 @@ const appRoutes: Routes = [
   },
 ];
 
-const publicPaths = ['', 'login', 'registro', 'registro-exitoso', 'recuperar-acceso'];
+const publicPaths = ['', 'login', 'registro'];
 export const routes: Routes = [
   ...appRoutes.map(route => publicPaths.includes(route.path ?? '') || route.path?.startsWith('demo/')
     ? route

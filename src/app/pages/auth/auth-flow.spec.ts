@@ -4,13 +4,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Router, provideRouter } from '@angular/router';
 import { Registro } from './registro/registro';
 import { Login } from './login/login';
-import { RecuperarAcceso } from './recuperar-acceso/recuperar-acceso';
-import { RegistroExitoso } from './registro-exitoso/registro-exitoso';
 import { Session } from '../../core/session';
+import { routes } from '../../app.routes';
 
 const REGISTER_URL = 'http://localhost:8080/api/auth/register';
 const LOGIN_URL = 'http://localhost:8080/api/auth/login';
-const RECOVERY_URL = 'http://localhost:8080/api/auth/recovery';
 const CONNECTION = 'No pudimos conectar con el servidor. Inténtalo de nuevo.';
 
 describe('API-connected access forms', () => {
@@ -200,7 +198,7 @@ describe('API-connected access forms', () => {
     expect(navigate).toHaveBeenCalledWith('/onboarding/coach/experiencia');
   });
 
-  it('shows "Credenciales inválidas" with retry and recovery actions, keeps the email and clears the password', async () => {
+  it('shows "Credenciales inválidas" with a retry action and no recovery link, keeps the email and clears the password', async () => {
     const fixture = TestBed.createComponent(Login);
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
@@ -211,7 +209,7 @@ describe('API-connected access forms', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(alertText(root)).toContain('Credenciales inválidas');
-    expect(root.querySelector('[role=alert] a[href="/recuperar-acceso"]')).not.toBeNull();
+    expect(root.querySelector('a[href="/recuperar-acceso"]')).toBeNull();
     expect(root.querySelector('[role=alert] button.retry')).not.toBeNull();
     expect(root.querySelector<HTMLInputElement>('#email')!.value).toBe('Camila.Rojas@upc.edu.pe');
     expect(root.querySelector<HTMLInputElement>('#password')!.value).toBe('');
@@ -233,31 +231,24 @@ describe('API-connected access forms', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(alertText(root)).toContain(CONNECTION);
-    expect(root.querySelector('[role=alert] a[href="/recuperar-acceso"]')).toBeNull();
     root.querySelector<HTMLButtonElement>('button.retry')!.click();
     fixture.detectChanges();
     expect(http.expectOne(LOGIN_URL).request.body.password).toBe('Prueba2026');
   });
 
-  it('shows recovery failure without a success screen or session', async () => {
-    const fixture = TestBed.createComponent(RecuperarAcceso);
-    await fixture.whenStable();
-    const root: HTMLElement = fixture.nativeElement;
-    type(root, 'recovery-email', 'test@example.com');
-    type(root, 'recovery-code', 'ABCDEFGHIJKLMNOPQRSTUVWX');
-    type(root, 'new-password', 'Prueba2026');
-    submit(root);
-    http.expectOne(RECOVERY_URL).flush({ message: 'Datos de recuperación inválidos' }, { status: 401, statusText: 'Unauthorized' });
-    await fixture.whenStable();
-    expect(alertText(root)).toContain('Datos de recuperación inválidos');
-    expect(root.querySelector('code')).toBeNull();
-    expect(TestBed.inject(Session).account()).toBeNull();
+  it('does not offer code-based recovery on the login or registration screens', async () => {
+    const login = TestBed.createComponent(Login);
+    await login.whenStable();
+    expect(login.nativeElement.querySelector('a[href="/recuperar-acceso"]')).toBeNull();
+    expect(login.nativeElement.textContent).not.toContain('¿Olvidaste tu contraseña?');
+    const registro = TestBed.createComponent(Registro);
+    await registro.whenStable();
+    expect(registro.nativeElement.textContent).not.toContain('código de recuperación');
   });
 
-  it('does not fabricate a registration confirmation when its ephemeral response is missing', async () => {
-    const fixture = TestBed.createComponent(RegistroExitoso);
-    await fixture.whenStable();
-    expect(fixture.nativeElement.textContent).toContain('Confirmación no disponible');
-    expect(fixture.nativeElement.querySelector('code')).toBeNull();
+  it('has no routes for the recovery code screens', () => {
+    const paths = routes.map((route) => route.path);
+    expect(paths).not.toContain('registro-exitoso');
+    expect(paths).not.toContain('recuperar-acceso');
   });
 });

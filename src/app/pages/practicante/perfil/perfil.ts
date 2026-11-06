@@ -4,10 +4,8 @@ import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
-import { RecoveryCode } from '../../../shared/recovery-code/recovery-code';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,7 +15,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import {
-  CODIGO_RECUPERACION_DEMO,
   DIAS_HEATMAP,
   ESTADISTICAS_DEMO,
   FILTROS_SOLICITUD_DEMO,
@@ -52,7 +49,7 @@ const ESTADOS_POR_PESTANA: Record<PestanaPerfil, readonly EstadoPerfil[]> = {
   info: ['cargando', 'sin-plataformas', 'actualizado'],
   solicitudes: ['vacio'],
   submissions: ['vacio'],
-  ajustes: ['ver-codigo', 'codigo-recuperacion'],
+  ajustes: [],
 };
 
 const PESTANAS: readonly PestanaPerfil[] = ['info', 'solicitudes', 'submissions', 'ajustes'];
@@ -72,9 +69,7 @@ function aCeldas(filas: string[]): number[] {
   imports: [
     HeaderNavigation,
     UserMenu,
-    RecoveryCode,
     AsyncPipe,
-    CdkTrapFocus,
     NgTemplateOutlet,
     ReactiveFormsModule,
     RouterLink,
@@ -234,7 +229,6 @@ export class Perfil {
 
   // ---- Ajustes generales ----
   protected readonly idiomas = IDIOMAS_AJUSTES;
-  protected readonly codigoRecuperacion = CODIGO_RECUPERACION_DEMO;
   protected readonly filasAjustes = [
     {
       tipo: 'interruptor',
@@ -265,14 +259,6 @@ export class Perfil {
       descripcion: 'Activa o desactiva el tema oscuro.',
     },
     {
-      tipo: 'codigo',
-      control: null,
-      icono: 'images/perfil/row-key-22.svg',
-      titulo: 'Código de recuperación',
-      descripcion:
-        'Úsalo para recuperar el acceso si olvidas tu contraseña. Se muestra tras confirmar tu contraseña.',
-    },
-    {
       tipo: 'salir',
       control: null,
       icono: 'images/perfil/row-logout-22.svg',
@@ -286,13 +272,4 @@ export class Perfil {
     idioma: new FormControl('es_419', { nonNullable: true }),
     temaOscuro: new FormControl(true, { nonNullable: true }),
   });
-
-  protected readonly formPassword = new FormGroup({
-    password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-  });
-  protected mostrarPassword = false;
-
-  protected alternarPassword(): void {
-    this.mostrarPassword = !this.mostrarPassword;
-  }
 }

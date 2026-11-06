@@ -26,8 +26,6 @@ describe('Variantes estáticas pendientes', () => {
   });
 
   const casos = [
-    ['/registro-exitoso?estado=verificacion-pendiente', 'Revisa tu correo institucional'],
-    ['/registro-exitoso?estado=cuenta-activada', 'Tu cuenta está activada'],
     ['/login?estado=cuenta-deshabilitada', 'Tu cuenta no está habilitada'],
     ['/coach/grupos/crear?paso=4&estado=creando', 'Creando grupo…'],
     ['/coach/grupos/crear?paso=4&estado=perfil-incompleto', 'Completa tu perfil de coach'],

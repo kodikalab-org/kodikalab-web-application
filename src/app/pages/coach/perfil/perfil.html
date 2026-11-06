@@ -504,19 +504,6 @@
                         />
                       </mat-form-field>
                     }
-                    @case ('codigo') {
-                      @if (!session.demo()) { <app-recovery-code /> } @else {
-                      <button
-                        mat-stroked-button
-                        class="h-10 rounded-[10px] border border-solid border-[#6b52e0] bg-[#7357f3]/12 px-4 text-sm text-[#e7e3f5]"
-                        type="button"
-                        disabled
-                      >
-                        <img src="images/perfil-coach/key-16.svg" alt="" width="16" height="16" />
-                        Código no disponible en demo
-                      </button>
-                      }
-                    }
                     @case ('salir') {
                       <a
                         mat-stroked-button

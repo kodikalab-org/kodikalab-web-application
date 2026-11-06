@@ -268,8 +268,6 @@ export const IDIOMAS_AJUSTES: OpcionSelect[] = [
   { valor: 'en_US', etiqueta: 'English' },
 ];
 
-/** Demo recovery code shown in the "código de recuperación" dialog (example only). */
-export const CODIGO_RECUPERACION_DEMO = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX';
 
 // ---- /perfil/editar -------------------------------------------------------------------
 

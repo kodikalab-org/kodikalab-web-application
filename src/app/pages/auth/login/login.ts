@@ -15,7 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
-// What the alert offers: 'credentials' (401) gets retry and recovery, 'connection' gets retry only.
+// What the alert offers: both a credentials (401) and a connection failure get a retry action.
 type LoginFailure = 'credentials' | 'connection' | null;
 
 @Component({

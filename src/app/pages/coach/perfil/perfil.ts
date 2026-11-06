@@ -2,7 +2,6 @@ import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
-import { RecoveryCode } from '../../../shared/recovery-code/recovery-code';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -38,7 +37,7 @@ interface FilaPestania {
 }
 
 interface FilaAjuste {
-  readonly tipo: 'interruptor' | 'idioma' | 'codigo' | 'salir';
+  readonly tipo: 'interruptor' | 'idioma' | 'salir';
   readonly campo: 'notificaciones' | 'privacidad' | 'idioma' | 'temaOscuro' | null;
   readonly icono: string;
   readonly titulo: string;
@@ -52,7 +51,6 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
   imports: [
     HeaderNavigation,
     UserMenu,
-    RecoveryCode,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -160,14 +158,6 @@ export class CoachPerfil {
       icono: 'images/perfil-coach/moon-22-row.svg',
       titulo: 'Tema oscuro',
       descripcion: 'Activa o desactiva el tema oscuro.',
-    },
-    {
-      tipo: 'codigo',
-      campo: null,
-      icono: 'images/perfil-coach/key-22.svg',
-      titulo: 'Código de recuperación',
-      descripcion:
-        'Úsalo para recuperar el acceso si olvidas tu contraseña. Se muestra tras confirmar tu contraseña.',
     },
     {
       tipo: 'salir',

@@ -1,22 +1,19 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Role } from '../../core/api';
 
-// Limits mirror the backend contract (POST /auth/register, /auth/login, /auth/recovery).
+// Limits mirror the backend contract (POST /auth/register and /auth/login).
 export const NAME_MAX_LENGTH = 80;
 export const FULL_NAME_MAX_LENGTH = 150;
 export const EMAIL_MAX_LENGTH = 100;
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_BYTES = 72;
-export const RECOVERY_CODE_LENGTH = 24;
 
 export const PASSWORD_POLICY_MESSAGE =
   'La contraseña debe contener al menos 8 caracteres, una mayúscula y un número';
-export const RECOVERY_CODE_EXAMPLE = 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX';
 
 // Same shape as the email pattern used by Angular's Validators.email.
 const EMAIL_PATTERN =
   /^(?=.{1,254}$)(?=.{1,64}@)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-const RECOVERY_CODE_PATTERN = /^[A-Z2-7]{24}$/;
 
 /** Names are trimmed and internal whitespace is collapsed before validation and before sending. */
 export function normalizeName(value: string): string {
@@ -26,16 +23,6 @@ export function normalizeName(value: string): string {
 /** Emails are trimmed and lowercased before validation and before sending. */
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
-}
-
-/** Accepts the code with or without hyphens, spaces or lowercase letters. */
-export function normalizeRecoveryCode(value: string): string {
-  return value.toUpperCase().replace(/[\s-]/g, '');
-}
-
-/** Canonical form sent to the backend: four groups of four, separated by hyphens. */
-export function formatRecoveryCode(normalized: string): string {
-  return normalized.match(/.{1,4}/g)?.join('-') ?? '';
 }
 
 export function utf8ByteLength(value: string): number {
@@ -73,12 +60,6 @@ export const passwordPolicyRule: ValidatorFn = (control) => {
 export const passwordBytesRule: ValidatorFn = (control) => {
   const bytes = utf8ByteLength(String(control.value ?? ''));
   return bytes > PASSWORD_MAX_BYTES ? { passwordTooLong: { max: PASSWORD_MAX_BYTES, actual: bytes } } : null;
-};
-
-export const recoveryCodeRule: ValidatorFn = (control) => {
-  const code = normalizeRecoveryCode(String(control.value ?? ''));
-  if (!code) return { required: true };
-  return RECOVERY_CODE_PATTERN.test(code) ? null : { recoveryCodeFormat: true };
 };
 
 export const roleRule: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {

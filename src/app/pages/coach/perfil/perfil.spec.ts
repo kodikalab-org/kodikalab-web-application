@@ -108,14 +108,13 @@ describe('CoachPerfil', () => {
     expect(root.querySelectorAll('li button').length).toBe(0);
   });
 
-  it('shows the general settings with toggles, language, recovery code and logout', async () => {
+  it('shows the general settings with toggles, language and logout, without a recovery code row', async () => {
     const { root, botones } = await abrir('/coach/perfil?tab=ajustes');
     const titulos = [
       'Notificaciones',
       'Privacidad del perfil',
       'Idioma',
       'Tema oscuro',
-      'Código de recuperación',
       'Cerrar sesión',
     ];
     for (const titulo of titulos) {
@@ -124,7 +123,8 @@ describe('CoachPerfil', () => {
     const toggles = Array.from(root.querySelectorAll<HTMLButtonElement>('button[role="switch"]'));
     expect(toggles.map((t) => t.getAttribute('aria-checked'))).toEqual(['true', 'false', 'true']);
     expect(root.querySelector('mat-select')?.textContent).toContain('Español');
-    expect(botones('Código no disponible en demo').length).toBe(1);
+    expect(root.textContent).not.toContain('Código de recuperación');
+    expect(botones('Código no disponible en demo').length).toBe(0);
     expect(root.querySelector('a[href="/login"]')?.textContent).toContain('Cerrar sesión');
   });
 

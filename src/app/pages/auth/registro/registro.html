@@ -80,7 +80,13 @@
               />
               <mat-error>
                 <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                Ingresa tu nombre
+                @if (form.controls.firstName.hasError('server')) {
+                  {{ form.controls.firstName.getError('server') }}
+                } @else if (form.controls.firstName.hasError('required')) {
+                  Ingresa tu nombre
+                } @else {
+                  El nombre no puede superar 80 caracteres
+                }
               </mat-error>
             </mat-form-field>
           </div>
@@ -106,11 +112,23 @@
               />
               <mat-error>
                 <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                Ingresa tu apellido
+                @if (form.controls.lastName.hasError('server')) {
+                  {{ form.controls.lastName.getError('server') }}
+                } @else if (form.controls.lastName.hasError('required')) {
+                  Ingresa tu apellido
+                } @else {
+                  El apellido no puede superar 80 caracteres
+                }
               </mat-error>
             </mat-form-field>
           </div>
         </div>
+        @if (form.hasError('fullNameTooLong') && (form.controls.firstName.touched || form.controls.lastName.touched)) {
+          <p class="m-0 -mt-1.5 flex items-start gap-1.5 text-[13px] leading-[18px] text-kl-danger">
+            <img class="mt-[1.5px] shrink-0" src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+            Nombre y apellido juntos no pueden superar 150 caracteres
+          </p>
+        }
 
         <div class="field flex min-w-0 flex-col gap-1.5">
           <label class="field__label text-[13px] font-medium text-kl-body" for="email"
@@ -133,7 +151,15 @@
             />
             <mat-error>
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-              Ingresa un correo válido
+              @if (form.controls.email.hasError('server')) {
+                {{ form.controls.email.getError('server') }}
+              } @else if (form.controls.email.hasError('required')) {
+                Ingresa tu correo institucional
+              } @else if (form.controls.email.hasError('maxlength')) {
+                El correo no puede superar 100 caracteres
+              } @else {
+                Ingresa un correo válido, por ejemplo nombre@upc.edu.pe
+              }
             </mat-error>
           </mat-form-field>
         </div>
@@ -144,6 +170,7 @@
           >
           <mat-form-field
             class="auth-field w-full text-[15px]"
+            [class.auth-field--weak]="isWeakPassword(form.controls.password)"
             appearance="outline"
             subscriptSizing="dynamic"
           >
@@ -160,10 +187,14 @@
             <img matSuffix src="images/registro/eye-off-20.svg" alt="" width="20" height="20" />
             <mat-error>
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-              @if (form.controls.password.hasError('required')) {
+              @if (form.controls.password.hasError('server')) {
+                {{ form.controls.password.getError('server') }}
+              } @else if (form.controls.password.hasError('required')) {
                 Crea una contraseña
-              } @else {
+              } @else if (form.controls.password.hasError('weakPassword')) {
                 La contraseña debe contener al menos 8 caracteres, una mayúscula y un número
+              } @else {
+                La contraseña no puede superar 72 bytes. Las letras con tilde o símbolos ocupan más de uno.
               }
             </mat-error>
           </mat-form-field>
@@ -286,7 +317,27 @@
             >Inicia sesión</a
           >
         </p>
-        @if (error) { <p role="alert" class="m-0 rounded-xl border border-solid border-red-400/40 bg-red-400/10 p-3 text-sm text-red-200">{{ error }}</p> }
+        @if (error || connectionError) {
+          <div
+            role="alert"
+            class="m-0 flex flex-col items-start gap-3 rounded-xl border border-solid border-red-400/40 bg-red-400/10 p-3 text-sm text-red-200"
+          >
+            @if (error) {
+              <p class="m-0">{{ error }}</p>
+            }
+            @if (connectionError) {
+              <button
+                mat-stroked-button
+                type="button"
+                class="retry"
+                [disabled]="busy || form.invalid"
+                (click)="registrar()"
+              >
+                Reintentar
+              </button>
+            }
+          </div>
+        }
       </form>
     </mat-card>
   </main>

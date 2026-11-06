@@ -265,15 +265,17 @@ describe('Perfil', () => {
     expect(root.querySelector('table')).toBeNull();
   });
 
-  it('shows the general settings with three switches and no recovery code row (?tab=ajustes)', async () => {
+  it('shows the general settings with one switch and no recovery code row (?tab=ajustes)', async () => {
     const { root } = await setup({ tab: 'ajustes' });
     const contenido = texto(root);
-    for (const titulo of ['Notificaciones', 'Privacidad del perfil', 'Idioma', 'Tema oscuro', 'Cerrar sesión']) {
+    for (const titulo of ['Privacidad del perfil', 'Idioma', 'Cerrar sesión']) {
       expect(contenido).toContain(titulo);
     }
     expect(contenido).not.toContain('Código de recuperación');
-    expect(root.querySelectorAll('mat-slide-toggle').length).toBe(3);
-    expect(root.querySelectorAll('button[role="switch"][aria-checked="true"]').length).toBe(3);
+    expect(root.querySelectorAll('mat-slide-toggle').length).toBe(1);
+    expect(contenido).not.toContain('Notificaciones');
+    expect(contenido).not.toContain('Tema oscuro');
+    expect(root.querySelectorAll('button[role="switch"][aria-checked="true"]').length).toBe(1);
     expect(root.querySelector('[role="dialog"]')).toBeNull();
   });
 

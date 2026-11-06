@@ -427,7 +427,7 @@
                   </div>
                   <a
                     mat-icon-button
-                    [routerLink]="coach ? '/coach/grupos/solicitudes' : '/grupos'"
+                    [routerLink]="coach ? '/coach/grupos/solicitudes' : (grupo.id ? ['/grupos', grupo.id] : '/grupos')"
                     [attr.aria-label]="'Ver ' + grupo.nombre"
                   >
                     <img src="/images/dashboard/0-imgIcon14.svg" width="18" height="18" alt="" />

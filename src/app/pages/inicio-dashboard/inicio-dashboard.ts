@@ -1,7 +1,7 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Session } from '../../core/session';
-import { CoachGroup, TeamsApi } from '../../core/teams-api';
+import { CoachGroup, PractitionerGroup, TeamsApi } from '../../core/teams-api';
 import { navigationFor } from '../../core/navigation';
 import { HeaderNavigation } from '../../shared/header-navigation/header-navigation';
 import { UserMenu } from '../../shared/user-menu/user-menu';
@@ -11,7 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { map } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
@@ -117,14 +117,24 @@ export class InicioDashboard {
   protected readonly temas;
   /** Grupos reales del coach; `null` mientras la petición está en curso. */
   protected readonly misGrupos = signal<CoachGroup[] | null>(null);
+  /** Membresías reales del practicante. */
+  protected readonly misMembresias = signal<PractitionerGroup[] | null>(null);
+  protected readonly resueltos = signal<number | null>(null);
+  protected readonly pendientesProblemas = signal<number | null>(null);
 
   /** Pasos completados: cuenta y perfil siempre; grupo e integrantes según datos reales. */
   protected readonly pasosCompletados = computed(() => {
-    if (!this.coach) return 2;
-    const grupos = this.misGrupos() ?? [];
-    const conGrupo = grupos.length > 0;
-    const conIntegrantes = grupos.some((grupo) => grupo.activeMembers > 0);
-    return 2 + (conGrupo ? 1 : 0) + (conIntegrantes ? 1 : 0);
+    if (this.coach) {
+      const grupos = this.misGrupos() ?? [];
+      const conGrupo = grupos.length > 0;
+      const conIntegrantes = grupos.some((grupo) => grupo.activeMembers > 0);
+      return 2 + (conGrupo ? 1 : 0) + (conIntegrantes ? 1 : 0);
+    }
+
+    const membresias = this.misMembresias() ?? [];
+    const enGrupo = membresias.length > 0;
+    const resolvio = (this.resueltos() ?? 0) > 0;
+    return 2 + (enGrupo ? 1 : 0) + (resolvio ? 1 : 0);
   });
 
   protected readonly estadisticas = computed(() => {
@@ -177,11 +187,48 @@ export class InicioDashboard {
     }
 
     if (!this.session.demo()) {
+      const membresias = this.misMembresias();
+      const activos = (membresias ?? []).filter(
+        (item) => item.membership.status === 'ACTIVO',
+      ).length;
+      const resueltos = this.resueltos();
+      const pendientes = this.pendientesProblemas();
       return [
-        { valor: '—', etiqueta: 'Problemas resueltos', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon6', tono: 'text-kl-muted' },
-        { valor: '—', etiqueta: 'Rating Codeforces', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon7', tono: 'text-kl-muted' },
-        { valor: '—', etiqueta: 'Mis grupos', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon8', tono: 'text-kl-muted' },
-        { valor: '—', etiqueta: 'Problemas pendientes', detalle: 'Pendiente de integración', vacio: '', icono: '0-imgIcon9', tono: 'text-kl-muted' },
+        {
+          valor: resueltos === null ? '—' : String(resueltos),
+          etiqueta: 'Problemas resueltos',
+          detalle: resueltos === null ? 'Cargando…' : 'En tus grupos',
+          vacio: '',
+          icono: '0-imgIcon6',
+          tono: resueltos ? 'text-green-400' : 'text-kl-muted',
+        },
+        {
+          valor: '—',
+          etiqueta: 'Rating Codeforces',
+          detalle: 'Pendiente de integración',
+          vacio: '',
+          icono: '0-imgIcon7',
+          tono: 'text-kl-muted',
+        },
+        {
+          valor: membresias === null ? '—' : String(membresias.length),
+          etiqueta: 'Mis grupos',
+          detalle:
+            membresias === null
+              ? 'Cargando…'
+              : `${activos} activo${activos === 1 ? '' : 's'} · ${membresias.length - activos} pendiente${membresias.length - activos === 1 ? '' : 's'}`,
+          vacio: '',
+          icono: '0-imgIcon8',
+          tono: 'text-kl-muted',
+        },
+        {
+          valor: pendientes === null ? '—' : String(pendientes),
+          etiqueta: 'Problemas pendientes',
+          detalle: pendientes === null ? 'Cargando…' : 'Sin resolver',
+          vacio: '',
+          icono: '0-imgIcon9',
+          tono: pendientes ? 'text-amber-300' : 'text-kl-muted',
+        },
       ];
     }
 
@@ -198,6 +245,7 @@ export class InicioDashboard {
       const reales = this.misGrupos();
       if (reales !== null) {
         return reales.map((grupo) => ({
+          id: grupo.groupId,
           iniciales: this.inicialesDe(grupo.name),
           nombre: grupo.name,
           detalle: `${grupo.activeMembers}/${grupo.maxCapacity ?? '—'} integrantes · ${grupo.sessionSchedule ?? 'horario por definir'}`,
@@ -211,12 +259,14 @@ export class InicioDashboard {
       }
       return [
         {
+          id: null,
           iniciales: 'EA',
           nombre: 'Equipo Alfa',
           detalle: '14/20 integrantes · Mar y jue 7:00 p. m.',
           estado: '2 pendientes',
         },
         {
+          id: null,
           iniciales: 'EB',
           nombre: 'Equipo Beta',
           detalle: '10/20 integrantes · Mié 6:00 p. m.',
@@ -225,10 +275,21 @@ export class InicioDashboard {
       ];
     }
 
+    const membresias = this.misMembresias();
+    if (membresias !== null) {
+      return membresias.map((item) => ({
+        id: item.groupId,
+        iniciales: this.inicialesDe(item.name),
+        nombre: item.name,
+        detalle: `${item.expectedLevel ?? 'Sin nivel'} · ${item.sessionSchedule ?? 'horario por definir'}`,
+        estado: this.estadoMembresia(item.membership.status),
+      }));
+    }
+
     return [
-      { iniciales: 'EA', nombre: 'Equipo Alfa', detalle: 'Intermedio', estado: 'Miembro' },
-      { iniciales: 'GD', nombre: 'Grafos y DP', detalle: 'Avanzado', estado: 'Miembro' },
-      { iniciales: 'SC', nombre: 'Sprint Coders', detalle: 'Todos los niveles', estado: 'Pendiente' },
+      { id: null, iniciales: 'EA', nombre: 'Equipo Alfa', detalle: 'Intermedio', estado: 'Miembro' },
+      { id: null, iniciales: 'GD', nombre: 'Grafos y DP', detalle: 'Avanzado', estado: 'Miembro' },
+      { id: null, iniciales: 'SC', nombre: 'Sprint Coders', detalle: 'Todos los niveles', estado: 'Pendiente' },
     ];
   });
 
@@ -242,6 +303,15 @@ export class InicioDashboard {
       this.api.loadMine().subscribe({
         next: (mine) => this.misGrupos.set(mine.filter((g): g is CoachGroup => 'activeMembers' in g)),
         error: () => this.misGrupos.set([]),
+      });
+    } else if (!this.coach && !this.session.demo()) {
+      this.api.loadMine().subscribe({
+        next: (mine) => {
+          const membresias = mine.filter((m): m is PractitionerGroup => 'membership' in m);
+          this.misMembresias.set(membresias);
+          this.cargarProblemas(membresias);
+        },
+        error: () => this.misMembresias.set([]),
       });
     }
     this.temas = this.coach
@@ -287,5 +357,45 @@ export class InicioDashboard {
       .slice(0, 2)
       .map((palabra) => palabra[0]?.toUpperCase() ?? '')
       .join('');
+  }
+
+  private estadoMembresia(status: string): string {
+    switch (status) {
+      case 'ACTIVO':
+        return 'Miembro';
+      case 'PENDIENTE':
+        return 'Pendiente';
+      case 'ACLARACION_SOLICITADA':
+        return 'Aclaración';
+      case 'EXPULSADO':
+        return 'Expulsado';
+      case 'RECHAZADO':
+        return 'Rechazado';
+      default:
+        return 'Retirado';
+    }
+  }
+
+  /** Cuenta problemas resueltos y pendientes sumando los grupos activos del practicante. */
+  private cargarProblemas(membresias: PractitionerGroup[]): void {
+    const activos = membresias.filter((item) => item.membership.status === 'ACTIVO');
+
+    if (activos.length === 0) {
+      this.resueltos.set(0);
+      this.pendientesProblemas.set(0);
+      return;
+    }
+
+    forkJoin(activos.map((item) => this.api.assignedProblems(item.groupId))).subscribe({
+      next: (results) => {
+        const items = results.flatMap((result) => result.items);
+        this.resueltos.set(items.filter((item) => item.status === 'RESUELTO').length);
+        this.pendientesProblemas.set(items.filter((item) => item.status !== 'RESUELTO').length);
+      },
+      error: () => {
+        this.resueltos.set(null);
+        this.pendientesProblemas.set(null);
+      },
+    });
   }
 }

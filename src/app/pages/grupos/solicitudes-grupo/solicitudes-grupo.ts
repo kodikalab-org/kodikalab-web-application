@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { apiError } from '../../../core/api';
 import { CoachGroup, Membership, MembershipDecision, TeamsApi } from '../../../core/teams-api';
 
-type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO';
+type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO' | 'EXPULSADO';
 
 /**
  * US06 — El coach revisa las postulaciones del grupo, acepta, rechaza o pide una
@@ -45,6 +45,7 @@ export class SolicitudesGrupo {
   protected readonly pidiendoAclaracion = signal(false);
   protected readonly mensaje = signal('');
   protected readonly guardando = signal(false);
+  protected readonly confirmandoExpulsion = signal<number | null>(null);
   protected readonly feedback = signal<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
 
   protected readonly selectedGroup = computed(() => {
@@ -111,8 +112,57 @@ export class SolicitudesGrupo {
     });
   }
 
-  protected nombrePracticante(request: Membership): string {
-    return request.practitioner?.fullName ?? 'Postulante';
+  /** US06: pide confirmación antes de expulsar a un integrante. */
+  protected pedirConfirmacion(request: Membership): void {
+    this.confirmandoExpulsion.set(request.membershipId);
+    this.feedback.set(null);
+  }
+
+  protected cancelarExpulsion(): void {
+    this.confirmandoExpulsion.set(null);
+  }
+
+  protected expulsar(request: Membership): void {
+    const groupId = this.selectedGroupId();
+    if (groupId === null || this.guardando()) return;
+
+    this.guardando.set(true);
+    this.api.decide(groupId, request.membershipId, 'EXPULSAR').subscribe({
+      next: (response) => {
+        this.guardando.set(false);
+        this.confirmandoExpulsion.set(null);
+        this.feedback.set({ tipo: 'ok', texto: response.message });
+        this.cargar();
+        this.api.loadMine().subscribe({ next: () => undefined });
+      },
+      error: (error: unknown) => {
+        this.guardando.set(false);
+        this.feedback.set({ tipo: 'error', texto: apiError(error) });
+      },
+    });
+  }
+
+  /** US06: vuelve a incorporar a alguien que fue expulsado. */
+  protected readmitir(request: Membership): void {
+    const groupId = this.selectedGroupId();
+    if (groupId === null || this.guardando()) return;
+
+    this.guardando.set(true);
+    this.api.decide(groupId, request.membershipId, 'READMITIR').subscribe({
+      next: (response) => {
+        this.guardando.set(false);
+        this.feedback.set({ tipo: 'ok', texto: response.message });
+        this.cargar();
+        this.api.loadMine().subscribe({ next: () => undefined });
+      },
+      error: (error: unknown) => {
+        this.guardando.set(false);
+        this.feedback.set({ tipo: 'error', texto: apiError(error) });
+      },
+    });
+  }
+
+  protected nombrePracticante(request: Membership): string {    return request.practitioner?.fullName ?? 'Postulante';
   }
 
   protected iniciales(request: Membership): string {

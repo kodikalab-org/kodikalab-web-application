@@ -57,6 +57,7 @@
         <mat-button-toggle value="PENDIENTE">Pendientes</mat-button-toggle>
         <mat-button-toggle value="ACLARACION_SOLICITADA">Aclaración solicitada</mat-button-toggle>
         <mat-button-toggle value="ACTIVO">Integrantes</mat-button-toggle>
+        <mat-button-toggle value="EXPULSADO">Expulsados</mat-button-toggle>
       </mat-button-toggle-group>
       @if (selectedGroup(); as group) {
         <p class="m-0 text-xs text-kl-muted">
@@ -70,6 +71,8 @@
       <p class="rounded-2xl bg-kl-surface-raised p-10 text-center text-sm text-kl-muted">
         @if (estado() === 'ACTIVO') {
           Este grupo todavía no tiene integrantes activos.
+        } @else if (estado() === 'EXPULSADO') {
+          No hay integrantes expulsados en este grupo.
         } @else {
           No hay solicitudes en este estado para el grupo seleccionado.
         }
@@ -102,6 +105,8 @@
             <div class="text-xs text-kl-body">
               @if (estado() === 'ACTIVO') {
                 <p class="m-0">Miembro desde el {{ fecha(request.requestedAt) }}</p>
+              } @else if (estado() === 'EXPULSADO') {
+                <p class="m-0">Expulsado el {{ fecha(request.requestedAt) }}</p>
               } @else {
                 <p class="m-0">Solicitó el {{ fecha(request.requestedAt) }}</p>
                 @if (request.clarification; as clarification) {
@@ -111,11 +116,48 @@
                 }
               }
             </div>
-            <div class="flex justify-start lg:justify-end">
+            <div class="flex flex-col items-start gap-2 lg:items-end">
               @if (estado() === 'ACTIVO') {
                 <span class="rounded-full border border-solid border-green-400/50 bg-green-400/10 px-3 py-1 text-[11px] text-green-300">
                   Integrante activo
                 </span>
+                @if (confirmandoExpulsion() === request.membershipId) {
+                  <div class="flex flex-wrap gap-2">
+                    <button mat-stroked-button type="button" (click)="cancelarExpulsion()">
+                      Cancelar
+                    </button>
+                    <button
+                      mat-flat-button
+                      type="button"
+                      class="bg-red-600 text-white"
+                      [disabled]="guardando()"
+                      (click)="expulsar(request)"
+                    >
+                      {{ guardando() ? 'Expulsando…' : 'Confirmar expulsión' }}
+                    </button>
+                  </div>
+                } @else {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="border-red-400/50 text-red-300"
+                    (click)="pedirConfirmacion(request)"
+                  >
+                    Expulsar
+                  </button>
+                }
+              } @else if (estado() === 'EXPULSADO') {
+                <span class="rounded-full border border-solid border-red-400/50 bg-red-400/10 px-3 py-1 text-[11px] text-red-300">
+                  Expulsado
+                </span>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="guardando()"
+                  (click)="readmitir(request)"
+                >
+                  {{ guardando() ? 'Readmitiendo…' : 'Readmitir' }}
+                </button>
               } @else {
                 <button mat-stroked-button type="button" (click)="ver(request)">Revisar</button>
               }

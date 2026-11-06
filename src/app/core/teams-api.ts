@@ -16,7 +16,12 @@ export type MembershipStatus =
   | 'RECHAZADO'
   | 'RETIRADO'
   | 'EXPULSADO';
-export type MembershipDecision = 'ACEPTAR' | 'RECHAZAR' | 'SOLICITAR_ACLARACION';
+export type MembershipDecision =
+  | 'ACEPTAR'
+  | 'RECHAZAR'
+  | 'SOLICITAR_ACLARACION'
+  | 'EXPULSAR'
+  | 'READMITIR';
 /** El backend usa estos valores en `nivel_esperado`; la UI los muestra en español. */
 export type ExpectedLevel = 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO' | string;
 
@@ -124,6 +129,32 @@ export interface ClarificationResponse {
   respondedAt: string;
 }
 
+/** US-08: problema asignado al equipo, tal como lo devuelve `/problems/assigned`. */
+export interface AssignedProblem {
+  competitionProblemId: number;
+  letter: string;
+  score: number | null;
+  assignedAt: string;
+  status: string | null;
+  attemptCount: number | null;
+  problem: {
+    id: number;
+    title: string;
+    url: string | null;
+    sourcePlatform: string | null;
+    sourceCode: string | null;
+    difficultyRating: string | null;
+    topics: string[];
+  };
+  competition: { name: string; startsAt: string | null; endsAt: string | null };
+}
+
+export interface AssignedProblemsResponse {
+  teamId: number;
+  total: number;
+  items: AssignedProblem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class TeamsApi {
   private readonly http = inject(HttpClient);
@@ -198,7 +229,10 @@ export class TeamsApi {
     });
   }
 
-  loadRequests(groupId: number, status: 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO') {
+  loadRequests(
+    groupId: number,
+    status: 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO' | 'EXPULSADO',
+  ) {
     if (this.session.demo()) return of(SOLICITUDES_GRUPO_DEMO.filter(request => request.groupId === groupId && request.status === status)).pipe(tap(requests => this.requests.set(requests)));
     this.loading.set(true);
     return this.http
@@ -237,6 +271,14 @@ export class TeamsApi {
       { message },
       { timeout: 15000 },
     );
+  }
+
+  /** US-08: problemas que el coach asignó al grupo. */
+  assignedProblems(teamId: number) {
+    return this.http.get<AssignedProblemsResponse>(`${this.url}/problems/assigned`, {
+      params: new HttpParams().set('teamId', teamId),
+      timeout: 15000,
+    });
   }
 
   private removeRequest(membershipId: number): void {

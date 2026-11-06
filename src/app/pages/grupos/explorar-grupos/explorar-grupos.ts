@@ -1,4 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
@@ -38,7 +40,7 @@ interface GrupoVm {
   descripcion: string;
   horario: string;
   cupo: number | null;
-  estado: 'Abierto' | 'Solicitud pendiente' | 'Aclaración solicitada' | 'Eres miembro';
+  estado: 'Abierto' | 'Solicitud pendiente' | 'Aclaración solicitada' | 'Eres miembro' | 'Expulsado';
   accion: string;
   tono: string;
   membershipId?: number;
@@ -101,13 +103,61 @@ export class ExplorarGrupos {
   protected readonly filtros = new FormGroup({
     buscar: new FormControl('', { nonNullable: true }),
     principiante: new FormControl(false, { nonNullable: true }),
-    intermedio: new FormControl(true, { nonNullable: true }),
+    intermedio: new FormControl(false, { nonNullable: true }),
     avanzado: new FormControl(false, { nonNullable: true }),
     publico: new FormControl(false, { nonNullable: true }),
     protegido: new FormControl(false, { nonNullable: true }),
     miembro: new FormControl(false, { nonNullable: true }),
     pendiente: new FormControl(false, { nonNullable: true }),
   });
+
+  private readonly filtros$ = toSignal(
+    this.filtros.valueChanges.pipe(startWith(this.filtros.getRawValue())),
+    { initialValue: this.filtros.getRawValue() },
+  );
+
+  /** US05: búsqueda y filtros reales sobre los grupos que devuelve la API. */
+  protected readonly visibles = computed(() => {
+    const filtro = this.filtros$();
+    const texto = (filtro.buscar ?? '').trim().toLowerCase();
+
+    const niveles: string[] = [];
+    if (filtro.principiante) niveles.push('Principiante');
+    if (filtro.intermedio) niveles.push('Intermedio');
+    if (filtro.avanzado) niveles.push('Avanzado');
+
+    const publico = filtro.publico === true;
+    const protegido = filtro.protegido === true;
+    const filtraVisibilidad = publico !== protegido;
+
+    return this.grupos().filter((grupo) => {
+      if (texto && !grupo.nombre.toLowerCase().includes(texto)) return false;
+      if (niveles.length > 0 && !niveles.includes(grupo.nivel)) return false;
+      if (filtraVisibilidad && publico !== grupo.publico) return false;
+      if (filtro.miembro && grupo.estado !== 'Eres miembro') return false;
+      if (
+        filtro.pendiente &&
+        grupo.estado !== 'Solicitud pendiente' &&
+        grupo.estado !== 'Aclaración solicitada'
+      ) {
+        return false;
+      }
+      return true;
+    });
+  });
+
+  protected limpiarFiltros(): void {
+    this.filtros.reset({
+      buscar: '',
+      principiante: false,
+      intermedio: false,
+      avanzado: false,
+      publico: false,
+      protegido: false,
+      miembro: false,
+      pendiente: false,
+    });
+  }
 
   protected readonly codigo = new FormGroup({
     invitacion: new FormControl('', {
@@ -255,7 +305,9 @@ export class ExplorarGrupos {
               ? 'Solicitud pendiente'
               : status === 'ACLARACION_SOLICITADA'
                 ? 'Aclaración solicitada'
-                : 'Abierto',
+                : status === 'EXPULSADO'
+                  ? 'Expulsado'
+                  : 'Abierto',
         accion: group.visibility === 'PUBLICO' ? 'Unirme' : 'Solicitar ingreso',
         tono: TONOS[index % TONOS.length],
         membershipId: membership?.membershipId,

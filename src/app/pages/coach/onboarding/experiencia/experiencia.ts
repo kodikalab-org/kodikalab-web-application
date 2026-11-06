@@ -11,8 +11,37 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
+import {
+  COACH_LIMITS,
+  RejectedValues,
+  errorMessage,
+  maxText,
+  requiredText,
+  trimmed,
+  wholeNumber,
+} from '../../../../models/profile-validation';
 
-const MAX_ANIOS = 60;
+const MAX_ANIOS = COACH_LIMITS.aniosMax;
+
+/** Backend field -> form control, for errors returned when the last step saves the profile. */
+const CONTROL_POR_CAMPO: Record<string, string> = {
+  especialidadPrincipal: 'especialidad', organizacionClub: 'organizacion', aniosExperiencia: 'anios',
+};
+const MENSAJES = {
+  especialidad: {
+    required: 'Ingresa tu especialidad principal',
+    maxlength: `La especialidad no puede superar los ${COACH_LIMITS.especialidad} caracteres`,
+  },
+  organizacion: {
+    maxlength: `La organización no puede superar los ${COACH_LIMITS.organizacion} caracteres`,
+  },
+  anios: {
+    required: 'Ingresa un valor entre 0 y 60',
+    min: 'Ingresa un valor entre 0 y 60',
+    max: 'Ingresa un valor entre 0 y 60',
+    integer: 'Los años de experiencia deben ser un número entero',
+  },
+};
 
 @Component({
   selector: 'app-onboarding-experiencia',
@@ -33,11 +62,21 @@ const MAX_ANIOS = 60;
 export class OnboardingExperiencia {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
-  constructor() { if (!this.session.demo()) this.form.patchValue(this.profiles.coach); }
+  constructor() {
+    if (this.session.demo()) return;
+    this.form.patchValue(this.profiles.coach);
+    // Errors returned when the last step tried to save: show them under their field.
+    this.rechazos.reject(this.form, this.profiles.draftErrors, CONTROL_POR_CAMPO);
+    this.profiles.draftErrors = {};
+  }
   protected continuar(): void {
     const { especialidad, organizacion, anios } = this.form.getRawValue();
-    this.profiles.coach = { especialidad, organizacion, anios };
+    this.profiles.coach = { especialidad: trimmed(especialidad), organizacion: trimmed(organizacion), anios };
   }
+  protected mensaje(campo: keyof typeof MENSAJES): string {
+    return errorMessage(this.form.controls[campo], MENSAJES[campo]);
+  }
+  protected readonly maxOrganizacion = COACH_LIMITS.organizacion;
   protected readonly sugerencias = [
     'Grafos',
     'Programación dinámica',
@@ -46,20 +85,24 @@ export class OnboardingExperiencia {
     'Geometría',
   ];
 
+  private readonly rechazos = new RejectedValues();
+
   protected readonly form = new FormGroup({
     especialidad: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(120)],
+      validators: [requiredText, maxText(COACH_LIMITS.especialidad), this.rechazos.validator('especialidad')],
     }),
     sugerencias: new FormControl<string[]>([], { nonNullable: true }),
     organizacion: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.maxLength(150)],
+      validators: [maxText(COACH_LIMITS.organizacion), this.rechazos.validator('organizacion')],
     }),
     anios: new FormControl<number | null>(null, [
       Validators.required,
-      Validators.min(0),
+      Validators.min(COACH_LIMITS.aniosMin),
       Validators.max(MAX_ANIOS),
+      wholeNumber,
+      this.rechazos.validator('anios'),
     ]),
   });
 

@@ -95,6 +95,10 @@
                 [attr.autofocus]="estado === 'con-texto' ? '' : null"
               ></textarea>
               <mat-hint>Cuéntales a los practicantes quién eres y cómo entrenas. Opcional.</mat-hint>
+              <mat-error class="-ml-1.5">
+                <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                {{ mensajePresentacion }}
+              </mat-error>
             </mat-form-field>
             <span
               class="pointer-events-none absolute right-3.5 bottom-[34px] font-mono text-xs leading-4 text-[#8d89a3]"
@@ -120,7 +124,7 @@
             <div class="flex min-w-0 flex-col gap-0.5">
               <span class="break-all text-[17px] leading-[normal] font-medium">{{ session.demo() ? 'Marco Paredes' : session.account()?.email }}</span>
               <span class="text-[13px] leading-[normal] text-kl-muted"
-                >Coach · Grafos y Programación Dinámica · Club de Programación Competitiva · 4 años</span
+                >{{ resumenPerfil }}</span
               >
             </div>
           </div>
@@ -139,7 +143,7 @@
             <img src="images/onboarding/arrow-left-18.svg" alt="" width="18" height="18" />
             Atrás
           </button>
-          @if (busy || (session.demo() && estado === 'guardando')) {
+          @if (busy() || (session.demo() && estado === 'guardando')) {
             <button
               mat-flat-button
               class="auth-submit bg-[#241f3f] px-7 text-[#8d89a3] max-[641px]:w-full"
@@ -158,7 +162,7 @@
             </button>
           } @else {
             <div class="flex items-center gap-5 max-[641px]:flex-col-reverse max-[641px]:items-stretch max-[641px]:gap-3">
-              <button type="button" [disabled]="busy" (click)="guardar(true)"
+              <button type="button" [disabled]="busy()" (click)="guardar(true)"
                 class="text-[15px] font-medium text-kl-accent-text hover:underline max-[641px]:text-center"
                 >Omitir por ahora</button
               >
@@ -175,7 +179,21 @@
             </div>
           }
         </div>
-        @if (error) { <p role="alert" class="text-sm text-red-200">{{ error }}</p> }
+        @if (erroresPasoAnterior().length > 0) {
+          <div class="rounded-xl border border-solid border-[#f87171]/45 bg-[#f87171]/10 px-3.5 py-3 text-sm leading-5 text-[#fecaca]" role="alert">
+            <strong class="block font-semibold">No pudimos guardar tu perfil</strong>
+            Corrige estos datos en el paso anterior. Lo que escribiste se conserva.
+            <ul class="m-0 mt-1.5 list-none p-0">
+              @for (mensaje of erroresPasoAnterior(); track mensaje) {
+                <li class="flex flex-wrap items-center gap-x-2">
+                  <span>{{ mensaje }}</span>
+                  <a class="text-kl-accent-text underline" routerLink="/onboarding/coach/experiencia">Volver a Tu experiencia</a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        @if (error()) { <p role="alert" class="text-sm text-red-200">{{ error() }}</p> }
       </form>
     </mat-card>
   </main>

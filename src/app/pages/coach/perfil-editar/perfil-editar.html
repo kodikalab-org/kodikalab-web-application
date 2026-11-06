@@ -1,6 +1,6 @@
 @if (vista$ | async) {
   <div class="relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text">
-    @if (mostrarAviso) {
+    @if (mostrarAviso()) {
       <img
         class="profile-background"
         src="images/perfil-coach/bg-1180.svg"
@@ -132,7 +132,7 @@
         </div>
 
         <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
-          @if (mostrarAviso) {
+          @if (mostrarAviso()) {
             <div
               class="flex items-start gap-2.5 rounded-xl border border-solid border-[#f87171]/45 bg-[#f87171]/10 px-3.5 py-3"
               role="alert"
@@ -141,6 +141,9 @@
               <div class="flex flex-col text-sm leading-5 text-[#fecaca]">
                 <p class="m-0 font-semibold">No pudimos guardar tus cambios</p>
                 <p class="m-0">Revisa los campos marcados e inténtalo de nuevo.</p>
+                @for (aviso of avisos(); track aviso) {
+                  <p class="m-0">{{ aviso }}</p>
+                }
               </div>
             </div>
           }
@@ -167,7 +170,7 @@
                 <mat-hint>Texto libre, máximo 120 caracteres.</mat-hint>
                 <mat-error>
                   <img src="images/perfil-coach/alert-15.svg" alt="" width="15" height="15" />
-                  Ingresa tu especialidad principal
+                  {{ mensaje('especialidad') }}
                 </mat-error>
               </mat-form-field>
             </div>
@@ -190,6 +193,12 @@
                     maxlength="150"
                     autocomplete="off"
                   />
+                  <mat-hint>Opcional.</mat-hint>
+                  <mat-hint align="end" class="font-mono">{{ form.controls.organizacion.value.length }}/{{ maxOrganizacion }}</mat-hint>
+                  <mat-error>
+                    <img src="images/perfil-coach/alert-15.svg" alt="" width="15" height="15" />
+                    {{ mensaje('organizacion') }}
+                  </mat-error>
                 </mat-form-field>
               </div>
 
@@ -247,7 +256,7 @@
                       width="15"
                       height="15"
                     />
-                    Ingresa un valor entre 0 y 60
+                    {{ mensaje('anios') }}
                   </mat-error>
                 }
               </div>
@@ -271,6 +280,10 @@
                     rows="3"
                     [attr.maxlength]="maxPresentacion"
                   ></textarea>
+                  <mat-error>
+                    <img src="images/perfil-coach/alert-15.svg" alt="" width="15" height="15" />
+                    {{ mensaje('presentacion') }}
+                  </mat-error>
                 </mat-form-field>
                 <span
                   class="pointer-events-none absolute right-4 bottom-3 font-mono text-xs text-[#8d89a3]"
@@ -291,12 +304,12 @@
               >Cancelar</a
             >
             @if (form.valid) {
-              <button type="button" (click)="guardar()" [disabled]="busy"
+              <button type="button" (click)="guardar()" [disabled]="busy()"
                 mat-flat-button
                 class="h-[50px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-7 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] max-[641px]:w-full"
               >
                 <img src="images/perfil-coach/save-18.svg" alt="" width="18" height="18" />
-                {{ busy ? 'Guardando…' : 'Guardar cambios' }}
+                {{ busy() ? 'Guardando…' : 'Guardar cambios' }}
               </button>
             } @else {
               <button
@@ -309,7 +322,7 @@
               </button>
             }
           </div>
-            @if (error) { <p role="alert" class="text-sm text-red-200">{{ error }}</p> }
+            @if (error()) { <p role="alert" class="text-sm text-red-200">{{ error() }}</p> }
           </form>
       </section>
     </main>

@@ -91,7 +91,7 @@
             <mat-hint>Texto libre, máximo 120 caracteres.</mat-hint>
             <mat-error class="-ml-1.5">
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-              Ingresa tu especialidad principal
+              {{ mensaje('especialidad') }}
             </mat-error>
           </mat-form-field>
         </div>
@@ -133,6 +133,11 @@
                 autocomplete="off"
               />
               <mat-hint>Opcional, máximo 150 caracteres.</mat-hint>
+              <mat-hint align="end" class="font-mono">{{ form.controls.organizacion.value.length }}/{{ maxOrganizacion }}</mat-hint>
+              <mat-error class="-ml-1.5">
+                <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                {{ mensaje('organizacion') }}
+              </mat-error>
             </mat-form-field>
           </div>
 
@@ -185,7 +190,7 @@
                 role="alert"
               >
                 <img class="mt-[1.5px] mr-1.5 shrink-0" src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                Ingresa un valor entre 0 y 60
+                {{ mensaje('anios') }}
               </mat-error>
             }
           </div>

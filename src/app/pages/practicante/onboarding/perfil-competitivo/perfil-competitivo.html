@@ -114,10 +114,17 @@
               role="alert"
             >
               <img class="mt-[1.5px] mr-1.5 shrink-0" src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-              Selecciona tu nivel competitivo
+              {{ mensajeNivel }}
             </mat-error>
           }
         </div>
+
+        @if (!session.demo()) {
+          <p class="m-0 rounded-xl border border-solid border-[#34304a] bg-white/3 px-3.5 py-2.5 text-[13px] leading-[18px] text-kl-muted" id="no-guardados">
+            Experiencia, franja horaria, días disponibles y objetivo aún no se guardan en tu cuenta:
+            se muestran deshabilitados y no se envían.
+          </p>
+        }
 
         <div class="grid grid-cols-2 items-start gap-4 max-[641px]:grid-cols-1">
           <div class="flex min-w-0 flex-col gap-1.5">
@@ -156,9 +163,11 @@
                   >{{ franja }}</mat-chip-option>
               }
             </mat-chip-listbox>
-            <p class="m-0 text-xs leading-[17px] text-kl-muted">
-              Se guarda junto con los días como tu disponibilidad.
-            </p>
+            @if (session.demo()) {
+              <p class="m-0 text-xs leading-[17px] text-kl-muted">
+                Se guarda junto con los días como tu disponibilidad.
+              </p>
+            }
           </div>
         </div>
 

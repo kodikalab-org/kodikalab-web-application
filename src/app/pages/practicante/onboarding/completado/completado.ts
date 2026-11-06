@@ -7,10 +7,12 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import { Session } from '../../../../core/session';
 import { ProfileApi } from '../../../../core/profile-api';
+import { cicloLabel } from '../../../../models/profile-validation';
+import { VinculacionPendiente } from '../../vinculacion-pendiente/vinculacion-pendiente';
 
 @Component({
   selector: 'app-onboarding-completado',
-  imports: [AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule, VinculacionPendiente],
   templateUrl: './completado.html',
   styleUrl: './completado.css',
 })
@@ -21,9 +23,13 @@ export class OnboardingCompletado {
     if (this.session.demo()) return this.resumenDemo;
     const p = this.profiles.profile();
     if (p?.role !== 'PRACTICANTE') return [];
-    return [`Código ${p.codigoEstudiante}`, p.carrera, `${p.cicloAcademico}.º ciclo`, p.nivelCompetitivo,
-      p.codeforcesHandle ? `Codeforces: ${p.codeforcesHandle}${p.codeforcesRating == null ? '' : ` · rating ${p.codeforcesRating}`}` : 'Codeforces sin vincular',
-      ...(p.atcoderHandle ? [`AtCoder: ${p.atcoderHandle}`] : []), ...(p.vjudgeHandle ? [`VJudge: ${p.vjudgeHandle}`] : [])];
+    const plataformas = this.profiles.platforms().flatMap((plataforma) => {
+      if (plataforma.state === 'PENDIENTE') return [`${plataforma.name}: ${plataforma.handle} · pendiente`];
+      if (plataforma.state === 'SIN_VINCULAR') return plataforma.key === 'codeforces' ? ['Codeforces sin vincular'] : [];
+      const rating = plataforma.rating == null ? '' : ` · rating ${plataforma.rating}`;
+      return [`${plataforma.name}: ${plataforma.handle}${rating}`];
+    });
+    return [`Código ${p.codigoEstudiante}`, p.carrera, cicloLabel(p.cicloAcademico), p.nivelCompetitivo, ...plataformas];
   }
   private readonly resumenDemo = [
     'Código 20240001',
@@ -46,6 +52,6 @@ export class OnboardingCompletado {
   /** Estado de maqueta (`?estado=aviso-codeforces`): Codeforces no confirmó el identificador. */
   protected readonly estado$ = inject(ActivatedRoute).queryParamMap.pipe(
     map((params) => this.session.demo() ? params.get('estado') :
-      this.profiles.message().includes('Codeforces no') ? 'aviso-codeforces' : null),
+      this.profiles.pendingLink() ? 'aviso-codeforces' : null),
   );
 }

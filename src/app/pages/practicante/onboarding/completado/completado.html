@@ -91,7 +91,7 @@
         </p>
       </div>
 
-      @if (estado === 'aviso-codeforces') {
+      @if (estado === 'aviso-codeforces' && (session.demo() || profiles.pendingLink())) {
         <div
           class="flex items-start gap-2.5 rounded-xl border border-solid px-3.5 py-3 border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fde68a]"
           role="status"
@@ -113,6 +113,10 @@
             {{ session.demo() ? 'Detectamos tu rating de Codeforces: 1432.' : profiles.message() || 'Tu perfil está guardado.' }}
           </p>
         </div>
+      }
+
+      @if (!session.demo()) {
+        <app-vinculacion-pendiente />
       }
 
       <ul class="m-0 flex list-none flex-wrap justify-center gap-2 p-0">

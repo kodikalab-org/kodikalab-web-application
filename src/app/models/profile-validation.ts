@@ -114,6 +114,37 @@ export function applyBackendErrors(
   return unmapped;
 }
 
+/**
+ * Backend rejections remembered per control. Unlike `setErrors`, the error survives the
+ * re-validation Angular runs when the view binds the control, and it disappears as soon as
+ * the value changes. Used by wizard steps that show errors produced by a later step.
+ */
+export class RejectedValues {
+  private readonly rejected = new Map<string, { value: unknown; message: string }>();
+
+  /** Validator to add to the control called `name`. */
+  validator(name: string): ValidatorFn {
+    return (control) => {
+      const entry = this.rejected.get(name);
+      return entry && control.value === entry.value ? { [SERVER_ERROR]: entry.message } : null;
+    };
+  }
+
+  /** Marks the current value of each mapped control as rejected. Returns unmapped messages. */
+  reject(form: FormGroup, errors: Record<string, string>, controlNames: Record<string, string>): string[] {
+    const unmapped: string[] = [];
+    for (const [field, message] of Object.entries(errors)) {
+      const name = controlNames[field];
+      const control = name ? form.get(name) : null;
+      if (!name || !control || control.disabled) { unmapped.push(message); continue; }
+      this.rejected.set(name, { value: control.value, message });
+      control.updateValueAndValidity();
+      control.markAsTouched();
+    }
+    return unmapped;
+  }
+}
+
 /** Message for the first failing rule of a control, or '' when it is valid. */
 export function errorMessage(
   control: AbstractControl | null | undefined,

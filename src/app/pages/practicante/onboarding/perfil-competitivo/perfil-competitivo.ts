@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -13,6 +13,12 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
+import { RejectedValues, errorMessage, nivelValido } from '../../../../models/profile-validation';
+
+const MENSAJES_NIVEL = {
+  required: 'Selecciona tu nivel competitivo',
+  nivel: 'El nivel debe ser Principiante, Intermedio o Avanzado',
+};
 
 @Component({
   selector: 'app-onboarding-perfil-competitivo',
@@ -38,8 +44,15 @@ export class OnboardingPerfilCompetitivo {
   constructor() {
     if (!this.session.demo()) {
       this.form.patchValue(this.profiles.competitive);
+      // These fields do not exist in the backend: disabled and never sent.
       for (const control of ['experiencia', 'franja', 'dias', 'objetivo'] as const) this.form.controls[control].disable();
+      // Errors returned when the last step tried to save: show them under the level.
+      this.rechazos.reject(this.form, this.profiles.draftErrors, { nivelCompetitivo: 'nivel' });
+      this.profiles.draftErrors = {};
     }
+  }
+  protected get mensajeNivel(): string {
+    return errorMessage(this.form.controls.nivel, MENSAJES_NIVEL);
   }
   protected continuar(): void { this.profiles.competitive = { nivel: this.form.controls.nivel.value }; }
   protected readonly niveles = [
@@ -71,8 +84,10 @@ export class OnboardingPerfilCompetitivo {
     'Aprender por diversión',
   ];
 
+  private readonly rechazos = new RejectedValues();
+
   protected readonly form = new FormGroup({
-    nivel: new FormControl<string | null>(null, [Validators.required]),
+    nivel: new FormControl<string | null>(null, [nivelValido, this.rechazos.validator('nivel')]),
     experiencia: new FormControl<number | null>(null),
     franja: new FormControl<string | null>(null),
     dias: new FormControl<string[]>([], { nonNullable: true }),

@@ -119,7 +119,7 @@
                 role="alert"
               >
                 <img class="mt-[1.5px] mr-1.5 shrink-0" src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                Usa solo letras, números, punto, guion y guion bajo (máx. 50)
+                {{ mensaje(plataforma.clave) }}
               </mat-error>
             }
           </div>
@@ -143,7 +143,7 @@
             <img src="images/onboarding/arrow-left-18.svg" alt="" width="18" height="18" />
             Atrás
           </button>
-          @if (busy || (session.demo() && estado === 'guardando')) {
+          @if (busy() || (session.demo() && estado === 'guardando')) {
             <button
               mat-flat-button
               class="auth-submit bg-[#241f3f] px-7 text-[#8d89a3] max-[641px]:w-full"
@@ -162,7 +162,7 @@
             </button>
           } @else {
             <div class="flex items-center gap-5 max-[641px]:flex-col-reverse max-[641px]:items-stretch max-[641px]:gap-3">
-              <button type="button" [disabled]="busy" (click)="guardar(true)"
+              <button type="button" [disabled]="busy()" (click)="guardar(true)"
                 class="text-[15px] font-medium text-kl-accent-text hover:underline max-[641px]:text-center"
                 >Omitir por ahora</button
               >
@@ -179,7 +179,21 @@
             </div>
           }
         </div>
-        @if (error) { <p role="alert" class="text-sm text-red-200">{{ error }} Puedes volver atrás para corregir los datos.</p> }
+        @if (erroresDePasos().length > 0) {
+          <div class="rounded-xl border border-solid border-[#f87171]/45 bg-[#f87171]/10 px-3.5 py-3 text-sm leading-5 text-[#fecaca]" role="alert">
+            <strong class="block font-semibold">No pudimos guardar tu perfil</strong>
+            Corrige estos datos en los pasos anteriores. Lo que escribiste se conserva.
+            <ul class="m-0 mt-1.5 list-none p-0">
+              @for (item of erroresDePasos(); track item.mensaje) {
+                <li class="flex flex-wrap items-center gap-x-2">
+                  <span>{{ item.mensaje }}</span>
+                  <a class="text-kl-accent-text underline" [routerLink]="item.ruta">Volver a {{ item.nombre }}</a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        @if (error()) { <p role="alert" class="text-sm text-red-200">{{ error() }} Puedes volver atrás para corregir los datos.</p> }
       </form>
     </mat-card>
   </main>

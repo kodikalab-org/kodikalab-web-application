@@ -10,6 +10,7 @@ import {
   handleFormat,
   maxText,
   nivelValido,
+  RejectedValues,
   parseCiclo,
   requiredText,
   trimmed,
@@ -129,5 +130,22 @@ describe('backend errors', () => {
     control.setErrors(null);
     expect(errorMessage(control, messages)).toBe('');
     expect(errorMessage(null, messages)).toBe('');
+  });
+});
+
+describe('RejectedValues', () => {
+  it('rejects the current value until it changes, surviving a re-validation', () => {
+    const rechazos = new RejectedValues();
+    const form = new FormGroup({ codigo: new FormControl('U1', [rechazos.validator('codigo')]), otro: new FormControl('x') });
+    const sinControl = rechazos.reject(form, { codigoEstudiante: 'Duplicado', zzz: 'No existe' }, { codigoEstudiante: 'codigo' });
+    expect(sinControl).toEqual(['No existe']);
+    expect(form.controls.codigo.getError(SERVER_ERROR)).toBe('Duplicado');
+    expect(form.controls.codigo.touched).toBe(true);
+    form.controls.codigo.updateValueAndValidity();
+    expect(form.controls.codigo.hasError(SERVER_ERROR)).toBe(true);
+    form.controls.codigo.setValue('U2');
+    expect(form.controls.codigo.hasError(SERVER_ERROR)).toBe(false);
+    form.controls.codigo.setValue('U1');
+    expect(form.controls.codigo.hasError(SERVER_ERROR)).toBe(true);
   });
 });

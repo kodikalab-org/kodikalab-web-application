@@ -203,6 +203,43 @@ describe('Live team features', () => {
       [...root.querySelectorAll('tbody tr td:first-child')].map((n) => n.textContent?.trim()),
     ).toEqual(['1', '1', '3']);
   });
+  it('shows the ordering and tie criteria returned by the service when positions are shared', async () => {
+    const { fixture, root } = await setup(RankingLive);
+    http.expectOne('/api/analytics/teams/1/standings').flush({
+      teamId: 1,
+      status: 'CALCULATED',
+      orderingCriterion: 'Problemas distintos aceptados, de mayor a menor',
+      tieCriterion: 'Los empatados comparten la misma posición y la siguiente se omite',
+      members: [
+        { membershipId: 1, fullName: 'Usuario A', position: 1, acceptedProblems: 3 },
+        { membershipId: 2, fullName: 'Usuario B', position: 1, acceptedProblems: 3 },
+        { membershipId: 3, fullName: 'Usuario C', position: 3, acceptedProblems: 1 },
+      ],
+    });
+    fixture.detectChanges();
+    expect(root.textContent).toContain('Problemas distintos aceptados, de mayor a menor');
+    expect(root.textContent).toContain(
+      'Los empatados comparten la misma posición y la siguiente se omite',
+    );
+    expect(root.textContent).not.toContain('1, 1, 3');
+  });
+  it('does not mention ties when no positions are shared', async () => {
+    const { fixture, root } = await setup(RankingLive);
+    http.expectOne('/api/analytics/teams/1/standings').flush({
+      teamId: 1,
+      status: 'CALCULATED',
+      orderingCriterion: 'Problemas distintos aceptados, de mayor a menor',
+      tieCriterion: 'Los empatados comparten la misma posición y la siguiente se omite',
+      members: [
+        { membershipId: 1, fullName: 'Usuario A', position: 1, acceptedProblems: 3 },
+        { membershipId: 2, fullName: 'Usuario B', position: 2, acceptedProblems: 1 },
+      ],
+    });
+    fixture.detectChanges();
+    expect(root.textContent).toContain('Problemas distintos aceptados, de mayor a menor');
+    expect(root.textContent).not.toContain('Los empatados comparten');
+    expect(root.textContent).not.toContain('Posiciones compartidas');
+  });
   it('shows NO_ACTIVITY without invented positions', async () => {
     const { fixture, root } = await setup(RankingLive);
     http
@@ -321,20 +358,55 @@ describe('Live team features', () => {
     expect(root.textContent).toContain('no tiene competencias disponibles');
     expect(root.querySelector('input[formControlName="competitionId"]')).toBeNull();
   });
-  it('shows catalog errors without publishing partial progress', async () => {
+  it('keeps the independent progress visible when the assignments request fails', async () => {
     const { fixture, page, root } = await setup(ProgressLive, { teamId: '1' }, false, false);
     assignedRequest(1).flush({}, { status: 503, statusText: 'Unavailable' });
+    http.expectOne('/api/analytics/teams/1/progress/me').flush({ teamId: 1, acceptedProblems: 2 });
+    fixture.detectChanges();
+    expect(page.assignments()).toEqual([]);
+    expect(root.querySelector('[role="alert"]')).not.toBeNull();
+    // A failed assignments request must not hide the independent progress (US14).
+    expect(page.progress()?.acceptedProblems).toBe(2);
+    expect(root.textContent).toContain('Problemas distintos aceptados');
+  });
+  it('shows assignments even when the progress request fails', async () => {
+    const { fixture, page, root } = await setup(ProgressLive, { teamId: '1' }, false, false);
+    assignedRequest(1).flush(
+      assignedList(1, [assignedItem(50, 30, 'Problema real', 'Competencia real', 'A')]),
+    );
+    http
+      .expectOne('/api/analytics/teams/1/progress/me')
+      .flush({}, { status: 503, statusText: 'Unavailable' });
     fixture.detectChanges();
     expect(page.progress()).toBeNull();
+    expect(page.assignments()).toHaveLength(1);
     expect(root.querySelector('[role="alert"]')).not.toBeNull();
-    http.expectNone('/api/analytics/teams/1/progress/me');
+  });
+  it('ignores a progress response that belongs to another team', async () => {
+    const { fixture, page, root } = await setup(ProgressLive, { teamId: '1' }, false, false);
+    assignedRequest(1).flush(assignedList(1, []));
+    http.expectOne('/api/analytics/teams/1/progress/me').flush({ teamId: 2, acceptedProblems: 9 });
+    fixture.detectChanges();
+    expect(page.progress()).toBeNull();
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain('otro equipo');
+  });
+  it('ignores assignments that belong to another team', async () => {
+    const { page } = await setup(ProgressLive, { teamId: '1' }, false, false);
+    assignedRequest(1).flush(
+      assignedList(2, [assignedItem(50, 30, 'Problema real', 'Competencia real', 'A')]),
+    );
+    http.expectOne('/api/analytics/teams/1/progress/me').flush({ teamId: 1, acceptedProblems: 0 });
+    expect(page.assignments()).toEqual([]);
+    expect(page.error()).toContain('otro equipo');
   });
   it('cancels a pending assignment catalog and clears the selected problem on team change', async () => {
     const { page, params } = await setup(ProgressLive, { teamId: '1' }, false, false);
     const old = assignedRequest(1);
+    const oldProgress = http.expectOne('/api/analytics/teams/1/progress/me');
     page.form.controls.competitionProblemId.setValue('50');
     params.next(convertToParamMap({ teamId: '2' }));
     expect(old.cancelled).toBe(true);
+    expect(oldProgress.cancelled).toBe(true);
     expect(page.form.controls.competitionProblemId.value).toBe('');
     assignedRequest(2).flush(assignedList(2, []));
     http.expectOne('/api/analytics/teams/2/progress/me').flush({ teamId: 2, acceptedProblems: 0 });
@@ -417,6 +489,45 @@ describe('Live team features', () => {
       .expectOne('/api/competitions/30/official-result')
       .flush({ teamId: 2, status: 'PENDIENTE' });
     expect(page.loadedId()).toBeNull();
+  });
+  it.each([
+    { message: 'Ya existe un resultado para esta competencia; complete el pendiente mediante PUT' },
+    {},
+  ])('explains a duplicate official result on create (409 %j)', async (body) => {
+    const { page } = await setup(ResultsLive);
+    http.expectOne('/api/competitions/teams/1/official-results').flush([]);
+    page.open(30);
+    http
+      .expectOne('/api/competitions/30/official-result')
+      .flush({}, { status: 404, statusText: 'Not Found' });
+    page.save(false);
+    http
+      .expectOne((r) => r.method === 'POST')
+      .flush(body, { status: 409, statusText: 'Conflict' });
+    expect(page.error()).toContain('ya tiene un resultado registrado');
+    expect(page.error()).not.toContain('inconsistentes');
+  });
+  it('keeps the backend message for a conflict that is not a duplicate', async () => {
+    const { page } = await setup(ResultsLive);
+    http.expectOne('/api/competitions/teams/1/official-results').flush([]);
+    page.open(30);
+    http
+      .expectOne('/api/competitions/30/official-result')
+      .flush({}, { status: 404, statusText: 'Not Found' });
+    page.save(false);
+    http
+      .expectOne((r) => r.method === 'POST')
+      .flush(
+        { message: 'La competencia no tiene un equipo asociado' },
+        { status: 409, statusText: 'Conflict' },
+      );
+    expect(page.error()).toBe('La competencia no tiene un equipo asociado');
+  });
+  it('reports a lost connection with the usual message and no proxy hint', async () => {
+    const { page } = await setup(TopicsLive);
+    http.expectOne('/api/analytics/teams/1/weaknesses').error(new ProgressEvent('error'));
+    expect(page.error()).toBe('No pudimos conectar con el servidor. Inténtalo de nuevo.');
+    expect(page.error()).not.toContain('proxy');
   });
   it('requires both values before confirmation', async () => {
     const { page } = await setup(ResultsLive);

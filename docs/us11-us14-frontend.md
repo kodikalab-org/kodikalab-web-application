@@ -31,7 +31,9 @@ Los endpoints GET /competitions/teams/{teamId} y GET /competitions/teams/{teamId
 
 Se conservan /ranking, /coach/rendimiento, /coach/competencias y /progreso/equipos. Se agrega /coach/ranking para el coach autorizado. Ejemplos de forma (los IDs son ilustrativos, deben existir en la API): /ranking?teamId=<id>, /coach/competencias?teamId=<id>&competitionId=<id>, /progreso/equipos?teamId=<id>&competitionProblemId=<id>.
 
-No hay APIs de listados de equipos, competencias ni asignaciones en este backend. Se reciben IDs desde query params o se introducen manualmente con etiquetas explícitas. No se usan IDs por defecto. La API valida autorización; introducir un ID no concede permisos. No se implementaron flujos de otras historias para suplir estos listados.
+El selector de equipo se llena con GET /teams/me, y las competencias y asignaciones de cada equipo vienen de GET /competitions?teamId= y GET /problems/assigned?teamId=. No se usan IDs por defecto.
+
+Comportamiento por historia: US-11 muestra los criterios orderingCriterion y tieCriterion de la respuesta (el de empate solo cuando hay posiciones compartidas). US-13 explica con un mensaje propio que la competencia ya tiene un resultado registrado cuando el alta devuelve 409. US-14 carga el avance y los problemas asignados de forma independiente (el fallo de uno no oculta al otro) e ignora respuestas cuyo teamId no coincide con el equipo seleccionado. Sin conexión se usa el mensaje habitual de apiError. La API valida autorización; introducir un ID no concede permisos. No se implementaron flujos de otras historias para suplir estos listados.
 
 Las cuatro maquetas existentes permanecen exclusivamente bajo Session.demo() con franja visible de datos de ejemplo; no se llaman endpoints en demo. Los datos estáticos no se presentan como integración real. El guard del coach y las validaciones del backend conservan el límite de acceso. El selector no permite cambiar contexto durante un envío; también se ignoran respuestas tardías al navegar a otro equipo.
 

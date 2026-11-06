@@ -8,6 +8,8 @@ import { TeamPage } from '../../shared/team-page';
 import { TeamFrame } from '../../shared/team-frame';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OfficialResult, TeamCompetition, positiveId } from '../../core/team-api';
+const DUPLICATE_RESULT =
+  'Esta competencia ya tiene un resultado registrado. Consulta el resultado existente y complétalo o confírmalo en lugar de crear uno nuevo.';
 @Component({
   selector: 'app-results-live',
   imports: [
@@ -258,21 +260,35 @@ export class ResultsLive extends TeamPage {
       this.error.set('La confirmación requiere posición final y problemas resueltos.');
       return;
     }
-    const request = this.result()
-      ? this.api.update(id, { ...values, confirm })
-      : this.api.create(id, { ...values, confirm });
+    const creating = !this.result();
+    const request = creating
+      ? this.api.create(id, { ...values, confirm })
+      : this.api.update(id, { ...values, confirm });
     // Re-query after any failed write before retrying: a timed-out request may have committed.
     this.loadedId.set(null);
-    this.write(request, (result) => {
-      this.loadedId.set(id);
-      this.result.set(result);
-      if (result.status === 'CONFIRMADO') this.form.disable();
-      this.message.set(
-        result.status === 'CONFIRMADO'
-          ? 'Resultado confirmado.'
-          : 'Resultado guardado como pendiente.',
-      );
-      this.reload();
-    });
+    this.write(
+      request,
+      (result) => {
+        this.loadedId.set(id);
+        this.result.set(result);
+        if (result.status === 'CONFIRMADO') this.form.disable();
+        this.message.set(
+          result.status === 'CONFIRMADO'
+            ? 'Resultado confirmado.'
+            : 'Resultado guardado como pendiente.',
+        );
+        this.reload();
+      },
+      (e) => {
+        // Creating over an existing result: say so instead of the generic conflict text.
+        if (creating && e instanceof HttpErrorResponse && e.status === 409) {
+          const detail: unknown = e.error?.message;
+          if (typeof detail !== 'string' || /ya existe/i.test(detail)) {
+            this.error.set(DUPLICATE_RESULT);
+            this.fields.set([]);
+          }
+        }
+      },
+    );
   }
 }

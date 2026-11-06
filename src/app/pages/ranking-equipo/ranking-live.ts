@@ -37,8 +37,12 @@ import { Ranking, LastRanking } from '../../core/team-api';
           </div>
           <div class="rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
             <p class="text-kl-muted">Criterio</p>
-            <strong>Problemas distintos aceptados</strong>
-            <p>Posiciones compartidas: 1, 1, 3. El orden mostrado es el del servicio.</p>
+            @if (ranking.orderingCriterion) {
+              <strong>{{ ranking.orderingCriterion }}</strong>
+            }
+            @if (hasTies(ranking) && ranking.tieCriterion) {
+              <p>{{ ranking.tieCriterion }}</p>
+            }
           </div>
         </section>
         <section class="overflow-x-auto rounded-2xl border border-kl-border bg-kl-surface">
@@ -78,6 +82,10 @@ import { Ranking, LastRanking } from '../../core/team-api';
 export class RankingLive extends TeamPage {
   readonly ranking = signal<Ranking | null>(null);
   readonly previous = signal<LastRanking | null>(null);
+  /** True when the service gave two members the same position. */
+  protected hasTies(ranking: Ranking) {
+    return new Set(ranking.members.map((m) => m.position)).size < ranking.members.length;
+  }
   protected clear() {
     this.ranking.set(null);
     this.previous.set(null);

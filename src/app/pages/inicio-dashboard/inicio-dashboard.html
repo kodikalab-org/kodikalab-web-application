@@ -31,40 +31,7 @@
         class="flex shrink-0 items-center gap-2.5 text-xl font-medium tracking-[-0.4px] sm:text-[25px]"
         ><img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab</a
       >
-      <nav
-        aria-label="Navegación principal"
-        class="ml-8 hidden h-full items-center gap-8 text-[15px] xl:flex"
-      >
-        <a
-          [routerLink]="ruta"
-          queryParamsHandling="preserve"
-          fragment="contenido"
-          (click)="irASeccion(contenido)"
-          aria-current="page"
-          class="flex h-full items-center border-b-2 border-kl-accent"
-          >Inicio</a
-        >
-        @for (enlace of enlaces; track enlace.id) {
-          <a
-            [routerLink]="ruta"
-            queryParamsHandling="preserve"
-            [fragment]="enlace.id"
-            (click)="
-              irASeccion(
-                enlace.id === 'problemas'
-                  ? problemasSeccion
-                  : enlace.id === 'competencias'
-                    ? competenciasSeccion
-                    : enlace.id === 'grupos'
-                      ? gruposSeccion
-                      : progresoSeccion
-              )
-            "
-            class="flex h-full items-center border-b-2 border-transparent text-kl-body transition-colors hover:border-kl-accent hover:text-kl-text focus-visible:text-kl-accent-text"
-            >{{ coach && enlace.id === 'problemas' ? 'Solicitudes' : enlace.nombre }}</a
-          >
-        }
-      </nav>
+      <app-header-navigation #navegacionHeader [coach]="coach" class="xl:ml-8" />
       <div class="ml-auto flex min-w-0 items-center gap-1 sm:gap-3">
         <button
           mat-button
@@ -105,15 +72,6 @@
             >{{ iniciales }}</span
           ><img src="/images/dashboard/0-imgIcon5.svg" width="16" height="16" alt="" />
         </button>
-        <button
-          mat-icon-button
-          [matMenuTriggerFor]="movil"
-          aria-label="Abrir navegación"
-          matTooltip="Navegación"
-          class="xl:hidden"
-        >
-          <span aria-hidden="true">☰</span>
-        </button>
       </div>
     </mat-toolbar>
   </header>
@@ -124,20 +82,8 @@
     @for (enlace of enlaces; track enlace.id) {
       <a
         mat-menu-item
-        [routerLink]="ruta"
-        queryParamsHandling="preserve"
-        [fragment]="enlace.id"
-        (click)="
-          irASeccion(
-            enlace.id === 'problemas'
-              ? problemasSeccion
-              : enlace.id === 'competencias'
-                ? competenciasSeccion
-                : enlace.id === 'grupos'
-                  ? gruposSeccion
-                  : progresoSeccion
-          )
-        "
+        [routerLink]="enlace.path"
+        [fragment]="enlace.fragment"
         >{{ coach && enlace.id === 'problemas' ? 'Solicitudes' : enlace.nombre }}</a
       >
     }
@@ -150,18 +96,16 @@
     </div>
     <a
       mat-menu-item
-      [routerLink]="ruta"
-      queryParamsHandling="preserve"
-      fragment="problemas"
-      (click)="irASeccion(problemasSeccion)"
+      [routerLink]="coach ? '/coach/grupos/solicitudes' : ruta"
+      [fragment]="coach ? undefined : 'problemas'"
+      (click)="!coach && irASeccion(problemasSeccion)"
       >{{ coach ? 'Revisar solicitudes' : 'Ver problemas asignados' }}</a
     >
     <a
       mat-menu-item
-      [routerLink]="ruta"
-      queryParamsHandling="preserve"
-      fragment="competencias"
-      (click)="irASeccion(competenciasSeccion)"
+      [routerLink]="coach ? '/coach/competencias' : ruta"
+      [fragment]="coach ? undefined : 'competencias'"
+      (click)="!coach && irASeccion(competenciasSeccion)"
       >Ver próximas competencias</a
     >
   </mat-menu>
@@ -188,6 +132,7 @@
       </div>
     </div>
     <a mat-menu-item [routerLink]="coach ? '/coach/perfil' : '/perfil'">Mi perfil</a>
+    <button mat-menu-item (click)="navegacionHeader.abrirSidebar()">Abrir navegación</button>
     @if (session.demo()) {
     <a mat-menu-item [routerLink]="ruta" [queryParams]="nuevo ? {} : { estado: 'nuevo' }">{{
       nuevo ? 'Ver demo con actividad' : 'Ver demo sin actividad'
@@ -199,40 +144,6 @@
     <a mat-menu-item routerLink="/login" (click)="salir()" class="mt-1 border-t border-kl-border-strong"
       >Volver al acceso</a
     >
-  </mat-menu>
-  <mat-menu #movil="matMenu" [class]="clasesMenu" [overlapTrigger]="false" xPosition="before">
-    <button mat-menu-item [matMenuTriggerFor]="apariencia">Apariencia</button>
-    <a
-      mat-menu-item
-      [routerLink]="ruta"
-      queryParamsHandling="preserve"
-      fragment="contenido"
-      (click)="irASeccion(contenido)"
-      aria-current="page"
-      >Inicio</a
-    >
-    @for (enlace of enlaces; track enlace.id) {
-      <a
-        mat-menu-item
-        [routerLink]="ruta"
-        queryParamsHandling="preserve"
-        [fragment]="enlace.id"
-        (click)="
-          irASeccion(
-            enlace.id === 'problemas'
-              ? problemasSeccion
-              : enlace.id === 'competencias'
-                ? competenciasSeccion
-                : enlace.id === 'grupos'
-                  ? gruposSeccion
-                  : progresoSeccion
-          )
-        "
-        >{{ coach && enlace.id === 'problemas' ? 'Solicitudes' : enlace.nombre }}</a
-      >
-    }
-    <button mat-menu-item [matMenuTriggerFor]="pendiente">Recursos · próximamente</button>
-    <button mat-menu-item [matMenuTriggerFor]="busqueda">Accesos rápidos</button>
   </mat-menu>
 
   <main
@@ -401,13 +312,7 @@
                   </div>
                   <span class="text-xs text-kl-muted">{{ solicitud.fecha }}</span>
                   <div class="ml-auto flex gap-3">
-                    <button
-                      mat-stroked-button
-                      [matMenuTriggerFor]="gestion"
-                      class="border-kl-danger/50 text-kl-danger"
-                    >
-                      Rechazar</button
-                    ><button mat-flat-button [matMenuTriggerFor]="gestion">Aceptar</button>
+                    <a mat-flat-button routerLink="/coach/grupos/solicitudes">Revisar solicitud</a>
                   </div>
                 </div>
               }
@@ -557,13 +462,13 @@
                       >{{ grupo.estado }}</span
                     >
                   </div>
-                  <button
+                  <a
                     mat-icon-button
-                    [matMenuTriggerFor]="pendiente"
+                    [routerLink]="coach ? '/coach/grupos/solicitudes' : '/grupos'"
                     [attr.aria-label]="'Ver ' + grupo.nombre"
                   >
                     <img src="/images/dashboard/0-imgIcon14.svg" width="18" height="18" alt="" />
-                  </button>
+                  </a>
                 </div>
               }
             }
@@ -640,9 +545,6 @@
     </div>
   </footer>
 </div>
-<mat-menu #gestion="matMenu" [class]="clasesMenu" [overlapTrigger]="false"
-  ><button mat-menu-item disabled>Gestión de solicitudes pendiente de integrar</button></mat-menu
->
 <ng-template #titulo let-nombre="nombre" let-icono="icono" let-accion="accion">
   <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
     <h2
@@ -652,14 +554,11 @@
         ><img [src]="'/images/dashboard/' + icono + '.svg'" width="20" height="20" alt="" /></span
       >{{ nombre }}
     </h2>
-    <button
-      mat-button
-      [matMenuTriggerFor]="pendiente"
-      class="h-auto min-w-0 px-0 text-sm text-kl-accent-text"
-    >
-      {{ accion
-      }}<img src="/images/dashboard/0-imgIconArrowRight1.svg" width="15" height="15" alt="" />
-    </button>
+    @if (destino(nombre); as destinoSeccion) {
+      <a mat-button [routerLink]="destinoSeccion" class="h-auto min-w-0 px-0 text-sm text-kl-accent-text">{{ accion }}<img src="/images/dashboard/0-imgIconArrowRight1.svg" width="15" height="15" alt="" /></a>
+    } @else {
+      <button mat-button [matMenuTriggerFor]="pendiente" class="h-auto min-w-0 px-0 text-sm text-kl-accent-text">{{ accion }}</button>
+    }
   </div>
 </ng-template>
 <ng-template
@@ -680,7 +579,11 @@
     <strong class="text-[15px]">{{ nombre }}</strong>
     <p class="mb-0 mt-2.5 max-w-[300px] text-[13px] leading-5 text-kl-muted">{{ descripcion }}</p>
     @if (accion) {
-      <button mat-stroked-button [matMenuTriggerFor]="pendiente" class="mt-4">{{ accion }}</button>
+      @if (destino(accion); as destinoAccion) {
+        <a mat-stroked-button [routerLink]="destinoAccion" class="mt-4">{{ accion }}</a>
+      } @else {
+        <button mat-stroked-button [matMenuTriggerFor]="pendiente" class="mt-4">{{ accion }}</button>
+      }
     }
   </div>
 </ng-template>

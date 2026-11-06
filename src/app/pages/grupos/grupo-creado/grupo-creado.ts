@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { TeamsApi } from '../../../core/teams-api';
+import { Session } from '../../../core/session';
 
 /**
  * Confirmación de US04. Toma el grupo recién creado desde `TeamsApi` en lugar de
@@ -16,8 +17,12 @@ import { TeamsApi } from '../../../core/teams-api';
 })
 export class GrupoCreado {
   private readonly api = inject(TeamsApi);
+  protected readonly session = inject(Session);
 
-  protected readonly grupo = this.api.lastCreated;
+  protected readonly grupo = computed(() => this.session.demo() ? {
+    groupId: 1, name: 'Equipo Alfa', status: 'ACTIVO', invitationCode: 'DEMO12345678',
+    message: 'Vista de ejemplo: no se creó ningún grupo.',
+  } : this.api.lastCreated());
   protected readonly esBorrador = computed(() => this.grupo()?.status === 'BORRADOR');
   protected readonly estado = computed(() =>
     this.esBorrador() ? 'Borrador' : 'Activo, visible para los practicantes',

@@ -8,6 +8,7 @@ import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/cor
 const appRoutes: Routes = [
   {
     path: 'recursos',
+    data: { shared: true },
     loadComponent: () => import('./pages/recursos-academicos/recursos-academicos').then((m) => m.RecursosAcademicos),
   },
   {
@@ -176,7 +177,7 @@ export const routes: Routes = [
   ...appRoutes.map(route => publicPaths.includes(route.path ?? '') || route.path?.startsWith('demo/')
     ? route
     : { ...route, canActivate: [accessGuard], data: { ...route.data,
-      role: route.path?.includes('coach/') ? 'COACH' : 'PRACTICANTE',
+      role: route.data?.['shared'] ? null : route.path?.startsWith('coach/') || route.path?.startsWith('onboarding/coach/') ? 'COACH' : 'PRACTICANTE',
     } }),
   { path: '**', redirectTo: '' },
 ];

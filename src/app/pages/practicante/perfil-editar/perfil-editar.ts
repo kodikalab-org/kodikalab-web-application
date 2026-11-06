@@ -2,6 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
@@ -10,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
 import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../core/profile-api';
 import { Session } from '../../../core/session';
@@ -41,6 +43,8 @@ function cicloValido(control: AbstractControl) {
 @Component({
   selector: 'app-perfil-editar',
   imports: [
+    HeaderNavigation,
+    MatMenuModule,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -90,7 +94,6 @@ export class PerfilEditar {
   }
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
   protected readonly iniciales = this.session.demo() ? INFO_PERSONAL_DEMO.iniciales : 'KL';
   protected readonly carreras = CARRERAS_EDICION;
   protected readonly ciclos = CICLOS_EDICION;

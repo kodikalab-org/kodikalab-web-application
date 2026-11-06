@@ -5,9 +5,10 @@ import { of } from 'rxjs';
 import { ExplorarGrupos } from './explorar-grupos/explorar-grupos';
 import { CrearGrupo } from './crear-grupo/crear-grupo';
 import { SolicitudesGrupo } from './solicitudes-grupo/solicitudes-grupo';
-import { CoachGroup, CreateGroupRequest, Membership, TeamsApi } from '../../core/teams-api';
+import { CoachGroup, CreateGroupRequest, CreateGroupResponse, Membership, TeamsApi } from '../../core/teams-api';
 
 class TeamsStub {
+  readonly lastCreated = signal<CreateGroupResponse | null>(null);
   readonly groups = signal([
     {
       groupId: 1,

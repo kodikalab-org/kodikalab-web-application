@@ -11,6 +11,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { MatMenuModule } from '@angular/material/menu';
+import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
 import { map } from 'rxjs';
 import {
   AJUSTES_COACH_DEMO,
@@ -48,6 +50,8 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
 @Component({
   selector: 'app-coach-perfil',
   imports: [
+    HeaderNavigation,
+    MatMenuModule,
     RecoveryCode,
     AsyncPipe,
     ReactiveFormsModule,
@@ -102,7 +106,6 @@ export class CoachPerfil {
     },
   ];
 
-  protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
 
   protected get perfil() {
     if (this.session.demo()) return PERFIL_COACH_DEMO;

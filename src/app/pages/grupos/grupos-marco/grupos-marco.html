@@ -13,27 +13,7 @@
       >
         <img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab
       </a>
-      <nav
-        aria-label="Navegación principal"
-        class="ml-8 hidden h-full items-center gap-8 text-[15px] xl:flex"
-      >
-        <a [routerLink]="coach ? '/coach/inicio' : '/inicio'">Inicio</a>
-        <span aria-disabled="true" title="Catálogo pendiente de integrar" class="text-kl-muted"
-          >Problemas</span
-        >
-        <span aria-disabled="true" title="Concursos pendiente de integrar" class="text-kl-muted"
-          >Concursos</span
-        >
-        <a
-          [routerLink]="coach ? '/coach/grupos/crear' : '/grupos'"
-          aria-current="page"
-          class="flex h-full items-center border-0 border-b-2 border-solid border-kl-accent"
-          >Grupos</a
-        >
-        <span aria-disabled="true" title="Recursos pendiente de integrar" class="text-kl-muted"
-          >Recursos</span
-        >
-      </nav>
+      <app-header-navigation #navegacionHeader [coach]="coach" />
       <div class="ml-auto flex items-center gap-3">
         <div
           aria-label="Búsqueda global pendiente"
@@ -71,9 +51,14 @@
       </div>
     </mat-toolbar>
     <mat-menu #navegacion="matMenu">
-      <a mat-menu-item [routerLink]="coach ? '/coach/grupos/crear' : '/grupos'">Explorar grupos</a>
-      <a mat-menu-item routerLink="/coach/grupos/crear">Crear grupo · vista coach</a>
-      <a mat-menu-item routerLink="/coach/grupos/solicitudes">Revisar solicitudes · vista coach</a>
+      <button mat-menu-item (click)="navegacionHeader.abrirSidebar()">Abrir navegación</button>
+      @if (coach) {
+        <a mat-menu-item routerLink="/coach/grupos/seguimiento">Seguimiento de grupos</a>
+        <a mat-menu-item routerLink="/coach/grupos/crear">Crear grupo</a>
+        <a mat-menu-item routerLink="/coach/grupos/solicitudes">Revisar solicitudes</a>
+      } @else {
+        <a mat-menu-item routerLink="/grupos">Explorar grupos</a>
+      }
       <a mat-menu-item [routerLink]="coach ? '/coach/inicio' : '/inicio'">Volver al inicio</a>
     </mat-menu>
   </header>
@@ -82,7 +67,7 @@
     class="flex flex-wrap items-center justify-between gap-4 border-0 border-t border-solid border-kl-border bg-[#060414]/90 px-4 py-5 text-xs text-kl-muted lg:px-11"
   >
     <div class="flex flex-wrap items-center gap-5">
-      <a routerLink="/grupos" class="flex items-center gap-2 text-lg text-kl-text"
+      <a [routerLink]="coach ? '/coach/grupos/crear' : '/grupos'" class="flex items-center gap-2 text-lg text-kl-text"
         ><img src="/images/dashboard/0-imgIcon1.svg" width="28" height="28" alt="" />Kodikalab</a
       ><span>© 2026 Kodikalab. Todos los derechos reservados.</span>
     </div>

@@ -20,7 +20,7 @@
   </mat-form-field>
 </ng-template>
 
-<div class="relative min-h-dvh overflow-hidden bg-kl-bg font-body leading-[1.26] text-kl-text">
+<div class="relative min-h-dvh overflow-clip bg-kl-bg font-body leading-[1.26] text-kl-text">
   <img
     class="profile-background"
     src="images/perfil/bg-1080.svg"
@@ -29,7 +29,7 @@
   />
 
   <mat-toolbar
-    class="auth-header relative z-10 flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
   >
     <div class="flex min-w-0 items-center gap-2 xl:gap-14">
       <a class="inline-flex items-center gap-2.5" routerLink="/inicio" aria-label="Kodikalab, inicio">
@@ -265,7 +265,7 @@
                       >
                         <p class="m-0 text-[15px] font-medium">Aún no vinculas plataformas</p>
                         <p class="m-0 text-[13px] text-kl-muted">
-                          Conecta Codeforces, AtCoder o VJudge para ver tu progreso aquí.
+                          Conecta Codeforces para ver tu progreso aquí.
                         </p>
                         <a
                           mat-stroked-button
@@ -307,6 +307,14 @@
                         }
                       </ul>
                     }
+                    <ul class="m-0 mt-3 grid list-none gap-3 p-0 sm:grid-cols-2">
+                      @for (platform of ['AtCoder', 'VJudge']; track platform) {
+                        <li aria-disabled="true" class="rounded-xl border border-kl-divider bg-white/3 p-3 text-sm text-kl-muted">
+                          <span class="font-semibold">{{ platform }}</span>
+                          <span class="block text-xs">En mantenimiento</span>
+                        </li>
+                      }
+                    </ul>
                   </div>
                 }
               </section>
@@ -315,6 +323,7 @@
               <section
                 class="min-w-0 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
                 aria-labelledby="titulo-estadisticas"
+                [attr.aria-busy]="statsLoading()"
               >
                 <div class="flex items-center gap-3">
                   <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
@@ -328,14 +337,25 @@
                   </h2>
                 </div>
 
-                @if (vista.estado === 'cargando') {
+                @if (vista.estado === 'cargando' || statsLoading()) {
                   <div class="mt-4 flex animate-pulse flex-col gap-3.5 motion-reduce:animate-none" aria-hidden="true">
                     <div class="h-[70px] w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
                     <div class="h-3.5 w-[419px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
                     <div class="h-[110px] w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
                     <div class="h-[110px] w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
                   </div>
+                } @else if (!session.demo() && statsError()) {
+                  <div role="alert" class="mt-4 rounded-xl border border-amber-400/40 p-4">
+                    <p>No pudimos cargar las estadísticas de Codeforces. Inténtalo de nuevo.</p>
+                    <button mat-stroked-button type="button" (click)="loadStats()">Reintentar</button>
+                  </div>
+                } @else if (!session.demo() && stats()?.linked === false) {
+                  <p class="mt-4 text-kl-body">Vincula tu usuario de Codeforces para ver tus estadísticas.</p>
+                  <a mat-stroked-button routerLink="/perfil/editar" fragment="plataformas">Vincula tu usuario de Codeforces</a>
                 } @else {
+                  @if (!session.demo() && stats()?.acceptedSubmissions === 0) {
+                    <p role="status" class="mt-4 text-kl-body">Aún no hay envíos aceptados</p>
+                  }
                   <ul class="m-0 mt-4 grid list-none grid-cols-2 gap-3 p-0 max-[641px]:grid-cols-1">
                     @for (estadistica of estadisticas; track estadistica.etiqueta) {
                       <li
@@ -365,6 +385,38 @@
                     }
                   </ul>
 
+                  @if (!session.demo() && stats(); as liveStats) {
+                    <section class="mt-4 rounded-xl border border-kl-divider p-4" aria-labelledby="activity-title">
+                      <h3 id="activity-title" class="m-0 text-[15px]">Actividad de resolución de problemas</h3>
+                      <p class="text-[12px] text-kl-muted">Último año · fechas UTC · envíos aceptados</p>
+                      <div class="overflow-x-auto">
+                        <div class="grid w-max grid-flow-col grid-rows-7 gap-[3px]" aria-label="Calendario de actividad">
+                          @for (day of activity; track $index) {
+                            <span class="size-[11px] rounded-[2px]"
+                              [style.visibility]="day.padding ? 'hidden' : 'visible'"
+                              [style.background]="day.count === 0 ? '#17163a' : day.count < 3 ? '#14532d' : day.count < 6 ? '#16a34a' : '#4ade80'"
+                              [title]="day.date + ': ' + day.count + ' envíos aceptados'"
+                              role="img" [attr.aria-label]="day.date + ': ' + day.count + ' envíos aceptados'"></span>
+                          }
+                        </div>
+                      </div>
+                      <p class="mb-0 text-[12px] text-kl-muted">Menos ▪ ▪ ▪ Más</p>
+                    </section>
+                    <section class="mt-4 rounded-xl border border-kl-divider p-4" aria-labelledby="rating-title">
+                      <h3 id="rating-title" class="m-0 text-[15px]">Heatmap por rating</h3>
+                      <p class="text-[12px] text-kl-muted">Problemas únicos resueltos por rating exacto · histórico</p>
+                      <div class="flex flex-wrap gap-2">
+                        @for (bucket of ratingBuckets; track bucket.rating) {
+                          <div class="rounded-lg border border-kl-divider p-2 text-center text-[12px]"
+                            [style.background]="bucket.count < 5 ? '#17163a' : bucket.count < 20 ? '#2a2750' : '#503a85'"
+                            [title]="(bucket.rating === 0 ? 'Sin rating' : bucket.rating) + ': ' + bucket.count + ' problemas'">
+                            <span>{{ bucket.rating === 0 ? 'Sin rating' : bucket.rating }}</span>
+                            <strong class="block">{{ bucket.count }}</strong>
+                          </div>
+                        }
+                      </div>
+                    </section>
+                  }
                   @for (heatmap of heatmaps; track heatmap.titulo) {
                     <div
                       class="mt-4 flex flex-col gap-1.5 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-4"

@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { Session } from '../../../core/session';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { Perfil } from './perfil';
+import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
 
 describe('Perfil', () => {
   async function setup(params: Record<string, string> = {}) {
@@ -21,6 +22,89 @@ describe('Perfil', () => {
   }
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
+
+  it('pins the outer toolbar with important utilities and no scroll-container ancestor', async () => {
+    const { root } = await setup();
+    const toolbar = root.querySelector('mat-toolbar')!;
+    for (const utility of ['sticky', 'top-0', 'z-40', 'backdrop-blur-xl']) {
+      expect(toolbar.classList.contains(utility)).toBe(true);
+    }
+    expect(toolbar.classList.contains('relative')).toBe(false);
+    expect(toolbar.classList.contains('z-10')).toBe(false);
+    expect(toolbar.parentElement!.classList.contains('overflow-clip')).toBe(true);
+    expect(toolbar.closest('.overflow-hidden')).toBeNull();
+    expect(root.querySelector('app-header-navigation')?.classList.contains('sticky')).toBe(false);
+  });
+
+  async function setupLive() {
+    const response = new Subject<CodeforcesStats>();
+    const load = vi.fn().mockReturnValue(response);
+    await TestBed.configureTestingModule({ imports: [Perfil], providers: [provideRouter([]),
+      { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
+      { provide: CodeforcesStatsApi, useValue: { load } },
+    ] }).compileComponents();
+    TestBed.inject(Session).demo.set(null);
+    const fixture = TestBed.createComponent(Perfil);
+    await fixture.whenStable();
+    return { fixture, root: fixture.nativeElement as HTMLElement, response, load };
+  }
+  const emptyStats: CodeforcesStats = { linked: true, handle: 'new_handle', problemsSolved: 0,
+    maxStreakDays: 0, currentRating: 0, acceptedSubmissions: 0, acceptanceRate: 0,
+    activity: [], solvedByRating: [] };
+
+  it('renders a real loading skeleton without demo numbers', async () => {
+    const { root } = await setupLive();
+    expect(root.querySelector('[aria-labelledby="titulo-estadisticas"]')?.getAttribute('aria-busy')).toBe('true');
+    expect(root.querySelector('.animate-pulse')).not.toBeNull();
+    expect(texto(root)).not.toContain('569');
+  });
+
+  it('offers linking when the server reports no Codeforces handle', async () => {
+    const { fixture, root, response } = await setupLive();
+    response.next({ ...emptyStats, linked: false, handle: null });
+    await fixture.whenStable();
+    expect(texto(root)).toContain('Vincula tu usuario de Codeforces');
+    expect(root.querySelector('a[fragment="plataformas"]')).not.toBeNull();
+    expect(texto(root)).not.toContain('Problemas resueltos');
+  });
+
+  it('shows genuine zero stats for a linked account without accepted submissions', async () => {
+    const { fixture, root, response } = await setupLive();
+    response.next(emptyStats);
+    await fixture.whenStable();
+    expect(texto(root)).toContain('Aún no hay envíos aceptados');
+    expect(texto(root)).toContain('0 días');
+    expect(texto(root)).toContain('0.0 % de aceptación');
+    expect(texto(root)).not.toContain('569');
+  });
+
+  it('renders backend counts and exact rating buckets including unrated', async () => {
+    const { fixture, root, response } = await setupLive();
+    response.next({ ...emptyStats, problemsSolved: 519, maxStreakDays: 10, currentRating: 1339,
+      acceptedSubmissions: 600, acceptanceRate: 45.25,
+      solvedByRating: [{ rating: 0, count: 7 }, { rating: 1350, count: 4 }] });
+    await fixture.whenStable();
+    expect(texto(root)).toContain('519');
+    expect(texto(root)).toContain('10 días');
+    expect(texto(root)).toContain('1339');
+    expect(texto(root)).toContain('Sin rating');
+    expect(texto(root)).toContain('1350');
+    expect(texto(root)).not.toContain('Top 12');
+  });
+
+  it('shows a retry alert on an unavailable service and recovers', async () => {
+    const { fixture, root, response, load } = await setupLive();
+    response.error({ status: 503 });
+    await fixture.whenStable();
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain('No pudimos cargar');
+    load.mockReturnValue(of(emptyStats));
+    const retry = [...root.querySelectorAll('button')].find(button => button.textContent?.includes('Reintentar'))!;
+    retry.click();
+    await fixture.whenStable();
+    expect(load).toHaveBeenCalledTimes(2);
+    expect(root.querySelector('[role="alert"]')).toBeNull();
+    expect(texto(root)).toContain('Aún no hay envíos aceptados');
+  });
 
   it('opens the "Información personal" tab by default with profile, stats and platforms', async () => {
     const { root } = await setup();
@@ -44,7 +128,9 @@ describe('Perfil', () => {
     expect(contenido).toContain('Problemas resueltos');
     expect(contenido).toContain('Actividad de resolución de problemas');
     expect(contenido).toContain('Heatmap por rating');
-    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(3);
+    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(1);
+    expect(root.querySelectorAll('li[aria-disabled="true"]').length).toBe(2);
+    expect(contenido.match(/En mantenimiento/g)?.length).toBe(2);
     expect(contenido).not.toContain('Aún no vinculas plataformas');
   });
 

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -23,6 +23,16 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('router-outlet')).not.toBeNull();
     expect(compiled.querySelector('aside')).toBeNull();
+  });
+
+  it('leaves the group requests header to the shared group layout', async () => {
+    vi.spyOn(TestBed.inject(Router), 'url', 'get').mockReturnValue('/coach/grupos/solicitudes');
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('header')).toBeNull();
+    expect(root.querySelector('router-outlet')).not.toBeNull();
+    expect(root.firstElementChild?.classList.contains('overflow-clip')).toBe(true);
   });
 
   it('has no sidebar drawer', async () => {

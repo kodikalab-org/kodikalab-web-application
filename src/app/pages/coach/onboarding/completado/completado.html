@@ -1,5 +1,5 @@
 <div
-  class="relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text"
+  class="relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text"
 >
   <img
     class="pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
@@ -9,7 +9,7 @@
   />
 
   <mat-toolbar
-    class="auth-header relative z-10 justify-between border-0 border-b border-solid border-kl-divider px-14 font-body font-normal max-[641px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl justify-between border-0 border-b border-solid border-kl-divider px-14 font-body font-normal max-[641px]:px-4"
   >
     <a class="inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
       <img src="images/registro/logo-40.svg" alt="" width="40" height="40" />

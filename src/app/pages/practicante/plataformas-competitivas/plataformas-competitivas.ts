@@ -21,11 +21,6 @@ export class PlataformasCompetitivas {
       usuario: 'camila_rc',
       pendiente: true,
     },
-    {
-      nombre: 'AtCoder',
-      usuario: 'camila_upc',
-      pendiente: false,
-    },
   ];
 
   /** Estado de maqueta (`?estado=confirmada`): Codeforces validó el identificador. */

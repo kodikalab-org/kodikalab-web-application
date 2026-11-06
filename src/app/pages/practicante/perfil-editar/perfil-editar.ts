@@ -33,6 +33,8 @@ import { EstadoEdicion } from '../../../models/perfil-practicante';
 
 /** Letters, numbers, dot, hyphen and underscore (optional field, max 50). */
 const HANDLE_VALIDO = /^[A-Za-z0-9._-]*$/;
+const TIME_VALUES = ['MANANA', 'TARDE', 'NOCHE'] as const;
+const DAY_VALUES = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'] as const;
 
 /** Cycle number must be >= 1 (e.g. "5.º ciclo" -> 5). */
 function cicloValido(control: AbstractControl) {
@@ -67,6 +69,8 @@ export class PerfilEditar {
   protected busy = false;
   protected error = '';
   constructor() {
+    this.form.controls.atcoder.disable();
+    this.form.controls.vjudge.disable();
     if (this.session.demo()) return;
     const p = this.profiles.profile();
     this.form.reset();
@@ -75,8 +79,11 @@ export class PerfilEditar {
       codigo: p.codigoEstudiante, carrera: p.carrera, ciclo: `${p.cicloAcademico}.º ciclo`,
       nivel: p.nivelCompetitivo, codeforces: p.codeforcesHandle ?? '',
       atcoder: p.atcoderHandle ?? '', vjudge: p.vjudgeHandle ?? '',
+      distrito: p.district ?? '', experiencia: p.experienceMonths ?? null,
+      franja: p.preferredTime ? FRANJAS_EDICION[TIME_VALUES.indexOf(p.preferredTime)] : null,
+      dias: (p.availableDays ?? []).map(day => DIAS_EDICION[DAY_VALUES.indexOf(day)]),
+      objetivo: p.goal ?? null,
     });
-    for (const control of ['distrito', 'experiencia', 'franja', 'dias', 'objetivo'] as const) this.form.controls[control].disable();
   }
   protected async guardar(): Promise<void> {
     if (this.form.invalid || this.busy) return;
@@ -87,6 +94,9 @@ export class PerfilEditar {
     try {
       await firstValueFrom(this.profiles.save({ codigoEstudiante: v.codigo, carrera: v.carrera,
         cicloAcademico: Number.parseInt(v.ciclo, 10), nivelCompetitivo: v.nivel as PractitionerProfile['nivelCompetitivo'],
+        district: v.distrito || null, experienceMonths: v.experiencia,
+        preferredTime: TIME_VALUES[FRANJAS_EDICION.indexOf(v.franja ?? '')] ?? null,
+        availableDays: v.dias.map(day => DAY_VALUES[DIAS_EDICION.indexOf(day)]), goal: v.objetivo,
         codeforcesHandle: v.codeforces || null, atcoderHandle: v.atcoder || null, vjudgeHandle: v.vjudge || null }));
       await this.router.navigate(['/perfil'], { queryParams: { estado: 'actualizado' } });
     } catch (error) { this.error = apiError(error); }

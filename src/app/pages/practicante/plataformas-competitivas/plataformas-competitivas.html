@@ -1,5 +1,5 @@
 @let estado = estado$ | async;
-<div class="relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text">
+<div class="relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text">
   <img
     class="pointer-events-none absolute top-0 left-0 z-0 h-[900px] w-[1440px] max-w-none max-[641px]:-left-[1000px]"
     src="images/onboarding/bg.svg"
@@ -8,7 +8,7 @@
   />
 
   <mat-toolbar
-    class="auth-header relative z-10 h-[68px] justify-between border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-14 font-body font-normal max-[641px]:h-[60px] max-[641px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl h-[68px] justify-between border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-14 font-body font-normal max-[641px]:h-[60px] max-[641px]:px-4"
   >
     <div class="flex items-center gap-10">
       <a class="inline-flex items-center gap-2" routerLink="/inicio" aria-label="Kodikalab, inicio">
@@ -97,6 +97,7 @@
           </div>
         }
         <div class="flex items-start gap-3 max-[641px]:flex-col">
+          <p aria-disabled="true" class="text-sm text-kl-muted">AtCoder · En mantenimiento<br />VJudge · En mantenimiento</p>
           @if (estado === 'confirmada') {
             <button
               mat-flat-button

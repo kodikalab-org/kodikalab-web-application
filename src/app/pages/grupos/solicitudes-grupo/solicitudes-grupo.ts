@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { apiError } from '../../../core/api';
 import { CoachGroup, Membership, MembershipDecision, TeamsApi } from '../../../core/teams-api';
 
-type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA';
+type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO';
 
 /**
  * US06 — El coach revisa las postulaciones del grupo, acepta, rechaza o pide una

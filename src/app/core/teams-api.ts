@@ -198,7 +198,7 @@ export class TeamsApi {
     });
   }
 
-  loadRequests(groupId: number, status: 'PENDIENTE' | 'ACLARACION_SOLICITADA') {
+  loadRequests(groupId: number, status: 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO') {
     if (this.session.demo()) return of(SOLICITUDES_GRUPO_DEMO.filter(request => request.groupId === groupId && request.status === status)).pipe(tap(requests => this.requests.set(requests)));
     this.loading.set(true);
     return this.http

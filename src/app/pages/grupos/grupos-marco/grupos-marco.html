@@ -25,7 +25,7 @@
           >Concursos</span
         >
         <a
-          routerLink="/grupos"
+          [routerLink]="coach ? '/coach/grupos/crear' : '/grupos'"
           aria-current="page"
           class="flex h-full items-center border-0 border-b-2 border-solid border-kl-accent"
           >Grupos</a
@@ -71,7 +71,7 @@
       </div>
     </mat-toolbar>
     <mat-menu #navegacion="matMenu">
-      <a mat-menu-item routerLink="/grupos">Explorar grupos</a>
+      <a mat-menu-item [routerLink]="coach ? '/coach/grupos/crear' : '/grupos'">Explorar grupos</a>
       <a mat-menu-item routerLink="/coach/grupos/crear">Crear grupo · vista coach</a>
       <a mat-menu-item routerLink="/coach/grupos/solicitudes">Revisar solicitudes · vista coach</a>
       <a mat-menu-item [routerLink]="coach ? '/coach/inicio' : '/inicio'">Volver al inicio</a>

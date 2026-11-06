@@ -257,19 +257,33 @@
           }}
         </p>
       </div>
-      <button
-        mat-flat-button
-        [matMenuTriggerFor]="pendiente"
-        class="h-[52px] rounded-xl bg-linear-to-br from-[#9a75ff] to-[#643bff] px-7 shadow-[0_0_24px_#7357f380]"
-      >
-        {{ coach ? 'Crear grupo' : 'Resolver problema'
-        }}<img
-          [src]="'/images/dashboard/' + (coach ? '2-imgIcon6' : '0-imgIconArrowRight') + '.svg'"
-          width="18"
-          height="18"
-          alt=""
-        />
-      </button>
+      @if (coach) {
+        <a
+          mat-flat-button
+          routerLink="/coach/grupos/crear"
+          class="h-[52px] rounded-xl bg-linear-to-br from-[#9a75ff] to-[#643bff] px-7 shadow-[0_0_24px_#7357f380]"
+        >
+          Crear grupo<img
+            src="/images/dashboard/2-imgIcon6.svg"
+            width="18"
+            height="18"
+            alt=""
+          />
+        </a>
+      } @else {
+        <button
+          mat-flat-button
+          [matMenuTriggerFor]="pendiente"
+          class="h-[52px] rounded-xl bg-linear-to-br from-[#9a75ff] to-[#643bff] px-7 shadow-[0_0_24px_#7357f380]"
+        >
+          Resolver problema<img
+            [src]="'/images/dashboard/0-imgIconArrowRight.svg'"
+            width="18"
+            height="18"
+            alt=""
+          />
+        </button>
+      }
     </div>
     @if (nuevo) {
       <mat-card

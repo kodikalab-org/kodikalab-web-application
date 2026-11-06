@@ -1,7 +1,9 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../core/session';
+import { navigationFor } from '../../core/navigation';
 import { ProfileApi } from '../../core/profile-api';
+import { HeaderNavigation } from '../../shared/header-navigation/header-navigation';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +15,7 @@ import { map } from 'rxjs';
 @Component({
   selector: 'app-inicio-dashboard',
   imports: [
+    HeaderNavigation,
     AsyncPipe,
     NgTemplateOutlet,
     RouterLink,
@@ -37,12 +40,22 @@ export class InicioDashboard {
   // Material renders menus in the CDK overlay, outside this component's host.
   protected readonly clasesMenu =
     'bg-kl-surface text-kl-text rounded-2xl border border-solid border-kl-border-strong shadow-[0_16px_48px_#00000099] max-w-[calc(100vw-24px)] [--mat-menu-container-color:var(--kl-surface)] [--mat-menu-item-label-text-size:14px] [--mat-menu-item-label-text-weight:400] [--mat-menu-item-hover-state-layer-color:var(--kl-accent)] [--mat-menu-item-focus-state-layer-color:var(--kl-accent)] [&_.mat-mdc-menu-item]:min-h-11 [&_.mat-mdc-menu-item]:text-kl-text [&_.mat-mdc-menu-item:hover]:bg-kl-accent/15 [&_.mat-mdc-menu-item:focus-visible]:bg-kl-accent/20';
-  protected readonly enlaces = [
-    { id: 'problemas', nombre: 'Problemas' },
-    { id: 'competencias', nombre: 'Concursos' },
-    { id: 'grupos', nombre: 'Grupos' },
-    { id: 'progreso', nombre: 'Progreso' },
-  ];
+  protected get enlaces() {
+    return [
+      ...navigationFor(this.coach).slice(1, 5).map((link, index) => ({
+        ...link, id: ['problemas', 'competencias', 'grupos', 'recursos'][index], nombre: link.label,
+      })),
+      { id: 'progreso', nombre: 'Progreso', path: this.coach ? '/coach/rendimiento' : '/progreso', fragment: undefined },
+    ];
+  }
+
+  protected destino(nombre: string): string | null {
+    if (nombre.includes('grupo') || nombre.includes('equipo')) return nombre === 'Crear grupo' ? '/coach/grupos/crear' : this.coach ? '/coach/grupos/solicitudes' : '/grupos';
+    if (nombre.includes('Solicitudes')) return '/coach/grupos/solicitudes';
+    if (nombre.includes('progreso') || nombre.includes('reforzar')) return this.coach ? '/coach/rendimiento' : '/progreso';
+    if (nombre.includes('competencias') && this.coach) return '/coach/competencias';
+    return null;
+  }
 
   protected irASeccion(seccion: HTMLElement): void {
     seccion.scrollIntoView({ block: 'start' });

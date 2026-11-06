@@ -413,3 +413,19 @@ app-login .auth-check .mdc-label {
 .onb-radio.mat-mdc-radio-checked {
   @apply border-kl-accent-text bg-[#2a1f6b]/60;
 }
+
+/* Weak password (US-01, US-02): orange warning, separate from the red error state.
+   The message text carries the meaning too; color is never the only signal. */
+:root {
+  --kl-warn: #fb923c;
+}
+
+.auth-field.auth-field--weak {
+  --mat-form-field-outlined-error-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-hover-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-focus-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-caret-color: var(--kl-warn);
+}
+.auth-field.auth-field--weak mat-error {
+  color: var(--kl-warn);
+}

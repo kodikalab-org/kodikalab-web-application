@@ -42,14 +42,36 @@ describe('Login', () => {
     await type('email', '');
     await type('password', '');
     const text = root.textContent ?? '';
-    expect(text).toContain('Ingresa un correo válido, por ejemplo nombre@upc.edu.pe');
+    expect(text).toContain('Ingresa tu correo institucional');
     expect(text).toContain('Ingresa tu contraseña');
+  });
+
+  it('treats a whitespace-only email as missing', async () => {
+    const { root, type } = await setup();
+    await type('email', '   ');
+    expect(root.textContent).toContain('Ingresa tu correo institucional');
   });
 
   it('rejects a malformed email', async () => {
     const { root, type } = await setup();
     await type('email', 'camila.rojas@');
     expect(root.textContent).toContain('Ingresa un correo válido, por ejemplo nombre@upc.edu.pe');
+  });
+
+  it('rejects an email above 100 characters', async () => {
+    const { root, type } = await setup();
+    await type('email', `${'a'.repeat(60)}@${'b'.repeat(30)}.${'c'.repeat(20)}.pe`);
+    expect(root.textContent).toContain('El correo no puede superar 100 caracteres');
+  });
+
+  it('does not trim or reject a password with spaces, but blocks passwords above 72 bytes', async () => {
+    const { root, submit, type } = await setup();
+    await type('email', 'camila.rojas@upc.edu.pe');
+    await type('password', '  Password123  ');
+    expect(submit().disabled).toBe(false);
+    await type('password', '€'.repeat(25));
+    expect(root.textContent).toContain('La contraseña no puede superar 72 bytes');
+    expect(submit().disabled).toBe(true);
   });
 
   it('enables the submit button when the form is valid', async () => {

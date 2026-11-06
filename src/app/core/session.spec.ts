@@ -121,6 +121,17 @@ describe('Real API session', () => {
     expect(session.account()).toBeNull();
   });
 
+  it('keeps the current session when recovery is rejected', async () => {
+    await login();
+    const result = firstValueFrom(session.recover('test@example.com', 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX', 'Nueva2026'));
+    const rejected = expect(result).rejects.toMatchObject({ status: 401 });
+    http.expectOne('http://localhost:8080/api/auth/recovery').flush({ message: 'Datos de recuperación inválidos' },
+      { status: 401, statusText: 'Unauthorized' });
+    await rejected;
+    expect(session.token()).toBe('test-token');
+    expect(session.registration()).toBeNull();
+  });
+
   it('rotates recovery through the real contract without persisting its response', async () => {
     await login();
     const result = firstValueFrom(session.recover('test@example.com', 'old-code', 'Nueva2026'));

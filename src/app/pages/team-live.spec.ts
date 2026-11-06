@@ -41,11 +41,10 @@ describe('Live team features', () => {
     TestBed.inject(Session).logout();
     if (authenticated)
       TestBed.inject(Session).account.set({
-        token: '',
+        token: 'test-token',
         email: 'test@example.com',
         role: 'PRACTICANTE',
-        cookie: true,
-        expiresAt: 0,
+        expiresAt: Date.now() + 3600_000,
       });
     const fixture = TestBed.createComponent(component);
     fixture.detectChanges();

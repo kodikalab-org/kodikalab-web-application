@@ -1,5 +1,7 @@
 # Frontend US-11 a US-14
 
+> Nota de integración con `develop` (6 de noviembre de 2026). Este informe lo redactó Luciano sobre una base anterior de `develop`. Al integrarlo se descartó lo que contradice el comportamiento actual: autenticación por cookie (sin token), `API_URL=/api` con `proxy.conf.json`, nuevo `Session.authenticated()`, la recuperación de contraseña por código en el interceptor, el selector de tema claro/oscuro con `theme.css`, la franja global de navegación del componente raíz, el cambio de versiones de `package.json` y el cambio de `pendingRequests` a opcional. Las secciones siguientes que los mencionan describen la rama original y no el estado integrado. En `develop` la sesión sigue usando JWT con cabecera `Authorization: Bearer`, el backend no usa cookies y la URL base de la API es la de `API_URL`.
+
 ## Estado de entrega
 
 Código implementado y compilado. Los 248 casos de pruebas ejecutables pasan. La suite global conserva un fallo preexistente por un archivo sin tests. Integración real y comparación visual completa pendientes; no declarar listo para producción. Rama comprobada: origin/feature/us-luciano. Backend exclusivamente leído; git status limpio al finalizar las verificaciones.
@@ -32,11 +34,7 @@ Las cuatro maquetas existentes permanecen exclusivamente bajo Session.demo() con
 
 ## Autenticación y comunicación
 
-app.config.ts utiliza API_URL=/api. proxy.conf.json y angular.json redirigen /api/** a http://localhost:8080 durante ng serve. No se modifica CORS en Spring. En producción, el host debe servir la API bajo el mismo origen mediante reverse proxy o configurar una solución de despliegue compatible; el proxy de Angular no funciona después de desplegar los archivos compilados.
-
-El interceptor envía credenciales solo a la API configurada. El login acepta AuthResponse sin token; guarda en sessionStorage únicamente una pista de cuenta/rol para navegación, no credenciales ni una sesión autenticada verificable. Cada entrada protegida valida mediante /users/me y las operaciones de equipo vuelven a ser autorizadas por el servidor. Un 401 protegido limpia la pista y redirige al login; 403 no elimina la sesión. Las cookies HttpOnly son administradas por el navegador. No se inventa fecha de expiración local para la sesión del servidor ni se promete Recordarme persistente para cookies.
-
-Se conserva la compatibilidad JWT preexistente si el host devuelve realmente token/expiración, para no romper sus otros flujos. La API Spring de referencia NO devuelve JWT. Cierre de sesión actual borra el estado local; NO se puede afirmar que invalide la cookie del servidor porque no hay endpoint de logout contratado. Recuperación y consulta de códigos existentes en el frontend tampoco están disponibles en este backend: requieren contrato externo y no se añadieron endpoints ficticios. Credenciales inválidas no se convierten en sesión. No se guardan contraseñas.
+Se reutiliza la sesión de `develop`: JWT en `Authorization: Bearer` (solo hacia `API_URL`), 401 protegido limpia la sesión y redirige al login, el modo demo bloquea cualquier llamada a la API. Las pantallas reales de equipo consultan la API solo con sesión real; la demo conserva las maquetas con datos de ejemplo.
 
 ## Diferencias frente a Figma
 

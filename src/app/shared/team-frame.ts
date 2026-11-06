@@ -135,7 +135,7 @@ export class TeamFrame implements OnInit {
   readonly loadingTeams = signal(false);
   readonly teamsError = signal('');
   ngOnInit() {
-    if (!this.session.authenticated()) return;
+    if (!this.session.token()) return;
     this.loadTeams();
   }
   loadTeams() {

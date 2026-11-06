@@ -48,7 +48,6 @@ describe('Integración de rutas de equipo (US11 a US14)', () => {
   function respond(url: string, body: object) {
     const request = http.expectOne(url);
     expect(request.request.method).toBe('GET');
-    expect(request.request.withCredentials).toBe(true);
     expect(request.request.headers.get('Authorization')).toBe('Bearer test-token');
     request.flush(body);
   }
@@ -101,6 +100,7 @@ describe('Integración de rutas de equipo (US11 a US14)', () => {
   it('cambia de equipo sin reutilizar métricas del anterior', async () => {
     authenticate('PRACTICANTE');
     const harness = await RouterTestingHarness.create('/ranking?teamId=8');
+    respond('/api/teams/me', []);
     respond('/api/analytics/teams/8/standings', {
       teamId: 8,
       status: 'CALCULATED',

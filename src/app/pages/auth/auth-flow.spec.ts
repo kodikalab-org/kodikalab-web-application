@@ -49,10 +49,68 @@ describe('API-connected access forms', () => {
     expect(navigate).not.toHaveBeenCalled();
     const request = http.expectOne(REGISTER_URL);
     expect(Object.keys(request.request.body).sort()).toEqual(['email', 'firstName', 'lastName', 'password', 'role']);
-    request.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE', recoveryCode: 'test-code' });
+    request.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
     await fixture.whenStable();
-    expect(navigate).toHaveBeenCalledWith('/registro-exitoso');
-    expect(TestBed.inject(Session).account()).toBeNull();
+    // Registration issues no token: the form signs in with the same credentials before onboarding.
+    expect(navigate).not.toHaveBeenCalled();
+    const login = http.expectOne(LOGIN_URL);
+    expect(login.request.body).toEqual({ email: 'test@example.com', password: 'Prueba2026' });
+    login.flush({ message: 'OK', email: 'test@example.com', role: 'PRACTICANTE', token: 'test-token', expiresIn: 3600 });
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith('/onboarding/practicante/datos-academicos');
+    expect(TestBed.inject(Session).account()?.token).toBe('test-token');
+    expect(root.querySelector<HTMLInputElement>('#password')!.value).toBe('');
+  });
+
+  it('sends a new coach straight to coach onboarding after signing in', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    root.querySelector<HTMLButtonElement>('mat-button-toggle[value="COACH"] button')!.click();
+    submit(root);
+    const register = http.expectOne(REGISTER_URL);
+    expect(register.request.body.role).toBe('COACH');
+    register.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'COACH' });
+    await fixture.whenStable();
+    http.expectOne(LOGIN_URL).flush({ message: 'OK', email: 'test@example.com', role: 'COACH', token: 'test-token', expiresIn: 3600 });
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith('/onboarding/coach/experiencia');
+  });
+
+  it('never registers twice when the automatic sign-in fails: Reintentar only repeats the sign-in', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    submit(root);
+    http.expectOne(REGISTER_URL).flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
+    await fixture.whenStable();
+    http.expectOne(LOGIN_URL).flush({}, { status: 503, statusText: 'Service Unavailable' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain(CONNECTION);
+    expect(navigate).not.toHaveBeenCalled();
+    root.querySelector<HTMLButtonElement>('button.retry')!.click();
+    fixture.detectChanges();
+    http.expectNone(REGISTER_URL);
+    expect(http.expectOne(LOGIN_URL).request.body.password).toBe('Prueba2026');
+  });
+
+  it('tells the user the account exists when the sign-in is rejected after registering', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    submit(root);
+    http.expectOne(REGISTER_URL).flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
+    await fixture.whenStable();
+    http.expectOne(LOGIN_URL).flush({ message: 'Credenciales inválidas' }, { status: 401, statusText: 'Unauthorized' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain('Tu cuenta se creó');
+    expect(root.querySelector('a[href="/login"]')).not.toBeNull();
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('sends trimmed names and a trimmed, lowercased email', async () => {
@@ -120,9 +178,11 @@ describe('API-connected access forms', () => {
     fixture.detectChanges();
     const retry = http.expectOne(REGISTER_URL);
     expect(retry.request.body.password).toBe('Prueba2026');
-    retry.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE', recoveryCode: 'test-code' });
+    retry.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
     await fixture.whenStable();
-    expect(navigate).toHaveBeenCalledWith('/registro-exitoso');
+    http.expectOne(LOGIN_URL).flush({ message: 'OK', email: 'test@example.com', role: 'PRACTICANTE', token: 'test-token', expiresIn: 3600 });
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith('/onboarding/practicante/datos-academicos');
   });
 
   it('routes a newly authenticated coach to coach onboarding, independently of the email', async () => {

@@ -269,7 +269,7 @@
 
                   <div class="mt-4 flex flex-col gap-2.5">
                     <h3 class="m-0 text-[14px] font-semibold">Plataformas competitivas</h3>
-                    @if (vista.estado === 'sin-plataformas' || (!session.demo() && plataformas.length === 0)) {
+                    @if (vista.estado === 'sin-plataformas' || (!session.demo() && sinPlataformas)) {
                       <div
                         class="flex flex-col items-center gap-2.5 rounded-[14px] border border-dashed border-[#3b3480] p-[18px] text-center"
                       >
@@ -302,9 +302,19 @@
                               <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
                                 <span class="text-[14px] font-semibold">{{ plataforma.nombre }}</span>
                                 <span class="flex items-center gap-[7px] text-[13px] text-kl-body">
-                                  <span class="size-[9px] shrink-0 rounded-full bg-[#4ade80]"></span>
-                                  <span class="truncate">{{ plataforma.usuario }}</span>
+                                  <span
+                                    class="size-[9px] shrink-0 rounded-full"
+                                    [class]="plataforma.estado ? clasesEstadoVinculo[plataforma.estado].punto : 'bg-[#4ade80]'"
+                                  ></span>
+                                  <span class="truncate">{{ plataforma.usuario || 'Sin identificador' }}</span>
                                 </span>
+                                @if (plataforma.estado; as estadoVinculo) {
+                                  <span
+                                    class="text-xs font-medium"
+                                    [class]="clasesEstadoVinculo[estadoVinculo].texto"
+                                    >{{ etiquetaEstado[estadoVinculo] }}</span
+                                  >
+                                }
                               </span>
                               <img
                                 src="images/perfil/chevron-right-16.svg"
@@ -316,6 +326,9 @@
                           </li>
                         }
                       </ul>
+                      @if (!session.demo()) {
+                        <app-vinculacion-pendiente />
+                      }
                     }
                   </div>
                 }

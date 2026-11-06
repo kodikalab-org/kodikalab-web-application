@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { Session } from '../../../core/session';
 import { PlataformasCompetitivas } from './plataformas-competitivas';
 
-describe('PlataformasCompetitivas', () => {
+describe('PlataformasCompetitivas (demo)', () => {
   async function abrir(consulta: string) {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: PlataformasCompetitivas }])],
     }).compileComponents();
+    TestBed.inject(Session).demo.set('PRACTICANTE');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/pantalla' + consulta, PlataformasCompetitivas);
     await harness.fixture.whenStable();

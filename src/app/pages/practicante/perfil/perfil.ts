@@ -1,7 +1,8 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../../core/session';
-import { ProfileApi } from '../../../core/profile-api';
+import { LINK_STATE_LABEL, LinkState, ProfileApi } from '../../../core/profile-api';
+import { VinculacionPendiente } from '../vinculacion-pendiente/vinculacion-pendiente';
 import { RecoveryCode } from '../../../shared/recovery-code/recovery-code';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -65,6 +66,15 @@ function aCeldas(filas: string[]): number[] {
   return [...filas[0]].flatMap((_, columna) => filas.map((fila) => Number(fila[columna])));
 }
 
+/** Platform row of the profile; `estado` is null in the demo, which has no link state. */
+interface PlataformaConEstado {
+  nombre: string;
+  usuario: string;
+  icono: string;
+  estado: LinkState | null;
+  aviso: string;
+}
+
 @Component({
   selector: 'app-perfil',
   imports: [
@@ -81,6 +91,7 @@ function aCeldas(filas: string[]): number[] {
     MatSelectModule,
     MatSlideToggleModule,
     MatToolbarModule,
+    VinculacionPendiente,
   ],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',
@@ -141,14 +152,23 @@ export class Perfil {
       nivelCodigo: p?.role === 'PRACTICANTE' ? `${p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
       objetivo: 'Objetivo pendiente de integración' };
   }
-  protected get plataformas() {
-    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO;
-    const p = this.profiles.profile();
-    if (p?.role !== 'PRACTICANTE') return [];
-    return PLATAFORMAS_PERFIL_DEMO.map((platform) => ({ ...platform,
-      usuario: (platform.nombre === 'Codeforces' ? p.codeforcesHandle : platform.nombre === 'AtCoder' ? p.atcoderHandle : p.vjudgeHandle) ?? '',
-    })).filter(platform => platform.usuario);
+  protected get plataformas(): PlataformaConEstado[] {
+    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO.map((plataforma) => ({ ...plataforma, estado: null, aviso: '' }));
+    return this.profiles.platforms().map((vinculo) => {
+      const icono = PLATAFORMAS_PERFIL_DEMO.find((p) => p.nombre === vinculo.name)!.icono;
+      return { nombre: vinculo.name, usuario: vinculo.handle ?? '', icono, estado: vinculo.state, aviso: vinculo.notice };
+    });
   }
+  /** True when the account has no platform linked or pending (every one is "Sin vincular"). */
+  protected get sinPlataformas(): boolean {
+    return this.plataformas.every((plataforma) => plataforma.estado === 'SIN_VINCULAR');
+  }
+  protected readonly etiquetaEstado = LINK_STATE_LABEL;
+  protected readonly clasesEstadoVinculo: Record<LinkState, { punto: string; texto: string }> = {
+    VINCULADA: { punto: 'bg-[#4ade80]', texto: 'text-[#4ade80]' },
+    PENDIENTE: { punto: 'bg-[#fbbf24]', texto: 'text-[#fbbf24]' },
+    SIN_VINCULAR: { punto: 'bg-[#8d89a3]', texto: 'text-kl-muted' },
+  };
   protected get estadisticas() { return this.session.demo() ? ESTADISTICAS_DEMO : []; }
   protected readonly tonos: Record<TonoEstadistica, { caja: string; detalle: string }> = {
     exito: { caja: 'bg-[#4ade80]/14', detalle: 'text-[#4ade80]' },

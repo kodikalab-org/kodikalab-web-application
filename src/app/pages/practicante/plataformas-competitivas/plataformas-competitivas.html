@@ -45,8 +45,8 @@
       </button>
       <span
         class="flex size-9 items-center justify-center rounded-full bg-[#6419ff] text-xs font-bold"
-        aria-label="Camila Rojas"
-        >CR</span
+        [attr.aria-label]="session.demo() ? 'Camila Rojas' : 'Mi cuenta'"
+        >{{ session.demo() ? 'CR' : 'KL' }}</span
       >
       <img
         class="min-[642px]:hidden"
@@ -73,7 +73,9 @@
       </p>
     </header>
 
-    @if (estado === 'confirmada') {
+    @if (!session.demo()) {
+      <app-vinculacion-pendiente />
+    } @else if (estado === 'confirmada') {
       <div
         class="flex flex-col gap-2 rounded-xl border border-solid border-[#4ade80] bg-[#0f2a1b] p-4 text-sm leading-5"
         role="status"
@@ -115,12 +117,12 @@
             </p>
             <p class="m-0 text-xs leading-[16.6px] text-kl-muted">
               Estado:
-              {{ plataforma.pendiente && estado !== 'confirmada' ? 'Pendiente de validación externa' : 'Vinculada' }}
+              {{ session.demo() ? (plataforma.pendiente && estado !== 'confirmada' ? 'Pendiente de validación externa' : 'Vinculada') : plataforma.etiqueta }}
             </p>
           </div>
         }
         <div class="flex items-start gap-3 max-[641px]:flex-col">
-          @if (estado === 'confirmada') {
+          @if (!session.demo() || estado === 'confirmada') {
             <button
               mat-flat-button
               class="px-5 shadow-[inset_0_1px_1px_#a881fe] drop-shadow-[0_2px_6px_rgba(168,129,254,.64)] max-[641px]:w-full"
@@ -158,8 +160,14 @@
             Datos guardados
           </h2>
           <div class="text-sm leading-5 text-kl-muted">
-            <p class="m-0">Camila Rojas · Ingeniería de Software</p>
-            <p class="m-0">Nivel intermedio</p>
+            @if (session.demo()) {
+              <p class="m-0">Camila Rojas · Ingeniería de Software</p>
+              <p class="m-0">Nivel intermedio</p>
+            } @else {
+              @for (dato of datosGuardados; track dato) {
+                <p class="m-0">{{ dato }}</p>
+              }
+            }
             <p class="m-0">Los datos válidos se conservan aunque falle una consulta externa.</p>
           </div>
         </section>

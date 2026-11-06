@@ -145,3 +145,31 @@ Creados:
 - src/app/shared/team-page.ts
 
 Sin commits, push, pull, merges, rebases, cambios de rama ni Pull Requests. Todos los cambios permanecen locales para revisión.
+
+
+## Integración local de origin/develop (5 de noviembre de 2026)
+
+Esta sección actualiza el estado de Git y las comprobaciones descritas anteriormente.
+
+- Rama conservada: `origin/feature/us-luciano`.
+- Commit de US-11 a US-14 conservado: `8362b409eeab1e1823b6b3bddfd87da5ec888495`.
+- Merge local: `465dccbfceae5eaf21f40986924859b3874f264e`, con padres `8362b409` y `624f7a3`.
+- Integración sin conflictos. `angular.json` conserva tanto los hosts locales de develop como el proxy de US-11 a US-14. `app.routes.ts` conserva tanto la redirección de grupos del coach como su ruta de ranking.
+- Los contratos, servicios, componentes y autorización de US-11 a US-14 no cambiaron durante el merge. No se modificó el backend.
+
+Ajustes posteriores al merge, sin commit adicional:
+
+- `src/app/pages/grupos/grupos.spec.ts`: la simulación de TeamsApi carecía de `lastCreated`, utilizado al guardar un grupo. Se añadió la señal y se verifican tanto el resultado almacenado como el mensaje de éxito; se elimina una excepción no controlada de RxJS sin modificar el servicio de producción.
+- `src/app/app.routes.server.ts`: `/grupos` estaba incluido en el prerenderizado y generaba `<meta http-equiv="refresh" content="0; url=/login">`. Se configura como Client, igual que las otras páginas privadas, para que la sesión y el guard se evalúen en el navegador al abrir directamente la ruta.
+- `src/app/merge-integration.spec.ts`: 17 pruebas de integración de Angular con RouterTestingHarness y HTTP simulado. Cubren redirección de grupos del coach, guardado de borrador y pantalla de confirmación, catálogo y membresías, solicitudes del grupo seleccionado, rutas de las cuatro historias con cookies, cambio de equipo sin reutilizar métricas anteriores, rechazo sin sesión y modo de renderizado de grupos.
+
+Verificaciones finales:
+
+- No fue necesario ejecutar npm ci: package.json y package-lock.json permanecen iguales al commit previo, node_modules ya estaba instalado y npm ls --depth=0 termina correctamente sin dependencias inválidas.
+- npm run build: correcto, con 7 rutas públicas prerenderizadas. Persiste la advertencia de tamaño inicial: 874.07 kB frente a un presupuesto de aviso de 500 kB, dentro del límite de error de 1 MB.
+- TypeScript: tsconfig.app.json y tsconfig.spec.json verificados con --noEmit, ambos correctos.
+- npm test -- --watch=false: 249 casos aprobados y 28 archivos aprobados; el proceso termina con error exclusivamente por el archivo vacío src/app/pages/coach/asignarproblema/asignarproblema.spec.ts. Se comprobó que ya tenía tamaño cero en ambos padres del merge y no se modificó.
+- npm test -- --watch=false --exclude=src/app/pages/coach/asignarproblema/asignarproblema.spec.ts: 249 casos y 28 archivos aprobados, código de salida 0, sin excepciones no controladas.
+- Servidor real de producción del frontend iniciado temporalmente en localhost:4301. Diez accesos directos devolvieron HTTP 200 con la aplicación Angular y sin redirección estática al login: /grupos, /coach/grupos, /coach/grupos/crear, /coach/grupos/creado, /coach/grupos/solicitudes?grupo=8, /ranking?teamId=8, /coach/ranking?teamId=8, /coach/rendimiento?teamId=8, /coach/competencias?teamId=8 y /progreso/equipos?teamId=8. Esta comprobación valida la entrega de las rutas, no una sesión real ni operaciones de negocio.
+- No se verificaron operaciones reales contra Spring Boot/PostgreSQL ni se escribieron datos. Las pruebas de integración funcional usan HTTP simulado y no constituyen validación de la API desplegada.
+- No se ejecutaron push, pull, rebase, reset, cambios de rama ni Pull Requests. El merge es local y los ajustes posteriores quedan pendientes de revisión y commit.

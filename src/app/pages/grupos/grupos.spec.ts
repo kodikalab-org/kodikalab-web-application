@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { ExplorarGrupos } from './explorar-grupos/explorar-grupos';
 import { CrearGrupo } from './crear-grupo/crear-grupo';
 import { SolicitudesGrupo } from './solicitudes-grupo/solicitudes-grupo';
-import { CoachGroup, CreateGroupRequest, Membership, TeamsApi } from '../../core/teams-api';
+import { CoachGroup, CreateGroupRequest, CreateGroupResponse, Membership, TeamsApi } from '../../core/teams-api';
 
 class TeamsStub {
   readonly groups = signal([
@@ -36,6 +36,7 @@ class TeamsStub {
     },
   ]);
   readonly requests = signal<Membership[]>([]);
+  readonly lastCreated = signal<CreateGroupResponse | null>(null);
 
   readonly calls = {
     join: [] as { groupId: number; code: string }[],
@@ -142,6 +143,8 @@ describe('Interfaces de grupos (US04, US05 y US06)', () => {
     expect(stub.calls.create.length).toBe(1);
     expect(stub.calls.create[0].draft).toBe(true);
     expect(stub.calls.create[0].name).toBe('Grupo de prueba');
+    expect(stub.lastCreated()?.groupId).toBe(9);
+    expect(root.textContent).toContain('Grupo creado correctamente');
   });
 
   it('lista las solicitudes pendientes del grupo del coach', async () => {

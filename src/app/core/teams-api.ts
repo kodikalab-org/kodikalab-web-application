@@ -16,7 +16,11 @@ export type MembershipStatus =
   | 'RECHAZADO'
   | 'RETIRADO'
   | 'EXPULSADO';
-export type MembershipDecision = 'ACEPTAR' | 'RECHAZAR' | 'SOLICITAR_ACLARACION';
+export type MembershipDecision =
+  | 'ACEPTAR'
+  | 'RECHAZAR'
+  | 'SOLICITAR_ACLARACION'
+  | 'EXPULSAR';
 /** El backend usa estos valores en `nivel_esperado`; la UI los muestra en español. */
 export type ExpectedLevel = 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO' | string;
 

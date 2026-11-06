@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Clipboard } from '@angular/cdk/clipboard';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -16,6 +17,15 @@ import { TeamsApi } from '../../../core/teams-api';
 })
 export class GrupoCreado {
   private readonly api = inject(TeamsApi);
+  private readonly clipboard = inject(Clipboard);
 
   protected readonly grupo = this.api.lastCreated;
+  /** `true` tras copiar el código, `false` si el navegador no permitió copiarlo. */
+  protected readonly copiado = signal<boolean | null>(null);
+
+  protected copiarCodigo(): void {
+    const creado = this.grupo();
+    if (!creado) return;
+    this.copiado.set(this.clipboard.copy(creado.invitationCode));
+  }
 }

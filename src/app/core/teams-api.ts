@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { finalize, tap } from 'rxjs';
 import { API_URL } from './api';
 
@@ -164,4 +164,24 @@ export class TeamsApi {
   private removeRequest(membershipId: number): void {
     this.requests.update((list) => list.filter((item) => item.membershipId !== membershipId));
   }
+}
+
+/**
+ * Errores por campo del backend (`{ message, errors: { campo: mensaje } }`).
+ * Devuelve un objeto vacío si la respuesta no los trae.
+ */
+export function readFieldErrors(error: unknown): Record<string, string> {
+  if (!(error instanceof HttpErrorResponse)) return {};
+  const errors = (error.error as { errors?: unknown } | null)?.errors;
+  if (!errors || typeof errors !== 'object') return {};
+  const result: Record<string, string> = {};
+  for (const [field, value] of Object.entries(errors)) {
+    if (typeof value === 'string' && value.trim()) result[field] = value;
+  }
+  return result;
+}
+
+/** Código HTTP del error, o 0 si no hubo respuesta del servidor. */
+export function httpStatus(error: unknown): number {
+  return error instanceof HttpErrorResponse ? error.status : 0;
 }

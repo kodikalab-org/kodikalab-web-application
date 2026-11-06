@@ -129,6 +129,32 @@ export interface ClarificationResponse {
   respondedAt: string;
 }
 
+/** US-08: problema asignado al equipo, tal como lo devuelve `/problems/assigned`. */
+export interface AssignedProblem {
+  competitionProblemId: number;
+  letter: string;
+  score: number | null;
+  assignedAt: string;
+  status: string | null;
+  attemptCount: number | null;
+  problem: {
+    id: number;
+    title: string;
+    url: string | null;
+    sourcePlatform: string | null;
+    sourceCode: string | null;
+    difficultyRating: string | null;
+    topics: string[];
+  };
+  competition: { name: string; startsAt: string | null; endsAt: string | null };
+}
+
+export interface AssignedProblemsResponse {
+  teamId: number;
+  total: number;
+  items: AssignedProblem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class TeamsApi {
   private readonly http = inject(HttpClient);
@@ -245,6 +271,14 @@ export class TeamsApi {
       { message },
       { timeout: 15000 },
     );
+  }
+
+  /** US-08: problemas que el coach asignó al grupo. */
+  assignedProblems(teamId: number) {
+    return this.http.get<AssignedProblemsResponse>(`${this.url}/problems/assigned`, {
+      params: new HttpParams().set('teamId', teamId),
+      timeout: 15000,
+    });
   }
 
   private removeRequest(membershipId: number): void {

@@ -2,6 +2,7 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   { path: 'inicio', renderMode: RenderMode.Client },
+  { path: 'grupos/**', renderMode: RenderMode.Client },
   { path: 'coach/**', renderMode: RenderMode.Client },
   { path: 'perfil', renderMode: RenderMode.Client },
   { path: 'perfil/**', renderMode: RenderMode.Client },

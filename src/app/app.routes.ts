@@ -68,6 +68,11 @@ const appRoutes: Routes = [
         loadComponent: () =>
           import('./pages/grupos/explorar-grupos/explorar-grupos').then((m) => m.ExplorarGrupos),
       },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./pages/grupos/grupo-detalle/grupo-detalle').then((m) => m.GrupoDetalle),
+      },
     ],
   },
   {

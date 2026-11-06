@@ -16,7 +16,7 @@
         @if (session.demo()) {
           Confirmación y código de invitación de ejemplo. No se guardaron cambios.
         } @else if (esBorrador()) {
-          {{ creado.name }} quedó guardado como borrador. Complétalo y publícalo desde Mis grupos.
+          {{ creado.name }} quedó guardado como borrador. Puedes publicarlo ahora o más tarde.
         } @else {
           {{ creado.name }} ya aparece en el listado de grupos disponibles.
         }
@@ -26,9 +26,31 @@
       >
         <strong>{{ creado.message }}</strong>
         <p class="mt-1 mb-0 text-kl-body">
-          {{ session.demo() ? 'Datos de demostración' : 'Quedaste como responsable del grupo' }} · estado: {{ estado() }}.
+          {{ session.demo() ? 'Datos de demostración' : 'Quedaste como responsable del grupo' }} · estado: {{ estadoTexto() }}.
         </p>
       </div>
+
+      @if (esBorrador() && !session.demo()) {
+        <div class="my-4 rounded-xl border border-solid border-amber-400/50 bg-amber-400/10 p-4 text-left text-sm">
+          <strong class="text-amber-300">Todavía no es visible para los practicantes</strong>
+          <p class="mt-1 mb-0 text-kl-body">
+            Para publicarlo se exige nivel esperado y cupo entre 1 y 1000. Si ya los completaste,
+            publícalo aquí mismo.
+          </p>
+        </div>
+      }
+
+      @if (mensaje()) {
+        <p class="my-3 rounded-xl border border-solid border-green-400/40 bg-green-400/10 p-3 text-sm text-green-300">
+          {{ mensaje() }}
+        </p>
+      }
+      @if (error()) {
+        <p class="my-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm text-kl-danger">
+          {{ error() }}
+        </p>
+      }
+
       <div class="mt-4 text-left">
         <span class="mb-2 block text-[13px] text-kl-body">Código de invitación</span>
         <div
@@ -50,14 +72,19 @@
     <div class="my-4 flex flex-wrap justify-center gap-2 text-xs text-kl-body">
       @if (grupo(); as creado) {
         <span class="rounded-lg border border-solid border-kl-border-strong bg-white/3 px-3 py-1.5"
-          >Estado: {{ creado.status }}</span
+          >Estado: {{ estadoActual() }}</span
         >
       }
     </div>
     <div class="flex flex-wrap justify-center gap-3">
+      @if (esBorrador() && !session.demo()) {
+        <button mat-flat-button type="button" [disabled]="publicando()" (click)="publicar()">
+          {{ publicando() ? 'Publicando…' : 'Publicar ahora' }}
+        </button>
+      }
       <a mat-stroked-button routerLink="/coach/grupos/crear">Crear otro grupo</a
-      ><a mat-flat-button routerLink="/coach/grupos/solicitudes"
-        >Ver mis equipos<img src="/images/login/arrow-right-18.svg" width="18" height="18" alt=""
+      ><a mat-stroked-button routerLink="/coach/grupos/solicitudes"
+        >Ver solicitudes<img src="/images/login/arrow-right-18.svg" width="18" height="18" alt=""
       /></a>
     </div>
   </mat-card>

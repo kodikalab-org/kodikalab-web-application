@@ -373,6 +373,45 @@
                   ' revisará tu solicitud. Verás su estado en “Mis equipos”.'
             }}
           </p>
+          @if (vistaActual === 'estado' && grupo?.estadoMembresia === 'ACLARACION_SOLICITADA') {
+            <div
+              class="mt-4 rounded-xl border border-solid border-kl-accent/40 bg-white/4 p-4 text-left text-sm"
+            >
+              <p class="m-0 text-xs uppercase tracking-wide text-kl-muted">
+                Aclaración del coach
+              </p>
+              <p class="my-2">{{ grupo?.aclaracion?.request }}</p>
+
+              @if (respuestaOk()) {
+                <p class="m-0 rounded-lg bg-green-400/10 p-2 text-green-300">{{ respuestaOk() }}</p>
+              } @else {
+                <label for="respuesta-aclaracion" class="mb-1 block text-xs text-kl-body"
+                  >Tu respuesta</label
+                >
+                <textarea
+                  id="respuesta-aclaracion"
+                  rows="3"
+                  maxlength="500"
+                  class="w-full rounded-lg border border-solid border-kl-border-strong bg-kl-surface p-2 text-sm text-kl-text"
+                  placeholder="Escribe la información que te pidió el coach"
+                  [value]="respuesta()"
+                  (input)="respuesta.set($any($event.target).value)"
+                ></textarea>
+                @if (respuestaError()) {
+                  <p class="mt-1 mb-0 text-xs text-kl-danger">{{ respuestaError() }}</p>
+                }
+                <button
+                  mat-flat-button
+                  type="button"
+                  class="mt-2 w-full"
+                  [disabled]="enviandoRespuesta() || !respuesta().trim()"
+                  (click)="responder()"
+                >
+                  {{ enviandoRespuesta() ? 'Enviando…' : 'Enviar respuesta' }}
+                </button>
+              }
+            </div>
+          }
           <span
             class="inline-block rounded-full border border-solid border-kl-accent/50 px-3 py-1 text-xs text-kl-accent-text"
             >{{ vistaActual === 'ingreso' ? 'Membresía activa' : 'Solicitud pendiente' }}</span

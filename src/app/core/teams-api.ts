@@ -234,3 +234,20 @@ export function classifyJoinError(error: unknown): JoinFailure {
   }
   return 'OTRO';
 }
+
+/** Causa por la que `PATCH /teams/{id}/memberships/{id}` no registró la decisión. */
+export type DecisionFailure = 'YA_RESPONDIDA' | 'SIN_CUPO' | 'SIN_PERMISO' | 'NO_ENCONTRADA' | 'OTRO';
+
+/**
+ * Clasifica el error de una decisión del coach. Un 409 es "sin cupo" si el mensaje lo dice;
+ * cualquier otro 409 significa que la postulación ya no estaba pendiente.
+ */
+export function classifyDecisionError(error: unknown): DecisionFailure {
+  const status = httpStatus(error);
+  if (status === 403) return 'SIN_PERMISO';
+  if (status === 404) return 'NO_ENCONTRADA';
+  if (status !== 409) return 'OTRO';
+  return /cupo|lleno|llena|capacidad|vacante|completo/.test(normalizeText(messageOf(error)))
+    ? 'SIN_CUPO'
+    : 'YA_RESPONDIDA';
+}

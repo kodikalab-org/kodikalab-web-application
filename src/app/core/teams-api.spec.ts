@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { API_URL } from './api';
-import { TeamsApi, classifyJoinError, httpStatus, normalizeText, readFieldErrors } from './teams-api';
+import { TeamsApi, classifyDecisionError, classifyJoinError, httpStatus, normalizeText, readFieldErrors } from './teams-api';
 
 const BASE = 'http://localhost:8080/api';
 
@@ -191,5 +191,25 @@ describe('classifyJoinError', () => {
 describe('normalizeText', () => {
   it('quita acentos, pasa a minúsculas y recorta', () => {
     expect(normalizeText('  Búsqueda BINARIA Ñandú ')).toBe('busqueda binaria nandu');
+  });
+});
+
+describe('classifyDecisionError', () => {
+  const conflicto = (message: string) =>
+    new HttpErrorResponse({ status: 409, error: { message } });
+
+  it('distingue la falta de cupo de una postulación ya atendida en un 409', () => {
+    expect(classifyDecisionError(conflicto('El grupo no tiene CUPO disponible'))).toBe('SIN_CUPO');
+    expect(classifyDecisionError(conflicto('El grupo está lleno'))).toBe('SIN_CUPO');
+    expect(classifyDecisionError(conflicto('La solicitud ya fue respondida'))).toBe('YA_RESPONDIDA');
+    expect(classifyDecisionError(conflicto('Mensaje inesperado'))).toBe('YA_RESPONDIDA');
+    expect(classifyDecisionError(new HttpErrorResponse({ status: 409 }))).toBe('YA_RESPONDIDA');
+  });
+
+  it('clasifica 403, 404 y el resto por código', () => {
+    expect(classifyDecisionError(new HttpErrorResponse({ status: 403 }))).toBe('SIN_PERMISO');
+    expect(classifyDecisionError(new HttpErrorResponse({ status: 404 }))).toBe('NO_ENCONTRADA');
+    expect(classifyDecisionError(new HttpErrorResponse({ status: 500 }))).toBe('OTRO');
+    expect(classifyDecisionError(new Error('red'))).toBe('OTRO');
   });
 });

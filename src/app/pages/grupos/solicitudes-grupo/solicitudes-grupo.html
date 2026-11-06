@@ -1,42 +1,58 @@
-<main class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1200px] px-4 pt-7 pb-16 lg:px-14">
+@let abierta = selected();
+<main
+  class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1200px] px-4 pt-7 pb-16 lg:px-14"
+  [attr.inert]="abierta ? '' : null"
+>
   <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
     <div>
-      <h1 class="m-0 font-display text-[32px] font-bold tracking-[-0.8px]">Solicitudes de ingreso</h1>
+      <h1 class="m-0 font-display text-[32px] font-bold tracking-[-0.8px]">
+        Solicitudes de ingreso
+      </h1>
       <p class="mt-1 mb-0 text-[15px] text-kl-body">
         Revisa el perfil de cada postulante y acepta o rechaza su solicitud.
       </p>
     </div>
     <div class="flex flex-wrap items-center gap-3">
-      <mat-form-field appearance="outline" class="auth-field w-[240px]" subscriptSizing="dynamic">
-        <mat-label>Grupo</mat-label>
-        <mat-select
-          [value]="selectedGroupId()"
-          (selectionChange)="cambiarGrupo($event.value)"
-        >
-          @for (group of groups(); track group.groupId) {
-            <mat-option [value]="group.groupId">{{ group.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      @if (groups().length > 0) {
+        <form [formGroup]="selector">
+          <mat-form-field
+            appearance="outline"
+            class="auth-field w-[240px]"
+            subscriptSizing="dynamic"
+          >
+            <mat-label>Grupo</mat-label>
+            <mat-select formControlName="grupo">
+              @for (group of groups(); track group.groupId) {
+                <mat-option [value]="group.groupId">{{ group.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </form>
+      }
       <a mat-stroked-button routerLink="/coach/grupos/crear">Nuevo grupo</a>
     </div>
   </div>
 
-  @if (feedback(); as aviso) {
+  @if (aviso()) {
     <section
       role="status"
-      class="mb-5 rounded-xl border border-solid p-4 text-sm"
-      [class]="
-        aviso.tipo === 'ok'
-          ? 'border-green-400 bg-[#0f2a1b] text-green-300'
-          : 'border-kl-danger bg-[#34161a] text-kl-danger'
-      "
+      class="mb-5 rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm text-green-300"
     >
-      {{ aviso.texto }}
+      {{ aviso() }}
     </section>
   }
 
-  @if (groups().length === 0) {
+  @if (cargandoGrupos()) {
+    <p role="status" class="text-sm text-kl-muted">Cargando tus grupos…</p>
+  } @else if (errorGrupos()) {
+    <mat-card
+      role="alert"
+      class="items-center gap-4 rounded-2xl border border-solid border-kl-danger bg-[#34161a] px-6 py-12 text-center"
+      ><h2 class="m-0 text-xl">No pudimos cargar tus grupos</h2>
+      <p class="m-0 text-sm">{{ errorGrupos() }}</p>
+      <button mat-flat-button type="button" (click)="cargarGrupos()">Reintentar</button></mat-card
+    >
+  } @else if (groups().length === 0) {
     <mat-card
       class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
       ><h2 class="m-0 text-xl">Todavía no tienes grupos</h2>
@@ -46,16 +62,38 @@
       <a mat-flat-button routerLink="/coach/grupos/crear">Crear grupo</a></mat-card
     >
   } @else {
-    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-      @if (selectedGroup(); as group) {
+    @if (selectedGroup(); as group) {
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <h2 class="m-0 text-base font-medium">
+          Pendientes ({{ group.pendingRequests }})
+        </h2>
         <p class="m-0 text-xs text-kl-muted">
           {{ group.activeMembers }} / {{ group.maxCapacity ?? '—' }} integrantes · código
           <span class="font-mono">{{ group.invitationCode }}</span>
         </p>
+      </div>
+      @if (grupoCompleto()) {
+        <p
+          class="mb-4 rounded-xl border border-solid border-amber-400/60 bg-[#2e2410] p-3 text-sm"
+        >
+          El grupo está completo: no podrás aceptar más postulantes mientras no haya cupo.
+        </p>
       }
-    </div>
+    }
 
-    @if (requests().length === 0) {
+    @if (cargandoSolicitudes()) {
+      <p role="status" class="rounded-2xl bg-kl-surface-raised p-10 text-center text-sm text-kl-muted">
+        Cargando solicitudes…
+      </p>
+    } @else if (errorSolicitudes()) {
+      <mat-card
+        role="alert"
+        class="items-center gap-4 rounded-2xl border border-solid border-kl-danger bg-[#34161a] px-6 py-12 text-center"
+        ><h2 class="m-0 text-xl">No pudimos cargar las solicitudes</h2>
+        <p class="m-0 text-sm">{{ errorSolicitudes() }}</p>
+        <button mat-flat-button type="button" (click)="cargar()">Reintentar</button></mat-card
+      >
+    } @else if (requests().length === 0) {
       <p class="rounded-2xl bg-kl-surface-raised p-10 text-center text-sm text-kl-muted">
         No hay solicitudes pendientes para el grupo seleccionado.
       </p>
@@ -72,15 +110,17 @@
                 >{{ iniciales(request) }}</span
               >
               <div class="min-w-0">
-                <h2 class="mt-0 mb-1 text-base font-medium">{{ nombrePracticante(request) }}</h2>
+                <h3 class="mt-0 mb-1 text-base font-medium">{{ nombrePracticante(request) }}</h3>
                 <p class="m-0 text-xs text-kl-muted">
-                  {{ request.practitioner?.studentCode }} ·
-                  {{ request.practitioner?.career }} · ciclo
-                  {{ request.practitioner?.academicCycle }}
+                  {{ request.practitioner?.studentCode }} · {{ request.practitioner?.career }} ·
+                  ciclo {{ request.practitioner?.academicCycle }}
                 </p>
                 <p class="mt-1 mb-0 text-xs text-kl-body">
-                  Nivel {{ request.practitioner?.competitiveLevel }} · Codeforces
+                  Nivel {{ nivel(request.practitioner?.competitiveLevel) }} · Codeforces
                   {{ request.practitioner?.codeforcesHandle || 'sin registrar' }}
+                  @if (request.practitioner?.codeforcesRating) {
+                    ({{ request.practitioner?.codeforcesRating }})
+                  }
                 </p>
               </div>
             </div>
@@ -97,7 +137,7 @@
   }
 </main>
 
-@if (selected(); as request) {
+@if (abierta; as request) {
   <div class="fixed inset-0 z-50 overflow-y-auto bg-black/75 px-4 py-[10vh]">
     <section
       role="dialog"
@@ -108,6 +148,7 @@
       <button
         type="button"
         (click)="cerrar()"
+        [disabled]="guardando()"
         aria-label="Cerrar solicitud"
         class="absolute top-5 right-5 flex size-8 items-center justify-center rounded-lg text-xl text-kl-body"
       >
@@ -125,25 +166,37 @@
         >
         <div>
           <h3 class="m-0 text-lg font-medium">{{ nombrePracticante(request) }}</h3>
-          <p class="mt-1 mb-0 text-xs text-kl-muted">
-            {{ selectedGroup()?.name }} · Pendiente
-          </p>
+          <p class="mt-1 mb-0 text-xs text-kl-muted">{{ selectedGroup()?.name }} · Pendiente</p>
         </div>
       </div>
 
       <dl class="m-0 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-4 text-sm">
         @for (
           fila of [
-            ['Carrera', (request.practitioner?.career ?? '—') + ' · ' + (request.practitioner?.academicCycle ?? '—') + '.° ciclo'],
-            ['Nivel competitivo', request.practitioner?.competitiveLevel ?? '—'],
+            [
+              'Carrera',
+              (request.practitioner?.career ?? '—') +
+                ' · ciclo ' +
+                (request.practitioner?.academicCycle ?? '—'),
+            ],
+            ['Nivel competitivo', nivel(request.practitioner?.competitiveLevel)],
             ['Código de estudiante', request.practitioner?.studentCode ?? '—'],
-            ['Codeforces', (request.practitioner?.codeforcesHandle ?? '—') + (request.practitioner?.codeforcesRating ? ' · rating ' + request.practitioner?.codeforcesRating : '')],
-            ['AtCoder · VJudge', (request.practitioner?.atcoderHandle ?? '—') + ' · ' + (request.practitioner?.vjudgeHandle ?? '—')],
+            [
+              'Codeforces',
+              (request.practitioner?.codeforcesHandle ?? '—') +
+                (request.practitioner?.codeforcesRating
+                  ? ' · rating ' + request.practitioner?.codeforcesRating
+                  : ''),
+            ],
+            ['AtCoder', request.practitioner?.atcoderHandle ?? '—'],
+            ['VJudge', request.practitioner?.vjudgeHandle ?? '—'],
             ['Solicitó', fecha(request.requestedAt)],
           ];
           track fila[0]
         ) {
-          <div class="grid gap-1 border-0 border-b border-solid border-kl-divider py-3 sm:grid-cols-[150px_1fr]">
+          <div
+            class="grid gap-1 border-0 border-b border-solid border-kl-divider py-3 sm:grid-cols-[150px_1fr]"
+          >
             <dt class="text-kl-muted">{{ fila[0] }}</dt>
             <dd class="m-0 break-words sm:text-right">{{ fila[1] }}</dd>
           </div>
@@ -153,20 +206,84 @@
         Por privacidad no se muestra el correo del postulante.
       </p>
 
-      <div class="mt-5 flex flex-wrap justify-end gap-3">
-        <button
-          mat-stroked-button
-          type="button"
-          class="border-red-400/50 text-red-300"
-          [disabled]="guardando()"
-          (click)="decidir('RECHAZAR')"
+      @if (resultado(); as detalle) {
+        <section
+          role="alert"
+          class="mt-4 rounded-xl border border-solid border-amber-400/60 bg-[#2e2410] p-4 text-sm"
         >
-          Rechazar
-        </button>
-        <button mat-flat-button type="button" [disabled]="guardando()" (click)="decidir('ACEPTAR')">
-          Aceptar solicitud
-        </button>
-      </div>
+          <strong>{{ detalle.titulo }}</strong>
+          <p class="mt-1 mb-0">{{ detalle.detalle }}</p>
+          @if (detalle.estado) {
+            <p class="mt-2 mb-0 font-mono text-xs text-amber-300">{{ detalle.estado }}</p>
+          }
+        </section>
+        <div class="mt-5 flex justify-end">
+          <button mat-flat-button type="button" (click)="cerrar()">Cerrar</button>
+        </div>
+      } @else {
+        @if (errorAccion()) {
+          <section
+            role="alert"
+            class="mt-4 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm"
+          >
+            {{ errorAccion() }}
+          </section>
+        }
+        @if (confirmandoRechazo()) {
+          <section
+            role="alertdialog"
+            aria-labelledby="rechazo-titulo"
+            class="mt-4 rounded-xl border border-solid border-red-400/60 bg-[#34161a] p-4 text-sm"
+          >
+            <strong id="rechazo-titulo"
+              >¿Rechazar la solicitud de {{ nombrePracticante(request) }}?</strong
+            >
+            <p class="mt-1 mb-0 text-kl-body">
+              La postulación quedará rechazada. El practicante podrá volver a solicitar ingreso más
+              adelante.
+            </p>
+          </section>
+          <div class="mt-5 flex flex-wrap justify-end gap-3">
+            <button
+              mat-stroked-button
+              type="button"
+              [disabled]="guardando()"
+              (click)="cancelarRechazo()"
+            >
+              Volver
+            </button>
+            <button
+              mat-flat-button
+              type="button"
+              class="bg-red-500"
+              [disabled]="guardando()"
+              (click)="decidir('RECHAZAR')"
+            >
+              {{ guardando() ? 'Rechazando…' : 'Sí, rechazar' }}
+            </button>
+          </div>
+        } @else {
+          <div class="mt-5 flex flex-wrap justify-end gap-3">
+            <button
+              mat-stroked-button
+              type="button"
+              class="border-red-400/50 text-red-300"
+              [disabled]="guardando()"
+              (click)="pedirRechazo()"
+            >
+              Rechazar
+            </button>
+            <button
+              mat-flat-button
+              type="button"
+              [disabled]="guardando()"
+              (click)="decidir('ACEPTAR')"
+            >
+              {{ guardando() ? 'Guardando…' : 'Aceptar solicitud' }}
+            </button>
+          </div>
+        }
+      }
     </section>
   </div>
 }

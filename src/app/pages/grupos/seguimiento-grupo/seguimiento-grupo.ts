@@ -3,7 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 
 /**
- * El seguimiento con aclaraciones no existe en el backend (las postulaciones solo se
+ * Esta pantalla de seguimiento no tiene respaldo en el backend (las postulaciones solo se
  * aceptan o rechazan), así que esta ruta antigua lleva a las solicitudes reales.
  */
 @Component({

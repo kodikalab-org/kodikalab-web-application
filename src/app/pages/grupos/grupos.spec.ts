@@ -9,12 +9,14 @@ import { ExplorarGrupos } from './explorar-grupos/explorar-grupos';
 import { CrearGrupo } from './crear-grupo/crear-grupo';
 import { GrupoCreado } from './grupo-creado/grupo-creado';
 import { SolicitudesGrupo } from './solicitudes-grupo/solicitudes-grupo';
+import { SeguimientoGrupo } from './seguimiento-grupo/seguimiento-grupo';
 import {
   CoachGroup,
   CreateGroupRequest,
   CreateGroupResponse,
   JoinGroupResponse,
   Membership,
+  ReviewMembershipResponse,
   TeamsApi,
 } from '../../core/teams-api';
 
@@ -60,6 +62,7 @@ class TeamsStub {
     join: [] as { groupId: number; code: string }[],
     create: [] as CreateGroupRequest[],
     decide: [] as { id: number; decision: string }[],
+    loadRequests: [] as number[],
     loadGroups: 0,
     loadMine: 0,
   };
@@ -88,12 +91,22 @@ class TeamsStub {
     this.calls.create.push(body);
     return this.createResult().pipe(tap((response) => this.lastCreated.set(response)));
   }
+  requestsResult: () => Observable<Membership[]> = () => of(this.requests());
+  decideResult: (membershipId: number, decision: string) => Observable<ReviewMembershipResponse> = (
+    membershipId,
+  ) => of({ message: 'Solicitud aceptada', membershipId, groupId: 1, status: 'ACTIVO' });
+
   decide(groupId: number, membershipId: number, decision: string) {
     this.calls.decide.push({ id: membershipId, decision });
-    return of({ message: 'ok', membershipId, groupId, status: 'ACTIVO' });
+    return this.decideResult(membershipId, decision).pipe(
+      tap(() =>
+        this.requests.update((lista) => lista.filter((item) => item.membershipId !== membershipId)),
+      ),
+    );
   }
-  loadRequests() {
-    return of([]);
+  loadRequests(groupId: number) {
+    this.calls.loadRequests.push(groupId);
+    return this.requestsResult().pipe(tap((lista) => this.requests.set(lista)));
   }
 }
 
@@ -138,76 +151,6 @@ function botones(root: HTMLElement) {
 function boton(root: HTMLElement, texto: string) {
   return botones(root).find((b) => b.textContent?.trim().includes(texto));
 }
-
-describe('Interfaces de grupos (US04, US05 y US06)', () => {
-  it('lista las solicitudes pendientes del grupo del coach', async () => {
-    const { stub, fixture } = configure(SolicitudesGrupo);
-    stub.requests.set([
-      {
-        membershipId: 101,
-        groupId: 1,
-        status: 'PENDIENTE',
-        requestedAt: '2026-11-02T18:20:00-05:00',
-        practitioner: {
-          fullName: 'Ana Prueba',
-          studentCode: 'U2020001',
-          career: 'Ingeniería de Software',
-          academicCycle: 5,
-          competitiveLevel: 'INTERMEDIO',
-          codeforcesHandle: 'ana_prueba',
-          codeforcesRating: 1520,
-          atcoderHandle: null,
-          vjudgeHandle: null,
-        },
-      },
-    ]);
-    await settle(fixture);
-
-    const root = fixture.nativeElement as HTMLElement;
-    expect(root.textContent).toContain('Ana Prueba');
-    expect(root.textContent).toContain('U2020001');
-  });
-
-  it('acepta una solicitud con la decisión ACEPTAR', async () => {
-    const { stub, fixture } = configure(SolicitudesGrupo);
-    stub.requests.set([
-      {
-        membershipId: 101,
-        groupId: 1,
-        status: 'PENDIENTE',
-        requestedAt: '2026-11-02T18:20:00-05:00',
-        practitioner: {
-          fullName: 'Ana Prueba',
-          studentCode: 'U2020001',
-          career: 'Ingeniería de Software',
-          academicCycle: 5,
-          competitiveLevel: 'INTERMEDIO',
-          codeforcesHandle: null,
-          codeforcesRating: null,
-          atcoderHandle: null,
-          vjudgeHandle: null,
-        },
-      },
-    ]);
-    await settle(fixture);
-
-    const root = fixture.nativeElement as HTMLElement;
-    const revisar = [...root.querySelectorAll('button')].find(
-      (b) => b.textContent?.trim() === 'Revisar',
-    );
-    revisar!.click();
-    await settle(fixture);
-
-    const aceptar = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(
-      (b) => b.textContent?.trim() === 'Aceptar solicitud',
-    );
-    expect(aceptar).toBeTruthy();
-    aceptar!.click();
-    await settle(fixture);
-
-    expect(stub.calls.decide).toEqual([{ id: 101, decision: 'ACEPTAR' }]);
-  });
-});
 
 interface CrearInternals {
   general: FormGroup;
@@ -1068,5 +1011,354 @@ describe('Explorar grupos (US05)', () => {
       ]);
       expect(root.textContent).toContain('Ya eres parte del grupo');
     });
+  });
+});
+
+interface SolicitudesInternals {
+  selector: FormGroup;
+  selectedGroupId(): number | null;
+  guardando(): boolean;
+}
+
+function postulacion(membershipId: number, fullName: string, extra: Partial<Membership> = {}): Membership {
+  return {
+    membershipId,
+    groupId: 1,
+    practitionerId: membershipId + 100,
+    status: 'PENDIENTE',
+    requestedAt: '2026-11-02T18:20:00-05:00',
+    practitioner: {
+      fullName,
+      studentCode: `U20200${membershipId}`,
+      career: 'Ingeniería de Software',
+      academicCycle: 5,
+      competitiveLevel: 'INTERMEDIO',
+      codeforcesHandle: 'ana_cf',
+      codeforcesRating: 1520,
+      atcoderHandle: 'ana_ac',
+      vjudgeHandle: null,
+    },
+    ...extra,
+  };
+}
+
+function grupoCoach(groupId: number, name: string, extra: Partial<CoachGroup> = {}): CoachGroup {
+  return {
+    groupId,
+    name,
+    description: null,
+    expectedLevel: 'INTERMEDIO',
+    maxCapacity: 15,
+    sessionSchedule: null,
+    status: 'ACTIVO',
+    visibility: 'PROTEGIDO',
+    invitationCode: 'A1B2C3D4E5F6',
+    activeMembers: 3,
+    pendingRequests: 2,
+    ...extra,
+  };
+}
+
+describe('Solicitudes de ingreso (US06)', () => {
+  const ANA = postulacion(101, 'Ana Prueba');
+  const LUIS = postulacion(102, 'Luis Prueba');
+
+  function abrir(preparar: (stub: TeamsStub) => void = () => undefined) {
+    const { stub, fixture } = configure(SolicitudesGrupo, [], (stub) => {
+      stub.requests.set([ANA, LUIS]);
+      stub.mine.set([grupoCoach(1, 'Grafos'), grupoCoach(2, 'Algoritmos')]);
+      preparar(stub);
+    });
+    const solicitudes = fixture.componentInstance as unknown as SolicitudesInternals;
+    return { stub, fixture, solicitudes, root: fixture.nativeElement as HTMLElement };
+  }
+
+  async function revisar(
+    fixture: { detectChanges(): void; whenStable(): Promise<unknown> },
+    root: HTMLElement,
+    indice = 0,
+  ) {
+    botones(root).filter((b) => b.textContent?.trim() === 'Revisar')[indice].click();
+    await settle(fixture);
+  }
+
+  it('pide solo las postulaciones pendientes del primer grupo y muestra su perfil', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+
+    expect(stub.calls.loadRequests).toEqual([1]);
+    expect(root.textContent).toContain('Ana Prueba');
+    expect(root.textContent).toContain('U20200101');
+    expect(root.textContent).toContain('Ingeniería de Software');
+    expect(root.textContent).toContain('Nivel Intermedio');
+    expect(root.textContent).toContain('ana_cf');
+    expect(root.textContent).toContain('(1520)');
+    expect(root.textContent).toContain('Pendientes (2)');
+    expect(root.textContent).toContain('3 / 15 integrantes');
+  });
+
+  it('el diálogo de revisión muestra el perfil académico y competitivo completo', async () => {
+    const { fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+
+    const dialogo = root.querySelector('[role="dialog"]') as HTMLElement;
+    for (const texto of ['Ingeniería de Software', 'ciclo 5', 'ana_cf · rating 1520', 'ana_ac', 'U20200101']) {
+      expect(dialogo.textContent, texto).toContain(texto);
+    }
+    expect(dialogo.textContent).not.toContain('Aclaración');
+  });
+
+  it('abre el grupo indicado en el parámetro grupo de la URL', async () => {
+    const { stub, fixture } = configure(SolicitudesGrupo, [
+      {
+        provide: ActivatedRoute,
+        useValue: { snapshot: { queryParamMap: convertToParamMap({ grupo: '2' }) } },
+      },
+    ], (stub) => stub.mine.set([grupoCoach(1, 'Grafos'), grupoCoach(2, 'Algoritmos')]));
+    await settle(fixture);
+
+    expect(stub.calls.loadRequests).toEqual([2]);
+  });
+
+  it('cambiar de grupo carga las solicitudes del nuevo grupo', async () => {
+    const { stub, fixture, solicitudes } = abrir();
+    await settle(fixture);
+
+    solicitudes.selector.controls['grupo'].setValue(2);
+    await settle(fixture);
+
+    expect(solicitudes.selectedGroupId()).toBe(2);
+    expect(stub.calls.loadRequests).toEqual([1, 2]);
+  });
+
+  it('acepta una solicitud con la decisión ACEPTAR y refresca los contadores', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+    const cargasPrevias = stub.calls.loadMine;
+    await revisar(fixture, root);
+
+    boton(root, 'Aceptar solicitud')!.click();
+    await settle(fixture);
+
+    expect(stub.calls.decide).toEqual([{ id: 101, decision: 'ACEPTAR' }]);
+    expect(root.querySelector('[role="dialog"]')).toBeNull();
+    expect(root.textContent).not.toContain('Ana Prueba');
+    expect(root.textContent).toContain('Luis Prueba');
+    expect(stub.calls.loadMine).toBe(cargasPrevias + 1);
+  });
+
+  it('pide confirmación explícita antes de rechazar', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+
+    boton(root, 'Rechazar')!.click();
+    await settle(fixture);
+    expect(stub.calls.decide).toEqual([]);
+    expect(root.textContent).toContain('¿Rechazar la solicitud de Ana Prueba?');
+
+    boton(root, 'Volver')!.click();
+    await settle(fixture);
+    expect(stub.calls.decide).toEqual([]);
+    expect(boton(root, 'Aceptar solicitud')).toBeTruthy();
+
+    boton(root, 'Rechazar')!.click();
+    await settle(fixture);
+    boton(root, 'Sí, rechazar')!.click();
+    await settle(fixture);
+
+    expect(stub.calls.decide).toEqual([{ id: 101, decision: 'RECHAZAR' }]);
+    expect(root.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('deshabilita las acciones mientras se guarda y no envía dos veces', async () => {
+    const { stub, fixture, solicitudes, root } = abrir();
+    const respuesta = new Subject<ReviewMembershipResponse>();
+    stub.decideResult = () => respuesta;
+    await settle(fixture);
+    await revisar(fixture, root);
+
+    const aceptar = boton(root, 'Aceptar solicitud') as HTMLButtonElement;
+    aceptar.click();
+    await settle(fixture);
+
+    expect(solicitudes.guardando()).toBe(true);
+    expect((boton(root, 'Guardando') as HTMLButtonElement).disabled).toBe(true);
+    expect((boton(root, 'Rechazar') as HTMLButtonElement).disabled).toBe(true);
+    (boton(root, 'Guardando') as HTMLButtonElement).click();
+    expect(stub.calls.decide.length).toBe(1);
+
+    respuesta.next({ message: 'ok', membershipId: 101, groupId: 1, status: 'ACTIVO' });
+    respuesta.complete();
+    await settle(fixture);
+    expect(solicitudes.guardando()).toBe(false);
+  });
+
+  it('ante un 409 de postulación ya atendida refresca la lista y muestra su estado actual', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+    const cargasPrevias = stub.calls.loadRequests.length;
+    stub.decideResult = () =>
+      throwError(() => httpError(409, { message: 'La solicitud ya fue respondida' }));
+    // Otro coach la atendió: ya no figura entre las pendientes.
+    stub.requestsResult = () => of([LUIS]);
+
+    boton(root, 'Aceptar solicitud')!.click();
+    await settle(fixture);
+
+    const dialogo = root.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialogo.textContent).toContain('La solicitud ya fue atendida');
+    expect(dialogo.textContent).toContain('Postulación: atendida, ya no está pendiente');
+    expect(dialogo.textContent).toContain('No se modificó la membresía');
+    expect(stub.calls.loadRequests.length).toBe(cargasPrevias + 1);
+    expect(boton(root, 'Aceptar solicitud')).toBeUndefined();
+
+    boton(root, 'Cerrar')!.click();
+    await settle(fixture);
+    expect(root.textContent).not.toContain('Ana Prueba');
+    expect(root.textContent).toContain('Luis Prueba');
+  });
+
+  it('ante un 409 por falta de cupo la postulación sigue pendiente y se actualizan los contadores', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+    const cargasPrevias = stub.calls.loadMine;
+    stub.decideResult = () =>
+      throwError(() => httpError(409, { message: 'El grupo no tiene cupo disponible' }));
+
+    boton(root, 'Aceptar solicitud')!.click();
+    await settle(fixture);
+
+    const dialogo = root.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialogo.textContent).toContain('El grupo no tiene cupo');
+    expect(dialogo.textContent).toContain('Postulación: pendiente, sin cambios');
+    expect(stub.calls.loadMine).toBe(cargasPrevias + 1);
+    expect(root.textContent).toContain('Ana Prueba');
+  });
+
+  it('ante un 403 explica que solo el coach responsable puede decidir', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+    stub.decideResult = () => throwError(() => httpError(403));
+
+    boton(root, 'Aceptar solicitud')!.click();
+    await settle(fixture);
+
+    expect(root.querySelector('[role="dialog"]')?.textContent).toContain(
+      'No eres el coach responsable de este grupo',
+    );
+  });
+
+  it('ante un 404 informa que la solicitud ya no existe y refresca la lista', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+    stub.decideResult = () => throwError(() => httpError(404));
+    stub.requestsResult = () => of([LUIS]);
+
+    boton(root, 'Aceptar solicitud')!.click();
+    await settle(fixture);
+
+    expect(root.querySelector('[role="dialog"]')?.textContent).toContain(
+      'La solicitud ya no existe',
+    );
+  });
+
+  it('ante un error de red conserva la revisión y permite reintentar', async () => {
+    const { stub, fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+    stub.decideResult = () => throwError(() => httpError(500));
+
+    boton(root, 'Aceptar solicitud')!.click();
+    await settle(fixture);
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain(
+      'No pudimos conectar con el servidor',
+    );
+
+    stub.decideResult = (id) => of({ message: 'ok', membershipId: id, groupId: 1, status: 'ACTIVO' });
+    boton(root, 'Aceptar solicitud')!.click();
+    await settle(fixture);
+    expect(stub.calls.decide.length).toBe(2);
+    expect(root.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('muestra el estado vacío cuando no hay solicitudes pendientes', async () => {
+    const { fixture, root } = abrir((stub) => stub.requests.set([]));
+    await settle(fixture);
+
+    expect(root.textContent).toContain('No hay solicitudes pendientes');
+  });
+
+  it('avisa cuando el grupo está completo', async () => {
+    const { fixture, root } = abrir((stub) =>
+      stub.mine.set([grupoCoach(1, 'Grafos', { activeMembers: 15 })]),
+    );
+    await settle(fixture);
+
+    expect(root.textContent).toContain('El grupo está completo');
+  });
+
+  it('un coach sin grupos ve una llamada a crear su primer grupo', async () => {
+    const { stub, fixture, root } = abrir((stub) => stub.mine.set([]));
+    await settle(fixture);
+
+    expect(root.textContent).toContain('Todavía no tienes grupos');
+    expect(root.querySelector('a[href="/coach/grupos/crear"]')).toBeTruthy();
+    expect(stub.calls.loadRequests).toEqual([]);
+  });
+
+  it('si falla la carga de grupos permite reintentar', async () => {
+    const { stub, fixture, root } = abrir((stub) => {
+      stub.mineResult = () => throwError(() => httpError(500));
+    });
+    await settle(fixture);
+    expect(root.textContent).toContain('No pudimos cargar tus grupos');
+
+    stub.mineResult = () => of(stub.mine());
+    boton(root, 'Reintentar')!.click();
+    await settle(fixture);
+
+    expect(root.textContent).not.toContain('No pudimos cargar tus grupos');
+    expect(root.textContent).toContain('Ana Prueba');
+  });
+
+  it('si falla la carga de solicitudes permite reintentar', async () => {
+    const { stub, fixture, root } = abrir((stub) => {
+      stub.requestsResult = () => throwError(() => httpError(500));
+    });
+    await settle(fixture);
+    expect(root.textContent).toContain('No pudimos cargar las solicitudes');
+
+    stub.requestsResult = () => of([ANA]);
+    boton(root, 'Reintentar')!.click();
+    await settle(fixture);
+
+    expect(root.textContent).not.toContain('No pudimos cargar las solicitudes');
+    expect(root.textContent).toContain('Ana Prueba');
+  });
+
+  it('no ofrece aclaraciones', async () => {
+    const { fixture, root } = abrir();
+    await settle(fixture);
+    await revisar(fixture, root);
+
+    expect(root.textContent?.toLowerCase()).not.toContain('aclaraci');
+  });
+});
+
+describe('Seguimiento de grupo (ruta antigua)', () => {
+  it('redirige a las solicitudes reales en lugar de mostrar datos de ejemplo', async () => {
+    TestBed.configureTestingModule({ imports: [SeguimientoGrupo], providers: [provideRouter([])] });
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+    const fixture = TestBed.createComponent(SeguimientoGrupo);
+    await settle(fixture);
+
+    expect(navegar).toHaveBeenCalledWith('/coach/grupos/solicitudes', { replaceUrl: true });
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Camila');
   });
 });

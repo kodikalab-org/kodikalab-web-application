@@ -1,0 +1,13 @@
+/* Solo tokens de Material; el diseño usa utilidades Tailwind. */
+:host {
+  --auth-field-height: 46px;
+  --auth-field-padding: 11px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-link);
+}
+
+/* El campo de código crece con su contenido. */
+.code-field {
+  --auth-field-height: auto;
+  --mat-form-field-container-height: auto;
+}

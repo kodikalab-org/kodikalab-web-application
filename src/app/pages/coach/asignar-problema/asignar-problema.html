@@ -1,1 +1,222 @@
-<p>asignar-problema works!</p>
+<div class="mx-auto w-full max-w-[1360px] px-4 pt-6 pb-12 md:px-10">
+  <span
+    class="inline-flex cursor-default items-center gap-2 text-[13px] text-kl-accent-link"
+    aria-disabled="true"
+    title="Próximamente"
+  >
+    <img src="images/app/arrow-left-accent.svg" alt="" width="16" height="16" />
+    Volver a Equipo Alfa
+  </span>
+
+  <header class="mt-5 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1
+        class="m-0 font-display text-[32px] leading-[38px] font-bold tracking-[-1px] md:text-[40px] md:leading-[44px]"
+      >
+        Asignar problemas
+      </h1>
+      <p class="mt-2 mb-0 text-base font-light text-kl-body">
+        Equipo Alfa · elige problemas del catálogo y asígnalos a una competencia.
+      </p>
+    </div>
+    <a mat-stroked-button class="h-11 px-5" routerLink="/coach/problemas-asignados"
+      >Ver problemas asignados</a
+    >
+  </header>
+
+  <ol class="m-0 mt-6 grid list-none gap-3 p-0 md:grid-cols-3" aria-label="Pasos de la asignación">
+    @for (paso of pasos; track paso.numero) {
+      <li
+        class="flex items-center gap-3 rounded-xl border border-solid px-4 py-3"
+        [class]="paso.clase"
+        [attr.aria-current]="paso.actual ? 'step' : null"
+      >
+        <span
+          class="flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold"
+          [class]="paso.claseNumero"
+          >{{ paso.numero }}</span
+        >
+        <div>
+          <p class="m-0 text-sm font-semibold text-kl-text">{{ paso.titulo }}</p>
+          <p class="m-0 text-xs text-kl-muted">{{ paso.detalle }}</p>
+        </div>
+      </li>
+    }
+  </ol>
+
+  <form
+    class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]"
+    [formGroup]="form"
+    novalidate
+    (submit)="$event.preventDefault()"
+  >
+    <mat-card
+      class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+      appearance="outlined"
+    >
+      <div class="p-4 md:p-6">
+        <h2 class="sr-only">Catálogo de problemas</h2>
+
+        <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-[minmax(0,1fr)_repeat(3,150px)]">
+          <mat-form-field
+            class="auth-field sm:col-span-3 lg:col-span-1"
+            appearance="outline"
+            subscriptSizing="dynamic"
+          >
+            <mat-label>Buscar por título o código…</mat-label>
+            <img matPrefix src="images/app/search-muted.svg" alt="" width="18" height="18" />
+            <input matInput type="search" formControlName="busqueda" autocomplete="off" />
+            <mat-error>Usa como máximo 100 caracteres</mat-error>
+          </mat-form-field>
+          <mat-form-field class="auth-field" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Plataforma</mat-label>
+            <select matNativeControl formControlName="plataforma">
+              <option value="">Todas</option>
+              @for (plataforma of plataformas; track plataforma) {
+                <option [value]="plataforma">{{ plataforma }}</option>
+              }
+            </select>
+          </mat-form-field>
+          <mat-form-field class="auth-field" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Dificultad</mat-label>
+            <select matNativeControl formControlName="dificultad">
+              <option value="">Todas</option>
+              @for (dificultad of dificultades; track dificultad) {
+                <option [value]="dificultad">{{ dificultad }}</option>
+              }
+            </select>
+          </mat-form-field>
+          <mat-form-field class="auth-field" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Tema</mat-label>
+            <select matNativeControl formControlName="tema">
+              <option value="">Todos</option>
+              @for (tema of temas; track tema) {
+                <option [value]="tema">{{ tema }}</option>
+              }
+            </select>
+          </mat-form-field>
+        </div>
+
+        <div class="mt-4 overflow-x-auto">
+          <table class="w-full min-w-[320px] border-collapse text-left text-sm">
+            <thead>
+              <tr class="text-xs text-kl-muted">
+                <th class="w-12 py-3 pr-2 font-normal"><span class="sr-only">Seleccionar</span></th>
+                <th class="py-3 pr-4 font-normal">Título</th>
+                <th class="hidden py-3 pr-4 font-normal md:table-cell">Temas</th>
+                <th class="hidden py-3 pr-4 font-normal sm:table-cell">Dificultad</th>
+                <th class="hidden py-3 pr-4 font-normal sm:table-cell">Plataforma</th>
+                <th class="hidden py-3 font-normal xl:table-cell">Límites</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="seleccion">
+              @for (problema of problemas; track problema.codigo; let i = $index) {
+                <tr class="border-0 border-t border-solid border-kl-divider">
+                  <td class="py-2.5 pr-2">
+                    <mat-checkbox
+                      class="auth-check"
+                      [formControlName]="i"
+                      [aria-label]="'Seleccionar ' + problema.titulo"
+                    />
+                  </td>
+                  <td class="py-2.5 pr-4">
+                    <p class="m-0 font-semibold text-kl-heading">{{ problema.titulo }}</p>
+                    <p class="m-0 font-mono text-xs text-kl-muted">{{ problema.codigo }}</p>
+                  </td>
+                  <td class="hidden py-2.5 pr-4 md:table-cell">
+                    <div class="flex flex-wrap gap-1.5">
+                      @for (tema of problema.temas; track tema) {
+                        <span
+                          class="rounded-full border border-solid border-kl-border-strong bg-white/4 px-2.5 py-0.5 text-xs text-kl-body"
+                          >{{ tema }}</span
+                        >
+                      }
+                    </div>
+                  </td>
+                  <td class="hidden py-2.5 pr-4 font-mono text-[13px] text-kl-body sm:table-cell">
+                    {{ problema.dificultad }}
+                  </td>
+                  <td class="hidden py-2.5 pr-4 sm:table-cell">
+                    <span class="inline-flex items-center gap-2 text-kl-body">
+                      <span class="size-2 rounded-full" [class]="problema.punto"></span>
+                      {{ problema.plataforma }}
+                    </span>
+                  </td>
+                  <td class="hidden py-2.5 font-mono text-xs text-kl-muted xl:table-cell">
+                    {{ problema.limites }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <mat-paginator
+          class="mt-2 bg-transparent"
+          [length]="120"
+          [pageSize]="8"
+          [pageIndex]="0"
+          [hidePageSize]="true"
+          aria-label="Paginación del catálogo"
+        />
+      </div>
+    </mat-card>
+
+    <aside aria-label="Problemas seleccionados">
+      <mat-card
+        class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        appearance="outlined"
+      >
+        <div class="p-5">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="m-0 flex items-center gap-2.5 font-display text-lg font-bold">
+              Seleccionados
+              <span
+                class="rounded-full border border-solid border-[#8a6cff] bg-[#2a1f6e] px-2.5 py-0.5 text-xs"
+                >4</span
+              >
+            </h2>
+            <button
+              type="button"
+              class="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-kl-accent-link"
+            >
+              Limpiar
+            </button>
+          </div>
+
+          <ul class="m-0 mt-3 list-none p-0">
+            @for (item of seleccionados; track item.titulo) {
+              <li
+                class="flex items-center justify-between gap-3 border-0 border-t border-solid border-kl-divider py-3 first:border-t-0"
+              >
+                <div class="min-w-0">
+                  <p class="m-0 truncate text-sm font-semibold text-kl-heading">{{ item.titulo }}</p>
+                  <p class="m-0 font-mono text-xs text-kl-muted">{{ item.detalle }}</p>
+                </div>
+                <button
+                  type="button"
+                  class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 hover:bg-white/8"
+                  [attr.aria-label]="'Quitar ' + item.titulo"
+                >
+                  <img src="images/app/x-body.svg" alt="" width="18" height="18" />
+                </button>
+              </li>
+            }
+          </ul>
+
+          <p class="mt-2 mb-4 text-xs text-kl-muted">Puedes asignar de 1 a 50 problemas por vez.</p>
+
+          <a
+            mat-flat-button
+            class="h-12 w-full bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-base shadow-[0_0_24px_rgba(115,87,243,.45)] aria-disabled:opacity-50 aria-disabled:shadow-none"
+            routerLink="/coach/asignar-problema/configurar"
+            [disabled]="form.invalid"
+          >
+            Continuar
+            <img src="images/app/arrow-right-white.svg" alt="" width="18" height="18" />
+          </a>
+        </div>
+      </mat-card>
+    </aside>
+  </form>
+</div>

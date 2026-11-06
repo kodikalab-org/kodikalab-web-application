@@ -35,10 +35,16 @@ describe('Application navigation', () => {
     }, 15000);
   }
 
-  it('preserves the coach group entry point added in develop', async () => {
+  it('points the Grupos link to the shared /grupos page for both roles', () => {
+    for (const coach of [true, false]) {
+      expect(navigationFor(coach).find((link) => link.label === 'Grupos')?.path, String(coach)).toBe('/grupos');
+    }
+  });
+
+  it('redirects the old coach group entry point to /grupos', async () => {
     TestBed.inject(Session).startDemo('COACH');
     const harness = await RouterTestingHarness.create('/coach/grupos');
-    expect(TestBed.inject(Router).url).toBe('/coach/grupos/crear');
+    expect(TestBed.inject(Router).url).toBe('/grupos');
     expect(harness.routeNativeElement?.querySelector('h1')).not.toBeNull();
   });
 });

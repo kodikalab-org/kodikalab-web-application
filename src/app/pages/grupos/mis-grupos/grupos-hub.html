@@ -1,0 +1,48 @@
+<main class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1600px] px-4 pt-7 pb-16 lg:px-14">
+  <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <h1 class="m-0 font-display text-[32px] font-bold tracking-[-0.8px]">Grupos</h1>
+      <p class="mt-1 mb-0 text-[15px] text-kl-body">
+        @if (coach()) {
+          Gestiona tus grupos de entrenamiento y revisa los que ya existen en la comunidad.
+        } @else {
+          Únete a grupos de entrenamiento, practica con tu comunidad y mejora tus habilidades.
+        }
+      </p>
+    </div>
+    @if (coach()) {
+      <a
+        mat-flat-button
+        routerLink="/coach/grupos/crear"
+        class="bg-linear-to-b from-[#8d6df8] to-[#6244e8] shadow-[0_2px_12px_#a881fe66]"
+        >Crear grupo</a
+      >
+    }
+  </div>
+
+  <nav mat-tab-nav-bar [tabPanel]="panel" aria-label="Secciones de grupos" class="mb-6">
+    <a
+      mat-tab-link
+      routerLink="/grupos"
+      [active]="tab() === 'explorar'"
+      [attr.aria-current]="tab() === 'explorar' ? 'page' : null"
+      >Explorar</a
+    >
+    <a
+      mat-tab-link
+      routerLink="/grupos"
+      [queryParams]="{ tab: 'mis-grupos' }"
+      [active]="tab() === 'mis-grupos'"
+      [attr.aria-current]="tab() === 'mis-grupos' ? 'page' : null"
+      >Mis grupos</a
+    >
+  </nav>
+
+  <mat-tab-nav-panel #panel>
+    @if (tab() === 'mis-grupos') {
+      <app-mis-grupos [coach]="coach()" />
+    } @else {
+      <app-explorar-grupos [coach]="coach()" />
+    }
+  </mat-tab-nav-panel>
+</main>

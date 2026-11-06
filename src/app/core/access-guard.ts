@@ -40,6 +40,17 @@ export const accessGuard: CanActivateFn = (route, state) => {
   );
 };
 
+/** The group detail page is the practitioner view; coaches manage the group from its requests page. */
+export const coachGroupDetailGuard: CanActivateFn = (route) => {
+  const session = inject(Session);
+  session.restore();
+  const role = session.demo() ?? session.account()?.role;
+  if (role !== 'COACH') return true;
+  return inject(Router).createUrlTree(['/coach/grupos/solicitudes'], {
+    queryParams: { grupo: route.paramMap.get('id') },
+  });
+};
+
 export const demoGuard: CanActivateFn = (route) => {
   const session = inject(Session);
   const profiles = inject(ProfileApi);

@@ -229,6 +229,16 @@ export class TeamsApi {
     });
   }
 
+  /** Ingreso directo con el código de invitación; el grupo lo resuelve el servidor. */
+  joinByCode(invitationCode: string) {
+    if (this.session.demo()) return this.demoWriteBlocked();
+    return this.http.post<JoinGroupResponse>(
+      `${this.url}/teams/join-by-code`,
+      { invitationCode: invitationCode.trim().toUpperCase() },
+      { timeout: 15000 },
+    );
+  }
+
   loadRequests(
     groupId: number,
     status: 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO' | 'EXPULSADO',

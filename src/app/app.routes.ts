@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LandingPage } from './pages/landing-page/landing-page';
 import { Login } from './pages/auth/login/login';
 import { Registro } from './pages/auth/registro/registro';
-import { accessGuard, demoGuard } from './core/access-guard';
+import { accessGuard, coachGroupDetailGuard, demoGuard } from './core/access-guard';
 import { passwordResetStepGuard } from './core/password-reset-flow';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 
@@ -62,14 +62,17 @@ const appRoutes: Routes = [
     path: 'grupos',
     loadComponent: () =>
       import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
+    // Shared: coaches and practitioners both land here (tabs «Explorar» and «Mis grupos»).
+    data: { shared: true },
     children: [
       {
         path: '',
         loadComponent: () =>
-          import('./pages/grupos/explorar-grupos/explorar-grupos').then((m) => m.ExplorarGrupos),
+          import('./pages/grupos/mis-grupos/grupos-hub').then((m) => m.GruposHub),
       },
       {
         path: ':id',
+        canActivate: [coachGroupDetailGuard],
         loadComponent: () =>
           import('./pages/grupos/grupo-detalle/grupo-detalle').then((m) => m.GrupoDetalle),
       },
@@ -81,7 +84,7 @@ const appRoutes: Routes = [
     loadComponent: () =>
       import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'crear' },
+      { path: '', pathMatch: 'full', redirectTo: '/grupos' },
       {
         path: 'solicitudes',
         loadComponent: () =>

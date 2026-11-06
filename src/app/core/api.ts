@@ -19,6 +19,11 @@ export interface RegisterRequest {
   firstName: string; lastName: string; email: string; password: string; role: Role;
 }
 export interface PractitionerProfile {
+  district?: string | null;
+  experienceMonths?: number | null;
+  preferredTime?: 'MANANA' | 'TARDE' | 'NOCHE' | null;
+  availableDays?: ('LUN' | 'MAR' | 'MIE' | 'JUE' | 'VIE' | 'SAB' | 'DOM')[] | null;
+  goal?: string | null;
   email: string; role: 'PRACTICANTE'; codigoEstudiante: string; carrera: string;
   cicloAcademico: number; nivelCompetitivo: 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO';
   codeforcesHandle: string | null; codeforcesRating: number | null;

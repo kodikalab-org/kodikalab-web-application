@@ -43,7 +43,6 @@ export class OnboardingDatosAcademicos {
   constructor() {
     if (!this.session.demo()) {
       this.form.patchValue(this.profiles.academic);
-      this.form.controls.distrito.disable();
     }
   }
   protected continuar(): void { this.profiles.academic = this.form.getRawValue(); }

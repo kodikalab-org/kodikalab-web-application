@@ -3,6 +3,8 @@ import { Session } from '../../../core/session';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { PerfilEditar } from './perfil-editar';
+import { ProfileApi } from '../../../core/profile-api';
+import { Router } from '@angular/router';
 
 describe('PerfilEditar', () => {
   async function setup(params: Record<string, string> = {}) {
@@ -33,6 +35,29 @@ describe('PerfilEditar', () => {
   }
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
+
+  it('loads and persists every optional practitioner field outside demo mode', async () => {
+    const profile = { role: 'PRACTICANTE' as const, email: 'test@example.com', codigoEstudiante: '123',
+      carrera: 'Ingeniería de Software', cicloAcademico: 5, nivelCompetitivo: 'INTERMEDIO' as const,
+      codeforcesHandle: '_matjavi_', codeforcesRating: null, atcoderHandle: null, vjudgeHandle: null,
+      district: 'San Miguel', experienceMonths: 12, preferredTime: 'NOCHE' as const,
+      availableDays: ['MIE', 'VIE'] as ('MIE' | 'VIE')[], goal: 'Mejorar mi nivel' };
+    const save = vi.fn().mockReturnValue(of({ profile, message: 'Saved' }));
+    await TestBed.configureTestingModule({ imports: [PerfilEditar], providers: [provideRouter([]),
+      { provide: ProfileApi, useValue: { profile: () => profile, save } },
+      { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
+    ] }).compileComponents();
+    TestBed.inject(Session).demo.set(null);
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const fixture = TestBed.createComponent(PerfilEditar);
+    const component = fixture.componentInstance as any;
+    expect(component.form.controls.distrito.enabled).toBe(true);
+    expect(component.form.getRawValue()).toMatchObject({ distrito: 'San Miguel', experiencia: 12,
+      franja: 'Noche', dias: ['Mié', 'Vie'], objetivo: 'Mejorar mi nivel' });
+    await component.guardar();
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ district: 'San Miguel', experienceMonths: 12,
+      preferredTime: 'NOCHE', availableDays: ['MIE', 'VIE'], goal: 'Mejorar mi nivel' }));
+  });
 
   it('loads the current profile data into the form', async () => {
     const { root, guardar } = await setup();

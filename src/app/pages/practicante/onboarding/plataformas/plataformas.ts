@@ -53,6 +53,7 @@ export class OnboardingPlataformas {
     try {
       await firstValueFrom(this.profiles.save({
         codigoEstudiante: academic.codigo, carrera: academic.carrera,
+        district: academic.distrito || null,
         cicloAcademico: Number.parseInt(academic.ciclo, 10),
         nivelCompetitivo: nivel as PractitionerProfile['nivelCompetitivo'],
         codeforcesHandle: omitir ? null : handles.codeforces || null,

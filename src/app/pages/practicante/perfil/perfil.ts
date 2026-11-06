@@ -135,9 +135,9 @@ export class Perfil {
     const p = this.profiles.profile();
     return { iniciales: 'KL', nombreCompleto: p?.email ?? '', usuario: '', rol: 'Practicante',
       carreraCiclo: p?.role === 'PRACTICANTE' ? `${p.carrera} · ${p.cicloAcademico}.º ciclo` : '',
-      universidad: 'Comunidad GPC UPC', ubicacion: 'Ubicación pendiente',
+      universidad: 'Comunidad GPC UPC', ubicacion: p?.role === 'PRACTICANTE' ? p.district || 'Distrito no indicado' : '',
       nivelCodigo: p?.role === 'PRACTICANTE' ? `${p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
-      objetivo: 'Objetivo pendiente de integración' };
+      objetivo: p?.role === 'PRACTICANTE' ? p.goal || 'Objetivo no indicado' : '' };
   }
   protected get plataformas() {
     if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO;

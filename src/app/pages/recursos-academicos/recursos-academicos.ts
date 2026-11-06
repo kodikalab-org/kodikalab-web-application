@@ -8,10 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
+import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-recursos-academicos',
-  imports: [HeaderNavigation, UserMenu, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [SiteFooter, HeaderNavigation, UserMenu, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './recursos-academicos.html',
   styleUrl: './recursos-academicos.css',
 })

@@ -59,6 +59,47 @@ describe('Real API session', () => {
     expect(sessionStorage.getItem('kodikalab.session')).toBeNull();
   });
 
+  describe('after the browser is reopened', () => {
+    // A new Session is what the app gets after closing and reopening the browser: it only has the storages.
+    const reopened = () => TestBed.runInInjectionContext(() => new Session());
+
+    it('restores a remembered login from the persistent storage', async () => {
+      await login(true);
+      const next = reopened();
+      expect(next.token()).toBe('test-token');
+      expect(next.account()?.email).toBe('test@example.com');
+      expect(next.account()?.role).toBe('COACH');
+    });
+
+    it('forgets a login that was not remembered once the tab is closed, but keeps it across a reload', async () => {
+      await login(false);
+      expect(reopened().token()).toBe('test-token');
+      // Closing the tab empties sessionStorage.
+      sessionStorage.removeItem('kodikalab.session');
+      expect(reopened().token()).toBeNull();
+    });
+
+    it('discards a remembered login whose token already expired and cleans the storage', async () => {
+      await login(true);
+      const saved = JSON.parse(localStorage.getItem('kodikalab.session')!);
+      localStorage.setItem('kodikalab.session', JSON.stringify({ ...saved, expiresAt: Date.now() - 1000 }));
+      expect(reopened().token()).toBeNull();
+      expect(localStorage.getItem('kodikalab.session')).toBeNull();
+    });
+
+    it('ignores a corrupted stored session', () => {
+      localStorage.setItem('kodikalab.session', '{no es json');
+      expect(reopened().token()).toBeNull();
+    });
+
+    it('a new login without remember replaces a previously remembered one', async () => {
+      await login(true);
+      await login(false);
+      expect(localStorage.getItem('kodikalab.session')).toBeNull();
+      expect(sessionStorage.getItem('kodikalab.session')).not.toBeNull();
+    });
+  });
+
   it('does not turn rejected credentials into a session', async () => {
     const result = firstValueFrom(session.login('test@example.com', 'wrong', false));
     const rejected = expect(result).rejects.toMatchObject({ status: 401 });

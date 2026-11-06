@@ -65,13 +65,13 @@
           </aside>
         </div>
       }
-      <footer class="flex flex-col gap-2 text-xs text-kl-muted">
-        <p class="m-0">© 2026 Kodikalab · GPC UPC</p><p class="m-0">Términos de Servicio · Política de privacidad</p>
+      <div class="flex flex-col gap-2 text-xs text-kl-muted">
         <p class="m-0">Maqueta estática · Sin IA. Apertura de recursos, consulta del catálogo y vista del problema pendientes de integración.</p>
         <nav aria-label="Variantes de demostración" class="flex flex-wrap gap-x-4 gap-y-2">
           <a routerLink="/recursos">Recursos pertinentes</a><a routerLink="/recursos" [queryParams]="{ estado: 'relacionados' }">Temas relacionados</a><a routerLink="/recursos" [queryParams]="{ estado: 'catalogo-no-disponible' }">Catálogo no disponible</a><a routerLink="/recursos" [queryParams]="{ estado: 'contexto-no-disponible' }">Contexto no disponible</a>
         </nav>
-      </footer>
+      </div>
     </main>
+    <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
   </div>
 }

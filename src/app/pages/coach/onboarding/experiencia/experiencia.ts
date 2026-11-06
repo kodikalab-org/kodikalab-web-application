@@ -11,12 +11,14 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
+import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 
 const MAX_ANIOS = 60;
 
 @Component({
   selector: 'app-onboarding-experiencia',
   imports: [
+    SiteFooter,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,

@@ -11,10 +11,12 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { map } from 'rxjs';
+import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-inicio-dashboard',
   imports: [
+    SiteFooter,
     HeaderNavigation,
     UserMenu,
     AsyncPipe,

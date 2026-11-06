@@ -23,6 +23,7 @@ import { authApiError } from '../../../core/api';
 import { PasswordResetApi } from '../../../core/password-reset-api';
 import { PasoRecuperacion, PasswordResetFlow } from '../../../core/password-reset-flow';
 import { emailRule, normalizeEmail, passwordBytesRule, passwordPolicyRule } from '../auth-rules';
+import { SiteFooter } from '../../../shared/site-footer/site-footer';
 
 const CODE_LENGTH = 6;
 
@@ -64,6 +65,7 @@ export function maskEmail(email: string): string {
 @Component({
   selector: 'app-recuperar-contrasena',
   imports: [
+    SiteFooter,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,

@@ -12,10 +12,6 @@
   --mat-card-outlined-container-shape: 14px;
 }
 
-.footer__divider {
-  --mat-divider-color: var(--kl-divider);
-}
-
 .pricing-card--featured {
   --mat-card-outlined-outline-color: var(--kl-accent);
   --mat-card-outlined-container-color: color-mix(in srgb, var(--kl-accent) 7%, var(--kl-surface));

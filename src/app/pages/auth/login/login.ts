@@ -14,6 +14,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { SiteFooter } from '../../../shared/site-footer/site-footer';
 
 // What the alert offers: both a credentials (401) and a connection failure get a retry action.
 type LoginFailure = 'credentials' | 'connection' | null;
@@ -21,6 +22,7 @@ type LoginFailure = 'credentials' | 'connection' | null;
 @Component({
   selector: 'app-login',
   imports: [
+    SiteFooter,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,

@@ -33,6 +33,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { SiteFooter } from '../../../shared/site-footer/site-footer';
 
 const passwordsMatch: ValidatorFn = (group) =>
   group.get('password')?.value === group.get('confirmPassword')?.value
@@ -48,6 +49,7 @@ class ConfirmPasswordMatcher implements ErrorStateMatcher {
 @Component({
   selector: 'app-registro',
   imports: [
+    SiteFooter,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,

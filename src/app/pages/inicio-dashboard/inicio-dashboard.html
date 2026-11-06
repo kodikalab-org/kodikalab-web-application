@@ -498,19 +498,7 @@
       </div>
     </div>
   </main>
-  <footer
-    class="flex flex-wrap items-center justify-between gap-6 border-t border-[#1b1840] bg-[#06041a] px-5 py-5 text-[13px] sm:px-11"
-  >
-    <div class="flex flex-wrap items-center gap-7">
-      <a [routerLink]="ruta" class="flex items-center gap-2.5 text-xl"
-        ><img src="/images/dashboard/0-imgIcon17.svg" width="32" height="32" alt="" />Kodikalab</a
-      ><span class="text-kl-faint">© 2026 Kodikalab. Todos los derechos reservados.</span>
-    </div>
-    <div class="flex gap-7 text-kl-muted">
-      <span title="Próximamente">Términos de Servicio</span
-      ><span title="Próximamente">Política de privacidad</span>
-    </div>
-  </footer>
+  <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
 </div>
 <ng-template #titulo let-nombre="nombre" let-icono="icono" let-accion="accion">
   <div class="mb-4 flex flex-wrap items-center justify-between gap-2">

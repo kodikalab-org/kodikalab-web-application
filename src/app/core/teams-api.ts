@@ -1,7 +1,9 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { finalize, tap } from 'rxjs';
+import { Injectable, computed, inject, linkedSignal } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { finalize, of, tap, throwError } from 'rxjs';
 import { API_URL } from './api';
+import { Session } from './session';
+import { GRUPOS_DEMO, GRUPOS_COACH_DEMO, MEMBRESIAS_DEMO, SOLICITUDES_GRUPO_DEMO } from '../data/grupos-demo';
 
 /** Estados y contratos de US04, US05 y US06 (`docs/sdd/03-api-contracts.md`). */
 
@@ -126,18 +128,28 @@ export interface ClarificationResponse {
 export class TeamsApi {
   private readonly http = inject(HttpClient);
   private readonly url = inject(API_URL);
+  private readonly session = inject(Session);
+  private readonly identity = computed(() => ({
+    account: this.session.account(), demo: this.session.demo(),
+  }));
+
+  private sessionState<T>(initial: () => T) {
+    // Reset synchronously on session changes, before a new load can populate the state.
+    return linkedSignal({ source: this.identity, computation: initial });
+  }
 
   /** Grupos publicados (US05). */
-  readonly groups = signal<StudyGroupSummary[]>([]);
+  readonly groups = this.sessionState<StudyGroupSummary[]>(() => []);
   /** Grupos del coach o membresías del practicante según el rol de la sesión. */
-  readonly mine = signal<(CoachGroup | PractitionerGroup)[]>([]);
+  readonly mine = this.sessionState<(CoachGroup | PractitionerGroup)[]>(() => []);
   /** Solicitudes del grupo seleccionado (US06). */
-  readonly requests = signal<Membership[]>([]);
+  readonly requests = this.sessionState<Membership[]>(() => []);
   /** Último grupo creado, para la pantalla de confirmación. */
-  readonly lastCreated = signal<CreateGroupResponse | null>(null);
-  readonly loading = signal(false);
+  readonly lastCreated = this.sessionState<CreateGroupResponse | null>(() => null);
+  readonly loading = this.sessionState(() => false);
 
   loadGroups() {
+    if (this.session.demo()) return of([...GRUPOS_DEMO]).pipe(tap(groups => this.groups.set(groups)));
     this.loading.set(true);
     return this.http.get<StudyGroupSummary[]>(`${this.url}/teams`, { timeout: 15000 }).pipe(
       tap((groups) => this.groups.set(groups)),
@@ -146,30 +158,38 @@ export class TeamsApi {
   }
 
   loadMine() {
+    if (this.session.demo()) {
+      const groups: (CoachGroup | PractitionerGroup)[] = this.session.demo() === 'COACH' ? [...GRUPOS_COACH_DEMO] : [...MEMBRESIAS_DEMO];
+      return of(groups).pipe(tap(mine => this.mine.set(mine)));
+    }
     return this.http
       .get<(CoachGroup | PractitionerGroup)[]>(`${this.url}/teams/me`, { timeout: 15000 })
       .pipe(tap((mine) => this.mine.set(mine)));
   }
 
   create(body: CreateGroupRequest) {
+    if (this.session.demo()) return this.demoWriteBlocked();
     return this.http
       .post<CreateGroupResponse>(`${this.url}/teams`, body, { timeout: 15000 })
       .pipe(tap((response) => this.lastCreated.set(response)));
   }
 
   updateDraft(groupId: number, body: Partial<CreateGroupRequest>) {
+    if (this.session.demo()) return this.demoWriteBlocked();
     return this.http.patch<StudyGroupDetail>(`${this.url}/teams/${groupId}/draft`, body, {
       timeout: 15000,
     });
   }
 
   publish(groupId: number) {
+    if (this.session.demo()) return this.demoWriteBlocked();
     return this.http.post<StudyGroupDetail>(`${this.url}/teams/${groupId}/publish`, {}, {
       timeout: 15000,
     });
   }
 
   join(groupId: number, invitationCode = '') {
+    if (this.session.demo()) return this.demoWriteBlocked();
     let params = new HttpParams();
     if (invitationCode.trim()) params = params.set('invitationCode', invitationCode.trim());
     return this.http.post<JoinGroupResponse>(`${this.url}/teams/${groupId}/join`, null, {
@@ -179,6 +199,7 @@ export class TeamsApi {
   }
 
   loadRequests(groupId: number, status: 'PENDIENTE' | 'ACLARACION_SOLICITADA') {
+    if (this.session.demo()) return of(SOLICITUDES_GRUPO_DEMO.filter(request => request.groupId === groupId && request.status === status)).pipe(tap(requests => this.requests.set(requests)));
     this.loading.set(true);
     return this.http
       .get<Membership[]>(`${this.url}/teams/${groupId}/memberships`, {
@@ -197,6 +218,7 @@ export class TeamsApi {
     decision: MembershipDecision,
     message = '',
   ) {
+    if (this.session.demo()) return this.demoWriteBlocked();
     const body: { decision: MembershipDecision; message?: string } = { decision };
     if (decision === 'SOLICITAR_ACLARACION') body.message = message;
     return this.http
@@ -209,6 +231,7 @@ export class TeamsApi {
   }
 
   respondClarification(groupId: number, membershipId: number, message: string) {
+    if (this.session.demo()) return this.demoWriteBlocked();
     return this.http.post<ClarificationResponse>(
       `${this.url}/teams/${groupId}/memberships/${membershipId}/clarification`,
       { message },
@@ -218,5 +241,11 @@ export class TeamsApi {
 
   private removeRequest(membershipId: number): void {
     this.requests.update((list) => list.filter((item) => item.membershipId !== membershipId));
+  }
+
+  private demoWriteBlocked() {
+    return throwError(() => new HttpErrorResponse({ status: 400, error: {
+      message: 'Demostración: los cambios no se guardan. Inicia sesión para gestionar grupos y solicitudes.',
+    } }));
   }
 }

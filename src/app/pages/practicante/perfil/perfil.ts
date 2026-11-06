@@ -1,7 +1,9 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
 import { UserMenu } from '../../../shared/user-menu/user-menu';
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CodeforcesStatsApi, CodeforcesStats, activityCalendar } from '../../../core/codeforces-stats-api';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -87,7 +89,29 @@ function aCeldas(filas: string[]): number[] {
 export class Perfil {
   protected readonly session = inject(Session);
   protected readonly profiles = inject(ProfileApi);
-  constructor() { if (!this.session.demo()) this.formAjustes.disable(); }
+  private readonly statsApi = inject(CodeforcesStatsApi);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly stats = signal<CodeforcesStats | null>(null);
+  protected readonly statsLoading = signal(false);
+  protected readonly statsError = signal(false);
+  constructor() {
+    if (!this.session.demo()) {
+      this.formAjustes.disable();
+      this.loadStats();
+    }
+  }
+  protected loadStats(): void {
+    if (this.session.demo() || this.statsLoading()) return;
+    this.statsLoading.set(true);
+    this.statsError.set(false);
+    this.stats.set(null);
+    this.statsApi.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: stats => { this.stats.set(stats); this.statsLoading.set(false); },
+      error: () => { this.statsError.set(true); this.statsLoading.set(false); },
+    });
+  }
+  protected get activity() { return activityCalendar(this.stats()?.activity ?? []); }
+  protected get ratingBuckets() { return [...(this.stats()?.solvedByRating ?? [])].sort((a, b) => a.rating - b.rating); }
   protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly route = inject(ActivatedRoute);
 
@@ -147,7 +171,16 @@ export class Perfil {
       usuario: (platform.nombre === 'Codeforces' ? p.codeforcesHandle : platform.nombre === 'AtCoder' ? p.atcoderHandle : p.vjudgeHandle) ?? '',
     })).filter(platform => platform.usuario);
   }
-  protected get estadisticas() { return this.session.demo() ? ESTADISTICAS_DEMO : []; }
+  protected get estadisticas() {
+    if (this.session.demo()) return ESTADISTICAS_DEMO;
+    const stats = this.stats();
+    if (!stats) return [];
+    const values = [String(stats.problemsSolved), `${stats.maxStreakDays} días`,
+      String(stats.currentRating), String(stats.acceptedSubmissions)];
+    const details = ['Problemas únicos aceptados', 'Mejor marca histórica', 'Codeforces',
+      `${stats.acceptanceRate.toFixed(1)} % de aceptación`];
+    return ESTADISTICAS_DEMO.map((card, i) => ({ ...card, valor: values[i], detalle: details[i] }));
+  }
   protected readonly tonos: Record<TonoEstadistica, { caja: string; detalle: string }> = {
     exito: { caja: 'bg-[#4ade80]/14', detalle: 'text-[#4ade80]' },
     alerta: { caja: 'bg-[#fb923c]/14', detalle: 'text-[#fbbf24]' },

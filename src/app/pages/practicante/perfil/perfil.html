@@ -365,6 +365,38 @@
                     }
                   </ul>
 
+                  @if (!session.demo() && stats(); as liveStats) {
+                    <section class="mt-4 rounded-xl border border-kl-divider p-4" aria-labelledby="activity-title">
+                      <h3 id="activity-title" class="m-0 text-[15px]">Actividad de resolución de problemas</h3>
+                      <p class="text-[12px] text-kl-muted">Último año · fechas UTC · envíos aceptados</p>
+                      <div class="overflow-x-auto">
+                        <div class="grid w-max grid-flow-col grid-rows-7 gap-[3px]" aria-label="Calendario de actividad">
+                          @for (day of activity; track $index) {
+                            <span class="size-[11px] rounded-[2px]"
+                              [style.visibility]="day.padding ? 'hidden' : 'visible'"
+                              [style.background]="day.count === 0 ? '#17163a' : day.count < 3 ? '#14532d' : day.count < 6 ? '#16a34a' : '#4ade80'"
+                              [title]="day.date + ': ' + day.count + ' envíos aceptados'"
+                              role="img" [attr.aria-label]="day.date + ': ' + day.count + ' envíos aceptados'"></span>
+                          }
+                        </div>
+                      </div>
+                      <p class="mb-0 text-[12px] text-kl-muted">Menos ▪ ▪ ▪ Más</p>
+                    </section>
+                    <section class="mt-4 rounded-xl border border-kl-divider p-4" aria-labelledby="rating-title">
+                      <h3 id="rating-title" class="m-0 text-[15px]">Heatmap por rating</h3>
+                      <p class="text-[12px] text-kl-muted">Problemas únicos resueltos por rating exacto · histórico</p>
+                      <div class="flex flex-wrap gap-2">
+                        @for (bucket of ratingBuckets; track bucket.rating) {
+                          <div class="rounded-lg border border-kl-divider p-2 text-center text-[12px]"
+                            [style.background]="bucket.count < 5 ? '#17163a' : bucket.count < 20 ? '#2a2750' : '#503a85'"
+                            [title]="(bucket.rating === 0 ? 'Sin rating' : bucket.rating) + ': ' + bucket.count + ' problemas'">
+                            <span>{{ bucket.rating === 0 ? 'Sin rating' : bucket.rating }}</span>
+                            <strong class="block">{{ bucket.count }}</strong>
+                          </div>
+                        }
+                      </div>
+                    </section>
+                  }
                   @for (heatmap of heatmaps; track heatmap.titulo) {
                     <div
                       class="mt-4 flex flex-col gap-1.5 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-4"

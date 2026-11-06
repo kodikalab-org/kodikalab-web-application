@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
+import { MatMenuModule } from '@angular/material/menu';
 import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../core/profile-api';
 import { Session } from '../../../core/session';
@@ -18,6 +20,8 @@ const MAX_PRESENTACION = 500;
 @Component({
   selector: 'app-coach-perfil-editar',
   imports: [
+    HeaderNavigation,
+    MatMenuModule,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -47,7 +51,6 @@ export class CoachPerfilEditar {
   protected readonly perfil = this.session.demo() ? PERFIL_COACH_DEMO : {
     ...PERFIL_COACH_DEMO, nombre: this.session.account()?.email ?? '', iniciales: 'KL',
   };
-  protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
   protected readonly maxPresentacion = MAX_PRESENTACION;
 
   protected readonly form = new FormGroup({

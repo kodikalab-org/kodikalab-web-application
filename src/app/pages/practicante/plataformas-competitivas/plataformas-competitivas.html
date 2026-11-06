@@ -11,7 +11,7 @@
     class="auth-header relative z-10 h-[68px] justify-between border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-14 font-body font-normal max-[641px]:h-[60px] max-[641px]:px-4"
   >
     <div class="flex items-center gap-10">
-      <a class="inline-flex items-center gap-2" routerLink="/" aria-label="Kodikalab, inicio">
+      <a class="inline-flex items-center gap-2" routerLink="/inicio" aria-label="Kodikalab, inicio">
         <img
           class="max-[641px]:size-7"
           src="images/plataformas/isotipo-34.svg"
@@ -21,19 +21,7 @@
         />
         <span class="text-xl font-bold tracking-[-.12px]">Kodikalab</span>
       </a>
-      <nav class="max-[1000px]:hidden" aria-label="Principal">
-        <ul class="m-0 flex list-none items-center gap-8 p-0 text-sm font-normal">
-          @for (enlace of enlaces; track enlace) {
-            @if ($first) {
-              <li class="text-kl-accent-text" aria-current="page">{{ enlace }}</li>
-            } @else if (enlace === 'Problemas') {
-              <li class="font-bold text-kl-muted">{{ enlace }}</li>
-            } @else {
-              <li class="text-kl-muted">{{ enlace }}</li>
-            }
-          }
-        </ul>
-      </nav>
+      <app-header-navigation />
     </div>
     <div class="flex items-center gap-4">
       <button

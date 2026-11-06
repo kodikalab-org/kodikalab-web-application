@@ -179,6 +179,9 @@ describe('Integración de grupos y rendimiento', () => {
     it(`conserva la ruta protegida y el contexto de equipo de ${page.path}`, async () => {
       authenticate(page.role);
       const harness = await RouterTestingHarness.create(`${page.path}?teamId=8`);
+      respond('/api/teams/me', []);
+      if (page.path === '/coach/competencias') respond('/api/competitions/teams/8', []);
+      if (page.path === '/progreso/equipos') respond('/api/competitions/teams/8/problems', []);
       respond(page.endpoint, page.body);
       harness.detectChanges();
       expect(TestBed.inject(Router).url).toBe(`${page.path}?teamId=8`);
@@ -192,6 +195,7 @@ describe('Integración de grupos y rendimiento', () => {
     respond('/api/teams', []);
     respond('/api/teams/me', []);
     await harness.navigateByUrl('/ranking?teamId=8');
+    respond('/api/teams/me', []);
     respond('/api/analytics/teams/8/standings', {
       teamId: 8,
       status: 'CALCULATED',

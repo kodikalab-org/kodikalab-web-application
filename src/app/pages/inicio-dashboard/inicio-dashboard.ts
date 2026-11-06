@@ -1,3 +1,4 @@
+import { Theme } from '../../core/theme';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../core/session';
@@ -26,6 +27,7 @@ import { map } from 'rxjs';
   styleUrl: './inicio-dashboard.css',
 })
 export class InicioDashboard {
+  protected readonly theme = inject(Theme);
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
   protected get nombre(): string { return this.session.demo() ? (this.coach ? 'Marco' : 'Camila') : this.session.account()?.email ?? 'Usuario'; }

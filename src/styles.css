@@ -1,5 +1,6 @@
 /* No Preflight: preserve Angular Material's controls and the existing browser reset. */
 @layer theme, base, components, utilities;
+@import './theme.css';
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities) important source('./app');
 
@@ -55,6 +56,7 @@
   --kl-accent-text: #a98bff;
   --kl-accent-link: #9b7dff;
   --kl-danger: #f87171;
+  --kl-warning: #fbbf24;
 
   --kl-font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --kl-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

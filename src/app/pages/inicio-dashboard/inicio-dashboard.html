@@ -166,7 +166,7 @@
     >
   </mat-menu>
   <mat-menu #apariencia="matMenu" [class]="clasesMenu" [overlapTrigger]="false"
-    ><button mat-menu-item disabled>Tema oscuro · tema claro próximamente</button></mat-menu
+    ><button mat-menu-item (click)="theme.toggle()">{{ theme.current() === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro' }}</button></mat-menu
   >
   <mat-menu #usuario="matMenu" [class]="clasesMenu" [overlapTrigger]="false" xPosition="before">
     <div

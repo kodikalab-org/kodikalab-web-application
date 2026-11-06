@@ -16,6 +16,8 @@ describe('Live team features', () => {
   async function setup<T extends TeamPage>(
     component: Type<T>,
     initial: Record<string, string> = { teamId: '1' },
+    authenticated = false,
+    catalogs = true,
   ) {
     const params = new BehaviorSubject(convertToParamMap(initial));
     await TestBed.configureTestingModule({
@@ -37,8 +39,41 @@ describe('Live team features', () => {
     }).compileComponents();
     http = TestBed.inject(HttpTestingController);
     TestBed.inject(Session).logout();
+    if (authenticated)
+      TestBed.inject(Session).account.set({
+        token: '',
+        email: 'test@example.com',
+        role: 'PRACTICANTE',
+        cookie: true,
+        expiresAt: 0,
+      });
     const fixture = TestBed.createComponent(component);
     fixture.detectChanges();
+    if (catalogs && initial['teamId']) {
+      const team = Number(initial['teamId']);
+      if (fixture.componentInstance instanceof ResultsLive)
+        http.expectOne(`/api/competitions/teams/${team}`).flush([
+          {
+            competitionId: 30,
+            teamId: team,
+            eventName: 'Competencia real',
+            status: 'FINALIZADA',
+          },
+        ]);
+      if (fixture.componentInstance instanceof ProgressLive)
+        http.expectOne(`/api/competitions/teams/${team}/problems`).flush([
+          {
+            competitionProblemId: 50,
+            competitionId: 30,
+            teamId: team,
+            problemId: 3,
+            title: 'Problema real',
+            eventName: 'Competencia real',
+            letter: 'A',
+            status: 'FINALIZADA',
+          },
+        ]);
+    }
     return {
       fixture,
       page: fixture.componentInstance,
@@ -47,6 +82,59 @@ describe('Live team features', () => {
     };
   }
   afterEach(() => http?.verify());
+  it('lists only active memberships and selects the only available team', async () => {
+    const { fixture, root } = await setup(ProgressLive, {}, true);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    http.expectOne('/api/teams/me').flush([
+      { groupId: 4, name: 'Equipo activo', membership: { status: 'ACTIVO' } },
+      { groupId: 5, name: 'Equipo pendiente', membership: { status: 'PENDIENTE' } },
+    ]);
+    fixture.detectChanges();
+    expect(root.querySelector('select')?.textContent).toContain('Equipo activo');
+    expect(root.querySelector('select')?.textContent).not.toContain('Equipo pendiente');
+    expect(navigate).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({
+        queryParams: { teamId: 4, competitionId: null, competitionProblemId: null },
+      }),
+    );
+  });
+  it('lists the coach teams without offering practitioner memberships', async () => {
+    const { fixture, root } = await setup(TopicsLive, {}, true);
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    http.expectOne('/api/teams/me').flush([
+      { groupId: 4, name: 'Equipo del coach', activeMembers: 2 },
+      { groupId: 5, name: 'Membresía practicante', membership: { status: 'ACTIVO' } },
+    ]);
+    fixture.detectChanges();
+    expect(root.querySelector('select')?.textContent).toContain('Equipo del coach');
+    expect(root.querySelector('select')?.textContent).not.toContain('Membresía practicante');
+  });
+  it('keeps team selection explicit when several memberships are active', async () => {
+    const { fixture, root } = await setup(ProgressLive, {}, true);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+    http.expectOne('/api/teams/me').flush([
+      { groupId: 4, name: 'Equipo A', membership: { status: 'ACTIVO' } },
+      { groupId: 5, name: 'Equipo B', membership: { status: 'ACTIVO' } },
+    ]);
+    fixture.detectChanges();
+    expect(root.querySelectorAll('select option')).toHaveLength(3);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+  it('explains an unavailable teams endpoint without asking for manual IDs', async () => {
+    const { fixture, root } = await setup(ProgressLive, {}, true);
+    http.expectOne('/api/teams/me').flush({}, { status: 404, statusText: 'Not Found' });
+    fixture.detectChanges();
+    expect(root.textContent).toContain('No se pudieron cargar tus equipos');
+    expect(root.querySelector('input[formControlName="teamId"]')).toBeNull();
+  });
+  it('treats an empty team list as a valid empty state instead of an error', async () => {
+    const { fixture, root } = await setup(ProgressLive, {}, true);
+    http.expectOne('/api/teams/me').flush([]);
+    fixture.detectChanges();
+    expect(root.textContent).toContain('No tienes equipos disponibles');
+    expect(root.querySelector('[role="alert"]')).toBeNull();
+  });
   it('does not request anything without team context', async () => {
     const { root } = await setup(RankingLive, {});
     http.expectNone(() => true);
@@ -79,19 +167,17 @@ describe('Live team features', () => {
   });
   it('keeps the error visible beside a dated previous result', async () => {
     const { fixture, root } = await setup(RankingLive);
-    http
-      .expectOne('/api/analytics/teams/1/standings')
-      .flush(
-        {
-          message: 'Datos inconsistentes',
-          errors: { teamId: 'Cruce' },
-          lastValidRanking: {
-            calculatedAt: '2026-11-05T12:00:00Z',
-            ranking: { teamId: 1, status: 'CALCULATED', members: [] },
-          },
+    http.expectOne('/api/analytics/teams/1/standings').flush(
+      {
+        message: 'Datos inconsistentes',
+        errors: { teamId: 'Cruce' },
+        lastValidRanking: {
+          calculatedAt: '2026-11-05T12:00:00Z',
+          ranking: { teamId: 1, status: 'CALCULATED', members: [] },
         },
-        { status: 409, statusText: 'Conflict' },
-      );
+      },
+      { status: 409, statusText: 'Conflict' },
+    );
     fixture.detectChanges();
     expect(root.querySelector('[role=alert]')?.textContent).toContain('Datos inconsistentes');
     expect(root.textContent).toContain('Último ranking válido');
@@ -163,6 +249,109 @@ describe('Live team features', () => {
     expect(page.report()).toBeNull();
     expect(root.querySelector('[role=alert]')).not.toBeNull();
   });
+  it('lists competitions by name without exposing a manual ID field', async () => {
+    const { fixture, root } = await setup(ResultsLive);
+    http.expectOne('/api/competitions/teams/1/official-results').flush([]);
+    fixture.detectChanges();
+    expect(root.querySelector('select[formControlName="competitionId"]')?.textContent).toContain(
+      'Competencia real',
+    );
+    expect(root.querySelector('input[formControlName="competitionId"]')).toBeNull();
+    const select = root.querySelector<HTMLSelectElement>(
+      'select[formControlName="competitionId"]',
+    )!;
+    select.value = '30';
+    select.dispatchEvent(new Event('change'));
+    http
+      .expectOne('/api/competitions/30/official-result')
+      .flush({ competitionId: 30, teamId: 1, status: 'CONFIRMADO' });
+  });
+  it('shows a legitimate empty competition list without an ID fallback', async () => {
+    const { fixture, root } = await setup(ResultsLive, { teamId: '1' }, false, false);
+    http.expectOne('/api/competitions/teams/1').flush([]);
+    http.expectOne('/api/competitions/teams/1/official-results').flush([]);
+    fixture.detectChanges();
+    expect(root.textContent).toContain('no tiene competencias disponibles');
+    expect(root.querySelector('input[formControlName="competitionId"]')).toBeNull();
+  });
+  it('shows catalog errors without publishing partial progress', async () => {
+    const { fixture, page, root } = await setup(ProgressLive, { teamId: '1' }, false, false);
+    http
+      .expectOne('/api/competitions/teams/1/problems')
+      .flush({}, { status: 503, statusText: 'Unavailable' });
+    fixture.detectChanges();
+    expect(page.progress()).toBeNull();
+    expect(root.querySelector('[role="alert"]')).not.toBeNull();
+    http.expectNone('/api/analytics/teams/1/progress/me');
+  });
+  it('cancels a pending assignment catalog and clears the selected problem on team change', async () => {
+    const { page, params } = await setup(ProgressLive, { teamId: '1' }, false, false);
+    const old = http.expectOne('/api/competitions/teams/1/problems');
+    page.form.controls.competitionProblemId.setValue('50');
+    params.next(convertToParamMap({ teamId: '2' }));
+    expect(old.cancelled).toBe(true);
+    expect(page.form.controls.competitionProblemId.value).toBe('');
+    http.expectOne('/api/competitions/teams/2/problems').flush([]);
+    http.expectOne('/api/analytics/teams/2/progress/me').flush({ teamId: 2, acceptedProblems: 0 });
+    expect(page.assignments()).toEqual([]);
+  });
+  it('distinguishes the same problem assigned to different competitions by the returned assignment ID', async () => {
+    const { fixture, page, root } = await setup(ProgressLive, { teamId: '1' }, false, false);
+    http.expectOne('/api/competitions/teams/1/problems').flush([
+      {
+        competitionProblemId: 50,
+        competitionId: 30,
+        teamId: 1,
+        title: 'Problema compartido',
+        eventName: 'Competencia Alfa',
+        letter: 'A',
+      },
+      {
+        competitionProblemId: 51,
+        competitionId: 31,
+        teamId: 1,
+        title: 'Problema compartido',
+        eventName: 'Competencia Beta',
+        letter: 'B',
+      },
+    ]);
+    http.expectOne('/api/analytics/teams/1/progress/me').flush({ teamId: 1, acceptedProblems: 0 });
+    fixture.detectChanges();
+    const select = root.querySelector<HTMLSelectElement>(
+      'select[formControlName="competitionProblemId"]',
+    )!;
+    expect(select.textContent).toContain('Competencia Alfa');
+    expect(select.textContent).toContain('Competencia Beta');
+    select.value = '51';
+    select.dispatchEvent(new Event('change'));
+    page.form.controls.language.setValue('Java');
+    page.register();
+    http.expectOne('/api/competitions/teams/1/problems/51/resolutions').flush({
+      registrationMethod: 'MANUAL_PROVISIONAL',
+      resolution: {},
+      progress: { teamId: 1, acceptedProblems: 1 },
+    });
+  });
+  it('does not allow an assignment that was not returned by the team catalog', async () => {
+    const { page } = await setup(ProgressLive);
+    http.expectOne('/api/analytics/teams/1/progress/me').flush({ teamId: 1, acceptedProblems: 0 });
+    page.form.setValue({ competitionProblemId: '999', language: 'Java', evidenceUrl: '' });
+    page.register();
+    http.expectNone((r) => r.method === 'POST');
+  });
+  it('does not describe a failed history request as an empty official history', async () => {
+    const { page, fixture, root } = await setup(ResultsLive);
+    http
+      .expectOne('/api/competitions/teams/1/official-results')
+      .flush({}, { status: 503, statusText: 'Unavailable' });
+    page.open(30);
+    http
+      .expectOne('/api/competitions/30/official-result')
+      .flush({ competitionId: 30, teamId: 1, status: 'PENDIENTE' });
+    fixture.detectChanges();
+    expect(root.textContent).not.toContain('No hay resultados confirmados.');
+    expect(root.textContent).toContain('El historial aún no está disponible.');
+  });
   it('loads confirmed history without inventing pending entries', async () => {
     const { page } = await setup(ResultsLive);
     http.expectOne('/api/competitions/teams/1/official-results').flush([]);
@@ -172,17 +361,15 @@ describe('Live team features', () => {
     const { page, fixture, root } = await setup(ResultsLive);
     http.expectOne('/api/competitions/teams/1/official-results').flush([]);
     page.open(30);
-    http
-      .expectOne('/api/competitions/30/official-result')
-      .flush({
-        id: 1,
-        competitionId: 30,
-        teamId: 1,
-        eventName: 'Prueba',
-        status: 'CONFIRMADO',
-        finalPosition: 4,
-        solvedProblems: 3,
-      });
+    http.expectOne('/api/competitions/30/official-result').flush({
+      id: 1,
+      competitionId: 30,
+      teamId: 1,
+      eventName: 'Prueba',
+      status: 'CONFIRMADO',
+      finalPosition: 4,
+      solvedProblems: 3,
+    });
     fixture.detectChanges();
     expect(page.form.disabled).toBe(true);
     page.save(false);
@@ -224,17 +411,16 @@ describe('Live team features', () => {
       confirm: false,
     });
     save.flush({ id: 1, competitionId: 30, teamId: 1, status: 'PENDIENTE' });
+    http.expectOne('/api/competitions/teams/1').flush([{ competitionId: 30, teamId: 1 }]);
     http.expectOne('/api/competitions/teams/1/official-results').flush([]);
-    http
-      .expectOne('/api/competitions/30/official-result')
-      .flush({
-        id: 1,
-        competitionId: 30,
-        teamId: 1,
-        status: 'PENDIENTE',
-        finalPosition: null,
-        solvedProblems: null,
-      });
+    http.expectOne('/api/competitions/30/official-result').flush({
+      id: 1,
+      competitionId: 30,
+      teamId: 1,
+      status: 'PENDIENTE',
+      finalPosition: null,
+      solvedProblems: null,
+    });
   });
   it('registers a provisional resolution and uses returned team progress', async () => {
     const { page } = await setup(ProgressLive);

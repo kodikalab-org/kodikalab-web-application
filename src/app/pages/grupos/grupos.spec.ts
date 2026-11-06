@@ -78,8 +78,9 @@ const routeStub = {
   queryParamMap: of(convertToParamMap({})),
 };
 
-function configure<T>(component: Type<T>) {
+function configure<T>(component: Type<T>, prepare?: (stub: TeamsStub) => void) {
   const stub = new TeamsStub();
+  prepare?.(stub);
   TestBed.configureTestingModule({
     imports: [component],
     providers: [
@@ -105,6 +106,20 @@ describe('Interfaces de grupos (US04, US05 y US06)', () => {
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain('Entrenamiento de Grafos');
     expect(root.textContent).toContain('Mostrando 1 grupos');
+  });
+
+  it('conserva el equipo activo al navegar al ranking y al avance', async () => {
+    const { fixture } = configure(ExplorarGrupos, stub =>
+      stub.mine.set([{ groupId: 1, membership: { status: 'ACTIVO' } }]),
+    );
+    await settle(fixture);
+    const links = [...(fixture.nativeElement as HTMLElement).querySelectorAll('a')];
+    const rankingLinks = links.filter(a => a.textContent?.includes('Ranking del equipo'));
+    const progressLinks = links.filter(a => a.textContent?.includes('Mi avance en este equipo'));
+    expect(rankingLinks).toHaveLength(1);
+    expect(progressLinks).toHaveLength(1);
+    expect(rankingLinks[0].getAttribute('href')).toBe('/ranking?teamId=1');
+    expect(progressLinks[0].getAttribute('href')).toBe('/progreso/equipos?teamId=1');
   });
 
   it('abre la solicitud y envía el ingreso al grupo elegido', async () => {

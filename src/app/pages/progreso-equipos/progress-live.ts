@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { DatePipe } from '@angular/common';
 import { TeamPage } from '../../shared/team-page';
 import { TeamFrame } from '../../shared/team-frame';
-import { Progress, Registration, positiveId } from '../../core/team-api';
+import { AssignedProblem, Progress, Registration, positiveId } from '../../core/team-api';
 @Component({
   selector: 'app-progress-live',
   imports: [TeamFrame, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
@@ -33,13 +33,26 @@ import { Progress, Registration, positiveId } from '../../core/team-api';
           Declaración provisional: no se ejecuta tu código ni se verifica automáticamente la
           evidencia.
         </p>
+        @if (!busy() && !error() && !assignments().length) {
+          <p role="status">Este equipo no tiene problemas asignados.</p>
+        }
         <form [formGroup]="form" (ngSubmit)="register()" class="flex flex-col gap-4">
-          <mat-form-field appearance="outline"
-            ><mat-label>ID del problema de competencia</mat-label
-            ><input matInput formControlName="competitionProblemId" inputmode="numeric" /><mat-hint
-              >competitionProblemId de la asignación, no el ID del catálogo.</mat-hint
-            ></mat-form-field
-          >
+          <label class="flex min-w-0 flex-col gap-2"
+            >Problema asignado
+            <select
+              aria-label="Problema asignado"
+              class="team-select"
+              formControlName="competitionProblemId"
+              [attr.disabled]="saving() || busy() || !assignments().length ? '' : null"
+            >
+              <option value="">Selecciona un problema de competencia</option>
+              @for (assignment of assignments(); track assignment.competitionProblemId) {
+                <option [value]="assignment.competitionProblemId">
+                  {{ assignment.eventName }} · {{ assignment.letter }} · {{ assignment.title }}
+                </option>
+              }
+            </select>
+          </label>
           <mat-form-field appearance="outline"
             ><mat-label>Lenguaje utilizado</mat-label
             ><input matInput formControlName="language" maxlength="30" /><mat-error
@@ -71,6 +84,7 @@ import { Progress, Registration, positiveId } from '../../core/team-api';
 })
 export class ProgressLive extends TeamPage {
   readonly progress = signal<Progress | null>(null);
+  readonly assignments = signal<AssignedProblem[]>([]);
   readonly registration = signal<Registration | null>(null);
   readonly form = new FormGroup({
     competitionProblemId: new FormControl('', {
@@ -90,6 +104,7 @@ export class ProgressLive extends TeamPage {
     }),
   });
   protected clear() {
+    this.assignments.set([]);
     this.progress.set(null);
     this.registration.set(null);
     this.form.reset();
@@ -102,7 +117,19 @@ export class ProgressLive extends TeamPage {
     if (!id || this.saving()) return;
     this.progress.set(null);
     this.registration.set(null);
-    this.read(this.api.progress(id), (p) => this.progress.set(p));
+    this.assignments.set([]);
+    this.read(this.api.assignments(id), (assignments) => {
+      this.assignments.set(assignments);
+      if (
+        !assignments.some(
+          (a) =>
+            a.competitionProblemId === positiveId(this.form.controls.competitionProblemId.value),
+        )
+      ) {
+        this.form.controls.competitionProblemId.setValue('');
+      }
+      this.read(this.api.progress(id), (p) => this.progress.set(p));
+    });
   }
   register() {
     const team = this.teamId();
@@ -111,6 +138,7 @@ export class ProgressLive extends TeamPage {
     if (
       !team ||
       !assignment ||
+      !this.assignments().some((a) => a.competitionProblemId === assignment && a.teamId === team) ||
       !this.progress() ||
       this.form.invalid ||
       this.saving() ||

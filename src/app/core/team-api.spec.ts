@@ -19,6 +19,14 @@ describe('Team API contracts', () => {
     http = TestBed.inject(HttpTestingController);
   });
   afterEach(() => http.verify());
+  it('lists competitions and assignments only in the selected team', async () => {
+    const competitions = firstValueFrom(api.competitions(12));
+    http.expectOne('/api/competitions/teams/12').flush([]);
+    expect(await competitions).toEqual([]);
+    const assignments = firstValueFrom(api.assignments(12));
+    http.expectOne('/api/competitions/teams/12/problems').flush([]);
+    expect(await assignments).toEqual([]);
+  });
   it('reads rankings without a client user identifier', async () => {
     const p = firstValueFrom(api.ranking(12));
     const r = http.expectOne('/api/analytics/teams/12/standings');

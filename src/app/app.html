@@ -1,6 +1,24 @@
+<div class="theme-bar" aria-label="Apariencia">
+  <button type="button" class="theme-toggle" (click)="theme.toggle()"
+    [attr.aria-pressed]="theme.current() === 'light'"
+    [attr.aria-label]="theme.current() === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'">
+    {{ theme.current() === 'dark' ? 'Modo claro' : 'Modo oscuro' }}
+  </button>
+</div>
 @if (privatePage) {
   <aside class="relative z-40 flex flex-wrap items-center justify-between gap-2 border-0 border-b border-solid border-kl-divider bg-kl-bg px-4 py-2 font-body text-xs text-kl-body" aria-label="Estado de la aplicación">
-    <span>{{ session.demo() ? 'Demostración · Datos de ejemplo · No hay autenticación ni se guardan cambios.' : 'Sesión real · Perfil conectado. Métricas, actividad, ajustes y campos deshabilitados: pendientes de integración.' }}</span>
+    <span>{{ session.demo() ? 'Demostración · Datos de ejemplo · No hay autenticación ni se guardan cambios.' : 'Sesión real · Acceso sujeto a los permisos del servidor.' }}</span>
+    @if (!session.demo()) {
+      <nav aria-label="Mi entrenamiento" class="flex flex-wrap gap-4">
+        <a [routerLink]="session.account()?.role === 'COACH' ? '/coach/ranking' : '/ranking'">Ranking</a>
+        @if (session.account()?.role === 'COACH') {
+          <a routerLink="/coach/rendimiento">Rendimiento</a>
+          <a routerLink="/coach/competencias">Resultados oficiales</a>
+        } @else {
+          <a routerLink="/progreso/equipos">Mi avance</a>
+        }
+      </nav>
+    }
     <button type="button" class="cursor-pointer border-0 bg-transparent font-body text-kl-accent-text" (click)="salir()">{{ session.demo() ? 'Salir de la demo' : 'Cerrar sesión' }}</button>
   </aside>
 }

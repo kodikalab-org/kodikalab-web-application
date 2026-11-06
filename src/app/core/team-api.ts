@@ -1,6 +1,24 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_URL } from './api';
+export interface TeamCompetition {
+  competitionId: number;
+  teamId: number;
+  eventName: string;
+  status: 'PROGRAMADA' | 'EN_CURSO' | 'FINALIZADA';
+  startsAt: string;
+  endsAt: string;
+}
+export interface AssignedProblem {
+  competitionProblemId: number;
+  competitionId: number;
+  teamId: number;
+  problemId: number;
+  title: string;
+  eventName: string;
+  letter: string;
+  status: TeamCompetition['status'];
+}
 export interface Standing {
   membershipId: number;
   userId: number;
@@ -85,6 +103,16 @@ export interface ManualRequest {
 export class TeamApi {
   private readonly http = inject(HttpClient);
   private readonly url = inject(API_URL);
+  competitions(teamId: number) {
+    return this.http.get<TeamCompetition[]>(`${this.url}/competitions/teams/${teamId}`, {
+      timeout: 15000,
+    });
+  }
+  assignments(teamId: number) {
+    return this.http.get<AssignedProblem[]>(`${this.url}/competitions/teams/${teamId}/problems`, {
+      timeout: 15000,
+    });
+  }
   ranking(id: number) {
     return this.http.get<Ranking>(this.url + '/analytics/teams/' + id + '/standings', {
       timeout: 15000,

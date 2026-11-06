@@ -35,7 +35,7 @@ export interface StudyGroupDetail extends StudyGroupSummary {
 
 export interface CoachGroup extends StudyGroupDetail {
   activeMembers: number;
-  pendingRequests: number;
+  pendingRequests?: number;
 }
 
 export interface Clarification {

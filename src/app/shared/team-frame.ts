@@ -1,13 +1,14 @@
-import { Component, input } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TeamsApi, CoachGroup, PractitionerGroup } from '../core/teams-api';
+import { Session } from '../core/session';
+import { DestroyRef, OnInit, inject, signal, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { TeamPage } from './team-page';
 @Component({
   selector: 'app-team-frame',
-  imports: [RouterLink, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [RouterLink, ReactiveFormsModule, MatButtonModule],
   template: ` <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
     <div
       class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat"
@@ -52,15 +53,27 @@ import { TeamPage } from './team-page';
         (ngSubmit)="page().selectTeam()"
         class="flex flex-wrap items-start gap-3"
       >
-        <mat-form-field appearance="outline"
-          ><mat-label>ID del equipo</mat-label
-          ><input
-            matInput
+        <label class="flex min-w-0 flex-col gap-2"
+          >Equipo
+          <select
+            aria-label="Equipo"
+            class="team-select"
             formControlName="teamId"
-            inputmode="numeric"
-            [readonly]="page().saving()"
-        /></mat-form-field>
-        <button mat-flat-button type="submit" [disabled]="page().saving()">Consultar equipo</button>
+            [attr.disabled]="page().saving() || loadingTeams() || !teams().length ? '' : null"
+          >
+            <option value="">Selecciona tu equipo</option>
+            @for (team of teams(); track team.groupId) {
+              <option [value]="team.groupId">{{ team.name }}</option>
+            }
+          </select>
+        </label>
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="page().saving() || loadingTeams() || !teams().length"
+        >
+          Consultar equipo
+        </button>
         <button
           mat-stroked-button
           type="button"
@@ -70,10 +83,23 @@ import { TeamPage } from './team-page';
           Reintentar consulta
         </button>
       </form>
+      @if (loadingTeams()) {
+        <p role="status">Consultando tus equipos…</p>
+      }
+      @if (teamsError()) {
+        <p role="alert">{{ teamsError() }}</p>
+        <button mat-stroked-button type="button" (click)="loadTeams()" [disabled]="loadingTeams()">
+          Reintentar equipos
+        </button>
+      }
+      @if (!loadingTeams() && !teamsError() && !teams().length) {
+        <p role="status">
+          No tienes equipos disponibles. Verifica tu membresía o consulta con tu coach.
+        </p>
+      }
       @if (!page().teamId()) {
         <p role="status" class="rounded-xl border border-kl-border p-4">
-          Selecciona un contexto de equipo válido. Esta versión de la API no lista equipos; puedes
-          recibir teamId desde la navegación o introducir su ID real.
+          Selecciona un contexto de equipo válido entre tus equipos disponibles.
         </p>
       }
       @if (page().busy()) {
@@ -101,7 +127,43 @@ import { TeamPage } from './team-page';
     </footer>
   </div>`,
 })
-export class TeamFrame {
+export class TeamFrame implements OnInit {
+  private readonly api = inject(TeamsApi);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly session = inject(Session);
+  readonly teams = signal<(CoachGroup | PractitionerGroup)[]>([]);
+  readonly loadingTeams = signal(false);
+  readonly teamsError = signal('');
+  ngOnInit() {
+    if (!this.session.authenticated()) return;
+    this.loadTeams();
+  }
+  loadTeams() {
+    this.loadingTeams.set(true);
+    this.teamsError.set('');
+    this.api
+      .loadMine()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (groups) => {
+          const available = groups.filter((group) =>
+            this.coach()
+              ? 'activeMembers' in group
+              : 'membership' in group && group.membership.status === 'ACTIVO',
+          );
+          this.teams.set(available);
+          this.loadingTeams.set(false);
+          if (available.length === 1 && !this.page().teamId()) {
+            this.page().context.controls.teamId.setValue(String(available[0].groupId));
+            this.page().selectTeam();
+          }
+        },
+        error: () => {
+          this.loadingTeams.set(false);
+          this.teamsError.set('No se pudieron cargar tus equipos. Reintenta la consulta.');
+        },
+      });
+  }
   readonly page = input.required<TeamPage>();
   readonly title = input.required<string>();
   readonly description = input('');

@@ -171,20 +171,20 @@
           <h2 class="m-0 flex items-center gap-3 font-display text-lg">
             <img src="/images/dashboard/1-imgIcon6.svg" width="20" height="20" alt="" />Empieza aquí
           </h2>
-          <span class="text-xs text-kl-muted">2 de 4 pasos completados</span>
+          <span class="text-xs text-kl-muted">{{ pasosCompletados() }} de 4 pasos completados</span>
         </div>
         <ol class="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 xl:grid-cols-4">
           @for (paso of pasos; track paso.nombre; let i = $index) {
             <li
               class="rounded-xl border border-solid border-kl-border-strong bg-white/3 p-4"
-              [class.border-kl-accent]="i === 2"
-              [class.bg-kl-accent/15]="i === 2"
+              [class.border-kl-accent]="i === pasosCompletados()"
+              [class.bg-kl-accent/15]="i === pasosCompletados()"
             >
               <div class="flex items-center gap-3 text-sm font-semibold">
                 <span
                   class="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-kl-accent/30"
                 >
-                  @if (i < 2) {
+                  @if (i < pasosCompletados()) {
                     <img
                       src="/images/dashboard/1-imgIconCheck.svg"
                       width="15"
@@ -206,7 +206,7 @@
       aria-label="Resumen de actividad"
       class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
-      @for (dato of estadisticas; track dato.etiqueta; let i = $index) {
+      @for (dato of estadisticas(); track dato.etiqueta; let i = $index) {
         <mat-card
           class="flex flex-row items-center gap-3.5 border border-solid border-[#25203b] bg-white/3 px-4 py-3.5"
           ><span
@@ -214,13 +214,9 @@
             ><img [src]="'/images/dashboard/' + dato.icono + '.svg'" width="24" height="24" alt=""
           /></span>
           <div>
-            <strong class="block font-display text-2xl">{{
-              !session.demo() ? '—' : nuevo ? (!coach && i === 1 ? '—' : '0') : dato.valor
-            }}</strong
+            <strong class="block font-display text-2xl">{{ dato.valor }}</strong
             ><span class="block text-[13px] text-kl-body">{{ dato.etiqueta }}</span
-            ><span class="mt-1 block text-xs" [class]="nuevo ? 'text-kl-muted' : dato.tono">{{
-              !session.demo() ? 'Pendiente de integración' : nuevo ? dato.vacio : dato.detalle
-            }}</span>
+            ><span class="mt-1 block text-xs" [class]="dato.tono">{{ dato.detalle }}</span>
           </div></mat-card
         >
       }
@@ -400,7 +396,7 @@
                 }
               "
             />
-            @if (nuevo) {
+            @if ((nuevo && session.demo()) || grupos().length === 0) {
               <ng-container
                 *ngTemplateOutlet="
                   vacio;
@@ -415,7 +411,7 @@
                 "
               />
             } @else {
-              @for (grupo of grupos; track grupo.nombre) {
+              @for (grupo of grupos(); track grupo.nombre) {
                 <div class="flex items-center gap-4 border-b border-[#1f1c44] py-3.5 last:border-0">
                   <span
                     class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-kl-accent/25 text-sm"

@@ -1,12 +1,10 @@
 import { Component, afterNextRender, inject, signal } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
-import { Router, RouterOutlet, RouterLink } from '@angular/router';
-import { HeaderNavigation } from './shared/header-navigation/header-navigation';
-import { UserMenu } from './shared/user-menu/user-menu';
+import { Router, RouterOutlet } from '@angular/router';
 import { Session } from './core/session';
 
 @Component({
-  imports: [RouterOutlet, RouterLink, HeaderNavigation, UserMenu],
+  imports: [RouterOutlet],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',

@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { apiError } from '../../../core/api';
 import {
+  Clarification,
   Membership,
   PractitionerGroup,
   StudyGroupSummary,
@@ -40,6 +41,9 @@ interface GrupoVm {
   estado: 'Abierto' | 'Solicitud pendiente' | 'Aclaración solicitada' | 'Eres miembro';
   accion: string;
   tono: string;
+  membershipId?: number;
+  estadoMembresia?: Membership['status'];
+  aclaracion?: Clarification | null;
 }
 
 const TONOS = [
@@ -86,6 +90,11 @@ export class ExplorarGrupos {
   protected readonly seleccionado = signal<GrupoVm | null>(null);
   protected readonly grupoCodigo = signal<number | null>(null);
   protected readonly enviando = signal(false);
+  /** Respuesta del practicante cuando el coach pidió una aclaración. */
+  protected readonly respuesta = signal('');
+  protected readonly enviandoRespuesta = signal(false);
+  protected readonly respuestaOk = signal('');
+  protected readonly respuestaError = signal('');
 
   protected readonly total = computed(() => this.grupos().length);
 
@@ -164,7 +173,37 @@ export class ExplorarGrupos {
 
   protected verEstado(grupo: GrupoVm): void {
     this.seleccionado.set(grupo);
+    this.respuesta.set('');
+    this.respuestaOk.set('');
+    this.respuestaError.set('');
     this.vista.set('estado');
+  }
+
+  /** US06: el postulante responde la aclaración y la solicitud vuelve a PENDIENTE. */
+  protected responder(): void {
+    const grupo = this.seleccionado();
+    if (!grupo?.membershipId || this.enviandoRespuesta()) return;
+
+    const texto = this.respuesta().trim();
+    if (!texto) {
+      this.respuestaError.set('Escribe una respuesta antes de enviarla.');
+      return;
+    }
+
+    this.enviandoRespuesta.set(true);
+    this.respuestaError.set('');
+    this.api.respondClarification(grupo.id, grupo.membershipId, texto).subscribe({
+      next: (response) => {
+        this.enviandoRespuesta.set(false);
+        this.respuestaOk.set(response.message);
+        this.respuesta.set('');
+        this.cargar();
+      },
+      error: (error: unknown) => {
+        this.enviandoRespuesta.set(false);
+        this.respuestaError.set(apiError(error));
+      },
+    });
   }
 
   private cargar(): void {
@@ -191,14 +230,15 @@ export class ExplorarGrupos {
     groups: StudyGroupSummary[],
     mine: (PractitionerGroup | { groupId: number })[],
   ): GrupoVm[] {
-    const memberships = new Map<number, Membership['status']>();
+    const memberships = new Map<number, PractitionerGroup['membership']>();
     for (const item of mine) {
       const membership = (item as PractitionerGroup).membership;
-      if (membership) memberships.set(item.groupId, membership.status);
+      if (membership) memberships.set(item.groupId, membership);
     }
 
     return groups.map((group, index) => {
-      const status = memberships.get(group.groupId);
+      const membership = memberships.get(group.groupId);
+      const status = membership?.status;
       return {
         id: group.groupId,
         iniciales: this.iniciales(group.name),
@@ -218,6 +258,9 @@ export class ExplorarGrupos {
                 : 'Abierto',
         accion: group.visibility === 'PUBLICO' ? 'Unirme' : 'Solicitar ingreso',
         tono: TONOS[index % TONOS.length],
+        membershipId: membership?.membershipId,
+        estadoMembresia: status,
+        aclaracion: membership?.clarification ?? null,
       };
     });
   }

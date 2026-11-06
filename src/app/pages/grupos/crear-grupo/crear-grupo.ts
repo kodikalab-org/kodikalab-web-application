@@ -188,11 +188,9 @@ export class CrearGrupo {
       next: (response) => {
         this.guardando.set(false);
         this.api.lastCreated.set(response);
-        if (draft) {
-          this.exito.set(response.message);
-        } else {
-          this.router.navigate(['/coach/grupos/creado']);
-        }
+        // Borrador y grupo publicado pasan por la confirmación: ahí se muestra el
+        // código de invitación y, si quedó como borrador, se puede publicar.
+        this.router.navigate(['/coach/grupos/creado']);
       },
       error: (error: unknown) => {
         this.guardando.set(false);

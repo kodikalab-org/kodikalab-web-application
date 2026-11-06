@@ -46,6 +46,11 @@ export class GrupoCreado {
     this.esBorrador() ? 'Borrador' : 'Activo, visible para los practicantes',
   );
 
+  /** Mensaje de la última acción: crear o publicar. */
+  protected readonly mensajePrincipal = computed(
+    () => this.mensaje() || this.grupo()?.message || '',
+  );
+
   /** US04: publica el borrador y lo deja disponible para solicitudes. */
   protected publicar(): void {
     const grupo = this.grupo();

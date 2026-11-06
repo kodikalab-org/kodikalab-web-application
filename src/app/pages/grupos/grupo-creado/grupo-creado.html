@@ -24,7 +24,7 @@
       <div
         class="my-3 rounded-xl border border-solid border-green-400/40 bg-green-400/10 p-4 text-left text-sm text-green-300"
       >
-        <strong>{{ creado.message }}</strong>
+        <strong>{{ mensajePrincipal() }}</strong>
         <p class="mt-1 mb-0 text-kl-body">
           {{ session.demo() ? 'Datos de demostración' : 'Quedaste como responsable del grupo' }} · estado: {{ estadoTexto() }}.
         </p>
@@ -40,11 +40,6 @@
         </div>
       }
 
-      @if (mensaje()) {
-        <p class="my-3 rounded-xl border border-solid border-green-400/40 bg-green-400/10 p-3 text-sm text-green-300">
-          {{ mensaje() }}
-        </p>
-      }
       @if (error()) {
         <p class="my-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm text-kl-danger">
           {{ error() }}

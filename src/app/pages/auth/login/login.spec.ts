@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
+import { Session } from '../../../core/session';
 import { Login } from './login';
 
 describe('Login', () => {
@@ -72,6 +75,38 @@ describe('Login', () => {
     await type('password', '€'.repeat(25));
     expect(root.textContent).toContain('La contraseña no puede superar 72 bytes');
     expect(submit().disabled).toBe(true);
+  });
+
+  describe('Remember me', () => {
+    async function submitWith(remember: boolean | null) {
+      const ctx = await setup();
+      const login = vi
+        .spyOn(TestBed.inject(Session), 'login')
+        .mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401, error: { message: 'x' } })));
+      await ctx.type('email', 'camila.rojas@upc.edu.pe');
+      await ctx.type('password', 'Prueba2026');
+      const box = ctx.root.querySelector<HTMLInputElement>('mat-checkbox input')!;
+      if (remember !== null && box.checked !== remember) {
+        box.click();
+        ctx.fixture.detectChanges();
+        await ctx.fixture.whenStable();
+      }
+      ctx.root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+      await ctx.fixture.whenStable();
+      return { ...ctx, login, box };
+    }
+
+    it('is checked by default and asks the session to remember the login', async () => {
+      const { login, box } = await submitWith(null);
+      expect(box.checked).toBe(true);
+      expect(login).toHaveBeenCalledWith('camila.rojas@upc.edu.pe', 'Prueba2026', true);
+    });
+
+    it('asks the session not to remember the login when the user unchecks it', async () => {
+      const { login, box } = await submitWith(false);
+      expect(box.checked).toBe(false);
+      expect(login).toHaveBeenCalledWith('camila.rojas@upc.edu.pe', 'Prueba2026', false);
+    });
   });
 
   it('enables the submit button when the form is valid', async () => {

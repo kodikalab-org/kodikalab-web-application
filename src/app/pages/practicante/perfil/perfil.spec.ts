@@ -151,65 +151,25 @@ describe('Perfil', () => {
     expect(root.querySelector('table')).toBeNull();
   });
 
-  it('shows the general settings with three switches and the recovery code row (?tab=ajustes)', async () => {
+  it('shows the general settings with three switches and no recovery code row (?tab=ajustes)', async () => {
     const { root } = await setup({ tab: 'ajustes' });
     const contenido = texto(root);
-    for (const titulo of [
-      'Notificaciones',
-      'Privacidad del perfil',
-      'Idioma',
-      'Tema oscuro',
-      'Código de recuperación',
-      'Cerrar sesión',
-    ]) {
+    for (const titulo of ['Notificaciones', 'Privacidad del perfil', 'Idioma', 'Tema oscuro', 'Cerrar sesión']) {
       expect(contenido).toContain(titulo);
     }
+    expect(contenido).not.toContain('Código de recuperación');
     expect(root.querySelectorAll('mat-slide-toggle').length).toBe(3);
     expect(root.querySelectorAll('button[role="switch"][aria-checked="true"]').length).toBe(3);
-    const verCodigo = [...root.querySelectorAll('a')].find((a) =>
-      a.textContent?.includes('Ver mi código'),
-    );
-    expect(verCodigo?.getAttribute('href')).toBe('/perfil?tab=ajustes&estado=ver-codigo');
     expect(root.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  it('asks for the current password before showing the recovery code (?estado=ver-codigo)', async () => {
-    const { fixture, root } = await setup({ tab: 'ajustes', estado: 'ver-codigo' });
-    const dialogo = root.querySelector('[role="dialog"]')!;
-    expect(dialogo.getAttribute('aria-modal')).toBe('true');
-    expect(dialogo.textContent).toContain('Confirma tu contraseña para ver el código vigente');
-    const mostrar = [...dialogo.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes('Mostrar código'),
-    )!;
-    expect(mostrar.disabled).toBe(true);
-
-    const input = dialogo.querySelector<HTMLInputElement>('#password-actual')!;
-    input.dispatchEvent(new Event('blur'));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(dialogo.querySelector('mat-error')?.textContent).toContain('Ingresa tu contraseña');
-
-    input.value = 'secreta123';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(mostrar.disabled).toBe(false);
-  });
-
-  it('closes the dialog through a link that returns to the settings tab', async () => {
-    const { root } = await setup({ tab: 'ajustes', estado: 'ver-codigo' });
-    const cerrar = root.querySelector('a[aria-label="Cerrar"]');
-    expect(cerrar?.getAttribute('href')).toBe('/perfil?tab=ajustes');
-  });
-
-  it('shows the recovery code once the password is verified (?estado=codigo-recuperacion)', async () => {
-    const { root } = await setup({ tab: 'ajustes', estado: 'codigo-recuperacion' });
-    const dialogo = root.querySelector('[role="dialog"]')!;
-    expect(dialogo.textContent).toContain('Contraseña verificada');
-    expect(dialogo.textContent).toContain('ABCD-EFGH-IJKL-MNOP-QRST-UVWX');
-    expect(dialogo.textContent).toContain('Guárdalo en un lugar seguro');
-    expect(dialogo.textContent).toContain('Listo');
-  });
+  for (const estado of ['ver-codigo', 'codigo-recuperacion']) {
+    it(`ignores the removed recovery code state ?estado=${estado} in the settings tab`, async () => {
+      const { root } = await setup({ tab: 'ajustes', estado });
+      expect(root.querySelector('[role="dialog"]')).toBeNull();
+      expect(texto(root)).not.toContain('Código de recuperación');
+    });
+  }
 
   it('ignores states that do not belong to the active tab', async () => {
     const { root } = await setup({ tab: 'solicitudes', estado: 'cargando' });

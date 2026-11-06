@@ -5,10 +5,11 @@ import { map } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-ranking-equipo',
-  imports: [AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [SiteFooter, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './ranking-equipo.html',
   styleUrl: './ranking-equipo.css',
 })

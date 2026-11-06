@@ -1,7 +1,7 @@
 import { FormControl, FormGroup } from '@angular/forms';
 import {
-  emailRule, formatRecoveryCode, fullNameRule, isWeakPassword, nameRule, normalizeEmail, normalizeName,
-  normalizeRecoveryCode, passwordBytesRule, passwordPolicyRule, recoveryCodeRule, roleRule, utf8ByteLength,
+  emailRule, fullNameRule, isWeakPassword, nameRule, normalizeEmail, normalizeName,
+  passwordBytesRule, passwordPolicyRule, roleRule, utf8ByteLength,
 } from './auth-rules';
 
 const control = (value: string) => new FormControl(value, { nonNullable: true });
@@ -112,28 +112,6 @@ describe('auth rules', () => {
       expect(passwordBytesRule(control('€'.repeat(36)))).toEqual({ passwordTooLong: { max: 72, actual: 108 } });
       // 24 euro signs = 72 bytes exactly.
       expect(passwordBytesRule(control('€'.repeat(24)))).toBeNull();
-    });
-  });
-
-  describe('recovery code', () => {
-    it('normalizes case, spaces and hyphens, then formats it canonically', () => {
-      const normalized = normalizeRecoveryCode(' abcd efgh-ijkl mnop qrst-uvwx ');
-      expect(normalized).toBe('ABCDEFGHIJKLMNOPQRSTUVWX');
-      expect(formatRecoveryCode(normalized)).toBe('ABCD-EFGH-IJKL-MNOP-QRST-UVWX');
-    });
-
-    it('accepts the code with or without hyphens', () => {
-      expect(recoveryCodeRule(control('ABCD-EFGH-IJKL-MNOP-QRST-UVWX'))).toBeNull();
-      expect(recoveryCodeRule(control('abcdefghijklmnopqrstuvwx'))).toBeNull();
-    });
-
-    it('requires 24 Base32 characters (A-Z and 2-7)', () => {
-      expect(recoveryCodeRule(control(''))).toEqual({ required: true });
-      expect(recoveryCodeRule(control('ABCD-EFGH-IJKL-MNOP-QRST-UVW'))).toEqual({ recoveryCodeFormat: true });
-      expect(recoveryCodeRule(control('ABCD-EFGH-IJKL-MNOP-QRST-UVWXY'))).toEqual({ recoveryCodeFormat: true });
-      expect(recoveryCodeRule(control('ABCD-EFGH-IJKL-MNOP-QRST-UVW0'))).toEqual({ recoveryCodeFormat: true });
-      expect(recoveryCodeRule(control('ABCD-EFGH-IJKL-MNOP-QRST-UVW1'))).toEqual({ recoveryCodeFormat: true });
-      expect(recoveryCodeRule(control('invalid-code'))).toEqual({ recoveryCodeFormat: true });
     });
   });
 

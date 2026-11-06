@@ -2,8 +2,8 @@ import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../core/session';
 import { navigationFor } from '../../core/navigation';
-import { ProfileApi } from '../../core/profile-api';
 import { HeaderNavigation } from '../../shared/header-navigation/header-navigation';
+import { UserMenu } from '../../shared/user-menu/user-menu';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -11,11 +11,14 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { map } from 'rxjs';
+import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-inicio-dashboard',
   imports: [
+    SiteFooter,
     HeaderNavigation,
+    UserMenu,
     AsyncPipe,
     NgTemplateOutlet,
     RouterLink,
@@ -30,10 +33,8 @@ import { map } from 'rxjs';
 })
 export class InicioDashboard {
   protected readonly session = inject(Session);
-  private readonly profiles = inject(ProfileApi);
   protected get nombre(): string { return this.session.demo() ? (this.coach ? 'Marco' : 'Camila') : this.session.account()?.email ?? 'Usuario'; }
   protected get iniciales(): string { return this.session.demo() ? (this.coach ? 'MP' : 'CR') : 'KL'; }
-  protected salir(): void { this.session.logout(); this.profiles.reset(); }
   protected readonly coach: boolean;
   protected readonly nuevo$;
   protected readonly ruta: string;

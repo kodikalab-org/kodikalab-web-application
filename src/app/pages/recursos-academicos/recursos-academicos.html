@@ -9,7 +9,7 @@
         <app-header-navigation [coach]="coach" class="mr-auto ml-10" />
         <div class="flex items-center gap-4">
           <img src="/images/recursos/campana.svg" alt="Notificaciones no disponibles en esta maqueta" />
-          <a [routerLink]="coach ? '/coach/perfil' : '/perfil'" aria-label="Ver perfil" class="flex size-9 items-center justify-center rounded-full bg-kl-accent text-xs">{{ session.demo() ? (coach ? 'MP' : 'CR') : 'KL' }}</a><img class="lg:hidden" src="/images/recursos/abajo.svg" alt="" />
+          <app-user-menu [coach]="coach" />
         </div>
       </mat-toolbar>
     </header>
@@ -65,13 +65,13 @@
           </aside>
         </div>
       }
-      <footer class="flex flex-col gap-2 text-xs text-kl-muted">
-        <p class="m-0">© 2026 Kodikalab · GPC UPC</p><p class="m-0">Términos de Servicio · Política de privacidad</p>
+      <div class="flex flex-col gap-2 text-xs text-kl-muted">
         <p class="m-0">Maqueta estática · Sin IA. Apertura de recursos, consulta del catálogo y vista del problema pendientes de integración.</p>
         <nav aria-label="Variantes de demostración" class="flex flex-wrap gap-x-4 gap-y-2">
           <a routerLink="/recursos">Recursos pertinentes</a><a routerLink="/recursos" [queryParams]="{ estado: 'relacionados' }">Temas relacionados</a><a routerLink="/recursos" [queryParams]="{ estado: 'catalogo-no-disponible' }">Catálogo no disponible</a><a routerLink="/recursos" [queryParams]="{ estado: 'contexto-no-disponible' }">Contexto no disponible</a>
         </nav>
-      </footer>
+      </div>
     </main>
+    <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
   </div>
 }

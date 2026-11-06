@@ -60,14 +60,11 @@
         >
           <strong class="text-kl-danger">Tu cuenta no está habilitada</strong
           ><span
-            >No se ha iniciado ninguna sesión. Recupera el acceso o contacta con el responsable de
-            la plataforma para revisar el estado de tu cuenta.</span
+            >No se ha iniciado ninguna sesión. Contacta con el responsable de la plataforma para
+            revisar el estado de tu cuenta.</span
           >
         </section>
-        <a mat-flat-button routerLink="/login" class="w-full">Reintentar</a
-        ><a mat-stroked-button routerLink="/recuperar-acceso" class="mt-3 w-full"
-          >Recuperar acceso</a
-        >
+        <a mat-flat-button routerLink="/login" class="w-full">Reintentar</a>
         <p class="text-xs text-kl-muted">
           Vista estática de ejemplo · No cambia el estado de tu cuenta.
         </p>
@@ -96,6 +93,15 @@
           novalidate
           (ngSubmit)="ingresar()"
         >
+          @if (notice) {
+            <p
+              role="status"
+              class="m-0 flex items-start gap-2.5 rounded-xl border border-solid border-green-400/40 bg-green-400/10 px-3.5 py-3 text-sm text-green-200"
+            >
+              <img src="images/onboarding/check-circle-20.svg" width="20" height="20" alt="" />
+              {{ notice }}
+            </p>
+          }
           <div class="field flex min-w-0 flex-col gap-1.5">
             <label class="field__label text-[13px] font-medium text-kl-body" for="email"
               >Correo institucional</label
@@ -180,7 +186,7 @@
               >Recordarme</mat-checkbox
             >
             <a
-              routerLink="/recuperar-acceso"
+              routerLink="/recuperar-contrasena"
               class="forgot text-sm font-medium whitespace-nowrap text-kl-accent-text"
               >¿Olvidaste tu contraseña?</a
             >
@@ -218,7 +224,7 @@
               <p class="m-0">{{ error }}</p>
               @if (failure === 'credentials') {
                 <p class="m-0 text-xs text-kl-body">
-                  Revisa tu correo y tu contraseña, o recupera el acceso si no recuerdas tus credenciales.
+                  Revisa tu correo y tu contraseña e inténtalo de nuevo.
                 </p>
               }
               @if (failure) {
@@ -232,9 +238,6 @@
                   >
                     Reintentar
                   </button>
-                  @if (failure === 'credentials') {
-                    <a mat-stroked-button routerLink="/recuperar-acceso" class="recover">Recuperar acceso</a>
-                  }
                 </div>
               }
             </div>
@@ -251,10 +254,5 @@
     </mat-card>
   </main>
 
-  <p
-    class="legal relative z-10 m-0 px-4 pb-[22px] text-center text-xs text-kl-faint [@media(max-height:760px)]:pb-3"
-  >
-    © 2026 Kodikalab · <span class="legal__link text-kl-accent-text">Términos de Servicio</span> ·
-    Política de privacidad
-  </p>
+  <app-site-footer variant="compact" class="legal relative z-10 m-0 px-4 pb-[22px] text-center text-xs text-kl-faint [@media(max-height:760px)]:pb-3" />
 </div>

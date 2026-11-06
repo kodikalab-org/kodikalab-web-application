@@ -38,7 +38,7 @@
           >Kodikalab</span
         >
       </a>
-      <app-header-navigation #navegacionHeader />
+      <app-header-navigation />
     </div>
     <div class="flex items-center gap-[22px] max-[641px]:gap-3">
       <button
@@ -73,27 +73,9 @@
       >
         <img src="images/perfil/moon-22.svg" alt="" width="22" height="22" />
       </button>
-      <button
-        class="inline-flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-kl-text"
-        type="button"
-        aria-label="Menú de usuario"
-        [matMenuTriggerFor]="usuario"
-      >
-        <span
-          class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
-          >{{ info.iniciales }}</span
-        >
-        <img src="images/perfil/chevron-down-16.svg" alt="" width="16" height="16" />
-      </button>
+      <app-user-menu [iniciales]="info.iniciales" />
     </div>
   </mat-toolbar>
-  <mat-menu #usuario="matMenu">
-    <button mat-menu-item (click)="navegacionHeader.abrirSidebar()">Abrir navegación</button>
-    <a mat-menu-item routerLink="/inicio">Inicio</a>
-    <a mat-menu-item routerLink="/perfil/editar">Editar perfil</a>
-    <a mat-menu-item routerLink="/perfil" [queryParams]="{ tab: 'ajustes' }">Ajustes generales</a>
-    <a mat-menu-item routerLink="/login" (click)="salir()">{{ session.demo() ? 'Salir de la demo' : 'Cerrar sesión' }}</a>
-  </mat-menu>
 
   @if (vista$ | async; as vista) {
     <main
@@ -816,19 +798,6 @@
                           "
                         />
                       }
-                      @case ('codigo') {
-                        @if (!session.demo()) { <app-recovery-code /> } @else {
-                        <a
-                          mat-stroked-button
-                          class="bg-[#7357f3]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
-                          routerLink="/perfil"
-                          [queryParams]="{ tab: 'ajustes', estado: 'ver-codigo' }"
-                        >
-                          <img src="images/perfil/key-16.svg" alt="" width="16" height="16" />
-                          Ver mi código de ejemplo
-                        </a>
-                        }
-                      }
                       @case ('salir') {
                         <a
                           mat-stroked-button
@@ -850,166 +819,5 @@
         }
       </div>
     </main>
-
-    @if (vista.estado === 'ver-codigo') {
-      <div
-        class="fixed inset-0 z-50 flex justify-center overflow-y-auto bg-[#03020a]/72 px-4 pt-[230px] pb-8 max-[900px]:pt-16"
-      >
-        <div
-          class="flex h-fit w-[500px] max-w-full flex-col gap-4 rounded-[20px] border border-solid border-[#5b44c9] bg-linear-to-b from-[#1b1450] to-[#0c0922] p-7 drop-shadow-[0_0_20px_rgba(100,60,255,.4)]"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="titulo-ver-codigo"
-          cdkTrapFocus
-          [cdkTrapFocusAutoCapture]="true"
-          (keydown.escape)="cerrarVerCodigo.click()"
-        >
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="m-0 font-display text-[22px] font-bold" id="titulo-ver-codigo">
-              Código de recuperación
-            </h2>
-            <a
-              #cerrarVerCodigo
-              class="inline-flex"
-              routerLink="/perfil"
-              [queryParams]="{ tab: 'ajustes' }"
-              aria-label="Cerrar"
-            >
-              <img src="images/perfil/close-20.svg" alt="" width="20" height="20" />
-            </a>
-          </div>
-          <p class="m-0 text-[14px] leading-[21px] font-light text-kl-body">
-            Confirma tu contraseña para ver el código vigente de tu cuenta.
-          </p>
-          <form class="flex flex-col gap-4" [formGroup]="formPassword" novalidate>
-            <div class="flex flex-col gap-1.5">
-              <label class="text-[13px] font-medium text-kl-body" for="password-actual"
-                >Contraseña actual</label
-              >
-              <mat-form-field
-                class="auth-field w-full text-[15px] [--auth-field-height:50px] [--auth-field-padding:13px] [--mat-form-field-outlined-outline-color:#9b7dff]"
-                appearance="outline"
-                subscriptSizing="dynamic"
-              >
-                <img matPrefix src="images/perfil/lock-20.svg" alt="" width="20" height="20" />
-                <input
-                  matInput
-                  id="password-actual"
-                  cdkFocusInitial
-                  [type]="mostrarPassword ? 'text' : 'password'"
-                  formControlName="password"
-                  placeholder="Contraseña"
-                  autocomplete="current-password"
-                  required
-                />
-                <button
-                  matSuffix
-                  type="button"
-                  class="flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
-                  (click)="alternarPassword()"
-                  [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                  [attr.aria-pressed]="mostrarPassword"
-                >
-                  <img src="images/perfil/eye-20.svg" alt="" width="20" height="20" />
-                </button>
-                <mat-error>
-                  <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                  Ingresa tu contraseña
-                </mat-error>
-              </mat-form-field>
-            </div>
-            <div class="flex items-start justify-end gap-3">
-              <a
-                mat-stroked-button
-                class="px-[22px] [--mat-button-outlined-container-height:46px] [--mat-button-outlined-container-shape:12px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:15px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#34304a]"
-                routerLink="/perfil"
-                [queryParams]="{ tab: 'ajustes' }"
-              >
-                Cancelar
-              </a>
-              <button
-                mat-flat-button
-                class="bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
-                type="button"
-                routerLink="/perfil"
-                [queryParams]="{ tab: 'ajustes', estado: 'codigo-recuperacion' }"
-                [disabled]="formPassword.invalid"
-              >
-                Mostrar código
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    }
-
-    @if (vista.estado === 'codigo-recuperacion') {
-      <div
-        class="fixed inset-0 z-50 flex justify-center overflow-y-auto bg-[#03020a]/72 px-4 pt-[230px] pb-8 max-[900px]:pt-16"
-      >
-        <div
-          class="flex h-fit w-[500px] max-w-full flex-col gap-4 rounded-[20px] border border-solid border-[#5b44c9] bg-linear-to-b from-[#1b1450] to-[#0c0922] p-7 drop-shadow-[0_0_20px_rgba(100,60,255,.4)]"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="titulo-codigo"
-          cdkTrapFocus
-          [cdkTrapFocusAutoCapture]="true"
-          (keydown.escape)="cerrarCodigo.click()"
-        >
-          <div class="flex items-center justify-between gap-3">
-            <h2 class="m-0 font-display text-[22px] font-bold" id="titulo-codigo">
-              Código de recuperación
-            </h2>
-            <a
-              #cerrarCodigo
-              class="inline-flex"
-              routerLink="/perfil"
-              [queryParams]="{ tab: 'ajustes' }"
-              aria-label="Cerrar"
-            >
-              <img src="images/perfil/close-20.svg" alt="" width="20" height="20" />
-            </a>
-          </div>
-          <div
-            class="flex items-start gap-2.5 rounded-xl border border-solid border-[#4ade80]/40 bg-[#4ade80]/10 px-3.5 py-3"
-            role="status"
-          >
-            <img src="images/onboarding/check-circle-20.svg" alt="" width="20" height="20" />
-            <p class="m-0 flex-1 text-[14px] leading-5 text-[#bbf7d0]">
-              <strong class="block font-semibold">Contraseña verificada</strong>
-              Este es tu código de recuperación vigente.
-            </p>
-          </div>
-          <div
-            class="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[#8a6cff] bg-[#7357f3]/10 p-4"
-          >
-            <p class="m-0 font-mono text-[15px] font-bold tracking-[1px] break-all">
-              {{ codigoRecuperacion }}
-            </p>
-            <button
-              class="inline-flex shrink-0 cursor-pointer items-center gap-1.5 border-0 bg-transparent p-0 font-body text-[13px] text-kl-body"
-              type="button"
-            >
-              <img src="images/perfil/copy-16.svg" alt="" width="16" height="16" />
-              Copiar
-            </button>
-          </div>
-          <p class="m-0 text-[12px] leading-[17px] text-[#fde68a]">
-            Guárdalo en un lugar seguro. Si cambias tu contraseña, el código anterior deja de servir.
-          </p>
-          <div class="flex justify-end">
-            <a
-              mat-flat-button
-              class="bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
-              cdkFocusInitial
-              routerLink="/perfil"
-              [queryParams]="{ tab: 'ajustes' }"
-            >
-              Listo
-            </a>
-          </div>
-        </div>
-      </div>
-    }
   }
 </div>

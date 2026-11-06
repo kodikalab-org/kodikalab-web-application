@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
-import { MatMenuModule } from '@angular/material/menu';
+import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../core/profile-api';
 import { Session } from '../../../core/session';
@@ -21,7 +21,7 @@ const MAX_PRESENTACION = 500;
   selector: 'app-coach-perfil-editar',
   imports: [
     HeaderNavigation,
-    MatMenuModule,
+    UserMenu,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,

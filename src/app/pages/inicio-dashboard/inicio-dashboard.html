@@ -31,7 +31,7 @@
         class="flex shrink-0 items-center gap-2.5 text-xl font-medium tracking-[-0.4px] sm:text-[25px]"
         ><img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab</a
       >
-      <app-header-navigation #navegacionHeader [coach]="coach" class="xl:ml-8" />
+      <app-header-navigation [coach]="coach" class="xl:ml-8" />
       <div class="ml-auto flex min-w-0 items-center gap-1 sm:gap-3">
         <button
           mat-button
@@ -60,18 +60,18 @@
         >
           <img src="/images/dashboard/0-imgIcon4.svg" width="22" height="22" alt="" />
         </button>
-        <button
-          mat-button
-          [matMenuTriggerFor]="usuario"
-          aria-label="Abrir menú de usuario"
-          matTooltip="Cuenta y vistas de demostración"
-          class="min-w-0 px-1"
-        >
-          <span
-            class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-kl-accent to-[#b780ff] text-xs"
-            >{{ iniciales }}</span
-          ><img src="/images/dashboard/0-imgIcon5.svg" width="16" height="16" alt="" />
-        </button>
+        <app-user-menu
+          [coach]="coach"
+          [nombre]="nombre"
+          [iniciales]="iniciales"
+          [extras]="[
+            {
+              label: nuevo ? 'Ver demo con actividad' : 'Ver demo sin actividad',
+              path: ruta,
+              queryParams: nuevo ? {} : { estado: 'nuevo' },
+            },
+          ]"
+        />
       </div>
     </mat-toolbar>
   </header>
@@ -112,39 +112,6 @@
   <mat-menu #apariencia="matMenu" [class]="clasesMenu" [overlapTrigger]="false"
     ><button mat-menu-item disabled>Tema oscuro · tema claro próximamente</button></mat-menu
   >
-  <mat-menu #usuario="matMenu" [class]="clasesMenu" [overlapTrigger]="false" xPosition="before">
-    <div
-      class="mb-1 flex items-center gap-3 border-b border-kl-border-strong px-4 pt-2 pb-4"
-      role="note"
-    >
-      <span
-        class="flex size-10 shrink-0 items-center justify-center rounded-full bg-kl-accent text-sm font-medium text-white"
-        aria-hidden="true"
-        >{{ iniciales }}</span
-      >
-      <div>
-        <strong class="block text-sm font-medium text-kl-heading">{{
-          nombre
-        }}</strong
-        ><span class="mt-1 block text-xs text-kl-muted"
-          >{{ coach ? 'Coach' : 'Practicante' }} · {{ session.demo() ? 'Vista de demostración' : 'Sesión iniciada' }}</span
-        >
-      </div>
-    </div>
-    <a mat-menu-item [routerLink]="coach ? '/coach/perfil' : '/perfil'">Mi perfil</a>
-    <button mat-menu-item (click)="navegacionHeader.abrirSidebar()">Abrir navegación</button>
-    @if (session.demo()) {
-    <a mat-menu-item [routerLink]="ruta" [queryParams]="nuevo ? {} : { estado: 'nuevo' }">{{
-      nuevo ? 'Ver demo con actividad' : 'Ver demo sin actividad'
-    }}</a>
-    <a mat-menu-item [routerLink]="coach ? '/demo/practicante' : '/demo/coach'">{{
-      coach ? 'Ver demo de practicante' : 'Ver demo de coach'
-    }}</a>
-    }
-    <a mat-menu-item routerLink="/login" (click)="salir()" class="mt-1 border-t border-kl-border-strong"
-      >Volver al acceso</a
-    >
-  </mat-menu>
 
   <main
     #contenido
@@ -531,19 +498,7 @@
       </div>
     </div>
   </main>
-  <footer
-    class="flex flex-wrap items-center justify-between gap-6 border-t border-[#1b1840] bg-[#06041a] px-5 py-5 text-[13px] sm:px-11"
-  >
-    <div class="flex flex-wrap items-center gap-7">
-      <a [routerLink]="ruta" class="flex items-center gap-2.5 text-xl"
-        ><img src="/images/dashboard/0-imgIcon17.svg" width="32" height="32" alt="" />Kodikalab</a
-      ><span class="text-kl-faint">© 2026 Kodikalab. Todos los derechos reservados.</span>
-    </div>
-    <div class="flex gap-7 text-kl-muted">
-      <span title="Próximamente">Términos de Servicio</span
-      ><span title="Próximamente">Política de privacidad</span>
-    </div>
-  </footer>
+  <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
 </div>
 <ng-template #titulo let-nombre="nombre" let-icono="icono" let-accion="accion">
   <div class="mb-4 flex flex-wrap items-center justify-between gap-2">

@@ -332,6 +332,7 @@
                           [id]="'hora-' + campo"
                           type="time"
                           [formControlName]="campo"
+                          (click)="$any($event.target).showPicker?.()"
                         /><mat-error>Selecciona la hora de {{ campo }}.</mat-error></mat-form-field
                       >
                     </div>

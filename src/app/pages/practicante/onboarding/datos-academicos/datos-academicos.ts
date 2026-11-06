@@ -18,10 +18,12 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
+import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-onboarding-datos-academicos',
   imports: [
+    SiteFooter,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,

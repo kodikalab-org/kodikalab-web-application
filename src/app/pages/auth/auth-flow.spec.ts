@@ -4,13 +4,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Router, provideRouter } from '@angular/router';
 import { Registro } from './registro/registro';
 import { Login } from './login/login';
-import { RecuperarAcceso } from './recuperar-acceso/recuperar-acceso';
-import { RegistroExitoso } from './registro-exitoso/registro-exitoso';
 import { Session } from '../../core/session';
+import { routes } from '../../app.routes';
 
 const REGISTER_URL = 'http://localhost:8080/api/auth/register';
 const LOGIN_URL = 'http://localhost:8080/api/auth/login';
-const RECOVERY_URL = 'http://localhost:8080/api/auth/recovery';
 const CONNECTION = 'No pudimos conectar con el servidor. Inténtalo de nuevo.';
 
 describe('API-connected access forms', () => {
@@ -49,10 +47,68 @@ describe('API-connected access forms', () => {
     expect(navigate).not.toHaveBeenCalled();
     const request = http.expectOne(REGISTER_URL);
     expect(Object.keys(request.request.body).sort()).toEqual(['email', 'firstName', 'lastName', 'password', 'role']);
-    request.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE', recoveryCode: 'test-code' });
+    request.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
     await fixture.whenStable();
-    expect(navigate).toHaveBeenCalledWith('/registro-exitoso');
-    expect(TestBed.inject(Session).account()).toBeNull();
+    // Registration issues no token: the form signs in with the same credentials before onboarding.
+    expect(navigate).not.toHaveBeenCalled();
+    const login = http.expectOne(LOGIN_URL);
+    expect(login.request.body).toEqual({ email: 'test@example.com', password: 'Prueba2026' });
+    login.flush({ message: 'OK', email: 'test@example.com', role: 'PRACTICANTE', token: 'test-token', expiresIn: 3600 });
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith('/onboarding/practicante/datos-academicos');
+    expect(TestBed.inject(Session).account()?.token).toBe('test-token');
+    expect(root.querySelector<HTMLInputElement>('#password')!.value).toBe('');
+  });
+
+  it('sends a new coach straight to coach onboarding after signing in', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    root.querySelector<HTMLButtonElement>('mat-button-toggle[value="COACH"] button')!.click();
+    submit(root);
+    const register = http.expectOne(REGISTER_URL);
+    expect(register.request.body.role).toBe('COACH');
+    register.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'COACH' });
+    await fixture.whenStable();
+    http.expectOne(LOGIN_URL).flush({ message: 'OK', email: 'test@example.com', role: 'COACH', token: 'test-token', expiresIn: 3600 });
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith('/onboarding/coach/experiencia');
+  });
+
+  it('never registers twice when the automatic sign-in fails: Reintentar only repeats the sign-in', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    submit(root);
+    http.expectOne(REGISTER_URL).flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
+    await fixture.whenStable();
+    http.expectOne(LOGIN_URL).flush({}, { status: 503, statusText: 'Service Unavailable' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain(CONNECTION);
+    expect(navigate).not.toHaveBeenCalled();
+    root.querySelector<HTMLButtonElement>('button.retry')!.click();
+    fixture.detectChanges();
+    http.expectNone(REGISTER_URL);
+    expect(http.expectOne(LOGIN_URL).request.body.password).toBe('Prueba2026');
+  });
+
+  it('tells the user the account exists when the sign-in is rejected after registering', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    submit(root);
+    http.expectOne(REGISTER_URL).flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
+    await fixture.whenStable();
+    http.expectOne(LOGIN_URL).flush({ message: 'Credenciales inválidas' }, { status: 401, statusText: 'Unauthorized' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain('Tu cuenta se creó');
+    expect(root.querySelector('a[href="/login"]')).not.toBeNull();
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('sends trimmed names and a trimmed, lowercased email', async () => {
@@ -120,9 +176,11 @@ describe('API-connected access forms', () => {
     fixture.detectChanges();
     const retry = http.expectOne(REGISTER_URL);
     expect(retry.request.body.password).toBe('Prueba2026');
-    retry.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE', recoveryCode: 'test-code' });
+    retry.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE' });
     await fixture.whenStable();
-    expect(navigate).toHaveBeenCalledWith('/registro-exitoso');
+    http.expectOne(LOGIN_URL).flush({ message: 'OK', email: 'test@example.com', role: 'PRACTICANTE', token: 'test-token', expiresIn: 3600 });
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith('/onboarding/practicante/datos-academicos');
   });
 
   it('routes a newly authenticated coach to coach onboarding, independently of the email', async () => {
@@ -140,7 +198,7 @@ describe('API-connected access forms', () => {
     expect(navigate).toHaveBeenCalledWith('/onboarding/coach/experiencia');
   });
 
-  it('shows "Credenciales inválidas" with retry and recovery actions, keeps the email and clears the password', async () => {
+  it('shows "Credenciales inválidas" with a retry action and no recovery link, keeps the email and clears the password', async () => {
     const fixture = TestBed.createComponent(Login);
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
@@ -151,7 +209,7 @@ describe('API-connected access forms', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(alertText(root)).toContain('Credenciales inválidas');
-    expect(root.querySelector('[role=alert] a[href="/recuperar-acceso"]')).not.toBeNull();
+    expect(root.querySelector('a[href="/recuperar-acceso"]')).toBeNull();
     expect(root.querySelector('[role=alert] button.retry')).not.toBeNull();
     expect(root.querySelector<HTMLInputElement>('#email')!.value).toBe('Camila.Rojas@upc.edu.pe');
     expect(root.querySelector<HTMLInputElement>('#password')!.value).toBe('');
@@ -173,31 +231,24 @@ describe('API-connected access forms', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(alertText(root)).toContain(CONNECTION);
-    expect(root.querySelector('[role=alert] a[href="/recuperar-acceso"]')).toBeNull();
     root.querySelector<HTMLButtonElement>('button.retry')!.click();
     fixture.detectChanges();
     expect(http.expectOne(LOGIN_URL).request.body.password).toBe('Prueba2026');
   });
 
-  it('shows recovery failure without a success screen or session', async () => {
-    const fixture = TestBed.createComponent(RecuperarAcceso);
-    await fixture.whenStable();
-    const root: HTMLElement = fixture.nativeElement;
-    type(root, 'recovery-email', 'test@example.com');
-    type(root, 'recovery-code', 'ABCDEFGHIJKLMNOPQRSTUVWX');
-    type(root, 'new-password', 'Prueba2026');
-    submit(root);
-    http.expectOne(RECOVERY_URL).flush({ message: 'Datos de recuperación inválidos' }, { status: 401, statusText: 'Unauthorized' });
-    await fixture.whenStable();
-    expect(alertText(root)).toContain('Datos de recuperación inválidos');
-    expect(root.querySelector('code')).toBeNull();
-    expect(TestBed.inject(Session).account()).toBeNull();
+  it('offers the email reset from the login but no code-based recovery', async () => {
+    const login = TestBed.createComponent(Login);
+    await login.whenStable();
+    expect(login.nativeElement.querySelector('a[href="/recuperar-acceso"]')).toBeNull();
+    expect(login.nativeElement.querySelector('a[href="/recuperar-contrasena"]')?.textContent).toContain('¿Olvidaste tu contraseña?');
+    const registro = TestBed.createComponent(Registro);
+    await registro.whenStable();
+    expect(registro.nativeElement.textContent).not.toContain('código de recuperación');
   });
 
-  it('does not fabricate a registration confirmation when its ephemeral response is missing', async () => {
-    const fixture = TestBed.createComponent(RegistroExitoso);
-    await fixture.whenStable();
-    expect(fixture.nativeElement.textContent).toContain('Confirmación no disponible');
-    expect(fixture.nativeElement.querySelector('code')).toBeNull();
+  it('has no routes for the recovery code screens', () => {
+    const paths = routes.map((route) => route.path);
+    expect(paths).not.toContain('registro-exitoso');
+    expect(paths).not.toContain('recuperar-acceso');
   });
 });

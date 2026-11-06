@@ -10,10 +10,17 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 
 describe('Application navigation', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()] }));
-  afterEach(() => { TestBed.inject(HttpTestingController).verify(); TestBed.inject(Session).logout(); });
+  afterEach(() => {
+    const http = TestBed.inject(HttpTestingController);
+    // /progreso reads the real topic progress (US-10) even in the demo; every other page must stay offline.
+    http.match((request) => request.url.includes('/analytics/teams/'))
+      .forEach((request) => request.flush(null, { status: 503, statusText: 'Service Unavailable' }));
+    http.verify();
+    TestBed.inject(Session).logout();
+  });
 
   for (const role of ['PRACTICANTE', 'COACH'] as const) {
-    it(`opens every sidebar destination for ${role} without backend requests`, async () => {
+    it(`opens every header and dropdown destination for ${role} without backend requests`, async () => {
       const session = TestBed.inject(Session);
       session.startDemo(role);
       const load = vi.spyOn(TestBed.inject(ProfileApi), 'load');

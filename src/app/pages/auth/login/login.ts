@@ -14,13 +14,15 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { SiteFooter } from '../../../shared/site-footer/site-footer';
 
-// What the alert offers: 'credentials' (401) gets retry and recovery, 'connection' gets retry only.
+// What the alert offers: both a credentials (401) and a connection failure get a retry action.
 type LoginFailure = 'credentials' | 'connection' | null;
 
 @Component({
   selector: 'app-login',
   imports: [
+    SiteFooter,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -49,6 +51,11 @@ export class Login {
       : this.route.snapshot.queryParamMap.get('motivo') === 'conexion'
         ? 'No pudimos cargar tu perfil. Comprueba la conexión con el servidor.'
         : '';
+  // Shown after finishing the password reset screens.
+  protected readonly notice =
+    this.route.snapshot.queryParamMap.get('motivo') === 'contrasena-actualizada'
+      ? 'Contraseña actualizada. Inicia sesión con tu nueva contraseña.'
+      : '';
   protected failure: LoginFailure = null;
   protected showPassword = false;
 

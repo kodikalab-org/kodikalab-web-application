@@ -3,6 +3,3 @@
     <a [routerLink]="enlace.path" [fragment]="enlace.fragment" routerLinkActive="text-kl-accent-text" [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'exact' }" ariaCurrentWhenActive="page" class="text-kl-body transition-colors hover:text-kl-text focus-visible:outline-2 focus-visible:outline-kl-accent">{{ enlace.label }}</a>
   }
 </nav>
-<button mat-icon-button type="button" aria-label="Abrir sidebar de la aplicación" aria-controls="app-sidebar" [attr.aria-expanded]="sidebar.opened()" (click)="abrirSidebar()" class="text-kl-text">
-  <span aria-hidden="true" class="text-2xl leading-none">☰</span>
-</button>

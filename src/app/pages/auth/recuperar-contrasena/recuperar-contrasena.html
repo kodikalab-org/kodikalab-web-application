@@ -1,0 +1,344 @@
+<div
+  class="page relative flex min-h-[calc(100dvh-1px)] flex-col overflow-hidden bg-kl-bg font-body text-kl-text"
+  #pageStart
+>
+  <img
+    class="page__bg pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
+    src="images/login/bg.svg"
+    alt=""
+    aria-hidden="true"
+  />
+
+  <mat-toolbar
+    class="header auth-header relative z-10 justify-between border-0 border-b border-solid border-kl-divider px-14 font-body max-[641px]:px-4"
+  >
+    <a class="brand inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
+      <img src="images/login/logo-40.svg" alt="" width="40" height="40" />
+      <span class="brand__name text-[25px] font-medium tracking-[-.4px] max-[641px]:text-[22px]"
+        >Kodikalab</span
+      >
+    </a>
+    <div class="header__actions flex items-center gap-5 max-[641px]:gap-2.5">
+      <a
+        class="back inline-flex items-center gap-2 text-[15px] text-kl-body hover:text-kl-accent-text max-[641px]:gap-1.5 max-[641px]:text-[13px]"
+        routerLink="/login"
+        aria-label="Volver a iniciar sesión"
+      >
+        <img src="images/login/arrow-left-18.svg" alt="" width="18" height="18" />
+        <span class="back__text max-[461px]:hidden">Volver a iniciar sesión</span>
+      </a>
+    </div>
+  </mat-toolbar>
+
+  <main
+    class="main relative z-10 flex flex-1 items-center justify-center px-4 py-8 [@media(max-height:760px)]:p-4"
+  >
+    <mat-card
+      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[#201454]/75 via-[#140d34]/82 to-[#0a071a]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7 [@media(max-height:760px)]:px-8 [@media(max-height:760px)]:py-6 [@media(max-height:760px)_and_(max-width:640px)]:px-5"
+      appearance="outlined"
+    >
+      @let paso = (paso$ | async) ?? 'correo';
+      <div class="card__brand inline-flex items-center gap-2.5">
+        <img src="images/login/logo-48.svg" alt="" width="48" height="48" />
+        <span
+          class="brand__name brand__name--card text-[30px] font-medium tracking-[-.4px] [@media(max-height:760px)]:text-[26px]"
+          >Kodikalab</span
+        >
+      </div>
+
+      <div class="mt-5 flex w-full flex-col items-center gap-2" role="group" aria-label="Progreso de recuperación">
+        <div class="flex w-full max-w-[220px] gap-2" aria-hidden="true">
+          <span class="h-1 flex-1 rounded-full bg-kl-accent"></span>
+          <span class="h-1 flex-1 rounded-full" [class]="paso === 'correo' ? 'bg-[#34304a]' : 'bg-kl-accent'"></span>
+          <span class="h-1 flex-1 rounded-full" [class]="paso === 'nueva' ? 'bg-kl-accent' : 'bg-[#34304a]'"></span>
+        </div>
+        <p class="m-0 text-xs text-kl-muted">
+          Paso {{ paso === 'correo' ? 1 : paso === 'codigo' ? 2 : 3 }} de 3
+        </p>
+      </div>
+
+      @switch (paso) {
+        @case ('correo') {
+          <h1
+            class="card__title mt-3 mb-0 text-center font-display text-[34px] leading-[38px] font-bold tracking-[-1px] max-[641px]:text-[30px] max-[641px]:leading-[34px] [@media(max-height:760px)]:text-[28px] [@media(max-height:760px)]:leading-8"
+          >
+            Recuperar contraseña
+          </h1>
+          <p class="card__subtitle mt-2.5 mb-0 text-center text-base leading-6 font-light text-kl-body">
+            Te ayudamos a volver a entrar a tu cuenta
+          </p>
+
+          <section
+            class="mt-5 w-full rounded-xl border border-solid border-[#34304a] bg-white/3 p-4 text-sm text-kl-body"
+            aria-label="Cómo recuperar tu contraseña"
+          >
+            <p class="m-0 mb-3 font-medium text-kl-text">Así recuperas tu contraseña</p>
+            <ol class="m-0 flex list-none flex-col gap-2.5 p-0">
+              <li class="flex items-start gap-2.5">
+                <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-kl-accent/25 text-xs text-kl-accent-text">1</span>
+                Escribe tu correo institucional y te enviaremos un código.
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-kl-accent/25 text-xs text-kl-accent-text">2</span>
+                Ingresa el código de {{ codeLength }} dígitos que recibiste.
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-kl-accent/25 text-xs text-kl-accent-text">3</span>
+                Crea una nueva contraseña y vuelve a iniciar sesión.
+              </li>
+            </ol>
+          </section>
+
+          <form
+            class="form flex w-full flex-col gap-3.5 pt-5"
+            [formGroup]="correoForm"
+            novalidate
+            (ngSubmit)="enviarCodigo()"
+          >
+            <div class="field flex min-w-0 flex-col gap-1.5">
+              <label class="field__label text-[13px] font-medium text-kl-body" for="recovery-email"
+                >Correo institucional</label
+              >
+              <mat-form-field class="auth-field w-full text-[15px]" appearance="outline" subscriptSizing="dynamic">
+                <img matPrefix src="images/login/mail-20.svg" alt="" width="20" height="20" />
+                <input
+                  matInput
+                  id="recovery-email"
+                  type="email"
+                  formControlName="email"
+                  placeholder="nombre@upc.edu.pe"
+                  autocomplete="email"
+                  required
+                />
+                <mat-error>
+                  <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                  @if (correoForm.controls.email.hasError('required')) {
+                    Ingresa tu correo institucional
+                  } @else if (correoForm.controls.email.hasError('maxlength')) {
+                    El correo no puede superar 100 caracteres
+                  } @else {
+                    Ingresa un correo válido, por ejemplo nombre@upc.edu.pe
+                  }
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <button
+              mat-flat-button
+              class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+              type="submit"
+              [disabled]="correoForm.invalid || busy()"
+            >
+              {{ busy() ? 'Enviando código...' : 'Enviar código por correo' }}
+              <img src="images/login/arrow-right-18.svg" alt="" width="18" height="18" />
+            </button>
+          </form>
+        }
+
+        @case ('codigo') {
+          <h1
+            class="card__title mt-3 mb-0 text-center font-display text-[34px] leading-[38px] font-bold tracking-[-1px] max-[641px]:text-[30px] max-[641px]:leading-[34px] [@media(max-height:760px)]:text-[28px] [@media(max-height:760px)]:leading-8"
+          >
+            Ingresa el código
+          </h1>
+          <p class="card__subtitle mt-2.5 mb-0 text-center text-base leading-6 font-light text-kl-body">
+            Enviamos un código de {{ codeLength }} dígitos a
+            <strong class="font-medium text-kl-text">{{ maskedEmail }}</strong>. Revisa también tu carpeta de
+            correo no deseado.
+          </p>
+
+          <form
+            class="form flex w-full flex-col gap-3.5 pt-6"
+            [formGroup]="codigoForm"
+            novalidate
+            (ngSubmit)="verificarCodigo()"
+          >
+            <div class="field flex min-w-0 flex-col gap-1.5">
+              <label class="field__label text-[13px] font-medium text-kl-body" for="recovery-code"
+                >Código de verificación</label
+              >
+              <mat-form-field class="auth-field w-full text-[15px]" appearance="outline" subscriptSizing="dynamic">
+                <img matPrefix src="images/login/lock-20.svg" alt="" width="20" height="20" />
+                <input
+                  matInput
+                  id="recovery-code"
+                  type="text"
+                  inputmode="numeric"
+                  formControlName="code"
+                  placeholder="123456"
+                  autocomplete="one-time-code"
+                  maxlength="12"
+                  required
+                />
+                <mat-error>
+                  <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                  @if (codigoForm.controls.code.hasError('required')) {
+                    Ingresa el código que recibiste
+                  } @else {
+                    El código tiene {{ codeLength }} dígitos
+                  }
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <button
+              mat-flat-button
+              class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+              type="submit"
+              [disabled]="codigoForm.invalid || busy()"
+            >
+              {{ busy() ? 'Verificando...' : 'Verificar código' }}
+              <img src="images/login/arrow-right-18.svg" alt="" width="18" height="18" />
+            </button>
+            <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
+              <button
+                type="button"
+                class="cursor-pointer border-0 bg-transparent p-0 font-medium text-kl-accent-text hover:underline disabled:cursor-default disabled:opacity-55 disabled:no-underline"
+                [disabled]="busy()"
+                (click)="reenviarCodigo()"
+              >
+                Reenviar código
+              </button>
+              <a
+                routerLink="/recuperar-contrasena"
+                class="font-medium text-kl-accent-text hover:underline"
+                (click)="error.set('')"
+                >Cambiar correo</a
+              >
+            </div>
+            @if (resent()) {
+              <p role="status" class="m-0 text-center text-xs text-kl-body">
+                Te enviamos un código nuevo a {{ maskedEmail }}.
+              </p>
+            }
+          </form>
+        }
+
+        @case ('nueva') {
+          <h1
+            class="card__title mt-3 mb-0 text-center font-display text-[34px] leading-[38px] font-bold tracking-[-1px] max-[641px]:text-[30px] max-[641px]:leading-[34px] [@media(max-height:760px)]:text-[28px] [@media(max-height:760px)]:leading-8"
+          >
+            Crea tu nueva contraseña
+          </h1>
+          <p class="card__subtitle mt-2.5 mb-0 text-center text-base leading-6 font-light text-kl-body">
+            Elige una contraseña segura que no uses en otros sitios
+          </p>
+
+          <form
+            class="form flex w-full flex-col gap-3.5 pt-6"
+            [formGroup]="nuevaForm"
+            novalidate
+            (ngSubmit)="cambiarContrasena()"
+          >
+            <div class="field flex min-w-0 flex-col gap-1.5">
+              <label class="field__label text-[13px] font-medium text-kl-body" for="new-password"
+                >Nueva contraseña</label
+              >
+              <mat-form-field class="auth-field w-full text-[15px]" appearance="outline" subscriptSizing="dynamic">
+                <img matPrefix src="images/login/lock-20.svg" alt="" width="20" height="20" />
+                <input
+                  matInput
+                  id="new-password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Nueva contraseña"
+                  autocomplete="new-password"
+                  required
+                />
+                <button
+                  matSuffix
+                  type="button"
+                  class="toggle flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
+                  (click)="togglePassword()"
+                  [attr.aria-label]="showPassword ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+                  [attr.aria-pressed]="showPassword"
+                >
+                  <img
+                    [src]="showPassword ? 'images/login/eye-20.svg' : 'images/login/eye-off-20.svg'"
+                    alt=""
+                    width="20"
+                    height="20"
+                  />
+                </button>
+                <mat-error>
+                  <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                  @if (nuevaForm.controls.password.hasError('required')) {
+                    Crea una contraseña
+                  } @else if (nuevaForm.controls.password.hasError('passwordTooLong')) {
+                    La contraseña no puede superar 72 bytes. Las letras con tilde o símbolos ocupan más de uno.
+                  } @else {
+                    La contraseña debe contener al menos 8 caracteres, una mayúscula y un número
+                  }
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="field flex min-w-0 flex-col gap-1.5">
+              <label class="field__label text-[13px] font-medium text-kl-body" for="repeat-password"
+                >Repetir contraseña</label
+              >
+              <mat-form-field class="auth-field w-full text-[15px]" appearance="outline" subscriptSizing="dynamic">
+                <img matPrefix src="images/login/lock-20.svg" alt="" width="20" height="20" />
+                <input
+                  matInput
+                  id="repeat-password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="Repetir contraseña"
+                  autocomplete="new-password"
+                  [errorStateMatcher]="confirmPasswordMatcher"
+                  required
+                />
+                <mat-error>
+                  <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                  @if (nuevaForm.controls.confirmPassword.hasError('required')) {
+                    Repite tu contraseña
+                  } @else {
+                    Las contraseñas no coinciden
+                  }
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <button
+              mat-flat-button
+              class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+              type="submit"
+              [disabled]="nuevaForm.invalid || busy()"
+            >
+              {{ busy() ? 'Guardando...' : 'Cambiar contraseña' }}
+              <img src="images/login/arrow-right-18.svg" alt="" width="18" height="18" />
+            </button>
+          </form>
+        }
+      }
+
+      @if (error()) {
+        <div
+          role="alert"
+          class="mt-4 flex w-full flex-col gap-1.5 rounded-xl border border-solid border-[#7a2f3d] bg-[#3a1620]/60 p-3 text-sm text-[#ffb3c0]"
+        >
+          <span class="flex items-start gap-2">
+            <img class="mt-0.5" src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+            {{ error() }}
+          </span>
+          @if (paso !== 'correo') {
+            <a
+              routerLink="/recuperar-contrasena"
+              class="font-medium text-kl-accent-text hover:underline"
+              (click)="error.set('')"
+              >Pedir un código nuevo</a
+            >
+          }
+        </div>
+      }
+      <a
+        routerLink="/login"
+        class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-kl-accent-text hover:underline"
+      >
+        <img src="images/login/arrow-left-18.svg" alt="" width="16" height="16" />
+        Volver a iniciar sesión
+      </a>
+    </mat-card>
+  </main>
+
+  <app-site-footer variant="compact" class="legal relative z-10 m-0 px-4 pb-[22px] text-center text-xs text-kl-faint [@media(max-height:760px)]:pb-3" />
+</div>

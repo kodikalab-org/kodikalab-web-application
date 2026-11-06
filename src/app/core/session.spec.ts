@@ -30,15 +30,14 @@ describe('Real API session', () => {
     await result;
   }
 
-  it('registers the selected role without creating an authenticated session or storing a recovery code', async () => {
+  it('registers the selected role without creating an authenticated session', async () => {
     const result = firstValueFrom(session.register({ firstName: 'Usuario', lastName: 'Prueba',
       email: 'test@example.com', password: 'Prueba2026', role: 'COACH' }));
     const request = http.expectOne('http://localhost:8080/api/auth/register');
     expect(request.request.body.role).toBe('COACH');
-    request.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'COACH', recoveryCode: 'code-only-in-memory' });
+    request.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'COACH' });
     await result;
     expect(session.token()).toBeNull();
-    expect(session.registration()?.recoveryCode).toBe('code-only-in-memory');
     expect(localStorage.getItem('kodikalab.session')).toBeNull();
     expect(sessionStorage.getItem('kodikalab.session')).toBeNull();
   });
@@ -58,6 +57,47 @@ describe('Real API session', () => {
     expect(session.account()).toBeNull();
     expect(localStorage.getItem('kodikalab.session')).toBeNull();
     expect(sessionStorage.getItem('kodikalab.session')).toBeNull();
+  });
+
+  describe('after the browser is reopened', () => {
+    // A new Session is what the app gets after closing and reopening the browser: it only has the storages.
+    const reopened = () => TestBed.runInInjectionContext(() => new Session());
+
+    it('restores a remembered login from the persistent storage', async () => {
+      await login(true);
+      const next = reopened();
+      expect(next.token()).toBe('test-token');
+      expect(next.account()?.email).toBe('test@example.com');
+      expect(next.account()?.role).toBe('COACH');
+    });
+
+    it('forgets a login that was not remembered once the tab is closed, but keeps it across a reload', async () => {
+      await login(false);
+      expect(reopened().token()).toBe('test-token');
+      // Closing the tab empties sessionStorage.
+      sessionStorage.removeItem('kodikalab.session');
+      expect(reopened().token()).toBeNull();
+    });
+
+    it('discards a remembered login whose token already expired and cleans the storage', async () => {
+      await login(true);
+      const saved = JSON.parse(localStorage.getItem('kodikalab.session')!);
+      localStorage.setItem('kodikalab.session', JSON.stringify({ ...saved, expiresAt: Date.now() - 1000 }));
+      expect(reopened().token()).toBeNull();
+      expect(localStorage.getItem('kodikalab.session')).toBeNull();
+    });
+
+    it('ignores a corrupted stored session', () => {
+      localStorage.setItem('kodikalab.session', '{no es json');
+      expect(reopened().token()).toBeNull();
+    });
+
+    it('a new login without remember replaces a previously remembered one', async () => {
+      await login(true);
+      await login(false);
+      expect(localStorage.getItem('kodikalab.session')).toBeNull();
+      expect(sessionStorage.getItem('kodikalab.session')).not.toBeNull();
+    });
   });
 
   it('does not turn rejected credentials into a session', async () => {
@@ -80,15 +120,6 @@ describe('Real API session', () => {
     await rejected;
     expect(session.token()).toBeNull();
     expect(navigation).toHaveBeenCalledWith(['/login'], { queryParams: { motivo: 'sesion-expirada' } });
-  });
-
-  it('does not end the session when the recovery-code password is incorrect', async () => {
-    await login();
-    const result = firstValueFrom(session.recoveryCode('wrong'));
-    const rejected = expect(result).rejects.toMatchObject({ status: 401 });
-    http.expectOne('http://localhost:8080/api/auth/recovery-code').flush({}, { status: 401, statusText: 'Unauthorized' });
-    await rejected;
-    expect(session.token()).toBe('test-token');
   });
 
   it('keeps demo navigation separate from real authentication', () => {
@@ -119,28 +150,5 @@ describe('Real API session', () => {
     session.account.update(account => account && { ...account, expiresAt: Date.now() - 1 });
     expect(session.token()).toBeNull();
     expect(session.account()).toBeNull();
-  });
-
-  it('keeps the current session when recovery is rejected', async () => {
-    await login();
-    const result = firstValueFrom(session.recover('test@example.com', 'ABCD-EFGH-IJKL-MNOP-QRST-UVWX', 'Nueva2026'));
-    const rejected = expect(result).rejects.toMatchObject({ status: 401 });
-    http.expectOne('http://localhost:8080/api/auth/recovery').flush({ message: 'Datos de recuperación inválidos' },
-      { status: 401, statusText: 'Unauthorized' });
-    await rejected;
-    expect(session.token()).toBe('test-token');
-    expect(session.registration()).toBeNull();
-  });
-
-  it('rotates recovery through the real contract without persisting its response', async () => {
-    await login();
-    const result = firstValueFrom(session.recover('test@example.com', 'old-code', 'Nueva2026'));
-    const request = http.expectOne('http://localhost:8080/api/auth/recovery');
-    expect(request.request.headers.has('Authorization')).toBe(false);
-    expect(request.request.body).toEqual({ email: 'test@example.com', recoveryCode: 'old-code', newPassword: 'Nueva2026' });
-    request.flush({ message: 'OK', recoveryCode: 'new-code' });
-    expect((await result).recoveryCode).toBe('new-code');
-    expect(session.account()).toBeNull();
-    expect(session.registration()).toBeNull();
   });
 });

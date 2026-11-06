@@ -11,6 +11,7 @@ import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
 import { PractitionerProfile, apiError } from '../../../../core/api';
+import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 
 const usuarioExterno = () =>
   new FormControl('', {
@@ -21,6 +22,7 @@ const usuarioExterno = () =>
 @Component({
   selector: 'app-onboarding-plataformas',
   imports: [
+    SiteFooter,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,

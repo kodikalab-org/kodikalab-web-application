@@ -396,7 +396,7 @@
                 }
               "
             />
-            @if (nuevo || grupos().length === 0) {
+            @if ((nuevo && session.demo()) || grupos().length === 0) {
               <ng-container
                 *ngTemplateOutlet="
                   vacio;

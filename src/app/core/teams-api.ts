@@ -20,7 +20,8 @@ export type MembershipDecision =
   | 'ACEPTAR'
   | 'RECHAZAR'
   | 'SOLICITAR_ACLARACION'
-  | 'EXPULSAR';
+  | 'EXPULSAR'
+  | 'READMITIR';
 /** El backend usa estos valores en `nivel_esperado`; la UI los muestra en español. */
 export type ExpectedLevel = 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO' | string;
 
@@ -202,7 +203,10 @@ export class TeamsApi {
     });
   }
 
-  loadRequests(groupId: number, status: 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO') {
+  loadRequests(
+    groupId: number,
+    status: 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO' | 'EXPULSADO',
+  ) {
     if (this.session.demo()) return of(SOLICITUDES_GRUPO_DEMO.filter(request => request.groupId === groupId && request.status === status)).pipe(tap(requests => this.requests.set(requests)));
     this.loading.set(true);
     return this.http

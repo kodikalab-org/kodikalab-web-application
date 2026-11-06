@@ -16,7 +16,7 @@ export const accessGuard: CanActivateFn = (route, state) => {
   session.restore();
   const role: Role = route.data['role'];
   if (session.demo()) return session.demo() === role ? true : router.parseUrl(homeFor(session.demo()!));
-  if (!session.token()) return router.parseUrl('/login');
+  if (!session.authenticated()) return router.parseUrl('/login');
   const actualRole = session.account()!.role;
   if (actualRole !== role) return router.parseUrl(homeFor(actualRole));
   return profiles.load().pipe(

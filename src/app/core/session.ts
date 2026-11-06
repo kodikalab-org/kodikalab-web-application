@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { API_URL, AuthResponse, RecoveryResponse, RegisterRequest, Role } from './api';
 
-interface SessionData { token: string; email: string; role: Role; expiresAt: number; }
+interface SessionData { token: string; email: string; role: Role; expiresAt: number; cookie?: boolean; }
 const KEY = 'kodikalab.session';
 const DEMO_KEY = 'kodikalab.demo';
 
@@ -28,7 +28,7 @@ export class Session {
       const raw = win.sessionStorage.getItem(KEY) ?? win.localStorage.getItem(KEY);
       const saved = raw ? JSON.parse(raw) : null;
       if (saved && typeof saved.token === 'string' && typeof saved.email === 'string' &&
-          ['PRACTICANTE', 'COACH'].includes(saved.role) && saved.expiresAt > Date.now()) this.account.set(saved);
+          ['PRACTICANTE', 'COACH'].includes(saved.role) && (saved.cookie === true || saved.expiresAt > Date.now())) this.account.set(saved);
       else this.clearStorage();
       const demo = win.sessionStorage.getItem(DEMO_KEY);
       if (demo === 'PRACTICANTE' || demo === 'COACH') this.demo.set(demo);
@@ -39,25 +39,30 @@ export class Session {
     this.restore();
     if (this.demo()) return null;
     const session = this.account();
-    if (session && session.expiresAt <= Date.now()) { this.logout(); return null; }
-    return session?.token ?? null;
+    if (session && !session.cookie && session.expiresAt <= Date.now()) { this.logout(); return null; }
+    return session?.token || null;
+  }
+
+  authenticated(): boolean {
+    this.token();
+    return !this.demo() && this.account() !== null;
   }
 
   login(email: string, password: string, remember: boolean) {
     return this.http.post<AuthResponse>(`${this.url}/auth/login`, { email, password }, { timeout: 15000 }).pipe(
       tap((response) => {
-        if (!response.token || !response.expiresIn || !['PRACTICANTE', 'COACH'].includes(response.role)) {
+        if (!response.email || !['PRACTICANTE', 'COACH'].includes(response.role) || (response.token && !response.expiresIn)) {
           throw new Error('Respuesta de autenticación incompleta');
         }
         this.logout();
         const data: SessionData = {
-          token: response.token, email: response.email, role: response.role,
-          expiresAt: Date.now() + response.expiresIn * 1000,
+          cookie: !response.token, token: response.token ?? '', email: response.email, role: response.role,
+          expiresAt: response.expiresIn ? Date.now() + response.expiresIn * 1000 : 0,
         };
         this.account.set(data);
         try {
           const win = this.document.defaultView;
-          if (this.browser && win) (remember ? win.localStorage : win.sessionStorage).setItem(KEY, JSON.stringify(data));
+          if (this.browser && win) (!data.cookie && remember ? win.localStorage : win.sessionStorage).setItem(KEY, JSON.stringify(data));
         } catch { /* Storage may be disabled. The in-memory session still works. */ }
       }),
     );

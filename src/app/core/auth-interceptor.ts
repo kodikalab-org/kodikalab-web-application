@@ -17,10 +17,11 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     return throwError(() => new Error('La demostración no realiza operaciones contra la API.'));
   }
   const token = publicAuth ? null : session.token();
+  request = request.clone({ withCredentials: true });
   return next(token ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : request).pipe(
     catchError((error: unknown) => {
       // An invalid recovery-code password is NOT an expired session.
-      if (error instanceof HttpErrorResponse && error.status === 401 && token &&
+      if (error instanceof HttpErrorResponse && error.status === 401 && !publicAuth && session.authenticated() &&
           !request.url.endsWith('/auth/recovery-code')) {
         session.logout();
         profiles.reset();

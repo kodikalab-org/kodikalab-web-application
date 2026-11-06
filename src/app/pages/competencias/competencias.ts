@@ -1,3 +1,6 @@
+import { inject as injectSession } from '@angular/core';
+import { Session } from '../../core/session';
+import { ResultsLive } from './results-live';
 import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,7 +16,7 @@ import { map, tap, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-competencias',
-  imports: [
+  imports: [ResultsLive,
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,
@@ -29,6 +32,7 @@ import { map, tap, distinctUntilChanged } from 'rxjs';
   styleUrl: './competencias.css',
 })
 export class Competencias {
+  readonly session = injectSession(Session);
   protected readonly estado$;
   protected readonly accion$;
   protected readonly resultados = [

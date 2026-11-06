@@ -6,6 +6,7 @@ import { accessGuard, demoGuard } from './core/access-guard';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 
 const appRoutes: Routes = [
+  { path: 'coach/ranking', loadComponent: () => import('./pages/ranking-equipo/ranking-equipo').then(m => m.RankingEquipo) },
   {
     path: 'recursos',
     loadComponent: () => import('./pages/recursos-academicos/recursos-academicos').then((m) => m.RecursosAcademicos),

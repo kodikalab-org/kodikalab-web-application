@@ -1,3 +1,4 @@
+import { API_URL } from './core/api';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
@@ -7,6 +8,7 @@ import { authInterceptor } from './core/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    { provide: API_URL, useValue: '/api' },
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideRouter(routes), provideClientHydration()

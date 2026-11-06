@@ -132,4 +132,27 @@ describe('Real API session', () => {
     expect(session.account()).toBeNull();
     expect(session.registration()).toBeNull();
   });
+  it('accepts the actual cookie login without inventing a token or expiry', async () => {
+    const result=firstValueFrom(session.login('test@example.com','Password123',true));
+    const request=http.expectOne('http://localhost:8080/api/auth/login');
+    expect(request.request.withCredentials).toBe(true);
+    request.flush({message:'OK',email:'test@example.com',role:'PRACTICANTE'});
+    await result;
+    expect(session.token()).toBeNull();expect(session.authenticated()).toBe(true);
+    expect(session.account()?.cookie).toBe(true);
+    expect(localStorage.getItem('kodikalab.session')).toBeNull();
+    const profile=firstValueFrom(TestBed.inject(ProfileApi).load());
+    const read=http.expectOne('http://localhost:8080/api/users/me');
+    expect(read.request.withCredentials).toBe(true);expect(read.request.headers.has('Authorization')).toBe(false);
+    read.flush({message:'OK',profile:{}});await profile;
+  });
+  it('invalidates a cookie-session hint on a protected 401', async () => {
+    const login=firstValueFrom(session.login('test@example.com','Password123',false));
+    http.expectOne('http://localhost:8080/api/auth/login').flush({message:'OK',email:'test@example.com',role:'COACH'});await login;
+    vi.spyOn(TestBed.inject(Router),'navigate').mockResolvedValue(true);
+    const profile=firstValueFrom(TestBed.inject(ProfileApi).load());const rejected=expect(profile).rejects.toMatchObject({status:401});
+    http.expectOne('http://localhost:8080/api/users/me').flush({},{status:401,statusText:'Unauthorized'});await rejected;
+    expect(session.authenticated()).toBe(false);
+  });
+
 });

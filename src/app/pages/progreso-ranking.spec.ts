@@ -1,3 +1,5 @@
+import { RenderMode } from '@angular/ssr';
+import { serverRoutes } from '../app.routes.server';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { OverlayContainer } from '@angular/cdk/overlay';
@@ -9,6 +11,11 @@ import { accessGuard } from '../core/access-guard';
 import { RendimientoEquipo } from './rendimiento-equipo/rendimiento-equipo';
 
 describe('Interfaces de progreso y ranking', () => {
+  it('renders private ranking and team progress only on the client', () => {
+    for (const path of ['ranking', 'progreso/equipos']) {
+      expect(serverRoutes.find(route => route.path === path)?.renderMode).toBe(RenderMode.Client);
+    }
+  });
   it('conserva los guards y roles de develop en las cuatro rutas nuevas', () => {
     for (const path of ['progreso', 'ranking', 'progreso/equipos', 'coach/rendimiento']) {
       const route = routes.find((item) => item.path === path)!;

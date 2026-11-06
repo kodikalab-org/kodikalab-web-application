@@ -1,3 +1,6 @@
+import { inject as injectSession } from '@angular/core';
+import { Session } from '../../core/session';
+import { TopicsLive } from './topics-live';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -11,7 +14,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-rendimiento-equipo',
-  imports: [
+  imports: [TopicsLive,
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,
@@ -25,6 +28,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
   styleUrl: './rendimiento-equipo.css',
 })
 export class RendimientoEquipo {
+  readonly session = injectSession(Session);
   protected readonly estado$;
   constructor(route: ActivatedRoute) {
     this.estado$ = route.queryParamMap.pipe(map((params) => params.get('estado') ?? ''));

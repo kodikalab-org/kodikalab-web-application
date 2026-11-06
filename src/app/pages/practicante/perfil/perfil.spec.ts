@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { of, Subject } from 'rxjs';
 import { Perfil } from './perfil';
 import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
+import { ProfileApi } from '../../../core/profile-api';
 
 describe('Perfil', () => {
   async function setup(params: Record<string, string> = {}) {
@@ -51,6 +52,31 @@ describe('Perfil', () => {
   const emptyStats: CodeforcesStats = { linked: true, handle: 'new_handle', problemsSolved: 0,
     maxStreakDays: 0, currentRating: 0, acceptedSubmissions: 0, acceptanceRate: 0,
     activity: [], solvedByRating: [] };
+
+  it('shows the real account name prominently, email separately and matching initials', async () => {
+    const { fixture, root } = await setupLive();
+    TestBed.inject(ProfileApi).profile.set({ fullName: 'Ana María Núñez', email: 'student@example.invalid',
+      role: 'PRACTICANTE', codigoEstudiante: 'TEST001', carrera: 'Ingeniería de Software', cicloAcademico: 5,
+      nivelCompetitivo: 'INTERMEDIO', codeforcesHandle: null, codeforcesRating: null,
+      atcoderHandle: null, vjudgeHandle: null });
+    await fixture.whenStable();
+    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Ana María Núñez');
+    expect(root.querySelector('.profile-name')?.textContent).not.toContain('@');
+    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('student@example.invalid');
+    expect(root.querySelector('.profile-email')?.classList.contains('text-[12px]')).toBe(true);
+    expect(root.querySelector('.profile-avatar')?.textContent?.trim()).toBe('AN');
+  });
+
+  it('does not promote email to a name while an older backend omits fullName', async () => {
+    const { fixture, root } = await setupLive();
+    TestBed.inject(ProfileApi).profile.set({ email: 'not.a.name@example.invalid', role: 'PRACTICANTE',
+      codigoEstudiante: 'TEST002', carrera: 'Ingeniería de Software', cicloAcademico: 5,
+      nivelCompetitivo: 'INTERMEDIO', codeforcesHandle: null, codeforcesRating: null,
+      atcoderHandle: null, vjudgeHandle: null });
+    await fixture.whenStable();
+    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Practicante');
+    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('not.a.name@example.invalid');
+  });
 
   it('renders a real loading skeleton without demo numbers', async () => {
     const { root } = await setupLive();
@@ -127,16 +153,18 @@ describe('Perfil', () => {
     expect(contenido).toContain('569');
     expect(contenido).toContain('Problemas resueltos');
     expect(contenido).toContain('Actividad de resolución de problemas');
-    expect(contenido).toContain('Heatmap por rating');
+    expect(contenido).toContain('Problemas por rating');
     expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(1);
     expect(root.querySelectorAll('li[aria-disabled="true"]').length).toBe(2);
     expect(contenido.match(/En mantenimiento/g)?.length).toBe(2);
     expect(contenido).not.toContain('Aún no vinculas plataformas');
   });
 
-  it('draws one heatmap cell per day (40 weeks x 7 days) in each heatmap', async () => {
+  it('draws one dated cell per day in the annual calendar and labels demo data', async () => {
     const { root } = await setup();
-    expect(root.querySelectorAll('span.size-\\[11px\\]').length).toBe(2 * 40 * 7);
+    const days = root.querySelectorAll('.activity-cell:not(.padding)');
+    expect([365, 366]).toContain(days.length);
+    expect(texto(root)).toContain('Datos de ejemplo');
   });
 
   it('shows skeletons instead of content while loading (?estado=cargando)', async () => {

@@ -19,6 +19,7 @@ export interface RegisterRequest {
   firstName: string; lastName: string; email: string; password: string; role: Role;
 }
 export interface PractitionerProfile {
+  fullName?: string | null;
   district?: string | null;
   experienceMonths?: number | null;
   preferredTime?: 'MANANA' | 'TARDE' | 'NOCHE' | null;
@@ -30,12 +31,13 @@ export interface PractitionerProfile {
   atcoderHandle: string | null; vjudgeHandle: string | null;
 }
 export interface CoachProfile {
+  fullName?: string | null;
   email: string; role: 'COACH'; especialidadPrincipal: string;
   organizacionClub: string | null; aniosExperiencia: number; presentacion: string | null;
 }
 export type Profile = PractitionerProfile | CoachProfile;
-export type PractitionerRequest = Omit<PractitionerProfile, 'email' | 'role' | 'codeforcesRating'>;
-export type CoachRequest = Omit<CoachProfile, 'email' | 'role'>;
+export type PractitionerRequest = Omit<PractitionerProfile, 'email' | 'role' | 'codeforcesRating' | 'fullName'>;
+export type CoachRequest = Omit<CoachProfile, 'email' | 'role' | 'fullName'>;
 export interface ProfileResponse { message: string; profile: Profile; }
 
 const CONNECTION_MESSAGE = 'No pudimos conectar con el servidor. Inténtalo de nuevo.';

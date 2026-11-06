@@ -3,9 +3,11 @@ import { HeaderNavigation } from '../../../shared/header-navigation/header-navig
 import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CodeforcesStatsApi, CodeforcesStats, activityCalendar } from '../../../core/codeforces-stats-api';
+import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
+import { ProfileStatistics } from './profile-statistics/profile-statistics';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
+import { profileIdentity } from '../../../core/profile-identity';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,20 +19,14 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import {
-  DIAS_HEATMAP,
-  ESTADISTICAS_DEMO,
   FILTROS_SOLICITUD_DEMO,
-  HEATMAP_ACTIVIDAD_DEMO,
-  HEATMAP_RATING_DEMO,
   IDIOMAS_AJUSTES,
   INFO_PERSONAL_DEMO,
   LENGUAJES_FILTRO,
-  MESES_HEATMAP,
   PAGINAS_SUBMISSIONS_DEMO,
   PERIODOS_FILTRO,
   PLATAFORMAS_FILTRO,
   PLATAFORMAS_PERFIL_DEMO,
-  PROBLEMAS_FILTRO,
   SOLICITUDES_DEMO,
   SUBMISSIONS_DEMO,
   VEREDICTOS_FILTRO,
@@ -39,7 +35,6 @@ import {
   EstadoPerfil,
   EstadoSolicitud,
   PestanaPerfil,
-  TonoEstadistica,
   VeredictoSubmission,
 } from '../../../models/perfil-practicante';
 
@@ -62,13 +57,10 @@ function resolverVista(tab: string | null, estado: string | null) {
   return { pestana, estado: valido };
 }
 
-function aCeldas(filas: string[]): number[] {
-  return [...filas[0]].flatMap((_, columna) => filas.map((fila) => Number(fila[columna])));
-}
-
 @Component({
   selector: 'app-perfil',
   imports: [
+    ProfileStatistics,
     HeaderNavigation,
     UserMenu,
     AsyncPipe,
@@ -110,8 +102,6 @@ export class Perfil {
       error: () => { this.statsError.set(true); this.statsLoading.set(false); },
     });
   }
-  protected get activity() { return activityCalendar(this.stats()?.activity ?? []); }
-  protected get ratingBuckets() { return [...(this.stats()?.solvedByRating ?? [])].sort((a, b) => a.rating - b.rating); }
   protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly route = inject(ActivatedRoute);
 
@@ -155,9 +145,10 @@ export class Perfil {
 
   // ---- Información personal ----
   protected get info() {
-    if (this.session.demo()) return INFO_PERSONAL_DEMO;
+    if (this.session.demo()) return { ...INFO_PERSONAL_DEMO, email: 'practicante@example.invalid' };
     const p = this.profiles.profile();
-    return { iniciales: 'KL', nombreCompleto: p?.email ?? '', usuario: '', rol: 'Practicante',
+    const identity = profileIdentity(p?.fullName, p?.email ?? '', 'Practicante');
+    return { iniciales: identity.initials, nombreCompleto: identity.name, email: identity.email, usuario: '', rol: 'Practicante',
       carreraCiclo: p?.role === 'PRACTICANTE' ? `${p.carrera} · ${p.cicloAcademico}.º ciclo` : '',
       universidad: 'Comunidad GPC UPC', ubicacion: p?.role === 'PRACTICANTE' ? p.district || 'Distrito no indicado' : '',
       nivelCodigo: p?.role === 'PRACTICANTE' ? `${p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
@@ -171,55 +162,6 @@ export class Perfil {
       usuario: p.codeforcesHandle ?? '',
     })).filter(platform => platform.usuario);
   }
-  protected get estadisticas() {
-    if (this.session.demo()) return ESTADISTICAS_DEMO;
-    const stats = this.stats();
-    if (!stats) return [];
-    const values = [String(stats.problemsSolved), `${stats.maxStreakDays} días`,
-      String(stats.currentRating), String(stats.acceptedSubmissions)];
-    const details = ['Problemas únicos aceptados', 'Mejor marca histórica', 'Codeforces',
-      `${stats.acceptanceRate.toFixed(1)} % de aceptación`];
-    return ESTADISTICAS_DEMO.map((card, i) => ({ ...card, valor: values[i], detalle: details[i] }));
-  }
-  protected readonly tonos: Record<TonoEstadistica, { caja: string; detalle: string }> = {
-    exito: { caja: 'bg-[#4ade80]/14', detalle: 'text-[#4ade80]' },
-    alerta: { caja: 'bg-[#fb923c]/14', detalle: 'text-[#fbbf24]' },
-    turquesa: { caja: 'bg-[#5eead4]/14', detalle: 'text-[#a78bfa]' },
-    violeta: { caja: 'bg-[#a78bfa]/14', detalle: 'text-[#4ade80]' },
-  };
-  protected readonly meses = MESES_HEATMAP;
-  protected readonly diasHeatmap = DIAS_HEATMAP;
-  private readonly heatmapsDemo = [
-    {
-      titulo: 'Actividad de resolución de problemas',
-      celdas: aCeldas(HEATMAP_ACTIVIDAD_DEMO),
-      clases: ['bg-[#17163a]', 'bg-[#14532d]', 'bg-[#16a34a]', 'bg-[#4ade80]'],
-      form: new FormGroup({
-        problemas: new FormControl('todos', { nonNullable: true }),
-        periodo: new FormControl('ultimo-anio', { nonNullable: true }),
-      }),
-    },
-    {
-      titulo: 'Heatmap por rating',
-      celdas: aCeldas(HEATMAP_RATING_DEMO),
-      clases: [
-        'bg-[#17163a]',
-        'bg-[#2a2750]',
-        'bg-[#a78bfa]',
-        'bg-[#5eead4]',
-        'bg-[#d4d4d8]',
-        'bg-[#c4b5fd]',
-      ],
-      form: new FormGroup({
-        problemas: new FormControl('todos', { nonNullable: true }),
-        periodo: new FormControl('ultimo-anio', { nonNullable: true }),
-      }),
-    },
-  ];
-  protected get heatmaps() { return this.session.demo() ? this.heatmapsDemo : []; }
-  protected readonly opcionesProblemas = PROBLEMAS_FILTRO;
-  protected readonly opcionesPeriodo = PERIODOS_FILTRO;
-
   // ---- Solicitudes ----
   protected readonly filtrosSolicitud = FILTROS_SOLICITUD_DEMO;
   protected get solicitudes() { return this.session.demo() ? SOLICITUDES_DEMO : []; }

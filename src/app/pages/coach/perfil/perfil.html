@@ -182,15 +182,16 @@
                   class="flex size-[118px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#8d6df8] to-[#4d2ff5] max-[641px]:size-24"
                 >
                   <span
-                    class="flex size-28 items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold max-[641px]:size-[90px] max-[641px]:text-[32px]"
+                    class="profile-avatar flex size-28 items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold max-[641px]:size-[90px] max-[641px]:text-[32px]"
                     aria-hidden="true"
                     >{{ perfil.iniciales }}</span
                   >
                 </span>
                 <div class="flex min-w-0 flex-col gap-2">
-                  <p class="m-0 break-all font-display text-2xl font-bold tracking-[-.4px]">
+                  <p class="profile-name m-0 font-display text-2xl font-bold tracking-[-.4px] [overflow-wrap:anywhere]">
                     {{ perfil.nombre }}
                   </p>
+                  <p class="profile-email m-0 text-[12px] leading-relaxed text-kl-muted [overflow-wrap:anywhere]">{{ perfil.email }}</p>
                   <div class="flex flex-wrap items-center gap-2.5">
                     <span class="text-sm text-kl-body">{{ perfil.usuario }}</span>
                     <span

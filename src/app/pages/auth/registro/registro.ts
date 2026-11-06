@@ -74,6 +74,8 @@ export class Registro {
   protected error = '';
   // True for network, timeout and 5xx failures: the form keeps its data so the user can retry.
   protected connectionError = false;
+  // One eye shows or hides both password fields, as in the other auth screens.
+  protected showPassword = false;
   protected readonly isWeakPassword = isWeakPassword;
   protected readonly confirmPasswordMatcher = new ConfirmPasswordMatcher();
 
@@ -98,6 +100,10 @@ export class Registro {
     },
     { validators: [passwordsMatch, fullNameRule] },
   );
+
+  protected togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   protected async registrar(): Promise<void> {
     if (this.form.invalid || this.busy) return;

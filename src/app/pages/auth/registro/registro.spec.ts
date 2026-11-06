@@ -31,6 +31,27 @@ describe('Registro', () => {
     expect(root.querySelector('.back')).not.toBeNull();
   });
 
+  it('has a working eye on each password field that shows and hides both of them', async () => {
+    const { fixture, root, input } = await setup();
+    const eyes = Array.from(root.querySelectorAll<HTMLButtonElement>('button.toggle'));
+    expect(eyes).toHaveLength(2);
+    // Each field shows a single icon of its own: the eye is a button, not a decorative image.
+    expect(root.querySelectorAll('img[matSuffix][src*="eye-off"]')).toHaveLength(0);
+    expect(input('password').type).toBe('password');
+    expect(eyes[0].getAttribute('aria-label')).toBe('Mostrar contraseñas');
+    eyes[1].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(input('password').type).toBe('text');
+    expect(input('confirmPassword').type).toBe('text');
+    expect(eyes[0].getAttribute('aria-label')).toBe('Ocultar contraseñas');
+    expect(eyes[0].getAttribute('aria-pressed')).toBe('true');
+    eyes[0].click();
+    fixture.detectChanges();
+    expect(input('password').type).toBe('password');
+    expect(input('confirmPassword').type).toBe('password');
+  });
+
   it('starts with the submit button disabled and no errors shown', async () => {
     const { root, submit } = await setup();
     expect(submit().disabled).toBe(true);

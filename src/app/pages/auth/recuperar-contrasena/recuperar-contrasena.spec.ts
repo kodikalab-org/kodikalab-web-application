@@ -224,6 +224,19 @@ describe('Password reset screens', () => {
     expect(button().disabled).toBe(false);
   });
 
+  it('has one working eye that shows and hides both new password fields', async () => {
+    const { root, settle } = await openNewPassword();
+    const eyes = root.querySelectorAll<HTMLButtonElement>('button.toggle');
+    expect(eyes).toHaveLength(1);
+    const field = (id: string) => root.querySelector<HTMLInputElement>(`#${id}`)!;
+    expect(field('new-password').type).toBe('password');
+    eyes[0].click();
+    await settle();
+    expect(field('new-password').type).toBe('text');
+    expect(field('repeat-password').type).toBe('text');
+    expect(eyes[0].getAttribute('aria-pressed')).toBe('true');
+  });
+
   it('sets the new password with the code, clears the flow and returns to the login with a confirmation', async () => {
     const flow = TestBed.inject(PasswordResetFlow);
     const { harness, type, submit, answer } = await openNewPassword();

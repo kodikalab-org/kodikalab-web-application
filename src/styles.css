@@ -335,6 +335,17 @@ app-login .auth-check .mdc-label {
   --mat-select-placeholder-text-color: #8d89a3;
   --mat-select-enabled-arrow-color: #cfcbe0;
 }
+/*
+ * Each field draws its own icons. Hide the browser's built-in ones (the password reveal eye of Edge and the
+ * clock of time inputs) so a field never shows two icons at once.
+ */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+input[type='time']::-webkit-calendar-picker-indicator {
+  display: none;
+}
 .auth-field .mat-mdc-select-arrow-wrapper {
   @apply hidden;
 }

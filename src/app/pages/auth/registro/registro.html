@@ -178,13 +178,27 @@
             <input
               matInput
               id="password"
-              type="password"
+              [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
               placeholder="Contraseña"
               autocomplete="new-password"
               required
             />
-            <img matSuffix src="images/registro/eye-off-20.svg" alt="" width="20" height="20" />
+            <button
+              matSuffix
+              type="button"
+              class="toggle flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <img
+                [src]="showPassword ? 'images/login/eye-20.svg' : 'images/login/eye-off-20.svg'"
+                alt=""
+                width="20"
+                height="20"
+              />
+            </button>
             <mat-error>
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
               @if (form.controls.password.hasError('server')) {
@@ -213,14 +227,28 @@
             <input
               matInput
               id="confirmPassword"
-              type="password"
+              [type]="showPassword ? 'text' : 'password'"
               formControlName="confirmPassword"
               placeholder="Confirmar contraseña"
               autocomplete="new-password"
               [errorStateMatcher]="confirmPasswordMatcher"
               required
             />
-            <img matSuffix src="images/registro/eye-off-20.svg" alt="" width="20" height="20" />
+            <button
+              matSuffix
+              type="button"
+              class="toggle flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <img
+                [src]="showPassword ? 'images/login/eye-20.svg' : 'images/login/eye-off-20.svg'"
+                alt=""
+                width="20"
+                height="20"
+              />
+            </button>
             <mat-error>
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
               @if (form.controls.confirmPassword.hasError('required')) {

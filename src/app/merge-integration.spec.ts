@@ -88,6 +88,9 @@ describe('Integración de rutas de equipo (US11 a US14)', () => {
     it(`conserva la ruta protegida y el contexto de equipo de ${page.path}`, async () => {
       authenticate(page.role);
       const harness = await RouterTestingHarness.create(`${page.path}?teamId=8`);
+      respond('/api/teams/me', []);
+      if (page.path === '/coach/competencias') respond('/api/competitions/teams/8', []);
+      if (page.path === '/progreso/equipos') respond('/api/competitions/teams/8/problems', []);
       respond(page.endpoint, page.body);
       harness.detectChanges();
       expect(TestBed.inject(Router).url).toBe(`${page.path}?teamId=8`);

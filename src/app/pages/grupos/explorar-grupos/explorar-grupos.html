@@ -196,6 +196,8 @@
                   >{{ item.estado }}</span
                 >
                 @if (item.estado === 'Eres miembro') {
+                  <a mat-stroked-button routerLink="/ranking" [queryParams]="{ teamId: item.id }" class="w-full">Ranking del equipo</a>
+                  <a mat-stroked-button routerLink="/progreso/equipos" [queryParams]="{ teamId: item.id }" class="w-full">Mi avance en este equipo</a>
                   <a mat-stroked-button [routerLink]="['/grupos', item.id]" class="w-full"
                     >Ver grupo</a
                   >

@@ -7,7 +7,7 @@ import { DatePipe } from '@angular/common';
 import { TeamPage } from '../../shared/team-page';
 import { TeamFrame } from '../../shared/team-frame';
 import { HttpErrorResponse } from '@angular/common/http';
-import { OfficialResult, positiveId } from '../../core/team-api';
+import { OfficialResult, TeamCompetition, positiveId } from '../../core/team-api';
 @Component({
   selector: 'app-results-live',
   imports: [
@@ -27,20 +27,31 @@ import { OfficialResult, positiveId } from '../../core/team-api';
     @if (teamId()) {
       <section class="rounded-2xl border border-kl-border bg-kl-surface p-5">
         <h2 class="font-display text-xl">Participación en una competencia existente</h2>
-        <p class="text-sm text-kl-muted">
-          Introduce el competitionId real recibido desde la navegación. La API no lista competencias
-          ni permite crearlas desde este formulario.
-        </p>
-        <form [formGroup]="lookup" (ngSubmit)="loadResult()" class="flex flex-wrap gap-3">
-          <mat-form-field appearance="outline"
-            ><mat-label>ID de competencia</mat-label
-            ><input
-              matInput
+        <form [formGroup]="lookup" (ngSubmit)="loadResult()" class="flex flex-wrap items-end gap-3">
+          <label class="flex min-w-0 flex-1 flex-col gap-2"
+            >Competencia
+            <select
+              aria-label="Competencia"
+              class="team-select"
               formControlName="competitionId"
-              inputmode="numeric"
-              [readonly]="saving()" /></mat-form-field
-          ><button mat-stroked-button [disabled]="busy() || saving()">Consultar resultado</button>
+              (change)="loadResult()"
+              [attr.disabled]="saving() || busy() || !competitions().length ? '' : null"
+            >
+              <option value="">Selecciona una competencia</option>
+              @for (competition of competitions(); track competition.competitionId) {
+                <option [value]="competition.competitionId">
+                  {{ competition.eventName }} · {{ competition.status }}
+                </option>
+              }
+            </select>
+          </label>
+          <button mat-stroked-button [disabled]="busy() || saving() || !parsedCompetition()">
+            Consultar resultado
+          </button>
         </form>
+        @if (!busy() && !error() && !competitions().length) {
+          <p role="status">Este equipo no tiene competencias disponibles.</p>
+        }
         @if (loadedId() && loadedId() === parsedCompetition()) {
           @if (result(); as result) {
             <p>
@@ -122,8 +133,10 @@ import { OfficialResult, positiveId } from '../../core/team-api';
             </button>
           </article>
         } @empty {
-          @if (!busy() && !error()) {
+          @if (historyLoaded() && !busy() && !error()) {
             <p>No hay resultados confirmados.</p>
+          } @else if (!historyLoaded() && !busy() && !error()) {
+            <p role="status">El historial aún no está disponible. Reintenta la consulta del equipo.</p>
           }
         }
       </section>
@@ -132,6 +145,8 @@ import { OfficialResult, positiveId } from '../../core/team-api';
 })
 export class ResultsLive extends TeamPage {
   readonly history = signal<OfficialResult[]>([]);
+  readonly historyLoaded = signal(false);
+  readonly competitions = signal<TeamCompetition[]>([]);
   readonly result = signal<OfficialResult | null>(null);
   readonly loadedId = signal<number | null>(null);
   readonly lookup = new FormGroup({ competitionId: new FormControl('', { nonNullable: true }) });
@@ -151,7 +166,9 @@ export class ResultsLive extends TeamPage {
     return positiveId(this.lookup.controls.competitionId.value);
   }
   protected clear() {
+    this.competitions.set([]);
     this.history.set([]);
+    this.historyLoaded.set(false);
     this.result.set(null);
     this.loadedId.set(null);
     this.form.enable();
@@ -164,9 +181,20 @@ export class ResultsLive extends TeamPage {
     const id = this.teamId();
     if (!id || this.saving()) return;
     this.history.set([]);
-    this.read(this.api.history(id), (list) => {
-      this.history.set(list);
-      if (this.parsedCompetition()) this.loadResult();
+    this.historyLoaded.set(false);
+    this.competitions.set([]);
+    this.result.set(null);
+    this.loadedId.set(null);
+    this.read(this.api.competitions(id), (competitions) => {
+      this.competitions.set(competitions);
+      if (!competitions.some((c) => c.competitionId === this.parsedCompetition())) {
+        this.lookup.controls.competitionId.setValue('');
+      }
+      this.read(this.api.history(id), (list) => {
+        this.history.set(list);
+        this.historyLoaded.set(true);
+        if (this.parsedCompetition()) this.loadResult();
+      });
     });
   }
   open(id: number) {
@@ -175,8 +203,15 @@ export class ResultsLive extends TeamPage {
   }
   loadResult() {
     const id = this.parsedCompetition();
-    if (!id || !this.teamId() || this.saving()) {
-      this.error.set('Introduce un identificador válido de competencia.');
+    if (
+      !id ||
+      !this.teamId() ||
+      this.saving() ||
+      !this.competitions().some((c) => c.competitionId === id && c.teamId === this.teamId())
+    ) {
+      this.result.set(null);
+      this.loadedId.set(null);
+      this.error.set('Selecciona una competencia de este equipo.');
       return;
     }
     this.result.set(null);

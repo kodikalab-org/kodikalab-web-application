@@ -45,12 +45,16 @@ export abstract class TeamPage implements OnInit, OnDestroy {
   selectTeam() {
     const id = positiveId(this.context.controls.teamId.value);
     if (!id) {
-      this.error.set('Introduce un identificador real de equipo válido.');
+      this.error.set('Selecciona un equipo disponible.');
+      return;
+    }
+    if (id === this.teamId()) {
+      this.reload();
       return;
     }
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { teamId: id },
+      queryParams: { teamId: id, competitionId: null, competitionProblemId: null },
       queryParamsHandling: 'merge',
     });
   }

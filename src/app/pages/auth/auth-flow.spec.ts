@@ -8,6 +8,11 @@ import { RecuperarAcceso } from './recuperar-acceso/recuperar-acceso';
 import { RegistroExitoso } from './registro-exitoso/registro-exitoso';
 import { Session } from '../../core/session';
 
+const REGISTER_URL = 'http://localhost:8080/api/auth/register';
+const LOGIN_URL = 'http://localhost:8080/api/auth/login';
+const RECOVERY_URL = 'http://localhost:8080/api/auth/recovery';
+const CONNECTION = 'No pudimos conectar con el servidor. Inténtalo de nuevo.';
+
 describe('API-connected access forms', () => {
   let http: HttpTestingController;
   let navigate: ReturnType<typeof vi.spyOn>;
@@ -24,19 +29,25 @@ describe('API-connected access forms', () => {
     input.value = value;
     input.dispatchEvent(new Event('input'));
   }
+  const submit = (root: HTMLElement) => root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+  const alertText = (root: HTMLElement) => root.querySelector('[role=alert]')?.textContent ?? '';
+
+  async function fillRegistration(root: HTMLElement, email = 'test@example.com') {
+    for (const [id, value] of Object.entries({ firstName: 'Usuario', lastName: 'Prueba', email,
+      password: 'Prueba2026', confirmPassword: 'Prueba2026' })) type(root, id, value);
+    root.querySelector<HTMLInputElement>('input[type=checkbox]')!.click();
+  }
 
   it('submits registration once, waits for 201, and never sends confirmation or terms as API fields', async () => {
     const fixture = TestBed.createComponent(Registro);
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
-    for (const [id, value] of Object.entries({ firstName: 'Usuario', lastName: 'Prueba', email: 'test@example.com',
-      password: 'Prueba2026', confirmPassword: 'Prueba2026' })) type(root, id, value);
-    root.querySelector<HTMLInputElement>('input[type=checkbox]')!.click();
-    root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
-    root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+    await fillRegistration(root);
+    submit(root);
+    submit(root);
     fixture.detectChanges();
     expect(navigate).not.toHaveBeenCalled();
-    const request = http.expectOne('http://localhost:8080/api/auth/register');
+    const request = http.expectOne(REGISTER_URL);
     expect(Object.keys(request.request.body).sort()).toEqual(['email', 'firstName', 'lastName', 'password', 'role']);
     request.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE', recoveryCode: 'test-code' });
     await fixture.whenStable();
@@ -44,18 +55,74 @@ describe('API-connected access forms', () => {
     expect(TestBed.inject(Session).account()).toBeNull();
   });
 
-  it('keeps a duplicate registration on its form and displays the backend error', async () => {
+  it('sends trimmed names and a trimmed, lowercased email', async () => {
     const fixture = TestBed.createComponent(Registro);
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
-    for (const [id, value] of Object.entries({ firstName: 'Usuario', lastName: 'Prueba', email: 'test@example.com',
-      password: 'Prueba2026', confirmPassword: 'Prueba2026' })) type(root, id, value);
-    root.querySelector<HTMLInputElement>('input[type=checkbox]')!.click();
-    root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
-    http.expectOne('http://localhost:8080/api/auth/register').flush({ message: 'El correo ya está registrado' }, { status: 409, statusText: 'Conflict' });
+    await fillRegistration(root, '  Test@Example.COM ');
+    type(root, 'firstName', '  Usuario   Nuevo ');
+    submit(root);
+    const request = http.expectOne(REGISTER_URL);
+    expect(request.request.body).toMatchObject({ firstName: 'Usuario Nuevo', lastName: 'Prueba', email: 'test@example.com' });
+    request.flush({}, { status: 500, statusText: 'Server Error' });
     await fixture.whenStable();
-    expect(root.querySelector('[role=alert]')?.textContent).toContain('El correo ya está registrado');
+  });
+
+  it('keeps a duplicate registration on its form, clears only the password and shows the backend alert', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    submit(root);
+    http.expectOne(REGISTER_URL).flush(
+      { message: 'El correo institucional ya está vinculado a una cuenta existente' },
+      { status: 409, statusText: 'Conflict' },
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain('El correo institucional ya está vinculado a una cuenta existente');
+    expect(root.querySelector<HTMLInputElement>('#firstName')!.value).toBe('Usuario');
+    expect(root.querySelector<HTMLInputElement>('#email')!.value).toBe('test@example.com');
+    expect(root.querySelector<HTMLInputElement>('#password')!.value).toBe('');
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('shows 400 field errors under their own control and keeps the rest of the form', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    submit(root);
+    http.expectOne(REGISTER_URL).flush(
+      { message: 'Datos inválidos', errors: { email: 'El correo no es válido para el registro' } },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root.textContent).toContain('El correo no es válido para el registro');
+    expect(alertText(root)).toBe('');
+    expect(root.querySelector<HTMLInputElement>('#email')!.value).toBe('test@example.com');
+    expect(root.querySelector<HTMLInputElement>('#lastName')!.value).toBe('Prueba');
+  });
+
+  it('offers Reintentar after a connection failure and sends the same data again', async () => {
+    const fixture = TestBed.createComponent(Registro);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    await fillRegistration(root);
+    submit(root);
+    http.expectOne(REGISTER_URL).flush({}, { status: 0, statusText: 'Unknown Error' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain(CONNECTION);
+    expect(root.querySelector<HTMLInputElement>('#password')!.value).toBe('Prueba2026');
+    root.querySelector<HTMLButtonElement>('button.retry')!.click();
+    fixture.detectChanges();
+    const retry = http.expectOne(REGISTER_URL);
+    expect(retry.request.body.password).toBe('Prueba2026');
+    retry.flush({ message: 'Registro exitoso', email: 'test@example.com', role: 'PRACTICANTE', recoveryCode: 'test-code' });
+    await fixture.whenStable();
+    expect(navigate).toHaveBeenCalledWith('/registro-exitoso');
   });
 
   it('routes a newly authenticated coach to coach onboarding, independently of the email', async () => {
@@ -64,8 +131,8 @@ describe('API-connected access forms', () => {
     const root: HTMLElement = fixture.nativeElement;
     type(root, 'email', 'practicante@example.com');
     type(root, 'password', 'Prueba2026');
-    root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
-    http.expectOne('http://localhost:8080/api/auth/login').flush({ message: 'OK', email: 'practicante@example.com', role: 'COACH', token: 'test-token', expiresIn: 3600 });
+    submit(root);
+    http.expectOne(LOGIN_URL).flush({ message: 'OK', email: 'practicante@example.com', role: 'COACH', token: 'test-token', expiresIn: 3600 });
     // The login handler checks whether a profile already exists before choosing the destination.
     await Promise.resolve();
     http.expectOne('http://localhost:8080/api/users/me').flush({}, { status: 404, statusText: 'Not Found' });
@@ -73,17 +140,56 @@ describe('API-connected access forms', () => {
     expect(navigate).toHaveBeenCalledWith('/onboarding/coach/experiencia');
   });
 
-  it('shows a recovery failure without a success screen or session', async () => {
+  it('shows "Credenciales inválidas" with retry and recovery actions, keeps the email and clears the password', async () => {
+    const fixture = TestBed.createComponent(Login);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    type(root, 'email', 'Camila.Rojas@upc.edu.pe');
+    type(root, 'password', 'Equivocada1');
+    submit(root);
+    http.expectOne(LOGIN_URL).flush({ message: 'Credenciales inválidas' }, { status: 401, statusText: 'Unauthorized' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain('Credenciales inválidas');
+    expect(root.querySelector('[role=alert] a[href="/recuperar-acceso"]')).not.toBeNull();
+    expect(root.querySelector('[role=alert] button.retry')).not.toBeNull();
+    expect(root.querySelector<HTMLInputElement>('#email')!.value).toBe('Camila.Rojas@upc.edu.pe');
+    expect(root.querySelector<HTMLInputElement>('#password')!.value).toBe('');
+    expect(TestBed.inject(Session).account()).toBeNull();
+    expect(navigate).not.toHaveBeenCalled();
+    root.querySelector<HTMLButtonElement>('button.retry')!.click();
+    fixture.detectChanges();
+    expect(alertText(root)).toBe('');
+  });
+
+  it('offers retry with the same password after a connection failure during login', async () => {
+    const fixture = TestBed.createComponent(Login);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    type(root, 'email', 'practicante@example.com');
+    type(root, 'password', 'Prueba2026');
+    submit(root);
+    http.expectOne(LOGIN_URL).flush({}, { status: 503, statusText: 'Service Unavailable' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(root)).toContain(CONNECTION);
+    expect(root.querySelector('[role=alert] a[href="/recuperar-acceso"]')).toBeNull();
+    root.querySelector<HTMLButtonElement>('button.retry')!.click();
+    fixture.detectChanges();
+    expect(http.expectOne(LOGIN_URL).request.body.password).toBe('Prueba2026');
+  });
+
+  it('shows recovery failure without a success screen or session', async () => {
     const fixture = TestBed.createComponent(RecuperarAcceso);
     await fixture.whenStable();
     const root: HTMLElement = fixture.nativeElement;
     type(root, 'recovery-email', 'test@example.com');
-    type(root, 'recovery-code', 'invalid-code');
+    type(root, 'recovery-code', 'ABCDEFGHIJKLMNOPQRSTUVWX');
     type(root, 'new-password', 'Prueba2026');
-    root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
-    http.expectOne('http://localhost:8080/api/auth/recovery').flush({}, { status: 401, statusText: 'Unauthorized' });
+    submit(root);
+    http.expectOne(RECOVERY_URL).flush({ message: 'Datos de recuperación inválidos' }, { status: 401, statusText: 'Unauthorized' });
     await fixture.whenStable();
-    expect(root.querySelector('[role=alert]')?.textContent).toContain('datos de recuperación inválidos');
+    expect(alertText(root)).toContain('Datos de recuperación inválidos');
     expect(root.querySelector('code')).toBeNull();
     expect(TestBed.inject(Session).account()).toBeNull();
   });

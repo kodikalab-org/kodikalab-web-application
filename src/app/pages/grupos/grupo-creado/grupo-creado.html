@@ -10,21 +10,17 @@
 
     @if (grupo(); as creado) {
       <h1 class="mt-5 mb-3 font-display text-[28px] font-bold">
-        {{ esBorrador() ? 'Borrador guardado' : '¡Grupo creado!' }}
+        ¡Grupo creado!
       </h1>
       <p class="mt-0 text-sm text-kl-body">
-        @if (esBorrador()) {
-          {{ creado.name }} quedó guardado como borrador. Complétalo y publícalo desde Mis grupos.
-        } @else {
-          {{ creado.name }} ya aparece en el listado de grupos disponibles.
-        }
+        {{ creado.name }} ya aparece en el listado de grupos disponibles.
       </p>
       <div
         class="my-3 rounded-xl border border-solid border-green-400/40 bg-green-400/10 p-4 text-left text-sm text-green-300"
       >
         <strong>{{ creado.message }}</strong>
         <p class="mt-1 mb-0 text-kl-body">
-          Quedaste como responsable del grupo · estado: {{ estado() }}.
+          Quedaste como responsable del grupo · estado: Activo, visible para los practicantes.
         </p>
       </div>
       <div class="mt-4 text-left">
@@ -46,13 +42,6 @@
       </p>
     }
 
-    <div class="my-4 flex flex-wrap justify-center gap-2 text-xs text-kl-body">
-      @if (grupo(); as creado) {
-        <span class="rounded-lg border border-solid border-kl-border-strong bg-white/3 px-3 py-1.5"
-          >Estado: {{ creado.status }}</span
-        >
-      }
-    </div>
     <div class="flex flex-wrap justify-center gap-3">
       <a mat-stroked-button routerLink="/coach/grupos/crear">Crear otro grupo</a
       ><a mat-flat-button routerLink="/coach/inicio" fragment="grupos"

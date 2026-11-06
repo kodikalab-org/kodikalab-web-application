@@ -186,7 +186,7 @@
                 <span
                   class="rounded-full border border-solid px-3 py-1 text-[11px]"
                   [class]="
-                    item.estado === 'Solicitud pendiente' || item.estado === 'Aclaración solicitada'
+                    item.estado === 'Solicitud pendiente'
                       ? 'border-amber-300/50 bg-amber-300/10 text-amber-300'
                       : item.estado === 'Eres miembro'
                         ? 'border-kl-accent/50 bg-kl-accent/10 text-kl-accent-text'
@@ -198,7 +198,7 @@
                   <a mat-stroked-button routerLink="/inicio" fragment="grupos" class="w-full"
                     >Ver grupo</a
                   >
-                } @else if (item.estado === 'Solicitud pendiente' || item.estado === 'Aclaración solicitada') {
+                } @else if (item.estado === 'Solicitud pendiente') {
                   <button mat-stroked-button type="button" class="w-full" (click)="verEstado(item)">
                     Ver estado
                   </button>

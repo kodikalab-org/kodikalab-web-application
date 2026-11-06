@@ -1,8 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,19 +8,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { apiError } from '../../../core/api';
 import { CoachGroup, Membership, MembershipDecision, TeamsApi } from '../../../core/teams-api';
 
-type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA';
-
 /**
- * US06 — El coach revisa las postulaciones del grupo, acepta, rechaza o pide una
- * aclaración. Los datos vienen de `GET /teams/{id}/memberships?status=…`.
+ * US06 — El coach revisa las postulaciones del grupo, acepta o rechaza.
+ * Los datos vienen de `GET /teams/{id}/memberships?status=PENDIENTE`.
  */
 @Component({
   selector: 'app-solicitudes-grupo',
   imports: [
     RouterLink,
-    FormsModule,
     MatButtonModule,
-    MatButtonToggleModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -39,11 +33,8 @@ export class SolicitudesGrupo {
     () => this.api.mine().filter((g): g is CoachGroup => 'activeMembers' in g),
   );
   protected readonly selectedGroupId = signal<number | null>(null);
-  protected readonly estado = signal<Estado>('PENDIENTE');
   protected readonly requests = this.api.requests;
   protected readonly selected = signal<Membership | null>(null);
-  protected readonly pidiendoAclaracion = signal(false);
-  protected readonly mensaje = signal('');
   protected readonly guardando = signal(false);
   protected readonly feedback = signal<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
 
@@ -72,22 +63,13 @@ export class SolicitudesGrupo {
     this.cargar();
   }
 
-  protected cambiarEstado(estado: Estado): void {
-    this.estado.set(estado);
-    this.selected.set(null);
-    this.cargar();
-  }
-
   protected ver(request: Membership): void {
     this.selected.set(request);
-    this.pidiendoAclaracion.set(false);
-    this.mensaje.set('');
     this.feedback.set(null);
   }
 
   protected cerrar(): void {
     this.selected.set(null);
-    this.pidiendoAclaracion.set(false);
   }
 
   protected decidir(decision: MembershipDecision): void {
@@ -96,7 +78,7 @@ export class SolicitudesGrupo {
     if (!request || groupId === null || this.guardando()) return;
 
     this.guardando.set(true);
-    this.api.decide(groupId, request.membershipId, decision, this.mensaje()).subscribe({
+    this.api.decide(groupId, request.membershipId, decision).subscribe({
       next: (response) => {
         this.guardando.set(false);
         this.feedback.set({ tipo: 'ok', texto: response.message });
@@ -132,7 +114,7 @@ export class SolicitudesGrupo {
   private cargar(): void {
     const groupId = this.selectedGroupId();
     if (groupId === null) return;
-    this.api.loadRequests(groupId, this.estado()).subscribe({
+    this.api.loadRequests(groupId).subscribe({
       error: (error: unknown) =>
         this.feedback.set({ tipo: 'error', texto: apiError(error) }),
     });

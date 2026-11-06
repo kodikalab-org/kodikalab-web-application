@@ -3,8 +3,7 @@
     <div>
       <h1 class="m-0 font-display text-[32px] font-bold tracking-[-0.8px]">Solicitudes de ingreso</h1>
       <p class="mt-1 mb-0 text-[15px] text-kl-body">
-        Acepta, rechaza o pide una aclaración antes de decidir. Mientras la aclaración no se
-        responda, la solicitud sigue pendiente.
+        Revisa el perfil de cada postulante y acepta o rechaza su solicitud.
       </p>
     </div>
     <div class="flex flex-wrap items-center gap-3">
@@ -48,15 +47,6 @@
     >
   } @else {
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-      <mat-button-toggle-group
-        hideSingleSelectionIndicator
-        [value]="estado()"
-        (change)="cambiarEstado($event.value)"
-        aria-label="Estado de las solicitudes"
-      >
-        <mat-button-toggle value="PENDIENTE">Pendientes</mat-button-toggle>
-        <mat-button-toggle value="ACLARACION_SOLICITADA">Aclaración solicitada</mat-button-toggle>
-      </mat-button-toggle-group>
       @if (selectedGroup(); as group) {
         <p class="m-0 text-xs text-kl-muted">
           {{ group.activeMembers }} / {{ group.maxCapacity ?? '—' }} integrantes · código
@@ -67,7 +57,7 @@
 
     @if (requests().length === 0) {
       <p class="rounded-2xl bg-kl-surface-raised p-10 text-center text-sm text-kl-muted">
-        No hay solicitudes en este estado para el grupo seleccionado.
+        No hay solicitudes pendientes para el grupo seleccionado.
       </p>
     } @else {
       <div class="flex flex-col gap-3">
@@ -96,11 +86,6 @@
             </div>
             <div class="text-xs text-kl-body">
               <p class="m-0">Solicitó el {{ fecha(request.requestedAt) }}</p>
-              @if (request.clarification; as clarification) {
-                <p class="mt-1 mb-0 text-kl-muted">
-                  {{ clarification.response ? 'Aclaración respondida' : 'Esperando respuesta' }}
-                </p>
-              }
             </div>
             <div class="flex justify-start lg:justify-end">
               <button mat-stroked-button type="button" (click)="ver(request)">Revisar</button>
@@ -141,8 +126,7 @@
         <div>
           <h3 class="m-0 text-lg font-medium">{{ nombrePracticante(request) }}</h3>
           <p class="mt-1 mb-0 text-xs text-kl-muted">
-            {{ selectedGroup()?.name }} ·
-            {{ request.status === 'PENDIENTE' ? 'Pendiente' : 'Aclaración solicitada' }}
+            {{ selectedGroup()?.name }} · Pendiente
           </p>
         </div>
       </div>
@@ -169,75 +153,19 @@
         Por privacidad no se muestra el correo del postulante.
       </p>
 
-      @if (request.clarification; as clarification) {
-        <section class="mt-4 rounded-xl border-l-4 border-solid border-kl-accent bg-white/4 p-4 text-sm">
-          <p class="m-0 text-xs uppercase tracking-wide text-kl-muted">Aclaración del coach</p>
-          <p class="my-1">{{ clarification.request }}</p>
-          @if (clarification.response) {
-            <p class="m-0 text-xs uppercase tracking-wide text-kl-muted">Respuesta</p>
-            <p class="mb-0">{{ clarification.response }}</p>
-          } @else {
-            <p class="mb-0 text-xs text-amber-300">
-              Esperando la respuesta del postulante: no se puede aceptar ni rechazar todavía.
-            </p>
-          }
-        </section>
-      }
-
-      @if (pidiendoAclaracion()) {
-        <mat-form-field appearance="outline" class="auth-field mt-4 w-full" subscriptSizing="dynamic">
-          <mat-label>Aclaración para el postulante</mat-label>
-          <textarea
-            matInput
-            rows="3"
-            maxlength="500"
-            [value]="mensaje()"
-            (input)="mensaje.set($any($event.target).value)"
-            placeholder="¿Puedes adjuntar el enlace de tu perfil de Codeforces?"
-          ></textarea>
-          <mat-hint align="end">{{ mensaje().length }} / 500</mat-hint>
-        </mat-form-field>
-      }
-
       <div class="mt-5 flex flex-wrap justify-end gap-3">
-        @if (pidiendoAclaracion()) {
-          <button mat-stroked-button type="button" (click)="pidiendoAclaracion.set(false)">
-            Cancelar
-          </button>
-          <button
-            mat-flat-button
-            type="button"
-            [disabled]="guardando() || !mensaje().trim()"
-            (click)="decidir('SOLICITAR_ACLARACION')"
-          >
-            Enviar aclaración
-          </button>
-        } @else if (request.status === 'PENDIENTE') {
-          <button
-            mat-stroked-button
-            type="button"
-            class="border-red-400/50 text-red-300"
-            [disabled]="guardando()"
-            (click)="decidir('RECHAZAR')"
-          >
-            Rechazar
-          </button>
-          <button
-            mat-stroked-button
-            type="button"
-            [disabled]="guardando()"
-            (click)="pidiendoAclaracion.set(true)"
-          >
-            Pedir aclaración
-          </button>
-          <button mat-flat-button type="button" [disabled]="guardando()" (click)="decidir('ACEPTAR')">
-            Aceptar solicitud
-          </button>
-        } @else {
-          <span class="text-xs text-kl-muted">
-            Sin acciones hasta que el postulante responda la aclaración.
-          </span>
-        }
+        <button
+          mat-stroked-button
+          type="button"
+          class="border-red-400/50 text-red-300"
+          [disabled]="guardando()"
+          (click)="decidir('RECHAZAR')"
+        >
+          Rechazar
+        </button>
+        <button mat-flat-button type="button" [disabled]="guardando()" (click)="decidir('ACEPTAR')">
+          Aceptar solicitud
+        </button>
       </div>
     </section>
   </div>

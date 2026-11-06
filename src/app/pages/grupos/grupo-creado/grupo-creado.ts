@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -18,8 +18,4 @@ export class GrupoCreado {
   private readonly api = inject(TeamsApi);
 
   protected readonly grupo = this.api.lastCreated;
-  protected readonly esBorrador = computed(() => this.grupo()?.status === 'BORRADOR');
-  protected readonly estado = computed(() =>
-    this.esBorrador() ? 'Borrador' : 'Activo, visible para los practicantes',
-  );
 }

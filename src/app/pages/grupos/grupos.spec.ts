@@ -40,7 +40,7 @@ class TeamsStub {
   readonly calls = {
     join: [] as { groupId: number; code: string }[],
     create: [] as CreateGroupRequest[],
-    decide: [] as { id: number; decision: string; message: string }[],
+    decide: [] as { id: number; decision: string }[],
   };
 
   loadGroups() {
@@ -59,12 +59,11 @@ class TeamsStub {
       message: 'Grupo creado correctamente',
       groupId: 9,
       name: body.name,
-      status: body.draft ? 'BORRADOR' : 'ACTIVO',
       invitationCode: 'CODIGO1234',
     });
   }
-  decide(groupId: number, membershipId: number, decision: string, message = '') {
-    this.calls.decide.push({ id: membershipId, decision, message });
+  decide(groupId: number, membershipId: number, decision: string) {
+    this.calls.decide.push({ id: membershipId, decision });
     return of({ message: 'ok', membershipId, groupId, status: 'ACTIVO' });
   }
   loadRequests() {
@@ -119,29 +118,6 @@ describe('Interfaces de grupos (US04, US05 y US06)', () => {
     await settle(fixture);
 
     expect(stub.calls.join).toEqual([{ groupId: 1, code: '' }]);
-  });
-
-  it('crea un borrador sin exigir nivel ni cupo', async () => {
-    const { stub, fixture } = configure(CrearGrupo);
-    await settle(fixture);
-
-    const root = fixture.nativeElement as HTMLElement;
-    const nombre = root.querySelector('#grupo-nombre') as HTMLInputElement | null;
-    expect(nombre).toBeTruthy();
-    nombre!.value = 'Grupo de prueba';
-    nombre!.dispatchEvent(new Event('input'));
-    await settle(fixture);
-
-    const borrador = [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].find(
-      (b) => b.textContent?.includes('Guardar borrador'),
-    );
-    expect(borrador).toBeTruthy();
-    borrador!.click();
-    await settle(fixture);
-
-    expect(stub.calls.create.length).toBe(1);
-    expect(stub.calls.create[0].draft).toBe(true);
-    expect(stub.calls.create[0].name).toBe('Grupo de prueba');
   });
 
   it('lista las solicitudes pendientes del grupo del coach', async () => {
@@ -209,6 +185,6 @@ describe('Interfaces de grupos (US04, US05 y US06)', () => {
     aceptar!.click();
     await settle(fixture);
 
-    expect(stub.calls.decide).toEqual([{ id: 101, decision: 'ACEPTAR', message: '' }]);
+    expect(stub.calls.decide).toEqual([{ id: 101, decision: 'ACEPTAR' }]);
   });
 });

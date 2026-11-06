@@ -5,16 +5,10 @@ import { API_URL } from './api';
 
 /** Estados y contratos de US04, US05 y US06 (`docs/sdd/03-api-contracts.md`). */
 
-export type GroupStatus = 'BORRADOR' | 'ACTIVO' | 'ARCHIVADO';
+export type GroupStatus = 'ACTIVO' | 'ARCHIVADO';
 export type GroupVisibility = 'PUBLICO' | 'PROTEGIDO' | 'ARCHIVADO';
-export type MembershipStatus =
-  | 'PENDIENTE'
-  | 'ACLARACION_SOLICITADA'
-  | 'ACTIVO'
-  | 'RECHAZADO'
-  | 'RETIRADO'
-  | 'EXPULSADO';
-export type MembershipDecision = 'ACEPTAR' | 'RECHAZAR' | 'SOLICITAR_ACLARACION';
+export type MembershipStatus = 'PENDIENTE' | 'ACTIVO' | 'RECHAZADO' | 'RETIRADO' | 'EXPULSADO';
+export type MembershipDecision = 'ACEPTAR' | 'RECHAZAR';
 /** El backend usa estos valores en `nivel_esperado`; la UI los muestra en español. */
 export type ExpectedLevel = 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO' | string;
 
@@ -38,13 +32,6 @@ export interface CoachGroup extends StudyGroupDetail {
   pendingRequests: number;
 }
 
-export interface Clarification {
-  request: string;
-  requestedAt: string;
-  response: string | null;
-  respondedAt: string | null;
-}
-
 export interface MembershipPractitioner {
   fullName: string;
   studentCode: string;
@@ -63,8 +50,6 @@ export interface Membership {
   practitionerId?: number;
   status: MembershipStatus;
   requestedAt: string;
-  joinedAt?: string | null;
-  clarification?: Clarification | null;
   practitioner?: MembershipPractitioner;
 }
 
@@ -75,7 +60,6 @@ export interface PractitionerGroup extends StudyGroupSummary {
     teamRole: string;
     joinedAt: string | null;
     leftAt: string | null;
-    clarification?: Clarification | null;
   };
 }
 
@@ -86,14 +70,12 @@ export interface CreateGroupRequest {
   maxCapacity?: number | null;
   sessionSchedule?: string | null;
   visibility?: Exclude<GroupVisibility, 'ARCHIVADO'>;
-  draft?: boolean;
 }
 
 export interface CreateGroupResponse {
   message: string;
   groupId: number;
   name: string;
-  status: GroupStatus;
   invitationCode: string;
 }
 
@@ -109,17 +91,6 @@ export interface ReviewMembershipResponse {
   membershipId: number;
   groupId: number;
   status: MembershipStatus;
-  clarificationRequest?: string;
-}
-
-export interface ClarificationResponse {
-  message: string;
-  membershipId: number;
-  groupId: number;
-  status: MembershipStatus;
-  clarificationRequest: string;
-  clarificationResponse: string;
-  respondedAt: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -157,18 +128,6 @@ export class TeamsApi {
       .pipe(tap((response) => this.lastCreated.set(response)));
   }
 
-  updateDraft(groupId: number, body: Partial<CreateGroupRequest>) {
-    return this.http.patch<StudyGroupDetail>(`${this.url}/teams/${groupId}/draft`, body, {
-      timeout: 15000,
-    });
-  }
-
-  publish(groupId: number) {
-    return this.http.post<StudyGroupDetail>(`${this.url}/teams/${groupId}/publish`, {}, {
-      timeout: 15000,
-    });
-  }
-
   join(groupId: number, invitationCode = '') {
     let params = new HttpParams();
     if (invitationCode.trim()) params = params.set('invitationCode', invitationCode.trim());
@@ -178,11 +137,12 @@ export class TeamsApi {
     });
   }
 
-  loadRequests(groupId: number, status: 'PENDIENTE' | 'ACLARACION_SOLICITADA') {
+  /** Lista las postulaciones pendientes del grupo, de la más antigua a la más reciente. */
+  loadRequests(groupId: number) {
     this.loading.set(true);
     return this.http
       .get<Membership[]>(`${this.url}/teams/${groupId}/memberships`, {
-        params: new HttpParams().set('status', status),
+        params: new HttpParams().set('status', 'PENDIENTE'),
         timeout: 15000,
       })
       .pipe(
@@ -191,29 +151,14 @@ export class TeamsApi {
       );
   }
 
-  decide(
-    groupId: number,
-    membershipId: number,
-    decision: MembershipDecision,
-    message = '',
-  ) {
-    const body: { decision: MembershipDecision; message?: string } = { decision };
-    if (decision === 'SOLICITAR_ACLARACION') body.message = message;
+  decide(groupId: number, membershipId: number, decision: MembershipDecision) {
     return this.http
       .patch<ReviewMembershipResponse>(
         `${this.url}/teams/${groupId}/memberships/${membershipId}`,
-        body,
+        { decision },
         { timeout: 15000 },
       )
       .pipe(tap(() => this.removeRequest(membershipId)));
-  }
-
-  respondClarification(groupId: number, membershipId: number, message: string) {
-    return this.http.post<ClarificationResponse>(
-      `${this.url}/teams/${groupId}/memberships/${membershipId}/clarification`,
-      { message },
-      { timeout: 15000 },
-    );
   }
 
   private removeRequest(membershipId: number): void {

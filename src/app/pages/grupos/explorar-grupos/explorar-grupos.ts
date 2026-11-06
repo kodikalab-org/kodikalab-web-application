@@ -37,7 +37,7 @@ interface GrupoVm {
   descripcion: string;
   horario: string;
   cupo: number | null;
-  estado: 'Abierto' | 'Solicitud pendiente' | 'Aclaración solicitada' | 'Eres miembro';
+  estado: 'Abierto' | 'Solicitud pendiente' | 'Eres miembro';
   accion: string;
   tono: string;
 }
@@ -213,9 +213,7 @@ export class ExplorarGrupos {
             ? 'Eres miembro'
             : status === 'PENDIENTE'
               ? 'Solicitud pendiente'
-              : status === 'ACLARACION_SOLICITADA'
-                ? 'Aclaración solicitada'
-                : 'Abierto',
+              : 'Abierto',
         accion: group.visibility === 'PUBLICO' ? 'Unirme' : 'Solicitar ingreso',
         tono: TONOS[index % TONOS.length],
       };

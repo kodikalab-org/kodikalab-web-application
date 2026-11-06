@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
-import { map, tap } from 'rxjs';
+import { map } from 'rxjs';
 import { apiError } from '../../../core/api';
 import { CreateGroupRequest, TeamsApi } from '../../../core/teams-api';
 
@@ -40,11 +40,9 @@ export class CrearGrupo {
   private readonly api = inject(TeamsApi);
   private readonly router = inject(Router);
 
-  protected readonly estado$;
   protected readonly paso$;
   protected readonly guardando = signal(false);
   protected readonly error = signal('');
-  protected readonly exito = signal('');
 
   protected readonly pasos = ['Información general', 'Horario', 'Acceso y visibilidad', 'Resumen'];
   protected readonly ayudas = [
@@ -87,25 +85,6 @@ export class CrearGrupo {
   });
 
   constructor(private readonly route: ActivatedRoute) {
-    this.estado$ = route.queryParamMap.pipe(
-      map((params) => params.get('estado') ?? ''),
-      tap((estado) => {
-        if (
-          ['borrador', 'creando', 'perfil-incompleto', 'conexion'].includes(estado) &&
-          !this.general.controls.nombre.value &&
-          this.general.pristine
-        ) {
-          this.general.patchValue({
-            nombre: 'Entrenamiento de Grafos',
-            descripcion:
-              'Preparación para competencias ICPC con enfoque en grafos y programación dinámica.',
-            nivel: 'Intermedio',
-            cupo: 15,
-          });
-          this.acceso.patchValue({ visibilidad: estado === 'borrador' ? 'Público' : 'Protegido' });
-        }
-      }),
-    );
     this.paso$ = route.queryParamMap.pipe(
       map((params) => {
         const paso = params.get('paso');
@@ -120,14 +99,9 @@ export class CrearGrupo {
     control.markAsTouched();
   }
 
-  /** US04: guarda lo ingresado como BORRADOR (solo exige el nombre). */
-  protected guardarBorrador(): void {
-    this.enviar(true);
-  }
-
   /** US04: publica el grupo, que pasa a estar visible para los practicantes. */
   protected crearGrupo(): void {
-    this.enviar(false);
+    this.enviar();
   }
 
   protected continuar(paso: number): void {
@@ -150,27 +124,16 @@ export class CrearGrupo {
     });
   }
 
-  private enviar(draft: boolean): void {
+  private enviar(): void {
     if (this.guardando()) return;
     this.error.set('');
-    this.exito.set('');
 
-    if (!this.general.controls.nombre.value.trim()) {
-      this.general.controls.nombre.markAsTouched();
-      this.error.set('El nombre del grupo es obligatorio.');
+    if (this.general.invalid || this.horario.invalid || this.acceso.invalid) {
+      this.general.markAllAsTouched();
+      this.horario.markAllAsTouched();
+      this.acceso.markAllAsTouched();
+      this.error.set('Revisa los campos marcados antes de crear el grupo.');
       return;
-    }
-
-    if (!draft) {
-      if (this.general.invalid || this.horario.invalid || this.acceso.invalid) {
-        this.general.markAllAsTouched();
-        this.horario.markAllAsTouched();
-        this.acceso.markAllAsTouched();
-        this.error.set(
-          'Revisa los campos marcados: para publicar se exige nombre, nivel y cupo entre 1 y 1000.',
-        );
-        return;
-      }
     }
 
     const body: CreateGroupRequest = {
@@ -180,7 +143,6 @@ export class CrearGrupo {
       maxCapacity: this.general.controls.cupo.value,
       sessionSchedule: this.horarioTexto(),
       visibility: this.acceso.controls.visibilidad.value === 'Público' ? 'PUBLICO' : 'PROTEGIDO',
-      draft,
     };
 
     this.guardando.set(true);
@@ -188,11 +150,7 @@ export class CrearGrupo {
       next: (response) => {
         this.guardando.set(false);
         this.api.lastCreated.set(response);
-        if (draft) {
-          this.exito.set(response.message);
-        } else {
-          this.router.navigate(['/coach/grupos/creado']);
-        }
+        this.router.navigate(['/coach/grupos/creado']);
       },
       error: (error: unknown) => {
         this.guardando.set(false);

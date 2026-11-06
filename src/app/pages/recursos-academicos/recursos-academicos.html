@@ -9,7 +9,7 @@
         <app-header-navigation [coach]="coach" class="mr-auto ml-10" />
         <div class="flex items-center gap-4">
           <img src="/images/recursos/campana.svg" alt="Notificaciones no disponibles en esta maqueta" />
-          <a [routerLink]="coach ? '/coach/perfil' : '/perfil'" aria-label="Ver perfil" class="flex size-9 items-center justify-center rounded-full bg-kl-accent text-xs">{{ session.demo() ? (coach ? 'MP' : 'CR') : 'KL' }}</a><img class="lg:hidden" src="/images/recursos/abajo.svg" alt="" />
+          <app-user-menu [coach]="coach" />
         </div>
       </mat-toolbar>
     </header>

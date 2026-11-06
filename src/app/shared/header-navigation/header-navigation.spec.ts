@@ -1,24 +1,28 @@
 import { TestBed } from '@angular/core/testing';
-import { HeaderNavigation } from './header-navigation';
-import { Sidebar } from '../../core/sidebar';
 import { provideRouter } from '@angular/router';
+import { HeaderNavigation } from './header-navigation';
 
-describe('Header sidebar control', () => {
-  it('opens the common drawer and exposes its accessible state', async () => {
+describe('HeaderNavigation', () => {
+  async function render(coach: boolean) {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
     const fixture = TestBed.createComponent(HeaderNavigation);
+    fixture.componentRef.setInput('coach', coach);
     await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    expect(button.getAttribute('aria-controls')).toBe('app-sidebar');
-    expect(button.classList.contains('xl:hidden')).toBe(false);
-    expect(fixture.nativeElement.querySelectorAll('nav a').length).toBe(5);
-    expect(button.getAttribute('aria-expanded')).toBe('false');
-    button.click();
-    await fixture.whenStable();
-    expect(TestBed.inject(Sidebar).opened()).toBe(true);
-    expect(button.getAttribute('aria-expanded')).toBe('true');
-    TestBed.inject(Sidebar).opened.set(false);
-    await fixture.whenStable();
-    expect(button.getAttribute('aria-expanded')).toBe('false');
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('shows the five header links and no sidebar or hamburger button', async () => {
+    const root = await render(false);
+    const links = Array.from(root.querySelectorAll('nav a')).map((a) => a.textContent?.trim());
+    expect(links).toEqual(['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos']);
+    expect(root.querySelector('button')).toBeNull();
+    expect(root.querySelector('[aria-controls="app-sidebar"]')).toBeNull();
+    expect(root.textContent).not.toContain('☰');
+  });
+
+  it('replaces Problemas with Solicitudes for the coach', async () => {
+    const root = await render(true);
+    const links = Array.from(root.querySelectorAll('nav a')).map((a) => a.textContent?.trim());
+    expect(links).toEqual(['Inicio', 'Solicitudes', 'Concursos', 'Grupos', 'Recursos']);
   });
 });

@@ -11,8 +11,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MatMenuModule } from '@angular/material/menu';
 import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
+import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { map } from 'rxjs';
 import {
   AJUSTES_COACH_DEMO,
@@ -51,7 +51,7 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
   selector: 'app-coach-perfil',
   imports: [
     HeaderNavigation,
-    MatMenuModule,
+    UserMenu,
     RecoveryCode,
     AsyncPipe,
     ReactiveFormsModule,

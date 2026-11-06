@@ -13,7 +13,7 @@
       >
         <img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab
       </a>
-      <app-header-navigation #navegacionHeader [coach]="coach" />
+      <app-header-navigation [coach]="coach" />
       <div class="ml-auto flex items-center gap-3">
         <div
           aria-label="Búsqueda global pendiente"
@@ -35,32 +35,9 @@
           alt="Tema oscuro"
           class="hidden sm:block"
         />
-        <a
-          [routerLink]="coach ? '/coach/perfil' : '/perfil'"
-          aria-label="Ver perfil"
-          class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-kl-accent to-[#b987ff] text-xs"
-          >{{ coach ? 'MP' : 'CR' }}</a
-        >
-        <button
-          mat-icon-button
-          [matMenuTriggerFor]="navegacion"
-          aria-label="Abrir navegación de grupos"
-        >
-          <img src="/images/dashboard/0-imgIcon5.svg" width="16" height="16" alt="" />
-        </button>
+        <app-user-menu [coach]="coach" />
       </div>
     </mat-toolbar>
-    <mat-menu #navegacion="matMenu">
-      <button mat-menu-item (click)="navegacionHeader.abrirSidebar()">Abrir navegación</button>
-      @if (coach) {
-        <a mat-menu-item routerLink="/coach/grupos/seguimiento">Seguimiento de grupos</a>
-        <a mat-menu-item routerLink="/coach/grupos/crear">Crear grupo</a>
-        <a mat-menu-item routerLink="/coach/grupos/solicitudes">Revisar solicitudes</a>
-      } @else {
-        <a mat-menu-item routerLink="/grupos">Explorar grupos</a>
-      }
-      <a mat-menu-item [routerLink]="coach ? '/coach/inicio' : '/inicio'">Volver al inicio</a>
-    </mat-menu>
   </header>
   <div class="flex flex-1 flex-col"><router-outlet /></div>
   <footer

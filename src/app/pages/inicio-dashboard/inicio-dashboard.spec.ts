@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { Session } from '../../core/session';
-import { Sidebar } from '../../core/sidebar';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -65,14 +64,10 @@ describe('InicioDashboard', () => {
     expect(root.textContent).toContain('Aún no tienes problemas asignados');
   });
 
-  it('opens the shared sidebar while preserving the Figma header links', async () => {
-    const { harness, root } = await setup('/coach/inicio');
-    const trigger = root.querySelector<HTMLButtonElement>('[aria-label="Abrir sidebar de la aplicación"]')!;
-    trigger.click();
-    harness.detectChanges();
-    await harness.fixture.whenStable();
-    expect(TestBed.inject(Sidebar).opened()).toBe(true);
-    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+  it('has no sidebar and keeps the Figma header links', async () => {
+    const { root } = await setup('/coach/inicio');
+    expect(root.querySelector('[aria-label="Abrir sidebar de la aplicación"]')).toBeNull();
+    expect(root.querySelector('[aria-controls="app-sidebar"]')).toBeNull();
     expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/coach/grupos/crear"]')).not.toBeNull();
     expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/recursos"]')).not.toBeNull();
     expect(root.querySelector('[aria-label="Estado de la aplicación"]')).toBeNull();

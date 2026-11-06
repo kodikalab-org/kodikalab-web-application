@@ -1,5 +1,6 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
+import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
@@ -14,7 +15,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatMenuModule } from '@angular/material/menu';
 import { map } from 'rxjs';
 import {
   CODIGO_RECUPERACION_DEMO,
@@ -71,7 +71,7 @@ function aCeldas(filas: string[]): number[] {
   selector: 'app-perfil',
   imports: [
     HeaderNavigation,
-    MatMenuModule,
+    UserMenu,
     RecoveryCode,
     AsyncPipe,
     CdkTrapFocus,

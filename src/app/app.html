@@ -1,32 +1,10 @@
-<mat-sidenav-container class="min-h-dvh overflow-clip bg-kl-bg text-kl-text">
-  <mat-sidenav #drawer id="app-sidebar" mode="over" [opened]="sidebar.opened()" (openedChange)="sidebar.opened.set($event)" [fixedInViewport]="true" class="w-[min(300px,90vw)] bg-kl-surface text-kl-text" aria-label="Navegación de la aplicación">
-    <div class="flex items-center justify-between gap-3 p-4 font-display">
-      <strong>Kodikalab · {{ coach ? 'Coach' : 'Practicante' }}</strong>
-      <button mat-button (click)="drawer.close()" aria-label="Cerrar navegación">Cerrar</button>
-    </div>
-    <nav class="flex flex-col gap-1 px-3 pb-5 font-body text-sm" aria-label="Interfaces de la aplicación">
-      @for (enlace of enlaces; track enlace.label) {
-        <a [routerLink]="enlace.path" [fragment]="enlace.fragment" routerLinkActive="bg-kl-accent/20 text-kl-accent-text" [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'exact' }" ariaCurrentWhenActive="page" (click)="drawer.close()" class="rounded-xl px-4 py-3 hover:bg-kl-accent/15 focus-visible:outline-2 focus-visible:outline-kl-accent">{{ enlace.label }}</a>
-      }
-      @if (session.demo()) {
-        <span class="px-4 pt-4 pb-1 text-xs text-kl-muted">Recorrido de interfaces · datos de ejemplo</span>
-        <a [routerLink]="coach ? '/onboarding/coach/experiencia' : '/onboarding/practicante/datos-academicos'" (click)="drawer.close()" class="rounded-xl px-4 py-3 hover:bg-kl-accent/15">Ver onboarding</a>
-        @if (coach) {
-          <a routerLink="/coach/grupos/creado" (click)="drawer.close()" class="rounded-xl px-4 py-3 hover:bg-kl-accent/15">Confirmación de grupo · ejemplo</a>
-        }
-        <a [routerLink]="coach ? '/demo/practicante' : '/demo/coach'" (click)="drawer.close()" class="rounded-xl px-4 py-3 hover:bg-kl-accent/15">{{ coach ? 'Ver demo de practicante' : 'Ver demo de coach' }}</a>
-      }
-      <button mat-button (click)="salir()">{{ session.demo() ? 'Salir de la demo' : 'Cerrar sesión' }}</button>
-    </nav>
-  </mat-sidenav>
-  <mat-sidenav-content class="overflow-visible">
-    @if (router.url.split('?')[0] === '/coach/grupos/solicitudes') {
-      <header class="flex h-[68px] items-center gap-4 border-0 border-b border-solid border-kl-border bg-kl-bg px-4 font-body text-kl-text lg:px-11">
-        <a routerLink="/coach/inicio" class="inline-flex items-center gap-2.5 text-xl font-medium"><img src="/images/dashboard/0-imgIcon1.svg" width="36" height="36" alt="" />Kodikalab</a>
-        <app-header-navigation [coach]="true" class="xl:ml-8" />
-        <a routerLink="/coach/perfil" class="ml-auto text-sm text-kl-body">Mi perfil</a>
-      </header>
-    }
-    <router-outlet />
-  </mat-sidenav-content>
-</mat-sidenav-container>
+<div class="min-h-dvh overflow-clip bg-kl-bg text-kl-text">
+  @if (router.url.split('?')[0] === '/coach/grupos/solicitudes') {
+    <header class="flex h-[68px] items-center gap-4 border-0 border-b border-solid border-kl-border bg-kl-bg px-4 font-body text-kl-text lg:px-11">
+      <a routerLink="/coach/inicio" class="inline-flex items-center gap-2.5 text-xl font-medium"><img src="/images/dashboard/0-imgIcon1.svg" width="36" height="36" alt="" />Kodikalab</a>
+      <app-header-navigation [coach]="true" class="xl:ml-8" />
+      <app-user-menu [coach]="true" class="ml-auto" />
+    </header>
+  }
+  <router-outlet />
+</div>

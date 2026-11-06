@@ -1,4 +1,17 @@
-export function navigationFor(coach: boolean) {
+export interface NavLink { label: string; path: string; fragment?: string }
+
+/** Links shown in the header bar (the first five entries of the full navigation). */
+export const HEADER_LINK_COUNT = 5;
+
+/**
+ * Everything that is not in the header bar: progress, ranking, platforms and the profile pages.
+ * These live in the user dropdown instead of a sidebar.
+ */
+export function profileMenuFor(coach: boolean): NavLink[] {
+  return navigationFor(coach).slice(HEADER_LINK_COUNT);
+}
+
+export function navigationFor(coach: boolean): NavLink[] {
   const home = coach ? '/coach/inicio' : '/inicio';
   return [
     { label: 'Inicio', path: home },

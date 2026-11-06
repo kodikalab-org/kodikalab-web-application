@@ -35,7 +35,7 @@
             >Kodikalab</span
           >
         </a>
-        <app-header-navigation #navegacionHeader [coach]="true" />
+        <app-header-navigation [coach]="true" />
       </div>
       <div class="flex items-center gap-[22px] max-[641px]:gap-3">
         <div
@@ -70,28 +70,9 @@
         >
           <img src="images/perfil-coach/moon-22.svg" alt="" width="22" height="22" />
         </button>
-        <button
-          class="inline-flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-kl-text"
-          type="button"
-          aria-label="Menú de {{ perfil.nombre }}"
-          [matMenuTriggerFor]="usuario"
-        >
-          <span
-            class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
-            aria-hidden="true"
-            >{{ perfil.iniciales }}</span
-          >
-          <img src="images/perfil-coach/chevron-down-16.svg" alt="" width="16" height="16" />
-        </button>
+        <app-user-menu [coach]="true" [nombre]="perfil.nombre" [iniciales]="perfil.iniciales" />
       </div>
     </mat-toolbar>
-    <mat-menu #usuario="matMenu">
-      <button mat-menu-item (click)="navegacionHeader.abrirSidebar()">Abrir navegación</button>
-      <a mat-menu-item routerLink="/coach/inicio">Inicio</a>
-      <a mat-menu-item routerLink="/coach/perfil/editar">Editar perfil</a>
-      <a mat-menu-item routerLink="/coach/perfil" [queryParams]="{ tab: 'ajustes' }">Ajustes generales</a>
-      <a mat-menu-item routerLink="/login" (click)="salir()">{{ session.demo() ? 'Salir de la demo' : 'Cerrar sesión' }}</a>
-    </mat-menu>
 
     <main
       class="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-5 px-14 pt-7 pb-10 max-[1000px]:px-6 max-[641px]:px-4"

@@ -17,7 +17,7 @@ describe('Access guard', () => {
   });
   afterEach(() => session.logout());
 
-  async function guard(url: string, role = 'PRACTICANTE') {
+  async function guard(url: string, role: string | null = 'PRACTICANTE') {
     const result = TestBed.runInInjectionContext(() => accessGuard(
       { data: { role } } as unknown as ActivatedRouteSnapshot,
       { url } as RouterStateSnapshot,
@@ -59,5 +59,20 @@ describe('Access guard', () => {
     authenticated();
     vi.spyOn(profiles, 'load').mockReturnValue(of({ message: 'OK', profile: {} as never }));
     expect(await guard('/perfil')).toBe(true);
+  });
+  it('allows shared resources for either demo role without relaxing private role checks', async () => {
+    session.demo.set('COACH');
+    expect(await guard('/recursos', null)).toBe(true);
+    expect(await guard('/perfil')).toBe('/coach/inicio');
+    session.demo.set('PRACTICANTE');
+    expect(await guard('/recursos', null)).toBe(true);
+    expect(await guard('/coach/perfil', 'COACH')).toBe('/inicio');
+  });
+  it('loads the signed-in coach profile on shared routes', async () => {
+    authenticated();
+    session.account.update(account => ({ ...account!, role: 'COACH' }));
+    const load = vi.spyOn(profiles, 'load').mockReturnValue(of({ message: 'OK', profile: {} as never }));
+    expect(await guard('/recursos', null)).toBe(true);
+    expect(load).toHaveBeenCalledOnce();
   });
 });

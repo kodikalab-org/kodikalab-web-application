@@ -1,0 +1,42 @@
+@if (pendiente(); as plataforma) {
+  <div
+    class="flex flex-col gap-2 rounded-xl border border-solid border-[#fbbf24] bg-[#2e2410] p-4 text-sm leading-5"
+    role="status"
+  >
+    <p class="m-0 font-bold text-[#fbbf24]">Vinculación pendiente</p>
+    <p class="m-0">
+      {{ plataforma.name }} no confirmó <strong>{{ plataforma.handle }}</strong
+      >. {{ plataforma.notice }}
+    </p>
+    <p class="m-0 text-kl-muted">
+      Tus demás datos ya están guardados. Puedes reintentar la vinculación cuando quieras.
+    </p>
+    @if (sigue()) {
+      <p class="m-0 text-[#fbbf24]">
+        Seguimos sin poder confirmarlo. Revisa el identificador o inténtalo más tarde.
+      </p>
+    }
+    <div>
+      <button
+        mat-flat-button
+        class="px-5 max-[641px]:w-full"
+        type="button"
+        [disabled]="busy()"
+        (click)="reintentar()"
+      >
+        {{ busy() ? 'Reintentando…' : 'Reintentar vinculación' }}
+      </button>
+    </div>
+  </div>
+} @else if (confirmada(); as handle) {
+  <div
+    class="flex flex-col gap-1 rounded-xl border border-solid border-[#4ade80] bg-[#0f2a1b] p-4 text-sm leading-5"
+    role="status"
+  >
+    <p class="m-0 font-bold text-[#4ade80]">Vinculación confirmada</p>
+    <p class="m-0">Validamos {{ handle }} en Codeforces.</p>
+  </div>
+}
+@if (error()) {
+  <p role="alert" class="m-0 mt-2 text-sm text-red-200">{{ error() }}</p>
+}

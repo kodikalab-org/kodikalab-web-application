@@ -1,0 +1,4 @@
+/* Layout uses Tailwind utilities; only Material tokens would live here. */
+:host {
+  display: block;
+}

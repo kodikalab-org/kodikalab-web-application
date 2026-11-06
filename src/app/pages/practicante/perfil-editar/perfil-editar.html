@@ -118,17 +118,27 @@
         </div>
 
         <form class="mt-4 flex flex-col gap-[18px]" [formGroup]="form" novalidate>
-          @if (vista.errores) {
+          @if (vista.errores || hayErroresServidor) {
             <div
               class="flex items-start gap-2.5 rounded-xl border border-solid border-[#f87171]/45 bg-[#f87171]/10 px-3.5 py-3"
               role="alert"
             >
               <img src="images/perfil/alert-20.svg" alt="" width="20" height="20" />
-              <p class="m-0 flex-1 text-[14px] leading-5 text-[#fecaca]">
+              <div class="m-0 flex-1 text-[14px] leading-5 text-[#fecaca]">
                 <strong class="block font-semibold">No pudimos guardar tus cambios</strong>
-                Revisa los campos marcados e inténtalo de nuevo.
-              </p>
+                Revisa los campos marcados e inténtalo de nuevo. Tus datos guardados no se modificaron.
+                @for (aviso of avisos(); track aviso) {
+                  <p class="m-0 mt-1">{{ aviso }}</p>
+                }
+              </div>
             </div>
+          }
+
+          @if (!session.demo()) {
+            <p class="m-0 rounded-xl border border-solid border-[#34304a] bg-white/3 px-3.5 py-2.5 text-[13px] leading-[18px] text-kl-muted" id="no-guardados">
+              Distrito, experiencia, franja horaria, días disponibles y objetivo aún no se guardan en tu cuenta:
+              se muestran deshabilitados y no se envían.
+            </p>
           }
 
           <div class="grid grid-cols-2 items-start gap-4 max-[900px]:grid-cols-1">
@@ -151,17 +161,10 @@
                   required
                 />
                 <mat-hint>Máximo 20 caracteres. Debe ser único.</mat-hint>
-                @if (form.controls.codigo.hasError('duplicado')) {
-                  <mat-error>
-                    <img src="images/perfil/alert-15.svg" alt="" width="15" height="15" />
-                    Este código de estudiante ya está vinculado a otro practicante
-                  </mat-error>
-                } @else {
-                  <mat-error>
-                    <img src="images/perfil/alert-15.svg" alt="" width="15" height="15" />
-                    Ingresa tu código de estudiante
-                  </mat-error>
-                }
+                <mat-error>
+                  <img src="images/perfil/alert-15.svg" alt="" width="15" height="15" />
+                  {{ mensaje('codigo') }}
+                </mat-error>
               </mat-form-field>
             </div>
 
@@ -182,7 +185,7 @@
                 <img matSuffix src="images/onboarding/chevron-down-20.svg" alt="" width="20" height="20" />
                 <mat-error>
                   <img src="images/perfil/alert-15.svg" alt="" width="15" height="15" />
-                  Selecciona tu carrera
+                  {{ mensaje('carrera') }}
                 </mat-error>
               </mat-form-field>
             </div>
@@ -206,7 +209,7 @@
                 <img matSuffix src="images/onboarding/chevron-down-20.svg" alt="" width="20" height="20" />
                 <mat-error>
                   <img src="images/perfil/alert-15.svg" alt="" width="15" height="15" />
-                  Selecciona tu ciclo académico
+                  {{ mensaje('ciclo') }}
                 </mat-error>
               </mat-form-field>
             </div>
@@ -250,6 +253,12 @@
                 </mat-button-toggle>
               }
             </mat-button-toggle-group>
+            @if (form.controls.nivel.invalid && (form.controls.nivel.touched || form.controls.nivel.dirty)) {
+              <mat-error class="flex items-start gap-1.5 text-[13px] leading-[18px]">
+                <img src="images/perfil/alert-15.svg" alt="" width="15" height="15" />
+                {{ mensaje('nivel') }}
+              </mat-error>
+            }
           </div>
 
           <div class="grid grid-cols-2 items-start gap-4 max-[900px]:grid-cols-1">
@@ -343,6 +352,13 @@
                     [attr.for]="'handle-' + plataforma.control"
                     >{{ plataforma.nombre }}</label
                   >
+                  @if (estado(plataforma.control); as vinculo) {
+                    <span
+                      class="rounded-full border border-solid px-2.5 py-0.5 text-xs font-medium"
+                      [class]="clasesEstado[vinculo.state]"
+                      >{{ etiquetaEstado[vinculo.state] }}</span
+                    >
+                  }
                   <mat-form-field
                     class="auth-field min-w-0 flex-1 text-[15px] [--auth-field-height:44px] [--auth-field-padding:10px] max-[641px]:basis-full"
                     appearance="outline"
@@ -362,11 +378,14 @@
                   <div class="auth-field px-1">
                     <mat-error>
                       <img src="images/perfil/alert-15.svg" alt="" width="15" height="15" />
-                      Usa solo letras, números, punto, guion y guion bajo (máx. 50)
+                      {{ mensaje(plataforma.control) }}
                     </mat-error>
                   </div>
                 }
               </div>
+            }
+            @if (!session.demo()) {
+              <app-vinculacion-pendiente />
             }
           </section>
 
@@ -377,13 +396,13 @@
               class="bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-7 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
               type="button"
               (click)="guardar()"
-              [disabled]="form.invalid || busy"
+              [disabled]="form.invalid || busy()"
             >
               <img src="images/perfil/save-18.svg" alt="" width="18" height="18" />
-              {{ busy ? 'Guardando…' : 'Guardar cambios' }}
+              {{ busy() ? 'Guardando…' : 'Guardar cambios' }}
             </button>
           </div>
-          @if (error) { <p role="alert" class="text-sm text-red-200">{{ error }}</p> }
+          @if (error()) { <p role="alert" class="text-sm text-red-200">{{ error() }}</p> }
         </form>
       </section>
     </main>

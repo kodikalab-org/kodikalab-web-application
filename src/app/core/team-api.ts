@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { map } from 'rxjs';
 import { API_URL } from './api';
+import { TeamsApi } from './teams-api';
 export interface TeamCompetition {
   competitionId: number;
   teamId: number;
@@ -8,6 +10,20 @@ export interface TeamCompetition {
   status: 'PROGRAMADA' | 'EN_CURSO' | 'FINALIZADA';
   startsAt: string;
   endsAt: string;
+  problemsCount: number;
+}
+/** `GET /competitions?teamId=`: `CompetitionListResponse` with its `CompetitionListItem` entries. */
+interface CompetitionListResponse {
+  teamId: number;
+  total: number;
+  items: {
+    id: number;
+    eventName: string;
+    status: TeamCompetition['status'];
+    startsAt: string;
+    endsAt: string;
+    problemsCount: number;
+  }[];
 }
 export interface AssignedProblem {
   competitionProblemId: number;
@@ -103,15 +119,52 @@ export interface ManualRequest {
 export class TeamApi {
   private readonly http = inject(HttpClient);
   private readonly url = inject(API_URL);
+  private readonly teams = inject(TeamsApi);
+  /** Competitions of one team from `GET /competitions?teamId=`, flattened to `TeamCompetition`. */
   competitions(teamId: number) {
-    return this.http.get<TeamCompetition[]>(`${this.url}/competitions/teams/${teamId}`, {
-      timeout: 15000,
-    });
+    return this.http
+      .get<CompetitionListResponse>(`${this.url}/competitions`, {
+        params: new HttpParams().set('teamId', teamId),
+        timeout: 15000,
+      })
+      .pipe(
+        map(({ teamId: team, items }) =>
+          items.map(
+            (item): TeamCompetition => ({
+              competitionId: item.id,
+              teamId: team,
+              eventName: item.eventName,
+              status: item.status,
+              startsAt: item.startsAt,
+              endsAt: item.endsAt,
+              problemsCount: item.problemsCount,
+            }),
+          ),
+        ),
+      );
   }
+  /**
+   * Problems assigned to one team from `GET /problems/assigned?teamId=` (shared with the groups
+   * pages), flattened to `AssignedProblem`. `competitionProblemId` is the identifier that
+   * `register` needs.
+   */
   assignments(teamId: number) {
-    return this.http.get<AssignedProblem[]>(`${this.url}/competitions/teams/${teamId}/problems`, {
-      timeout: 15000,
-    });
+    return this.teams.assignedProblems(teamId).pipe(
+      map(({ teamId: team, items }) =>
+        items.map(
+          (item): AssignedProblem => ({
+            competitionProblemId: item.competitionProblemId,
+            competitionId: item.competition.id,
+            teamId: team,
+            problemId: item.problem.id,
+            title: item.problem.title,
+            eventName: item.competition.name,
+            letter: item.letter,
+            status: item.competition.status,
+          }),
+        ),
+      ),
+    );
   }
   ranking(id: number) {
     return this.http.get<Ranking>(this.url + '/analytics/teams/' + id + '/standings', {

@@ -23,6 +23,9 @@ Código implementado y compilado. Los 248 casos de pruebas ejecutables pasan. La
 | US-12 | GET /analytics/teams/{teamId}/weaknesses |
 | US-13 | POST/PUT/GET /competitions/{competitionId}/official-result; GET /competitions/teams/{teamId}/official-results |
 | US-14 | GET /analytics/teams/{teamId}/progress/me; POST /competitions/teams/{teamId}/problems/{competitionProblemId}/resolutions |
+| Listados (US-13, US-14) | GET /teams/me; GET /competitions?teamId= (items con id, eventName, status, startsAt, endsAt, problemsCount); GET /problems/assigned?teamId= (items con competitionProblemId, letter, competition.id/name/status, problem.id/title) |
+
+Los endpoints GET /competitions/teams/{teamId} y GET /competitions/teams/{teamId}/problems ya no existen en el backend. TeamApi.competitions y TeamApi.assignments consumen los listados de develop y los aplanan a TeamCompetition (competitionId = item.id) y AssignedProblem (competitionProblemId = item.competitionProblemId, el identificador que exige el registro de resoluciones). GET /teams/me devuelve todos los estados de membresía; la pantalla solo ofrece membresías ACTIVO o, para el coach, sus grupos que no están en BORRADOR.
 
 ## Navegación y contexto real
 

@@ -146,9 +146,11 @@ export class TeamFrame implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (groups) => {
+          // /teams/me returns every membership status: keep only the active practitioner
+          // memberships, or the coach's own published (non-draft) groups.
           const available = groups.filter((group) =>
             this.coach()
-              ? 'activeMembers' in group
+              ? 'activeMembers' in group && group.status !== 'BORRADOR'
               : 'membership' in group && group.membership.status === 'ACTIVO',
           );
           this.teams.set(available);

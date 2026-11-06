@@ -1,0 +1,16 @@
+/* Only Material tokens remain local; visual layout uses Tailwind utilities. */
+:host {
+  --auth-field-height: 50px;
+  --auth-field-padding: 13px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-link);
+  --auth-submit-height: 54px;
+}
+
+@media (max-height: 760px) {
+  :host {
+    --auth-field-height: 46px;
+    --auth-field-padding: 11px;
+    --auth-submit-height: 48px;
+  }
+}

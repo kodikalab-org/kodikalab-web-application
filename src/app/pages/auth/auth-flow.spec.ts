@@ -236,11 +236,11 @@ describe('API-connected access forms', () => {
     expect(http.expectOne(LOGIN_URL).request.body.password).toBe('Prueba2026');
   });
 
-  it('does not offer code-based recovery on the login or registration screens', async () => {
+  it('offers the email reset from the login but no code-based recovery', async () => {
     const login = TestBed.createComponent(Login);
     await login.whenStable();
     expect(login.nativeElement.querySelector('a[href="/recuperar-acceso"]')).toBeNull();
-    expect(login.nativeElement.textContent).not.toContain('¿Olvidaste tu contraseña?');
+    expect(login.nativeElement.querySelector('a[href="/recuperar-contrasena"]')?.textContent).toContain('¿Olvidaste tu contraseña?');
     const registro = TestBed.createComponent(Registro);
     await registro.whenStable();
     expect(registro.nativeElement.textContent).not.toContain('código de recuperación');

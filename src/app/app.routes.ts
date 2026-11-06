@@ -3,6 +3,7 @@ import { LandingPage } from './pages/landing-page/landing-page';
 import { Login } from './pages/auth/login/login';
 import { Registro } from './pages/auth/registro/registro';
 import { accessGuard, demoGuard } from './core/access-guard';
+import { passwordResetStepGuard } from './core/password-reset-flow';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 
 const appRoutes: Routes = [
@@ -38,6 +39,23 @@ const appRoutes: Routes = [
   { path: '', component: LandingPage },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
+  {
+    path: 'recuperar-contrasena',
+    data: { paso: 'correo' },
+    loadComponent: () => import('./pages/auth/recuperar-contrasena/recuperar-contrasena').then((m) => m.RecuperarContrasena),
+  },
+  {
+    path: 'recuperar-contrasena/codigo',
+    data: { paso: 'codigo' },
+    canActivate: [passwordResetStepGuard],
+    loadComponent: () => import('./pages/auth/recuperar-contrasena/recuperar-contrasena').then((m) => m.RecuperarContrasena),
+  },
+  {
+    path: 'recuperar-contrasena/nueva',
+    data: { paso: 'nueva' },
+    canActivate: [passwordResetStepGuard],
+    loadComponent: () => import('./pages/auth/recuperar-contrasena/recuperar-contrasena').then((m) => m.RecuperarContrasena),
+  },
   { path: 'demo/practicante', component: Login, canActivate: [demoGuard], data: { role: 'PRACTICANTE' } },
   { path: 'demo/coach', component: Login, canActivate: [demoGuard], data: { role: 'COACH' } },
   {
@@ -170,7 +188,7 @@ const appRoutes: Routes = [
   },
 ];
 
-const publicPaths = ['', 'login', 'registro'];
+const publicPaths = ['', 'login', 'registro', 'recuperar-contrasena', 'recuperar-contrasena/codigo', 'recuperar-contrasena/nueva'];
 export const routes: Routes = [
   ...appRoutes.map(route => publicPaths.includes(route.path ?? '') || route.path?.startsWith('demo/')
     ? route

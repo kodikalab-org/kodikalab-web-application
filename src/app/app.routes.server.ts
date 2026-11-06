@@ -8,6 +8,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'onboarding/**', renderMode: RenderMode.Client },
   { path: 'practicante/**', renderMode: RenderMode.Client },
   { path: 'demo/**', renderMode: RenderMode.Client },
+  { path: 'recuperar-contrasena/**', renderMode: RenderMode.Client },
   {
     path: '**',
     renderMode: RenderMode.Prerender

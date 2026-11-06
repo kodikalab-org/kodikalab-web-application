@@ -49,6 +49,11 @@ export class Login {
       : this.route.snapshot.queryParamMap.get('motivo') === 'conexion'
         ? 'No pudimos cargar tu perfil. Comprueba la conexión con el servidor.'
         : '';
+  // Shown after finishing the password reset screens.
+  protected readonly notice =
+    this.route.snapshot.queryParamMap.get('motivo') === 'contrasena-actualizada'
+      ? 'Contraseña actualizada. Inicia sesión con tu nueva contraseña.'
+      : '';
   protected failure: LoginFailure = null;
   protected showPassword = false;
 

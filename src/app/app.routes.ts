@@ -65,6 +65,7 @@ const appRoutes: Routes = [
     loadComponent: () =>
       import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'crear' },
       {
         path: 'crear',
         loadComponent: () =>

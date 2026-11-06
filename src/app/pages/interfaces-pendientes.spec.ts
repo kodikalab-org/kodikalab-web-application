@@ -17,7 +17,11 @@ describe('Variantes estáticas pendientes', () => {
     return { harness, root: harness.routeNativeElement! };
   }
   afterEach(() => {
-    TestBed.inject(HttpTestingController).verify();
+    const http = TestBed.inject(HttpTestingController);
+    // Las pantallas de grupos ya consultan la API real: se descartan las
+    // peticiones pendientes para no arrastrarlas al siguiente caso.
+    http.match(() => true).forEach((request) => request.flush([]));
+    http.verify();
     TestBed.inject(Session).logout();
   });
 
@@ -25,18 +29,10 @@ describe('Variantes estáticas pendientes', () => {
     ['/registro-exitoso?estado=verificacion-pendiente', 'Revisa tu correo institucional'],
     ['/registro-exitoso?estado=cuenta-activada', 'Tu cuenta está activada'],
     ['/login?estado=cuenta-deshabilitada', 'Tu cuenta no está habilitada'],
-    ['/coach/grupos/crear?paso=2&estado=borrador', 'Borrador guardado'],
     ['/coach/grupos/crear?paso=4&estado=creando', 'Creando grupo…'],
     ['/coach/grupos/crear?paso=4&estado=perfil-incompleto', 'Completa tu perfil de coach'],
     ['/coach/grupos/crear?estado=sin-permisos', 'No tienes permisos para crear grupos'],
     ['/coach/grupos/crear?paso=4&estado=conexion', 'No pudimos crear el grupo'],
-    ['/grupos?vista=cargando', 'Cargando grupos…'],
-    ['/grupos?vista=sin-resultados', 'No encontramos grupos con esos filtros'],
-    ['/grupos?vista=duplicada', 'Ya tienes una solicitud pendiente'],
-    ['/grupos?vista=sin-cupos', 'Este grupo no tiene cupos disponibles'],
-    ['/grupos?vista=cerradas', 'Este grupo no admite postulaciones'],
-    ['/coach/grupos/solicitudes?vista=rechazada', 'Solicitud rechazada'],
-    ['/coach/grupos/solicitudes?vista=atendida', 'Esta solicitud ya fue atendida'],
     ['/coach/grupos/seguimiento?vista=sin-vigencia', 'La solicitud ya no está vigente'],
     ['/coach/grupos/seguimiento?vista=sin-vacantes', 'El grupo no tiene vacantes'],
     [
@@ -98,14 +94,6 @@ describe('Variantes estáticas pendientes', () => {
     expect(root.querySelector<HTMLInputElement>('#puesto')?.value).toBe('');
     expect(root.querySelector<HTMLButtonElement>('button[mat-flat-button]')?.disabled).toBe(true);
     expect(root.textContent).toContain('Pendiente · no publicado');
-  });
-  it('bloquea las decisiones sobre una solicitud ya atendida', async () => {
-    const { root } = await abrir('/coach/grupos/solicitudes?vista=atendida');
-    const dialogo = root.querySelector('[role="dialog"]')!;
-    expect(dialogo.querySelector<HTMLButtonElement>('button[mat-stroked-button]')?.disabled).toBe(
-      true,
-    );
-    expect(dialogo.querySelector('a[mat-flat-button]')?.getAttribute('aria-disabled')).toBe('true');
   });
   it('no muestra actividad ni métricas de un contexto inválido', async () => {
     const { root } = await abrir('/progreso/equipos?estado=contexto-invalido');

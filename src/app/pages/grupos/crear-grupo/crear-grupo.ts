@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -10,6 +10,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
 import { map, tap } from 'rxjs';
+import { apiError } from '../../../core/api';
+import { CreateGroupRequest, TeamsApi } from '../../../core/teams-api';
+
+const NIVELES: Record<string, string> = {
+  Principiante: 'PRINCIPIANTE',
+  Intermedio: 'INTERMEDIO',
+  Avanzado: 'AVANZADO',
+};
 
 @Component({
   selector: 'app-crear-grupo',
@@ -29,8 +37,15 @@ import { map, tap } from 'rxjs';
   styleUrl: './crear-grupo.css',
 })
 export class CrearGrupo {
+  private readonly api = inject(TeamsApi);
+  private readonly router = inject(Router);
+
   protected readonly estado$;
   protected readonly paso$;
+  protected readonly guardando = signal(false);
+  protected readonly error = signal('');
+  protected readonly exito = signal('');
+
   protected readonly pasos = ['Información general', 'Horario', 'Acceso y visibilidad', 'Resumen'];
   protected readonly ayudas = [
     'Datos básicos del grupo',
@@ -71,7 +86,7 @@ export class CrearGrupo {
     visibilidad: new FormControl('Público', { nonNullable: true, validators: Validators.required }),
   });
 
-  constructor(route: ActivatedRoute) {
+  constructor(private readonly route: ActivatedRoute) {
     this.estado$ = route.queryParamMap.pipe(
       map((params) => params.get('estado') ?? ''),
       tap((estado) => {
@@ -103,5 +118,92 @@ export class CrearGrupo {
     const control = this.general.controls.cupo;
     control.setValue(Math.min(1000, Math.max(1, (control.value ?? 0) + cambio)));
     control.markAsTouched();
+  }
+
+  /** US04: guarda lo ingresado como BORRADOR (solo exige el nombre). */
+  protected guardarBorrador(): void {
+    this.enviar(true);
+  }
+
+  /** US04: publica el grupo, que pasa a estar visible para los practicantes. */
+  protected crearGrupo(): void {
+    this.enviar(false);
+  }
+
+  protected continuar(paso: number): void {
+    if (paso >= 4) {
+      this.crearGrupo();
+      return;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { paso: paso + 1 },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  protected irAtras(paso: number): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { paso },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  private enviar(draft: boolean): void {
+    if (this.guardando()) return;
+    this.error.set('');
+    this.exito.set('');
+
+    if (!this.general.controls.nombre.value.trim()) {
+      this.general.controls.nombre.markAsTouched();
+      this.error.set('El nombre del grupo es obligatorio.');
+      return;
+    }
+
+    if (!draft) {
+      if (this.general.invalid || this.horario.invalid || this.acceso.invalid) {
+        this.general.markAllAsTouched();
+        this.horario.markAllAsTouched();
+        this.acceso.markAllAsTouched();
+        this.error.set(
+          'Revisa los campos marcados: para publicar se exige nombre, nivel y cupo entre 1 y 1000.',
+        );
+        return;
+      }
+    }
+
+    const body: CreateGroupRequest = {
+      name: this.general.controls.nombre.value.trim(),
+      description: this.general.controls.descripcion.value.trim() || null,
+      expectedLevel: NIVELES[this.general.controls.nivel.value] ?? this.general.controls.nivel.value,
+      maxCapacity: this.general.controls.cupo.value,
+      sessionSchedule: this.horarioTexto(),
+      visibility: this.acceso.controls.visibilidad.value === 'Público' ? 'PUBLICO' : 'PROTEGIDO',
+      draft,
+    };
+
+    this.guardando.set(true);
+    this.api.create(body).subscribe({
+      next: (response) => {
+        this.guardando.set(false);
+        this.api.lastCreated.set(response);
+        if (draft) {
+          this.exito.set(response.message);
+        } else {
+          this.router.navigate(['/coach/grupos/creado']);
+        }
+      },
+      error: (error: unknown) => {
+        this.guardando.set(false);
+        this.error.set(apiError(error));
+      },
+    });
+  }
+
+  private horarioTexto(): string | null {
+    const { dias, inicio, fin } = this.horario.getRawValue();
+    if (!dias.length) return null;
+    return `${dias.join(', ')} de ${inicio} a ${fin}`;
   }
 }

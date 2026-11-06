@@ -3,8 +3,25 @@ import { Session } from '../../../core/session';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { CoachPerfil } from './perfil';
+import { ProfileApi } from '../../../core/profile-api';
 
 describe('CoachPerfil', () => {
+  it('shows the account name above a smaller email and uses real initials', async () => {
+    await TestBed.configureTestingModule({ providers: [
+      provideRouter([{ path: 'coach/perfil', component: CoachPerfil }]),
+    ] }).compileComponents();
+    TestBed.inject(Session).demo.set(null);
+    TestBed.inject(ProfileApi).profile.set({ fullName: 'Ángela Prueba', email: 'coach@example.invalid',
+      role: 'COACH', especialidadPrincipal: 'Grafos', organizacionClub: null,
+      aniosExperiencia: 4, presentacion: null });
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/coach/perfil', CoachPerfil);
+    const root = harness.routeNativeElement as HTMLElement;
+    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Ángela Prueba');
+    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('coach@example.invalid');
+    expect(root.querySelector('.profile-avatar')?.textContent?.trim()).toBe('ÁP');
+  });
+
   async function abrir(url: string) {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'coach/perfil', component: CoachPerfil }])],

@@ -1,0 +1,139 @@
+<section class="chart-card" aria-labelledby="activity-title">
+  <div class="chart-heading">
+    <div>
+      <h3 id="activity-title" class="m-0 text-[13px] font-semibold text-[#ece6f7]">
+        Actividad de resolución de problemas
+      </h3>
+      <p class="m-0 mt-1.5 text-[10px] leading-normal text-[#a69bb9]">
+        Envíos aceptados por día · fechas UTC
+      </p>
+    </div>
+    <div class="period-filter" role="group" aria-label="Periodo de actividad">
+      @for (option of periods; track option.id) {
+        <button
+          type="button"
+          [attr.aria-pressed]="period() === option.id"
+          (click)="period.set(option.id)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+  </div>
+  @let calendar = activity();
+  <div class="activity-summary">
+    <div>
+      <strong>{{ calendar.accepted }}</strong
+      ><span>aceptados en el periodo</span>
+    </div>
+    <div>
+      <strong
+        >{{ calendar.activeDays }} <small>/ {{ calendar.days }}</small></strong
+      ><span>días con actividad</span>
+    </div>
+    <div>
+      <strong class="date-value">{{ shortDate(calendar.lastActive) }}</strong
+      ><span>última actividad del periodo</span>
+    </div>
+  </div>
+  <div
+    class="calendar"
+    [style.--weeks]="calendar.columns"
+    [class.short-period]="period() !== 'year'"
+  >
+    <div
+      class="calendar-months"
+      aria-hidden="true"
+      [style.grid-template-columns]="'repeat(' + calendar.columns + ', minmax(0, 1fr))'"
+    >
+      @for (month of calendar.months; track month.key) {
+        <span [style.grid-column]="month.column + ' / span ' + month.span">{{ month.label }}</span>
+      }
+    </div>
+    <div class="calendar-body">
+      <div class="weekdays" aria-hidden="true">
+        <span>Lun</span><span></span><span>Mié</span><span></span><span>Vie</span><span></span
+        ><span>Dom</span>
+      </div>
+      <div
+        class="calendar-grid"
+        aria-label="Calendario de actividad"
+        [style.grid-template-columns]="'repeat(' + calendar.columns + ', minmax(0, 1fr))'"
+      >
+        @for (day of calendar.cells; track $index) {
+          <span
+            class="activity-cell"
+            [class.padding]="day.padding"
+            [attr.data-level]="day.count === 0 ? 0 : day.count < 3 ? 1 : day.count < 6 ? 2 : 3"
+            [attr.role]="day.padding ? null : 'img'"
+            [attr.aria-hidden]="day.padding ? 'true' : null"
+            [attr.aria-label]="
+              day.padding ? null : day.date + ': ' + day.count + ' envíos aceptados'
+            "
+            [title]="day.padding ? '' : day.date + ': ' + day.count + ' envíos aceptados'"
+          ></span>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="calendar-footer">
+    <span
+      >{{ shortDate(calendar.start) }} — {{ shortDate(calendar.end) }} ·
+      {{ calendar.consistency }} % de días activos</span
+    ><span class="activity-legend" aria-label="Intensidad: 0, 1 a 2, 3 a 5, 6 o más envíos"
+      >Menos <i data-level="0"></i><i data-level="1"></i><i data-level="2"></i
+      ><i data-level="3"></i> Más</span
+    >
+  </div>
+  @if (calendar.accepted === 0) {
+    <p class="chart-empty">
+      No hay envíos aceptados en este periodo. Las métricas históricas de arriba no cambian al
+      filtrar el calendario.
+    </p>
+  }
+</section>
+<section class="chart-card" aria-labelledby="rating-title">
+  <div class="chart-heading">
+    <div>
+      <h3 id="rating-title" class="m-0 text-[13px] font-semibold text-[#ece6f7]">
+        Problemas por rating
+      </h3>
+      <p class="m-0 mt-1.5 text-[10px] leading-normal text-[#a69bb9]">
+        Distribución de problemas únicos resueltos · histórico
+      </p>
+    </div>
+    @if (hardest() > 0) {
+      <span class="difficulty-badge"
+        >Mayor dificultad resuelta <strong>{{ hardest() }}</strong></span
+      >
+    }
+  </div>
+  @if (buckets().length) {
+    <div class="rating-list">
+      @for (bucket of buckets(); track bucket.rating) {
+        <div class="rating-row">
+          <a
+            [href]="bucket.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            [attr.aria-label]="'Explorar problemas de Codeforces: ' + bucket.label"
+            >{{ bucket.label }}</a
+          ><span class="rating-track" aria-hidden="true"
+            ><span [style.width.%]="bucket.width"></span></span
+          ><span
+            class="bucket-count"
+            [title]="bucket.percentage.toFixed(1) + ' % de los problemas resueltos'"
+            ><strong>{{ bucket.count }}</strong
+            ><small>{{ bucket.percentage.toFixed(1) }} %</small></span
+          >
+        </div>
+      }
+    </div>
+    <p class="chart-footnote">
+      Cada problema cuenta una vez. «Sin rating» no significa dificultad cero. Los enlaces exploran
+      el catálogo de Codeforces, no una lista de tus soluciones.
+    </p>
+  } @else {
+    <p class="chart-empty">Todavía no hay problemas aceptados para distribuir por dificultad.</p>
+  }
+</section>

@@ -2,6 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
+import { profileIdentity } from '../../../core/profile-identity';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -106,9 +107,10 @@ export class CoachPerfil {
 
 
   protected get perfil() {
-    if (this.session.demo()) return PERFIL_COACH_DEMO;
+    if (this.session.demo()) return { ...PERFIL_COACH_DEMO, email: 'coach@example.invalid' };
     const p = this.profiles.profile();
-    return { iniciales: 'KL', nombre: p?.email ?? '', usuario: '', rol: 'Coach',
+    const identity = profileIdentity(p?.fullName, p?.email ?? '', 'Coach');
+    return { iniciales: identity.initials, nombre: identity.name, email: identity.email, usuario: '', rol: 'Coach',
       especialidad: p?.role === 'COACH' ? p.especialidadPrincipal : '',
       organizacion: p?.role === 'COACH' ? p.organizacionClub ?? '' : '',
       anios: p?.role === 'COACH' ? p.aniosExperiencia : 0,

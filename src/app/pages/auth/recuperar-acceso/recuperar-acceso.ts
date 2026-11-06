@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -33,6 +33,8 @@ export class RecuperarAcceso {
   private readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
   private readonly clipboard = inject(Clipboard);
+  // The app runs without zone.js: HTTP results must notify the view explicitly.
+  private readonly cdr = inject(ChangeDetectorRef);
   protected readonly recoveryCodeExample = RECOVERY_CODE_EXAMPLE;
   protected readonly isWeakPassword = isWeakPassword;
   protected busy = false;
@@ -71,6 +73,7 @@ export class RecuperarAcceso {
       this.showError(error);
     } finally {
       this.busy = false;
+      this.cdr.markForCheck();
     }
   }
 

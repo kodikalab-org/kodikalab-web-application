@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -63,6 +63,8 @@ class ConfirmPasswordMatcher implements ErrorStateMatcher {
 export class Registro {
   private readonly session = inject(Session);
   private readonly router = inject(Router);
+  // The app runs without zone.js: HTTP results must notify the view explicitly.
+  private readonly cdr = inject(ChangeDetectorRef);
   protected busy = false;
   // Visible alert text. Empty when the message is attached to a field instead.
   protected error = '';
@@ -116,6 +118,7 @@ export class Registro {
       this.showError(error);
     } finally {
       this.busy = false;
+      this.cdr.markForCheck();
     }
   }
 

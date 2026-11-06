@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -39,6 +39,8 @@ export class Login {
   private readonly profiles = inject(ProfileApi);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  // The app runs without zone.js: HTTP results must notify the view explicitly.
+  private readonly cdr = inject(ChangeDetectorRef);
   protected readonly estado$ = this.route.queryParamMap.pipe(map((params) => params.get('estado')));
   protected busy = false;
   protected error =
@@ -88,6 +90,7 @@ export class Login {
         : apiError(error);
     } finally {
       this.busy = false;
+      this.cdr.markForCheck();
     }
   }
 

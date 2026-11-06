@@ -57,11 +57,15 @@ export const emailRule: ValidatorFn = (control) => {
   return EMAIL_PATTERN.test(email) ? null : { email: true };
 };
 
-/** Strength rule only. Empty values report `required`; weak values report `weakPassword`. */
+/**
+ * Strength rule only. Empty values report `required`; weak values report `weakPassword`.
+ * Mirrors the backend pattern `(?s)(?=.*\p{Lu})(?=.*\p{Nd}).{8,}`: any Unicode uppercase letter,
+ * any Unicode decimal digit, and a length counted in code points (not UTF-16 units).
+ */
 export const passwordPolicyRule: ValidatorFn = (control) => {
   const value = String(control.value ?? '');
   if (!value) return { required: true };
-  const strong = value.length >= PASSWORD_MIN_LENGTH && /[A-Z]/.test(value) && /[0-9]/.test(value);
+  const strong = Array.from(value).length >= PASSWORD_MIN_LENGTH && /\p{Lu}/u.test(value) && /\p{Nd}/u.test(value);
   return strong ? null : { weakPassword: true };
 };
 

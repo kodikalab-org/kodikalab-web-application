@@ -73,6 +73,18 @@ describe('auth rules', () => {
       expect(passwordPolicyRule(control('Abcdefg1'))).toBeNull();
     });
 
+    it('accepts Unicode uppercase letters and digits like the backend pattern', () => {
+      expect(passwordPolicyRule(control('Ñandú2026'))).toBeNull();
+      expect(passwordPolicyRule(control('ñandúÑ1234'))).toBeNull();
+      expect(passwordPolicyRule(control('Abcdefg٣'))).toBeNull();
+      expect(passwordPolicyRule(control('ñandú2026'))).toEqual({ weakPassword: true });
+    });
+
+    it('counts the minimum length in code points, not UTF-16 units', () => {
+      expect(passwordPolicyRule(control('A😀😀😀😀😀😀1'))).toBeNull();
+      expect(passwordPolicyRule(control('A😀😀😀😀😀1'))).toEqual({ weakPassword: true });
+    });
+
     it('marks a weak password for orange only after it is touched and has a value', () => {
       const field = control('12345');
       expect(isWeakPassword(field)).toBe(false);

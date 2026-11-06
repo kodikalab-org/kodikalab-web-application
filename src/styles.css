@@ -440,3 +440,16 @@ input[type='time']::-webkit-calendar-picker-indicator {
 .auth-field.auth-field--weak mat-error {
   color: var(--kl-warn);
 }
+
+/* Los paneles de mat-select viven en el overlay del CDK, fuera del componente.
+   Sin fondo opaco, las opciones se transparentan sobre la pagina de atras. */
+.mat-mdc-select-panel {
+  background-color: var(--kl-surface) !important;
+  border: 1px solid var(--kl-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px #000000aa;
+}
+
+.mat-mdc-select-panel .mat-mdc-option {
+  color: var(--kl-text);
+}

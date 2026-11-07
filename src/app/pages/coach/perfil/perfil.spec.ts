@@ -3,8 +3,25 @@ import { Session } from '../../../core/session';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { CoachPerfil } from './perfil';
+import { ProfileApi } from '../../../core/profile-api';
 
 describe('CoachPerfil', () => {
+  it('shows the account name above a smaller email and uses real initials', async () => {
+    await TestBed.configureTestingModule({ providers: [
+      provideRouter([{ path: 'coach/perfil', component: CoachPerfil }]),
+    ] }).compileComponents();
+    TestBed.inject(Session).demo.set(null);
+    TestBed.inject(ProfileApi).profile.set({ fullName: 'Ángela Prueba', email: 'coach@example.invalid',
+      role: 'COACH', especialidadPrincipal: 'Grafos', organizacionClub: null,
+      aniosExperiencia: 4, presentacion: null });
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/coach/perfil', CoachPerfil);
+    const root = harness.routeNativeElement as HTMLElement;
+    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Ángela Prueba');
+    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('coach@example.invalid');
+    expect(root.querySelector('.profile-avatar')?.textContent?.trim()).toBe('ÁP');
+  });
+
   async function abrir(url: string) {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'coach/perfil', component: CoachPerfil }])],
@@ -108,14 +125,13 @@ describe('CoachPerfil', () => {
     expect(root.querySelectorAll('li button').length).toBe(0);
   });
 
-  it('shows the general settings with toggles, language, recovery code and logout', async () => {
+  it('shows the general settings with toggles, language and logout, without a recovery code row', async () => {
     const { root, botones } = await abrir('/coach/perfil?tab=ajustes');
     const titulos = [
       'Notificaciones',
       'Privacidad del perfil',
       'Idioma',
       'Tema oscuro',
-      'Código de recuperación',
       'Cerrar sesión',
     ];
     for (const titulo of titulos) {
@@ -124,7 +140,8 @@ describe('CoachPerfil', () => {
     const toggles = Array.from(root.querySelectorAll<HTMLButtonElement>('button[role="switch"]'));
     expect(toggles.map((t) => t.getAttribute('aria-checked'))).toEqual(['true', 'false', 'true']);
     expect(root.querySelector('mat-select')?.textContent).toContain('Español');
-    expect(botones('Código no disponible en demo').length).toBe(1);
+    expect(root.textContent).not.toContain('Código de recuperación');
+    expect(botones('Código no disponible en demo').length).toBe(0);
     expect(root.querySelector('a[href="/login"]')?.textContent).toContain('Cerrar sesión');
   });
 

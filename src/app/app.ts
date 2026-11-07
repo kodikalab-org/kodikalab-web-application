@@ -1,28 +1,23 @@
 import { Component, afterNextRender, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
-import { Theme } from './core/theme';
+import { ViewportScroller } from '@angular/common';
+import { Router, RouterOutlet } from '@angular/router';
 import { Session } from './core/session';
-import { ProfileApi } from './core/profile-api';
+import { Theme } from './core/theme';
 
 @Component({
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class App {
-  protected readonly session = inject(Session);
+  private readonly session = inject(Session);
   protected readonly router = inject(Router);
-  private readonly profiles = inject(ProfileApi);
+  private readonly viewportScroller = inject(ViewportScroller);
   protected readonly theme = inject(Theme);
-  constructor() { afterNextRender(() => { this.session.restore(); this.theme.init(); }); }
-  protected get privatePage(): boolean {
-    return /^\/(inicio|coach|perfil|onboarding|practicante|ranking|progreso|grupos)(\/|\?|$)/.test(this.router.url);
-  }
-  protected salir(): void {
-    this.session.logout();
-    this.profiles.reset();
-    void this.router.navigateByUrl('/login');
+  constructor() {
+    this.viewportScroller.setOffset([0, 96]);
+    afterNextRender(() => { this.session.restore(); this.theme.init(); });
   }
   protected readonly title = signal('kodikalab_application');
 }

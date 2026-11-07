@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { Session } from '../../../core/session';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { Perfil } from './perfil';
+import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
+import { ProfileApi } from '../../../core/profile-api';
 
 describe('Perfil', () => {
   async function setup(params: Record<string, string> = {}) {
@@ -21,6 +23,114 @@ describe('Perfil', () => {
   }
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
+
+  it('pins the outer toolbar with important utilities and no scroll-container ancestor', async () => {
+    const { root } = await setup();
+    const toolbar = root.querySelector('mat-toolbar')!;
+    for (const utility of ['sticky', 'top-0', 'z-40', 'backdrop-blur-xl']) {
+      expect(toolbar.classList.contains(utility)).toBe(true);
+    }
+    expect(toolbar.classList.contains('relative')).toBe(false);
+    expect(toolbar.classList.contains('z-10')).toBe(false);
+    expect(toolbar.parentElement!.classList.contains('overflow-clip')).toBe(true);
+    expect(toolbar.closest('.overflow-hidden')).toBeNull();
+    expect(root.querySelector('app-header-navigation')?.classList.contains('sticky')).toBe(false);
+  });
+
+  async function setupLive() {
+    const response = new Subject<CodeforcesStats>();
+    const load = vi.fn().mockReturnValue(response);
+    await TestBed.configureTestingModule({ imports: [Perfil], providers: [provideRouter([]),
+      { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
+      { provide: CodeforcesStatsApi, useValue: { load } },
+    ] }).compileComponents();
+    TestBed.inject(Session).demo.set(null);
+    const fixture = TestBed.createComponent(Perfil);
+    await fixture.whenStable();
+    return { fixture, root: fixture.nativeElement as HTMLElement, response, load };
+  }
+  const emptyStats: CodeforcesStats = { linked: true, handle: 'new_handle', problemsSolved: 0,
+    maxStreakDays: 0, currentRating: 0, acceptedSubmissions: 0, acceptanceRate: 0,
+    activity: [], solvedByRating: [] };
+
+  it('shows the real account name prominently, email separately and matching initials', async () => {
+    const { fixture, root } = await setupLive();
+    TestBed.inject(ProfileApi).profile.set({ fullName: 'Ana María Núñez', email: 'student@example.invalid',
+      role: 'PRACTICANTE', codigoEstudiante: 'TEST001', carrera: 'Ingeniería de Software', cicloAcademico: 5,
+      nivelCompetitivo: 'INTERMEDIO', codeforcesHandle: null, codeforcesRating: null,
+      atcoderHandle: null, vjudgeHandle: null });
+    await fixture.whenStable();
+    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Ana María Núñez');
+    expect(root.querySelector('.profile-name')?.textContent).not.toContain('@');
+    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('student@example.invalid');
+    expect(root.querySelector('.profile-email')?.classList.contains('text-[12px]')).toBe(true);
+    expect(root.querySelector('.profile-avatar')?.textContent?.trim()).toBe('AN');
+  });
+
+  it('does not promote email to a name while an older backend omits fullName', async () => {
+    const { fixture, root } = await setupLive();
+    TestBed.inject(ProfileApi).profile.set({ email: 'not.a.name@example.invalid', role: 'PRACTICANTE',
+      codigoEstudiante: 'TEST002', carrera: 'Ingeniería de Software', cicloAcademico: 5,
+      nivelCompetitivo: 'INTERMEDIO', codeforcesHandle: null, codeforcesRating: null,
+      atcoderHandle: null, vjudgeHandle: null });
+    await fixture.whenStable();
+    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Practicante');
+    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('not.a.name@example.invalid');
+  });
+
+  it('renders a real loading skeleton without demo numbers', async () => {
+    const { root } = await setupLive();
+    expect(root.querySelector('[aria-labelledby="titulo-estadisticas"]')?.getAttribute('aria-busy')).toBe('true');
+    expect(root.querySelector('.animate-pulse')).not.toBeNull();
+    expect(texto(root)).not.toContain('569');
+  });
+
+  it('offers linking when the server reports no Codeforces handle', async () => {
+    const { fixture, root, response } = await setupLive();
+    response.next({ ...emptyStats, linked: false, handle: null });
+    await fixture.whenStable();
+    expect(texto(root)).toContain('Vincula tu usuario de Codeforces');
+    expect(root.querySelector('a[fragment="plataformas"]')).not.toBeNull();
+    expect(texto(root)).not.toContain('Problemas resueltos');
+  });
+
+  it('shows genuine zero stats for a linked account without accepted submissions', async () => {
+    const { fixture, root, response } = await setupLive();
+    response.next(emptyStats);
+    await fixture.whenStable();
+    expect(texto(root)).toContain('Aún no hay envíos aceptados');
+    expect(texto(root)).toContain('0 días');
+    expect(texto(root)).toContain('0.0 % de aceptación');
+    expect(texto(root)).not.toContain('569');
+  });
+
+  it('renders backend counts and exact rating buckets including unrated', async () => {
+    const { fixture, root, response } = await setupLive();
+    response.next({ ...emptyStats, problemsSolved: 519, maxStreakDays: 10, currentRating: 1339,
+      acceptedSubmissions: 600, acceptanceRate: 45.25,
+      solvedByRating: [{ rating: 0, count: 7 }, { rating: 1350, count: 4 }] });
+    await fixture.whenStable();
+    expect(texto(root)).toContain('519');
+    expect(texto(root)).toContain('10 días');
+    expect(texto(root)).toContain('1339');
+    expect(texto(root)).toContain('Sin rating');
+    expect(texto(root)).toContain('1350');
+    expect(texto(root)).not.toContain('Top 12');
+  });
+
+  it('shows a retry alert on an unavailable service and recovers', async () => {
+    const { fixture, root, response, load } = await setupLive();
+    response.error({ status: 503 });
+    await fixture.whenStable();
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain('No pudimos cargar');
+    load.mockReturnValue(of(emptyStats));
+    const retry = [...root.querySelectorAll('button')].find(button => button.textContent?.includes('Reintentar'))!;
+    retry.click();
+    await fixture.whenStable();
+    expect(load).toHaveBeenCalledTimes(2);
+    expect(root.querySelector('[role="alert"]')).toBeNull();
+    expect(texto(root)).toContain('Aún no hay envíos aceptados');
+  });
 
   it('opens the "Información personal" tab by default with profile, stats and platforms', async () => {
     const { root } = await setup();
@@ -43,14 +153,18 @@ describe('Perfil', () => {
     expect(contenido).toContain('569');
     expect(contenido).toContain('Problemas resueltos');
     expect(contenido).toContain('Actividad de resolución de problemas');
-    expect(contenido).toContain('Heatmap por rating');
-    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(3);
+    expect(contenido).toContain('Problemas por rating');
+    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(1);
+    expect(root.querySelectorAll('li[aria-disabled="true"]').length).toBe(2);
+    expect(contenido.match(/En mantenimiento/g)?.length).toBe(2);
     expect(contenido).not.toContain('Aún no vinculas plataformas');
   });
 
-  it('draws one heatmap cell per day (40 weeks x 7 days) in each heatmap', async () => {
+  it('draws one dated cell per day in the annual calendar and labels demo data', async () => {
     const { root } = await setup();
-    expect(root.querySelectorAll('span.size-\\[11px\\]').length).toBe(2 * 40 * 7);
+    const days = root.querySelectorAll('.activity-cell:not(.padding)');
+    expect([365, 366]).toContain(days.length);
+    expect(texto(root)).toContain('Datos de ejemplo');
   });
 
   it('shows skeletons instead of content while loading (?estado=cargando)', async () => {
@@ -151,65 +265,25 @@ describe('Perfil', () => {
     expect(root.querySelector('table')).toBeNull();
   });
 
-  it('shows the general settings with three switches and the recovery code row (?tab=ajustes)', async () => {
+  it('shows the general settings with three switches and no recovery code row (?tab=ajustes)', async () => {
     const { root } = await setup({ tab: 'ajustes' });
     const contenido = texto(root);
-    for (const titulo of [
-      'Notificaciones',
-      'Privacidad del perfil',
-      'Idioma',
-      'Tema oscuro',
-      'Código de recuperación',
-      'Cerrar sesión',
-    ]) {
+    for (const titulo of ['Notificaciones', 'Privacidad del perfil', 'Idioma', 'Tema oscuro', 'Cerrar sesión']) {
       expect(contenido).toContain(titulo);
     }
+    expect(contenido).not.toContain('Código de recuperación');
     expect(root.querySelectorAll('mat-slide-toggle').length).toBe(3);
     expect(root.querySelectorAll('button[role="switch"][aria-checked="true"]').length).toBe(3);
-    const verCodigo = [...root.querySelectorAll('a')].find((a) =>
-      a.textContent?.includes('Ver mi código'),
-    );
-    expect(verCodigo?.getAttribute('href')).toBe('/perfil?tab=ajustes&estado=ver-codigo');
     expect(root.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  it('asks for the current password before showing the recovery code (?estado=ver-codigo)', async () => {
-    const { fixture, root } = await setup({ tab: 'ajustes', estado: 'ver-codigo' });
-    const dialogo = root.querySelector('[role="dialog"]')!;
-    expect(dialogo.getAttribute('aria-modal')).toBe('true');
-    expect(dialogo.textContent).toContain('Confirma tu contraseña para ver el código vigente');
-    const mostrar = [...dialogo.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes('Mostrar código'),
-    )!;
-    expect(mostrar.disabled).toBe(true);
-
-    const input = dialogo.querySelector<HTMLInputElement>('#password-actual')!;
-    input.dispatchEvent(new Event('blur'));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(dialogo.querySelector('mat-error')?.textContent).toContain('Ingresa tu contraseña');
-
-    input.value = 'secreta123';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(mostrar.disabled).toBe(false);
-  });
-
-  it('closes the dialog through a link that returns to the settings tab', async () => {
-    const { root } = await setup({ tab: 'ajustes', estado: 'ver-codigo' });
-    const cerrar = root.querySelector('a[aria-label="Cerrar"]');
-    expect(cerrar?.getAttribute('href')).toBe('/perfil?tab=ajustes');
-  });
-
-  it('shows the recovery code once the password is verified (?estado=codigo-recuperacion)', async () => {
-    const { root } = await setup({ tab: 'ajustes', estado: 'codigo-recuperacion' });
-    const dialogo = root.querySelector('[role="dialog"]')!;
-    expect(dialogo.textContent).toContain('Contraseña verificada');
-    expect(dialogo.textContent).toContain('ABCD-EFGH-IJKL-MNOP-QRST-UVWX');
-    expect(dialogo.textContent).toContain('Guárdalo en un lugar seguro');
-    expect(dialogo.textContent).toContain('Listo');
-  });
+  for (const estado of ['ver-codigo', 'codigo-recuperacion']) {
+    it(`ignores the removed recovery code state ?estado=${estado} in the settings tab`, async () => {
+      const { root } = await setup({ tab: 'ajustes', estado });
+      expect(root.querySelector('[role="dialog"]')).toBeNull();
+      expect(texto(root)).not.toContain('Código de recuperación');
+    });
+  }
 
   it('ignores states that do not belong to the active tab', async () => {
     const { root } = await setup({ tab: 'solicitudes', estado: 'cargando' });

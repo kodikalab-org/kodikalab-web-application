@@ -2,7 +2,7 @@ import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
-import { API_URL, AuthResponse, RecoveryResponse, RegisterRequest, Role } from './api';
+import { API_URL, AuthResponse, RegisterRequest, Role } from './api';
 
 interface SessionData { token: string; email: string; role: Role; expiresAt: number; cookie?: boolean; }
 const KEY = 'kodikalab.session';
@@ -16,8 +16,6 @@ export class Session {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   readonly account = signal<SessionData | null>(null);
   readonly demo = signal<Role | null>(null);
-  // Recovery codes are ephemeral: never stored in URLs, browser storage or logs.
-  readonly registration = signal<AuthResponse | null>(null);
   private restored = false;
 
   restore(): void {
@@ -69,18 +67,7 @@ export class Session {
   }
 
   register(request: RegisterRequest) {
-    return this.http.post<AuthResponse>(`${this.url}/auth/register`, request, { timeout: 15000 }).pipe(
-      tap((response) => this.registration.set(response)),
-    );
-  }
-
-  recover(email: string, recoveryCode: string, newPassword: string) {
-    return this.http.post<RecoveryResponse>(`${this.url}/auth/recovery`, { email, recoveryCode, newPassword }, { timeout: 15000 })
-      .pipe(tap(() => this.logout()));
-  }
-
-  recoveryCode(password: string) {
-    return this.http.post<RecoveryResponse>(`${this.url}/auth/recovery-code`, { password }, { timeout: 15000 });
+    return this.http.post<AuthResponse>(`${this.url}/auth/register`, request, { timeout: 15000 });
   }
 
   startDemo(role: Role): void {
@@ -93,7 +80,6 @@ export class Session {
     this.restored = true;
     this.account.set(null);
     this.demo.set(null);
-    this.registration.set(null);
     this.clearStorage();
     try { this.document.defaultView?.sessionStorage.removeItem(DEMO_KEY); } catch { /* optional */ }
   }

@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
+import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
+import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { SiteFooter } from '../../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-grupos-marco',
-  imports: [RouterLink, RouterOutlet, MatButtonModule, MatMenuModule, MatToolbarModule],
+  imports: [SiteFooter, HeaderNavigation, UserMenu, RouterLink, RouterOutlet, MatToolbarModule],
   templateUrl: './grupos-marco.html',
   styleUrl: './grupos-marco.css',
 })

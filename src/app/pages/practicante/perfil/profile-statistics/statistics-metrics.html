@@ -1,0 +1,58 @@
+@let current = data();
+<div class="metric-grid">
+  <article class="metric-card solved">
+    <span class="metric-icon"
+      ><img src="images/perfil/stat-check-24.svg" alt="" width="24" height="24"
+    /></span>
+    <div>
+      <strong>{{ current.problemsSolved }}</strong>
+      <h3>Problemas resueltos</h3>
+      <p>Únicos aceptados · histórico</p>
+    </div>
+  </article>
+  <article class="metric-card streak">
+    <span class="metric-icon"
+      ><img src="images/perfil/stat-flame-24.svg" alt="" width="24" height="24"
+    /></span>
+    <div>
+      <strong>{{ current.maxStreakDays }} <small>días</small></strong>
+      <h3>Racha máxima</h3>
+      <p>Mejor marca histórica · UTC</p>
+    </div>
+  </article>
+  <article class="metric-card rating">
+    <span class="metric-icon"
+      ><img src="images/perfil/stat-bars-24.svg" alt="" width="24" height="24"
+    /></span>
+    <div>
+      <strong>{{ current.currentRating }}</strong>
+      <h3>Rating actual</h3>
+      <p>Codeforces · {{ rank() }}</p>
+    </div>
+  </article>
+  <article class="metric-card accepted">
+    <span class="metric-icon"
+      ><img src="images/perfil/stat-file-24.svg" alt="" width="24" height="24"
+    /></span>
+    <div>
+      <strong>{{ current.acceptedSubmissions }}</strong>
+      <h3>Envíos aceptados</h3>
+      <p>{{ current.acceptanceRate.toFixed(1) }} % de aceptación</p>
+    </div>
+  </article>
+</div>
+<div class="acceptance-line">
+  <span
+    >Aceptación de envíos <strong>{{ current.acceptanceRate.toFixed(1) }} %</strong></span
+  >
+  <div
+    class="acceptance-track"
+    role="meter"
+    aria-label="Porcentaje de envíos aceptados"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="current.acceptanceRate"
+  >
+    <span [style.width.%]="current.acceptanceRate"></span>
+  </div>
+</div>

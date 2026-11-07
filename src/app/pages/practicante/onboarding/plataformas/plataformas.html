@@ -1,6 +1,6 @@
 @let estado = estado$ | async;
 <div
-  class="relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text"
+  class="relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text"
   [attr.data-estado]="estado"
 >
   <img
@@ -11,7 +11,7 @@
   />
 
   <mat-toolbar
-    class="auth-header relative z-10 justify-between border-0 border-b border-solid border-kl-divider px-14 font-body font-normal max-[641px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl justify-between border-0 border-b border-solid border-kl-divider px-14 font-body font-normal max-[641px]:px-4"
   >
     <a class="inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
       <img src="images/registro/logo-40.svg" alt="" width="40" height="40" />
@@ -97,6 +97,9 @@
                 [for]="plataforma.clave"
                 >{{ plataforma.nombre }}</label
               >
+              @if (plataforma.clave !== 'codeforces') {
+                <span class="text-xs text-kl-muted">En mantenimiento</span>
+              }
               <mat-form-field
                 class="auth-field min-w-0 flex-1 text-[15px] max-[641px]:basis-full"
                 appearance="outline"
@@ -184,10 +187,5 @@
     </mat-card>
   </main>
 
-  <p
-    class="relative z-10 mx-0 mt-[-37px] mb-0 h-[37px] px-4 text-center text-xs leading-[15px] text-kl-faint"
-  >
-    © 2026 Kodikalab · <span class="text-kl-accent-text">Términos de Servicio</span> · Política de
-    privacidad
-  </p>
+  <app-site-footer variant="compact" class="relative z-10 mx-0 mt-[-37px] mb-0 h-[37px] px-4 text-center text-xs leading-[15px] text-kl-faint" />
 </div>

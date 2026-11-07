@@ -26,8 +26,6 @@ describe('Variantes estáticas pendientes', () => {
   });
 
   const casos = [
-    ['/registro-exitoso?estado=verificacion-pendiente', 'Revisa tu correo institucional'],
-    ['/registro-exitoso?estado=cuenta-activada', 'Tu cuenta está activada'],
     ['/login?estado=cuenta-deshabilitada', 'Tu cuenta no está habilitada'],
     ['/coach/grupos/crear?paso=4&estado=creando', 'Creando grupo…'],
     ['/coach/grupos/crear?paso=4&estado=perfil-incompleto', 'Completa tu perfil de coach'],
@@ -39,11 +37,6 @@ describe('Variantes estáticas pendientes', () => {
       '/coach/grupos/seguimiento?vista=sin-autorizacion',
       'No tienes permiso para procesar esta solicitud',
     ],
-    ['/progreso?estado=sin-actividad', 'Aún no tienes actividad en ningún tema'],
-    ['/progreso?estado=actividad-mixta', 'CON RESULTADOS · 3'],
-    ['/progreso?estado=inconsistentes', 'No pudimos calcular tu progreso'],
-    ['/progreso?estado=no-disponible', 'No pudimos obtener tus registros'],
-    ['/progreso?estado=sin-pertenencia', 'No pudimos mostrar este progreso'],
     ['/ranking?estado=inconsistentes', 'Última clasificación válida'],
     ['/ranking?estado=compartidas', 'Dos integrantes comparten el segundo puesto'],
     ['/coach/rendimiento?estado=insuficiente', 'No hay información suficiente'],
@@ -62,20 +55,6 @@ describe('Variantes estáticas pendientes', () => {
     });
   }
 
-  it('no muestra indicadores o barras cuando no se puede consultar el progreso', async () => {
-    const { root, harness } = await abrir('/progreso?estado=inconsistentes');
-    for (const estado of ['inconsistentes', 'no-disponible', 'sin-pertenencia']) {
-      await harness.navigateByUrl(`/progreso?estado=${estado}`);
-      expect(root.querySelector('[aria-label="Resumen del progreso"]')).toBeNull();
-      expect(root.querySelector('[role="progressbar"]')).toBeNull();
-    }
-  });
-  it('no confunde ausencia de actividad con cobertura calculada de un tema', async () => {
-    const { root } = await abrir('/progreso?estado=sin-actividad');
-    expect(root.querySelectorAll('article')).toHaveLength(6);
-    expect(root.querySelectorAll('[role="progressbar"]')).toHaveLength(0);
-    expect(root.textContent).not.toContain('Son los temas con menor cobertura');
-  });
   it('presenta posiciones compartidas 1, 2, 2, 4, 5 sin recalcularlas', async () => {
     const { root } = await abrir('/ranking?estado=compartidas');
     expect(

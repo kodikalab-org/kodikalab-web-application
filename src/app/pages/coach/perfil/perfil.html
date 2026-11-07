@@ -1,5 +1,5 @@
 @if (vista$ | async; as vista) {
-  <div class="relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text">
+  <div class="relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text">
     @switch (vista.pestania) {
       @case ('ajustes') {
         <img
@@ -20,10 +20,10 @@
     }
 
     <mat-toolbar
-      class="auth-header relative z-10 h-[68px] justify-between border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1000px]:px-6 max-[641px]:h-[60px] max-[641px]:px-4"
+      class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1000px]:px-6 max-[641px]:h-[60px] max-[641px]:px-4"
     >
-      <div class="flex items-center gap-14 max-[1200px]:gap-8">
-        <a class="inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
+      <div class="flex min-w-0 items-center gap-2 xl:gap-14">
+        <a class="inline-flex items-center gap-2.5" routerLink="/coach/inicio" aria-label="Kodikalab, inicio">
           <img
             class="max-[641px]:size-8"
             src="images/perfil-coach/logo-40.svg"
@@ -31,17 +31,11 @@
             width="40"
             height="40"
           />
-          <span class="text-[25px] font-medium tracking-[-.4px] max-[641px]:text-xl"
+          <span class="text-[25px] font-medium tracking-[-.4px] max-[641px]:text-xl max-[359px]:hidden"
             >Kodikalab</span
           >
         </a>
-        <nav class="max-[1280px]:hidden" aria-label="Principal">
-          <ul class="m-0 flex list-none items-center gap-9 p-0 text-[15px] font-normal">
-            @for (enlace of enlaces; track enlace) {
-              <li>@if (enlace === 'Inicio') { <a routerLink="/coach/inicio">Inicio</a> } @else { <span aria-disabled="true" title="Pendiente de integrar">{{ enlace }}</span> }</li>
-            }
-          </ul>
-        </nav>
+        <app-header-navigation [coach]="true" />
       </div>
       <div class="flex items-center gap-[22px] max-[641px]:gap-3">
         <div
@@ -62,6 +56,8 @@
           class="inline-flex cursor-pointer border-0 bg-transparent p-0"
           type="button"
           aria-label="Notificaciones"
+          disabled
+          title="Notificaciones pendientes de integración"
         >
           <img src="images/perfil-coach/bell-22.svg" alt="" width="22" height="22" />
         </button>
@@ -69,21 +65,12 @@
           class="inline-flex cursor-pointer border-0 bg-transparent p-0 max-[641px]:hidden"
           type="button"
           aria-label="Cambiar tema"
+          disabled
+          title="Cambio de tema pendiente de integración"
         >
           <img src="images/perfil-coach/moon-22.svg" alt="" width="22" height="22" />
         </button>
-        <button
-          class="inline-flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-kl-text"
-          type="button"
-          aria-label="Menú de {{ perfil.nombre }}"
-        >
-          <span
-            class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
-            aria-hidden="true"
-            >{{ perfil.iniciales }}</span
-          >
-          <img src="images/perfil-coach/chevron-down-16.svg" alt="" width="16" height="16" />
-        </button>
+        <app-user-menu [coach]="true" [nombre]="perfil.nombre" [iniciales]="perfil.iniciales" />
       </div>
     </mat-toolbar>
 
@@ -195,15 +182,16 @@
                   class="flex size-[118px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#8d6df8] to-[#4d2ff5] max-[641px]:size-24"
                 >
                   <span
-                    class="flex size-28 items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold max-[641px]:size-[90px] max-[641px]:text-[32px]"
+                    class="profile-avatar flex size-28 items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold max-[641px]:size-[90px] max-[641px]:text-[32px]"
                     aria-hidden="true"
                     >{{ perfil.iniciales }}</span
                   >
                 </span>
                 <div class="flex min-w-0 flex-col gap-2">
-                  <p class="m-0 break-all font-display text-2xl font-bold tracking-[-.4px]">
+                  <p class="profile-name m-0 font-display text-2xl font-bold tracking-[-.4px] [overflow-wrap:anywhere]">
                     {{ perfil.nombre }}
                   </p>
+                  <p class="profile-email m-0 text-[12px] leading-relaxed text-kl-muted [overflow-wrap:anywhere]">{{ perfil.email }}</p>
                   <div class="flex flex-wrap items-center gap-2.5">
                     <span class="text-sm text-kl-body">{{ perfil.usuario }}</span>
                     <span
@@ -516,19 +504,6 @@
                           height="14"
                         />
                       </mat-form-field>
-                    }
-                    @case ('codigo') {
-                      @if (!session.demo()) { <app-recovery-code /> } @else {
-                      <button
-                        mat-stroked-button
-                        class="h-10 rounded-[10px] border border-solid border-[#6b52e0] bg-[#7357f3]/12 px-4 text-sm text-[#e7e3f5]"
-                        type="button"
-                        disabled
-                      >
-                        <img src="images/perfil-coach/key-16.svg" alt="" width="16" height="16" />
-                        Código no disponible en demo
-                      </button>
-                      }
                     }
                     @case ('salir') {
                       <a

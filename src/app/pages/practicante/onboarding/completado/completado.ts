@@ -7,10 +7,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import { Session } from '../../../../core/session';
 import { ProfileApi } from '../../../../core/profile-api';
+import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-onboarding-completado',
-  imports: [AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [SiteFooter, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './completado.html',
   styleUrl: './completado.css',
 })

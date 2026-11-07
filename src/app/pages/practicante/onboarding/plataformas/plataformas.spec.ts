@@ -29,7 +29,13 @@ describe('OnboardingPlataformas', () => {
   it('shows step 3 of 3 with the three platforms and an enabled save button', async () => {
     const { root, save } = await setup();
     expect(root.textContent).toContain('PASO 3 DE 3');
+    expect(root.querySelector('mat-toolbar.sticky.top-0.z-40.backdrop-blur-xl')).not.toBeNull();
+    expect(root.querySelector('mat-toolbar')!.closest('.overflow-hidden')).toBeNull();
     expect(root.querySelectorAll('input').length).toBe(3);
+    expect(root.querySelector<HTMLInputElement>('#codeforces')!.disabled).toBe(false);
+    expect(root.querySelector<HTMLInputElement>('#atcoder')!.disabled).toBe(true);
+    expect(root.querySelector<HTMLInputElement>('#vjudge')!.disabled).toBe(true);
+    expect(root.textContent?.match(/En mantenimiento/g)?.length).toBe(2);
     expect(save().disabled).toBe(false);
   });
 

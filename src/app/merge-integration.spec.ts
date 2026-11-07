@@ -93,9 +93,9 @@ describe('Integración de grupos y rendimiento', () => {
       status: 'BORRADOR',
       invitationCode: 'TEST12345678',
     });
+    await harness.fixture.whenStable();
     harness.detectChanges();
-    expect(root.textContent).toContain('Borrador guardado');
-    await harness.navigateByUrl('/coach/grupos/creado');
+    expect(TestBed.inject(Router).url).toBe('/coach/grupos/creado');
     expect(harness.routeNativeElement?.textContent).toContain('Grupo integración');
     expect(harness.routeNativeElement?.textContent).toContain('TEST12345678');
   });
@@ -142,6 +142,27 @@ describe('Integración de grupos y rendimiento', () => {
     harness.detectChanges();
     expect(harness.routeNativeElement?.textContent).toContain('TEST12345678');
     expect(harness.routeNativeElement?.textContent).toContain('No hay solicitudes');
+  });
+
+  it.each([
+    { pendingRequests: undefined, expected: 'No disponible' },
+    { pendingRequests: 0, expected: 'Todo al día' },
+    { pendingRequests: 2, expected: 'Requieren tu respuesta' },
+  ])('conserva el recuento de solicitudes del coach cuando es $pendingRequests', async ({ pendingRequests, expected }) => {
+    authenticate('COACH');
+    const harness = await RouterTestingHarness.create('/coach/inicio');
+    respond('/api/teams/me', [{
+      groupId: 8, name: 'Grupo integración', status: 'ACTIVO', visibility: 'PUBLICO',
+      activeMembers: 2, maxCapacity: 10, pendingRequests,
+    }]);
+    harness.detectChanges();
+    const summary = harness.routeNativeElement?.querySelector('[aria-label="Resumen de actividad"]');
+    expect(summary?.textContent).toContain(expected);
+    expect(summary?.textContent).not.toContain('NaN');
+    if (pendingRequests === undefined) {
+      expect(harness.routeNativeElement?.textContent).toContain('Solicitudes no disponibles');
+      expect(summary?.textContent).not.toContain('Todo al día');
+    }
   });
 
   const pages = [

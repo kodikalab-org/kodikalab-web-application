@@ -34,9 +34,8 @@
         <button
           mat-button
           type="button"
-          disabled
           class="text-xs"
-          title="Filtros visuales pendientes de integrar"
+          (click)="limpiarFiltros()"
         >
           Limpiar
         </button>
@@ -95,7 +94,7 @@
         }
       </form>
       <p class="mt-4 mb-0 text-xs leading-4 text-kl-muted">
-        Filtros visuales: todavía no filtran el listado.
+        La búsqueda y los filtros se aplican sobre los grupos publicados.
       </p>
     </aside>
 
@@ -116,20 +115,20 @@
             </div>
           }
         </div>
-      } @else if (grupos().length === 0) {
+      } @else if (visibles().length === 0) {
         <p class="mt-0 text-sm text-kl-muted">Mostrando 0 grupos</p>
         <mat-card
           class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-16 text-center"
-          ><h2 class="m-0 text-xl">Todavía no hay grupos publicados</h2>
+          ><h2 class="m-0 text-xl">No encontramos grupos con esos filtros</h2>
           <p class="m-0 text-sm text-kl-muted">
-            Cuando un coach publique un grupo aparecerá aquí para que puedas solicitar ingreso.
+            Prueba con otro nivel, otra visibilidad o limpia los filtros para ver todos los grupos.
           </p>
-          <a mat-stroked-button routerLink="/inicio">Volver al inicio</a></mat-card
-        >
+          <button mat-stroked-button type="button" (click)="limpiarFiltros()">Limpiar filtros</button>
+        </mat-card>
       } @else {
-        <p class="mt-0 mb-3 text-sm text-kl-body">Mostrando {{ total() }} grupos</p>
+        <p class="mt-0 mb-3 text-sm text-kl-body">Mostrando {{ visibles().length }} grupos</p>
         <div class="flex flex-col gap-3">
-          @for (item of grupos(); track item.id) {
+          @for (item of visibles(); track item.id) {
             <mat-card
               appearance="outlined"
               class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_180px_170px]"
@@ -190,16 +189,22 @@
                       ? 'border-amber-300/50 bg-amber-300/10 text-amber-300'
                       : item.estado === 'Eres miembro'
                         ? 'border-kl-accent/50 bg-kl-accent/10 text-kl-accent-text'
-                        : 'border-green-400/50 bg-green-400/10 text-green-400'
+                        : item.estado === 'Expulsado'
+                          ? 'border-red-400/50 bg-red-400/10 text-red-300'
+                          : 'border-green-400/50 bg-green-400/10 text-green-400'
                   "
                   >{{ item.estado }}</span
                 >
                 @if (item.estado === 'Eres miembro') {
                   <a mat-stroked-button routerLink="/ranking" [queryParams]="{ teamId: item.id }" class="w-full">Ranking del equipo</a>
                   <a mat-stroked-button routerLink="/progreso/equipos" [queryParams]="{ teamId: item.id }" class="w-full">Mi avance en este equipo</a>
-                  <a mat-stroked-button routerLink="/inicio" fragment="grupos" class="w-full"
+                  <a mat-stroked-button [routerLink]="['/grupos', item.id]" class="w-full"
                     >Ver grupo</a
                   >
+                } @else if (item.estado === 'Expulsado') {
+                  <p class="mb-0 text-[11px] leading-4 text-kl-muted">
+                    El coach te sacó del grupo; solo él puede readmitirte.
+                  </p>
                 } @else if (item.estado === 'Solicitud pendiente' || item.estado === 'Aclaración solicitada') {
                   <button mat-stroked-button type="button" class="w-full" (click)="verEstado(item)">
                     Ver estado
@@ -375,6 +380,45 @@
                   ' revisará tu solicitud. Verás su estado en “Mis equipos”.'
             }}
           </p>
+          @if (vistaActual === 'estado' && grupo?.estadoMembresia === 'ACLARACION_SOLICITADA') {
+            <div
+              class="mt-4 rounded-xl border border-solid border-kl-accent/40 bg-white/4 p-4 text-left text-sm"
+            >
+              <p class="m-0 text-xs uppercase tracking-wide text-kl-muted">
+                Aclaración del coach
+              </p>
+              <p class="my-2">{{ grupo?.aclaracion?.request }}</p>
+
+              @if (respuestaOk()) {
+                <p class="m-0 rounded-lg bg-green-400/10 p-2 text-green-300">{{ respuestaOk() }}</p>
+              } @else {
+                <label for="respuesta-aclaracion" class="mb-1 block text-xs text-kl-body"
+                  >Tu respuesta</label
+                >
+                <textarea
+                  id="respuesta-aclaracion"
+                  rows="3"
+                  maxlength="500"
+                  class="w-full rounded-lg border border-solid border-kl-border-strong bg-kl-surface p-2 text-sm text-kl-text"
+                  placeholder="Escribe la información que te pidió el coach"
+                  [value]="respuesta()"
+                  (input)="respuesta.set($any($event.target).value)"
+                ></textarea>
+                @if (respuestaError()) {
+                  <p class="mt-1 mb-0 text-xs text-kl-danger">{{ respuestaError() }}</p>
+                }
+                <button
+                  mat-flat-button
+                  type="button"
+                  class="mt-2 w-full"
+                  [disabled]="enviandoRespuesta() || !respuesta().trim()"
+                  (click)="responder()"
+                >
+                  {{ enviandoRespuesta() ? 'Enviando…' : 'Enviar respuesta' }}
+                </button>
+              }
+            </div>
+          }
           <span
             class="inline-block rounded-full border border-solid border-kl-accent/50 px-3 py-1 text-xs text-kl-accent-text"
             >{{ vistaActual === 'ingreso' ? 'Membresía activa' : 'Solicitud pendiente' }}</span

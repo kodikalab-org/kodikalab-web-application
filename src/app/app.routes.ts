@@ -3,12 +3,14 @@ import { LandingPage } from './pages/landing-page/landing-page';
 import { Login } from './pages/auth/login/login';
 import { Registro } from './pages/auth/registro/registro';
 import { accessGuard, demoGuard } from './core/access-guard';
+import { passwordResetStepGuard } from './core/password-reset-flow';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 
 const appRoutes: Routes = [
   { path: 'coach/ranking', loadComponent: () => import('./pages/ranking-equipo/ranking-equipo').then(m => m.RankingEquipo) },
   {
     path: 'recursos',
+    data: { shared: true },
     loadComponent: () => import('./pages/recursos-academicos/recursos-academicos').then((m) => m.RecursosAcademicos),
   },
   {
@@ -38,16 +40,25 @@ const appRoutes: Routes = [
   { path: '', component: LandingPage },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
-  { path: 'registro-exitoso', loadComponent: () => import('./pages/auth/registro-exitoso/registro-exitoso').then(m => m.RegistroExitoso) },
-  { path: 'recuperar-acceso', loadComponent: () => import('./pages/auth/recuperar-acceso/recuperar-acceso').then(m => m.RecuperarAcceso) },
+  {
+    path: 'recuperar-contrasena',
+    data: { paso: 'correo' },
+    loadComponent: () => import('./pages/auth/recuperar-contrasena/recuperar-contrasena').then((m) => m.RecuperarContrasena),
+  },
+  {
+    path: 'recuperar-contrasena/codigo',
+    data: { paso: 'codigo' },
+    canActivate: [passwordResetStepGuard],
+    loadComponent: () => import('./pages/auth/recuperar-contrasena/recuperar-contrasena').then((m) => m.RecuperarContrasena),
+  },
+  {
+    path: 'recuperar-contrasena/nueva',
+    data: { paso: 'nueva' },
+    canActivate: [passwordResetStepGuard],
+    loadComponent: () => import('./pages/auth/recuperar-contrasena/recuperar-contrasena').then((m) => m.RecuperarContrasena),
+  },
   { path: 'demo/practicante', component: Login, canActivate: [demoGuard], data: { role: 'PRACTICANTE' } },
   { path: 'demo/coach', component: Login, canActivate: [demoGuard], data: { role: 'COACH' } },
-  {
-    path: 'coach/grupos/solicitudes',
-    data: { coach: true },
-    loadComponent: () =>
-      import('./pages/grupos/solicitudes-grupo/solicitudes-grupo').then((m) => m.SolicitudesGrupo),
-  },
   {
     path: 'grupos',
     loadComponent: () =>
@@ -58,6 +69,11 @@ const appRoutes: Routes = [
         loadComponent: () =>
           import('./pages/grupos/explorar-grupos/explorar-grupos').then((m) => m.ExplorarGrupos),
       },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./pages/grupos/grupo-detalle/grupo-detalle').then((m) => m.GrupoDetalle),
+      },
     ],
   },
   {
@@ -67,6 +83,13 @@ const appRoutes: Routes = [
       import('./pages/grupos/grupos-marco/grupos-marco').then((m) => m.GruposMarco),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'crear' },
+      {
+        path: 'solicitudes',
+        loadComponent: () =>
+          import('./pages/grupos/solicitudes-grupo/solicitudes-grupo').then(
+            (m) => m.SolicitudesGrupo,
+          ),
+      },
       {
         path: 'crear',
         loadComponent: () =>
@@ -172,12 +195,12 @@ const appRoutes: Routes = [
   },
 ];
 
-const publicPaths = ['', 'login', 'registro', 'registro-exitoso', 'recuperar-acceso'];
+const publicPaths = ['', 'login', 'registro', 'recuperar-contrasena', 'recuperar-contrasena/codigo', 'recuperar-contrasena/nueva'];
 export const routes: Routes = [
   ...appRoutes.map(route => publicPaths.includes(route.path ?? '') || route.path?.startsWith('demo/')
     ? route
     : { ...route, canActivate: [accessGuard], data: { ...route.data,
-      role: route.path?.includes('coach/') ? 'COACH' : 'PRACTICANTE',
+      role: route.data?.['shared'] ? null : route.path?.startsWith('coach/') || route.path?.startsWith('onboarding/coach/') ? 'COACH' : 'PRACTICANTE',
     } }),
   { path: '**', redirectTo: '' },
 ];

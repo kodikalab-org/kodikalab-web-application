@@ -5,7 +5,7 @@
   <div
     class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
   ></div>
-  <header class="border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+  <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
     <mat-toolbar
       class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14"
     >
@@ -206,14 +206,13 @@
       ><a routerLink="/ranking" [queryParams]="{ estado: 'compartidas' }">Posiciones compartidas</a
       ><a routerLink="/ranking">Ranking actualizado</a>
     </nav>
-    <footer class="flex flex-col gap-2 text-xs text-kl-muted">
+    <div class="flex flex-col gap-2 text-xs text-kl-muted">
       <p role="note" class="m-0">
         Vista de demostración · Ranking fijo del diseño, sin cálculo ni consulta real.
       </p>
-      <p class="m-0">© 2026 Kodikalab · GPC UPC</p>
-      <p class="m-0">Términos de Servicio · Política de privacidad</p>
-    </footer>
+    </div>
   </main>
+  <app-site-footer audience="practicante" />
 </div>
 
 } @else { <app-ranking-live /> }

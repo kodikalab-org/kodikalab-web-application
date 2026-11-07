@@ -95,3 +95,17 @@ Resultados finales de esta actualización: Angular compila (890.43 kB iniciales,
 - El selector de tema se comprobó en páginas públicas, inicio, perfiles, formularios y las cuatro historias, conservando la preferencia al navegar y recargar. No representa una auditoría exhaustiva de todos los estados visuales de todas las historias.
 - Explorar grupos conserva un error de carga del listado general contra este backend; no se cambió esa operación ajena a estas historias. La corrección de enlaces tiene cobertura automatizada.
 - Esta etapa modifica y publica exclusivamente el frontend. No se modifica el backend, PostgreSQL ni la configuración de autenticación.
+
+
+## Integración local con develop y cambio de nombre de rama
+
+- Rama nueva: feature/US11-US12-US13-US14-frontend. Se conservó el historial completo y la rama remota feature/us-luciano; no había Pull Requests asociados al nombre anterior ni al commit revisado.
+- Se publicó únicamente el HEAD original e01e9f3 con el nombre nuevo. La integración con develop 6366045 y sus resoluciones permanecen locales, pendientes de autorización para publicarse.
+- Se resolvieron diez archivos en conflicto: shell y tema global, interceptor, pruebas de sesión, imports de los cuatro componentes, enlaces de grupos y pruebas de borradores. Se conservaron los componentes reales y el footer compartido.
+- Se mantiene el menú compartido del equipo y se incorpora Ranking para el coach. Los enlaces de grupos conservan teamId y Ver grupo abre el detalle /grupos/:groupId de US-05.
+- La recuperación usa los contratos actuales de develop. Se mantienen cookies, Bearer y limpieza de sesiones ante un 401 protegido; un rechazo del restablecimiento público no cierra la sesión.
+- Se unificaron las opciones del servidor Angular y se retiró una propiedad duplicada del stub de grupos generadas por la fusión automática. Se conservan proxyConfig y prebundle.
+- El dashboard conserva los recuentos de solicitudes disponibles. Si el contrato no incluye pendingRequests, informa que el dato no está disponible en lugar de mostrar un cero inventado.
+- Compilación: correcta, 904.21 kB iniciales, con el aviso de presupuesto de 500 kB preexistente; cinco rutas prerenderizadas.
+- Pruebas: 438 aprobadas; un caso todo preexistente de asignarproblema. Cobertura de US-04 a US-06, las cuatro historias, cookies, selección de contexto, errores, confirmación de resultados y registro provisional.
+- Navegador: vistas demo de coach y practicante, claro/oscuro, menú compartido, detalle de grupo, enlace de avance con teamId y preferencia conservada tras recargar. El backend estaba detenido; no se realizaron pruebas nuevas con API real ni escrituras en PostgreSQL.

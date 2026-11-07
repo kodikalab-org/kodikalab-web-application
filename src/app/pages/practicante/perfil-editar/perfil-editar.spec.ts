@@ -3,6 +3,8 @@ import { Session } from '../../../core/session';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { PerfilEditar } from './perfil-editar';
+import { ProfileApi } from '../../../core/profile-api';
+import { Router } from '@angular/router';
 
 describe('PerfilEditar', () => {
   async function setup(params: Record<string, string> = {}) {
@@ -34,6 +36,29 @@ describe('PerfilEditar', () => {
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
 
+  it('loads and persists every optional practitioner field outside demo mode', async () => {
+    const profile = { role: 'PRACTICANTE' as const, email: 'test@example.com', codigoEstudiante: '123',
+      carrera: 'Ingeniería de Software', cicloAcademico: 5, nivelCompetitivo: 'INTERMEDIO' as const,
+      codeforcesHandle: '_matjavi_', codeforcesRating: null, atcoderHandle: null, vjudgeHandle: null,
+      district: 'San Miguel', experienceMonths: 12, preferredTime: 'NOCHE' as const,
+      availableDays: ['MIE', 'VIE'] as ('MIE' | 'VIE')[], goal: 'Mejorar mi nivel' };
+    const save = vi.fn().mockReturnValue(of({ profile, message: 'Saved' }));
+    await TestBed.configureTestingModule({ imports: [PerfilEditar], providers: [provideRouter([]),
+      { provide: ProfileApi, useValue: { profile: () => profile, save } },
+      { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
+    ] }).compileComponents();
+    TestBed.inject(Session).demo.set(null);
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const fixture = TestBed.createComponent(PerfilEditar);
+    const component = fixture.componentInstance as any;
+    expect(component.form.controls.distrito.enabled).toBe(true);
+    expect(component.form.getRawValue()).toMatchObject({ distrito: 'San Miguel', experiencia: 12,
+      franja: 'Noche', dias: ['Mié', 'Vie'], objetivo: 'Mejorar mi nivel' });
+    await component.guardar();
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ district: 'San Miguel', experienceMonths: 12,
+      preferredTime: 'NOCHE', availableDays: ['MIE', 'VIE'], goal: 'Mejorar mi nivel' }));
+  });
+
   it('loads the current profile data into the form', async () => {
     const { root, guardar } = await setup();
     expect(
@@ -48,7 +73,13 @@ describe('PerfilEditar', () => {
     expect(root.querySelector<HTMLInputElement>('#handle-codeforces')!.value).toBe('_matjavi_');
     expect(root.querySelector<HTMLInputElement>('#handle-atcoder')!.value).toBe('matjavi');
     expect(root.querySelector<HTMLInputElement>('#handle-vjudge')!.value).toBe('matjavi');
+    expect(root.querySelector<HTMLInputElement>('#handle-codeforces')!.disabled).toBe(false);
+    expect(root.querySelector<HTMLInputElement>('#handle-atcoder')!.disabled).toBe(true);
+    expect(root.querySelector<HTMLInputElement>('#handle-vjudge')!.disabled).toBe(true);
+    expect(texto(root).match(/En mantenimiento/g)?.length).toBe(2);
     expect(root.querySelector('section#plataformas')).not.toBeNull();
+    expect(root.querySelector('mat-toolbar.sticky.top-0.z-40.backdrop-blur-xl')).not.toBeNull();
+    expect(root.querySelector('mat-toolbar')!.closest('.overflow-hidden')).toBeNull();
     expect(guardar().disabled).toBe(false);
     expect(root.querySelector('[role="alert"]')).toBeNull();
   });
@@ -85,18 +116,18 @@ describe('PerfilEditar', () => {
 
   it('accepts only letters, numbers, dot, hyphen and underscore in handles', async () => {
     const { root, guardar, type } = await setup();
-    await type('handle-atcoder', 'camila_r-1.x');
+    await type('handle-codeforces', 'camila_r-1.x');
     expect(guardar().disabled).toBe(false);
-    await type('handle-atcoder', 'camila rojas!');
+    await type('handle-codeforces', 'camila rojas!');
     expect(guardar().disabled).toBe(true);
     expect(texto(root)).toContain('Usa solo letras, números, punto, guion y guion bajo (máx. 50)');
-    await type('handle-atcoder', '');
+    await type('handle-codeforces', '');
     expect(guardar().disabled).toBe(false);
   });
 
   it('rejects handles longer than 50 characters', async () => {
     const { guardar, type } = await setup();
-    await type('handle-vjudge', 'a'.repeat(51));
+    await type('handle-codeforces', 'a'.repeat(51));
     expect(guardar().disabled).toBe(true);
   });
 

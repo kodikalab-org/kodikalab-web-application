@@ -1,9 +1,8 @@
 <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
-  @let vista = estado$ | async;
   <div
     class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
   ></div>
-  <header class="border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+  <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
     <mat-toolbar
       class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14"
     >
@@ -47,317 +46,271 @@
           Identifica tus fortalezas y los temas que conviene reforzar.
         </p>
       </div>
-      <div class="flex flex-col gap-1.5 lg:w-[280px]">
-        <span class="text-sm font-bold">Equipo</span>
-        <div
-          class="flex h-11 items-center justify-between rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5"
-        >
-          <span>Equipo Alfa</span><img src="/images/progreso-ranking/abajo.svg" alt="" />
-        </div>
-      </div>
+      @if (teams().length > 1) {
+        <mat-form-field class="lg:w-[280px]" subscriptSizing="dynamic">
+          <mat-label>Equipo</mat-label>
+          <mat-select [formControl]="teamControl" aria-label="Equipo">
+            @for (team of teams(); track team.groupId) {
+              <mat-option [value]="team.groupId">{{ team.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      } @else if (selectedTeam(); as team) {
+        <p class="m-0 text-sm lg:w-[280px]">
+          <span class="font-bold">Equipo</span><br />{{ team.name }}
+        </p>
+      }
     </div>
-    @if (vista?.error; as error) {
+
+    @if (teamsState() === 'loading') {
+      <p role="status" class="m-0 text-sm text-kl-muted">Cargando tus equipos…</p>
+    } @else if (teamsState() === 'error') {
+      <mat-card
+        class="items-center gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6 text-center lg:py-12"
+      >
+        <h2 class="m-0 font-display text-2xl">No pudimos cargar tus equipos</h2>
+        <p role="alert" class="m-0 max-w-[560px] text-sm text-kl-muted">
+          Inténtalo de nuevo en unos segundos.
+        </p>
+        <button mat-flat-button type="button" (click)="loadTeams()">Reintentar</button>
+      </mat-card>
+    } @else if (teams().length === 0) {
+      <mat-card
+        class="items-center gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6 text-center lg:py-12"
+      >
+        <h2 class="m-0 font-display text-2xl">Aún no perteneces a ningún equipo activo</h2>
+        <p class="m-0 max-w-[560px] text-sm text-kl-muted">
+          Únete a un equipo y cuando tengas problemas asignados verás aquí tu progreso por tema.
+        </p>
+        <a mat-flat-button routerLink="/grupos">Ir a mis equipos</a>
+      </mat-card>
+    } @else if (api.loading()) {
+      <p role="status" class="m-0 text-sm text-kl-muted">Calculando tu progreso por tema…</p>
+    } @else if (api.error(); as error) {
       <mat-card
         class="items-center gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6 text-center lg:py-12"
       >
         <span class="rounded-full bg-[#34161a] px-3 py-1 text-xs text-kl-danger">{{
-          error.codigo
+          errorView()?.chip
         }}</span>
-        <h2 class="m-0 font-display text-2xl">{{ error.titulo }}</h2>
-        <p role="alert" class="m-0 max-w-[560px] text-sm text-kl-muted">{{ error.detalle }}</p>
-        @if (vista?.nombre === 'inconsistentes') {
+        <h2 class="m-0 font-display text-2xl">{{ errorView()?.title }}</h2>
+        <p role="alert" class="m-0 max-w-[560px] text-sm text-kl-muted">
+          {{ error.message }}
+          @if (error.kind === 'inconsistent') {
+            Para no mostrarte cifras incorrectas, no presentamos indicadores. Tu práctica no se
+            modificó.
+          }
+        </p>
+        @if (error.affected.length > 0) {
           <dl
             class="m-0 w-full max-w-[560px] rounded-xl border border-solid border-[#2b2760] bg-white/3 p-4 text-left text-sm"
           >
             <dt class="font-mono text-xs text-kl-danger">INFORMACIÓN AFECTADA</dt>
-            <dd class="m-0 py-3">
-              <code>assignments[3].teamId</code><br />La asignación no pertenece al equipo
-              consultado
-            </dd>
-            <dd class="m-0"><code>attempts[7]</code><br />El intento está incompleto</dd>
+            @for (item of error.affected; track item.field) {
+              <dd class="m-0 pt-3">
+                <code>{{ item.field }}</code
+                ><br />{{ item.message }}
+              </dd>
+            }
           </dl>
         }
-        @if (vista?.nombre === 'sin-pertenencia') {
-          <a mat-flat-button routerLink="/grupos">Ir a mis equipos</a
-          ><a routerLink="/progreso/equipos" class="text-sm text-kl-accent-text"
-            >Elegir otro equipo</a
-          >
-        } @else {
-          <button mat-flat-button disabled>Repetir consulta</button>
-          @if (vista?.nombre === 'inconsistentes') {
-            <button mat-button disabled>Avisar a mi coach</button>
-          } @else {
-            <a routerLink="/inicio" class="text-sm text-kl-accent-text">Volver al inicio</a>
-          }
+        @if (error.retryable) {
+          <button mat-flat-button type="button" (click)="retry()">Reintentar</button>
+        }
+        @if (errorView()?.link) {
+          <a mat-flat-button routerLink="/grupos">Ir a mis equipos</a>
         }
       </mat-card>
-    } @else if (vista?.nombre === 'sin-actividad' || vista?.nombre === 'actividad-mixta') {
-      @let mixta = vista?.nombre === 'actividad-mixta';
-      <section aria-label="Resumen del progreso" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        @for (
-          dato of [
-            ['Problemas asignados', '14'],
-            ['Resueltos', mixta ? '4' : '0'],
-            ['Cobertura global', mixta ? '29%' : '0%'],
-            ['Sin actividad', mixta ? '3' : '6'],
-          ];
-          track dato[0]
-        ) {
-          <mat-card class="gap-2 border border-solid border-[#2b2760] bg-kl-surface p-5"
-            ><span class="text-sm text-kl-muted">{{ dato[0] }}</span
-            ><strong class="font-display text-2xl">{{ dato[1] }}</strong></mat-card
-          >
-        }
-      </section>
-      @if (!mixta) {
-        <section
-          role="status"
-          class="rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
-        >
-          <strong class="text-[#60b0ff]">Aún no tienes actividad en ningún tema</strong>
-          <p class="mb-0">
-            Resuelve tu primer problema asignado y verás aquí tu cobertura por tema.
-          </p>
-        </section>
-      }
-      <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <mat-card
-          class="min-w-0 gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
-          ><h2 class="m-0 text-xl font-bold">Progreso por tema</h2>
-          @if (mixta) {
-            <h3 class="font-mono text-xs text-kl-accent-text">CON RESULTADOS · 3</h3>
-            @for (
-              tema of [
-                ['Programación dinámica', '3 asignados · 1 resueltos', '33'],
-                ['Grafos', '6 asignados · 2 resueltos · 1 por verificar', '33'],
-                ['Estructuras de datos', '5 asignados · 3 resueltos', '60'],
-              ];
-              track tema[0]
-            ) {
-              <article
-                class="flex flex-col gap-2 rounded-xl border border-solid border-[#2b2760] bg-white/3 p-4"
-              >
-                <h3 class="m-0 text-sm">{{ tema[0] }}</h3>
-                <p class="m-0 text-xs text-kl-muted">{{ tema[1] }}</p>
-                <span class="text-xs">Cobertura {{ tema[2] }}% · En progreso</span>
-                <div
-                  role="progressbar"
-                  [attr.aria-label]="tema[0]"
-                  [attr.aria-valuenow]="tema[2]"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  class="h-2 rounded bg-white/10"
-                >
-                  <div class="h-full rounded bg-kl-accent" [style.width.%]="tema[2]"></div>
-                </div>
-              </article>
-            }
-          }
-          <h3 class="font-mono text-xs text-kl-muted">SIN ACTIVIDAD · {{ mixta ? '3' : '6' }}</h3>
-          @for (tema of mixta ? [temas[0], temas[1], temas[5]] : temas; track tema.nombre) {
-            <article
-              class="flex flex-col gap-2 rounded-xl border border-dashed border-[#2b2760] p-4"
-            >
-              <h3 class="m-0 text-sm">{{ tema.nombre }}</h3>
-              <p class="m-0 text-xs text-kl-muted">
-                {{ tema.detalle.split(' ')[0] }} problemas asignados · aún sin intentos
-              </p>
-              <span class="text-xs text-kl-muted">Inicio — · Sin actividad</span>
-              <div aria-hidden="true" class="h-2 rounded bg-white/10"></div>
-            </article>
-          }
-        </mat-card>
-        <aside class="flex flex-col gap-4">
-          @for (
-            dato of [
-              [
-                'Para reforzar',
-                'Cuando tengas resultados, aquí verás los temas con menor cobertura.',
-              ],
-              [
-                'Fortalezas',
-                'Aún no hay temas con buen avance. Cada problema resuelto suma a tu cobertura.',
-              ],
-              [
-                'Cómo se calcula',
-                'Cobertura = problemas distintos resueltos ÷ asignados a tu equipo. Un problema cuenta una sola vez aunque tenga varios temas.',
-              ],
-            ];
-            track dato[0]
-          ) {
-            <mat-card class="gap-3 border border-solid border-[#2b2760] bg-kl-surface p-6"
-              ><h2 class="m-0 text-xl font-bold">{{ dato[0] }}</h2>
-              <p class="m-0 text-sm text-kl-muted">{{ dato[1] }}</p></mat-card
-            >
-          }
-        </aside>
-      </div>
-    } @else {
+    } @else if (api.progress(); as progress) {
       <section
         aria-label="Resumen del progreso"
         class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4"
       >
-        @for (indicador of indicadores; track indicador.etiqueta) {
+        @for (indicator of indicators(); track indicator.label) {
           <mat-card
             class="gap-1.5 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-3.5 lg:p-5"
           >
-            <span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
-            ><strong class="font-display text-2xl lg:text-[40px]">{{ indicador.valor }}</strong
-            ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span>
+            <span class="text-sm text-kl-muted">{{ indicator.label }}</span
+            ><strong class="font-display text-2xl lg:text-[40px]">{{ indicator.value }}</strong
+            ><span class="text-xs text-kl-muted">{{ indicator.help }}</span>
           </mat-card>
         }
       </section>
-      <aside
-        class="flex items-start gap-3 rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
-      >
-        <img src="/images/progreso-ranking/info.svg" alt="" />
-        <div>
-          <strong class="text-[#60b0ff]">1 problema asignado no tiene tema</strong>
-          <p class="mt-1 mb-0">
-            No se incluye en ningún tema, pero sí cuenta en el total de problemas asignados.
-          </p>
-        </div>
-      </aside>
-      <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
-        <mat-card
-          class="min-w-0 gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+      @if (progress.unclassifiedProblems > 0) {
+        <aside
+          role="note"
+          class="flex items-start gap-3 rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
         >
-          <h2 class="m-0 text-xl font-bold">Progreso por tema</h2>
-          <p class="m-0 text-sm text-kl-muted">
-            Ordenados del más débil al más fuerte según tu cobertura.
-          </p>
-          @for (tema of temas; track tema.nombre) {
-            <article
-              class="flex flex-col gap-3 rounded-[14px] border border-solid border-[#2b2760] bg-white/3 p-3.5 xl:flex-row xl:items-center xl:gap-4 xl:px-5 xl:py-4"
+          <img src="/images/progreso-ranking/info.svg" alt="" />
+          <div>
+            <strong class="text-[#60b0ff]"
+              >{{ progress.unclassifiedProblems }}
+              {{
+                progress.unclassifiedProblems === 1
+                  ? 'problema asignado no tiene tema'
+                  : 'problemas asignados no tienen tema'
+              }}</strong
             >
-              <div class="min-w-0 flex-1">
-                <h3 class="m-0 text-sm font-bold">{{ tema.nombre }}</h3>
-                <p class="mt-0.5 mb-0 text-xs text-kl-muted">{{ tema.detalle }}</p>
-              </div>
-              <div class="w-full xl:w-[28%]">
-                <div class="mb-1.5 flex justify-between gap-2 font-mono text-xs">
-                  <span class="text-kl-muted">Cobertura</span><strong>{{ tema.cobertura }}%</strong>
+            <p class="mt-1 mb-0">
+              No se incluyen en ningún tema, pero sí cuentan en el total de problemas asignados.
+            </p>
+          </div>
+        </aside>
+      }
+      @if (progress.topics.length === 0) {
+        <section
+          role="status"
+          class="rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
+        >
+          <strong class="text-[#60b0ff]">Tu equipo aún no tiene problemas asignados</strong>
+          <p class="mb-0">Cuando tu coach asigne problemas verás aquí tu cobertura por tema.</p>
+        </section>
+      } @else {
+        @if (allInactive()) {
+          <section
+            role="status"
+            class="rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
+          >
+            <strong class="text-[#60b0ff]">Aún no tienes actividad en ningún tema</strong>
+            <p class="mb-0">
+              Resuelve tu primer problema asignado y verás aquí tu cobertura por tema.
+            </p>
+          </section>
+        }
+        <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
+          <mat-card
+            class="min-w-0 gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+          >
+            <h2 class="m-0 text-xl font-bold">Progreso por tema</h2>
+            <p class="m-0 text-sm text-kl-muted">
+              Ordenados del más débil al más fuerte según tu cobertura.
+              @if (inactiveCount() > 0 && !allInactive()) {
+                {{ inactiveCount() }} sin actividad todavía.
+              }
+            </p>
+            @for (topic of progress.topics; track topic.topicId) {
+              <article
+                class="flex flex-col gap-3 rounded-[14px] border border-solid bg-white/3 p-3.5 xl:flex-row xl:items-center xl:gap-4 xl:px-5 xl:py-4"
+                [class.border-[#2b2760]]="topic.status !== 'SIN_ACTIVIDAD'"
+                [class.border-dashed]="topic.status === 'SIN_ACTIVIDAD'"
+                [class.border-[#3a3670]]="topic.status === 'SIN_ACTIVIDAD'"
+              >
+                <div class="min-w-0 flex-1">
+                  <h3 class="m-0 text-sm font-bold">{{ topic.topicName }}</h3>
+                  <p class="mt-0.5 mb-0 text-xs text-kl-muted">
+                    @if (topic.status === 'SIN_ACTIVIDAD') {
+                      {{ topic.assignedProblems }} asignados · aún sin intentos
+                    } @else {
+                      {{ detail(topic) }}
+                    }
+                  </p>
+                </div>
+                <div class="w-full xl:w-[28%]">
+                  <div class="mb-1.5 flex justify-between gap-2 font-mono text-xs">
+                    <span class="text-kl-muted">Cobertura</span
+                    ><strong>{{ percent(topic.coveragePercentage) }}%</strong>
+                  </div>
+                  <div
+                    role="progressbar"
+                    [attr.aria-label]="topic.topicName"
+                    [attr.aria-valuenow]="topic.coveragePercentage"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    class="h-2 overflow-hidden rounded-full bg-[#2e2e2e]"
+                  >
+                    <div
+                      class="h-full rounded-full"
+                      [style.background-color]="barColor(topic)"
+                      [style.width.%]="topic.coveragePercentage"
+                    ></div>
+                  </div>
                 </div>
                 <div
-                  role="progressbar"
-                  [attr.aria-label]="tema.nombre"
-                  [attr.aria-valuenow]="tema.cobertura"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  class="h-2 overflow-hidden rounded-full bg-[#2e2e2e]"
+                  class="flex flex-wrap gap-1.5 text-xs xl:w-[132px] xl:flex-col xl:items-start"
                 >
-                  <div
-                    class="h-full rounded-full"
-                    [style.background-color]="
-                      tema.reforzar
-                        ? '#fbbf24'
-                        : tema.cobertura === 100
-                          ? '#4ade80'
-                          : 'var(--kl-accent)'
-                    "
-                    [style.width.%]="tema.cobertura"
-                  ></div>
+                  <span
+                    class="inline-flex items-center gap-1.5 rounded-full px-3 py-1"
+                    [class.bg-[#0e2238]]="topic.status === 'EN_PROGRESO'"
+                    [class.text-[#60b0ff]]="topic.status === 'EN_PROGRESO'"
+                    [class.bg-[#0f2a1b]]="topic.status === 'COMPLETADO'"
+                    [class.text-green-400]="topic.status === 'COMPLETADO'"
+                    [class.bg-[#212121]]="topic.status === 'SIN_ACTIVIDAD'"
+                    [class.text-kl-muted]="topic.status === 'SIN_ACTIVIDAD'"
+                    ><img
+                      [src]="
+                        topic.status === 'COMPLETADO'
+                          ? '/images/progreso-ranking/punto-verde.svg'
+                          : topic.status === 'EN_PROGRESO'
+                            ? '/images/progreso-ranking/punto-azul.svg'
+                            : '/images/progreso-ranking/punto-gris.svg'
+                      "
+                      alt=""
+                    />{{ statusLabel(topic.status) }}</span
+                  >
+                  @if (topic.needsReinforcement) {
+                    <span
+                      class="inline-flex items-center gap-1.5 rounded-full bg-[#2e2410] px-3 py-1 text-amber-400"
+                      ><img src="/images/progreso-ranking/punto-amarillo.svg" alt="" />Por
+                      reforzar</span
+                    >
+                  }
                 </div>
-              </div>
-              <div class="flex flex-wrap gap-1.5 text-xs xl:w-[132px] xl:flex-col xl:items-start">
-                <span
-                  class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[#60b0ff]"
-                  [class.bg-[#0e2238]]="tema.cobertura < 100"
-                  [class.bg-[#0f2a1b]]="tema.cobertura === 100"
-                  [class.text-green-400]="tema.cobertura === 100"
-                  ><img
-                    [src]="
-                      tema.cobertura === 100
-                        ? '/images/progreso-ranking/punto-verde.svg'
-                        : '/images/progreso-ranking/punto-azul.svg'
-                    "
-                    alt=""
-                  />{{ tema.cobertura === 100 ? 'Completado' : 'En progreso' }}</span
-                >
-                @if (tema.reforzar) {
-                  <span
-                    class="inline-flex items-center gap-1.5 rounded-full bg-[#2e2410] px-3 py-1 text-amber-400"
-                    ><img src="/images/progreso-ranking/punto-amarillo.svg" alt="" />Por
-                    reforzar</span
-                  >
-                }
-                @if (tema.verificar) {
-                  <span
-                    class="inline-flex items-center gap-1.5 rounded-full bg-[#212121] px-3 py-1 text-kl-muted"
-                    ><img src="/images/progreso-ranking/punto-gris.svg" alt="" />1 por
-                    verificar</span
-                  >
-                }
-              </div>
-            </article>
-          }
-        </mat-card>
-        <aside class="flex min-w-0 flex-col gap-4">
-          <mat-card
-            class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
-            ><h2 class="m-0 text-xl font-bold">Para reforzar</h2>
-            @for (nombre of ['Teoría de números', 'Geometría']; track nombre) {
-              <div
-                class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
-              >
-                <strong>{{ nombre }}</strong
-                ><span class="font-mono text-xs text-amber-400">25%</span>
-              </div>
+              </article>
             }
-            <p class="m-0 text-xs text-kl-muted">
-              Son los temas con menor cobertura. Empieza por ellos.
-            </p></mat-card
-          >
-          <mat-card
-            class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
-            ><h2 class="m-0 text-xl font-bold">Fortalezas</h2>
-            <div
-              class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+          </mat-card>
+          <aside class="flex min-w-0 flex-col gap-4">
+            <mat-card
+              class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+              ><h2 class="m-0 text-xl font-bold">Para reforzar</h2>
+              @for (topic of reinforceTopics(); track topic.topicId) {
+                <div
+                  class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+                >
+                  <strong>{{ topic.topicName }}</strong
+                  ><span class="font-mono text-xs text-amber-400"
+                    >{{ percent(topic.coveragePercentage) }}%</span
+                  >
+                </div>
+              } @empty {
+                <p class="m-0 text-sm text-kl-muted">
+                  No tienes temas por reforzar: todos están completos.
+                </p>
+              }
+            </mat-card>
+            <mat-card
+              class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+              ><h2 class="m-0 text-xl font-bold">Fortalezas</h2>
+              @for (topic of completedTopics(); track topic.topicId) {
+                <div
+                  class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+                >
+                  <strong>{{ topic.topicName }}</strong
+                  ><span class="font-mono text-xs text-green-400">100.00%</span>
+                </div>
+              } @empty {
+                <p class="m-0 text-sm text-kl-muted">
+                  Aún no hay temas completados. Cada problema resuelto suma a tu cobertura.
+                </p>
+              }
+            </mat-card>
+            <mat-card
+              class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+              ><h2 class="m-0 text-xl font-bold">Cómo se calcula</h2>
+              <p class="m-0 text-xs leading-relaxed text-kl-muted">
+                Cobertura = problemas distintos resueltos ÷ asignados a tu equipo. Un problema cuenta
+                una sola vez aunque tenga varios temas.
+              </p>
+              <p class="m-0 text-xs leading-relaxed text-kl-muted">
+                {{ progress.reinforcementCriterion }}
+              </p></mat-card
             >
-              <strong>Búsqueda binaria</strong
-              ><span class="font-mono text-xs text-green-400">100%</span>
-            </div>
-            <div
-              class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
-            >
-              <strong>Estructuras de datos</strong
-              ><span class="font-mono text-xs text-green-400">80%</span>
-            </div></mat-card
-          >
-          <mat-card
-            class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
-            ><h2 class="m-0 text-xl font-bold">Cómo se calcula</h2>
-            <p class="m-0 text-xs leading-relaxed text-kl-muted">
-              Cobertura = problemas distintos resueltos ÷ asignados a tu equipo. Un problema cuenta
-              una sola vez aunque tenga varios temas. Se marcan para reforzar los temas con la menor
-              cobertura mientras sea menor a 100%.
-            </p></mat-card
-          >
-        </aside>
-      </div>
-    }
-    <nav aria-label="Estados de progreso" class="flex flex-wrap gap-3 text-xs text-kl-accent-text">
-      @for (
-        estado of [
-          'sin-actividad',
-          'actividad-mixta',
-          'inconsistentes',
-          'no-disponible',
-          'sin-pertenencia',
-        ];
-        track estado
-      ) {
-        <a routerLink="/progreso" [queryParams]="{ estado: estado }">{{ estado }}</a>
+          </aside>
+        </div>
       }
-      <a routerLink="/progreso">Con resultados</a>
-    </nav>
+    }
     <nav aria-label="Vistas de progreso" class="flex flex-wrap gap-3">
       <a mat-stroked-button routerLink="/ranking">Ver ranking</a
       ><a mat-stroked-button routerLink="/progreso/equipos">Progreso por equipo</a>
     </nav>
-    <p role="note" class="m-0 text-xs text-kl-muted">
-      Vista de demostración · Datos de ejemplo del diseño. La consulta de equipos estará disponible
-      al conectar el backend.
-    </p>
   </main>
 </div>

@@ -20,7 +20,7 @@ describe('Recursos académicos estáticos · US-19', () => {
     expect(root.textContent).toContain('Competitive Programmer’s Handbook');
     expect(root.textContent).toContain('Equipo Alfa');
     expect(root.textContent).toContain('Sin IA');
-    expect([...root.querySelectorAll('button')].every(button => button.disabled)).toBe(true);
+    expect([...root.querySelectorAll<HTMLButtonElement>('main button')].every(button => button.disabled)).toBe(true);
   });
   it('distingue alternativas de coincidencias directas', async () => {
     const root = await abrir('relacionados');

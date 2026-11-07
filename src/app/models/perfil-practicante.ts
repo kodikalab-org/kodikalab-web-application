@@ -5,9 +5,7 @@ export type EstadoPerfil =
   | 'cargando'
   | 'sin-plataformas'
   | 'actualizado'
-  | 'vacio'
-  | 'ver-codigo'
-  | 'codigo-recuperacion';
+  | 'vacio';
 
 /** Query param `estado` accepted by `/perfil/editar`. */
 export type EstadoEdicion = 'errores';

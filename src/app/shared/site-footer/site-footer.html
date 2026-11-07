@@ -1,0 +1,60 @@
+@if (variant() === 'compact') {
+  <p class="footer-compact m-0 text-center text-xs leading-[15px] text-kl-faint">
+    © 2026 Kodikalab · GPC UPC ·
+    <span class="text-kl-accent-text" title="Próximamente">Términos de Servicio</span> ·
+    <span title="Próximamente">Política de privacidad</span>
+  </p>
+} @else {
+  <footer
+    class="footer border-0 border-t border-solid border-kl-divider bg-[#060414]/90 px-4 pt-10 pb-6 text-kl-muted lg:px-11"
+  >
+    <div class="mx-auto flex w-full max-w-[1280px] flex-col gap-10 lg:flex-row lg:gap-16">
+      <div class="footer__brand w-full shrink-0 lg:max-w-[320px]">
+        <a class="flex items-center gap-2.5 text-kl-text" [routerLink]="home()" aria-label="Kodikalab, inicio">
+          <img src="images/landing/logo-footer-32.svg" alt="" width="32" height="32" />
+          <span class="font-display text-xl font-medium">Kodikalab</span>
+        </a>
+        <p class="footer__text mt-4 mb-0 text-[13px] leading-5">
+          Plataforma de entrenamiento en programación competitiva del GPC UPC.
+        </p>
+        <p class="mt-3 mb-0 text-[13px] leading-5 text-kl-faint">
+          Practicantes y coaches entrenan juntos: grupos, recursos académicos, progreso por tema y ranking en un solo
+          lugar.
+        </p>
+      </div>
+
+      <div class="grid flex-1 grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 xl:grid-cols-4">
+        @for (column of columns(); track column.title) {
+          <nav [attr.aria-label]="column.title">
+            <h2 class="m-0 mb-4 font-display text-[11px] font-semibold tracking-[1.6px] text-kl-text uppercase">
+              {{ column.title }}
+            </h2>
+            <ul class="m-0 flex list-none flex-col gap-3 p-0 text-[13px]">
+              @for (link of column.links; track link.label) {
+                <li>
+                  <a
+                    class="transition-colors hover:text-kl-accent-text"
+                    [routerLink]="link.path"
+                    [fragment]="link.fragment"
+                    >{{ link.label }}</a
+                  >
+                </li>
+              }
+            </ul>
+          </nav>
+        }
+      </div>
+    </div>
+
+    <div
+      class="mx-auto mt-10 flex w-full max-w-[1280px] flex-col gap-3 border-0 border-t border-solid border-kl-divider pt-6 text-xs text-kl-faint md:flex-row md:items-center md:justify-between"
+    >
+      <div class="flex flex-col gap-2 md:flex-row md:flex-wrap md:gap-x-6">
+        <span>© 2026 Kodikalab. Todos los derechos reservados.</span>
+        <span title="Próximamente">Términos de Servicio</span>
+        <span title="Próximamente">Política de privacidad</span>
+      </div>
+      <span>Hecho por el GPC UPC</span>
+    </div>
+  </footer>
+}

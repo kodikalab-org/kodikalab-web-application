@@ -13,10 +13,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap, distinctUntilChanged } from 'rxjs';
+import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-competencias',
   imports: [ResultsLive,
+    SiteFooter,
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,

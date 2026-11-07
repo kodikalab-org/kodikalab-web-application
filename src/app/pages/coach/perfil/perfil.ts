@@ -2,7 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
-import { RecoveryCode } from '../../../shared/recovery-code/recovery-code';
+import { profileIdentity } from '../../../core/profile-identity';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
@@ -11,6 +11,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
+import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { map } from 'rxjs';
 import {
   AJUSTES_COACH_DEMO,
@@ -36,7 +38,7 @@ interface FilaPestania {
 }
 
 interface FilaAjuste {
-  readonly tipo: 'interruptor' | 'idioma' | 'codigo' | 'salir';
+  readonly tipo: 'interruptor' | 'idioma' | 'salir';
   readonly campo: 'notificaciones' | 'privacidad' | 'idioma' | 'temaOscuro' | null;
   readonly icono: string;
   readonly titulo: string;
@@ -48,7 +50,8 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
 @Component({
   selector: 'app-coach-perfil',
   imports: [
-    RecoveryCode,
+    HeaderNavigation,
+    UserMenu,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -102,12 +105,12 @@ export class CoachPerfil {
     },
   ];
 
-  protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
 
   protected get perfil() {
-    if (this.session.demo()) return PERFIL_COACH_DEMO;
+    if (this.session.demo()) return { ...PERFIL_COACH_DEMO, email: 'coach@example.invalid' };
     const p = this.profiles.profile();
-    return { iniciales: 'KL', nombre: p?.email ?? '', usuario: '', rol: 'Coach',
+    const identity = profileIdentity(p?.fullName, p?.email ?? '', 'Coach');
+    return { iniciales: identity.initials, nombre: identity.name, email: identity.email, usuario: '', rol: 'Coach',
       especialidad: p?.role === 'COACH' ? p.especialidadPrincipal : '',
       organizacion: p?.role === 'COACH' ? p.organizacionClub ?? '' : '',
       anios: p?.role === 'COACH' ? p.aniosExperiencia : 0,
@@ -157,14 +160,6 @@ export class CoachPerfil {
       icono: 'images/perfil-coach/moon-22-row.svg',
       titulo: 'Tema oscuro',
       descripcion: 'Activa o desactiva el tema oscuro.',
-    },
-    {
-      tipo: 'codigo',
-      campo: null,
-      icono: 'images/perfil-coach/key-22.svg',
-      titulo: 'Código de recuperación',
-      descripcion:
-        'Úsalo para recuperar el acceso si olvidas tu contraseña. Se muestra tras confirmar tu contraseña.',
     },
     {
       tipo: 'salir',

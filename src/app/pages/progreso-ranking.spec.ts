@@ -37,23 +37,6 @@ describe('Interfaces de progreso y ranking', () => {
     return { harness, root: harness.routeNativeElement! };
   }
 
-  it('muestra las seis coberturas fijas por tema y las advertencias del diseño', async () => {
-    const { root } = await setup('/progreso');
-    expect(root.querySelector('h1')?.textContent).toContain('Mi progreso por tema');
-    const barras = [...root.querySelectorAll('[role="progressbar"]')];
-    expect(barras.map((barra) => barra.getAttribute('aria-valuenow'))).toEqual([
-      '25',
-      '25',
-      '33',
-      '50',
-      '80',
-      '100',
-    ]);
-    expect(root.textContent).toContain('1 problema asignado no tiene tema');
-    expect(root.textContent).toContain('1 por verificar');
-    expect(root.querySelector('a[href="/ranking"]')).not.toBeNull();
-  });
-
   it('muestra el ranking de ejemplo y enlaza a progreso sin simular paginación', async () => {
     const { harness, root } = await setup('/ranking');
     expect(root.querySelectorAll('tbody tr')).toHaveLength(5);

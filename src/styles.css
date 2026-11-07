@@ -337,6 +337,17 @@ app-login .auth-check .mdc-label {
   --mat-select-placeholder-text-color: #8d89a3;
   --mat-select-enabled-arrow-color: #cfcbe0;
 }
+/*
+ * Each field draws its own icons. Hide the browser's built-in ones (the password reveal eye of Edge and the
+ * clock of time inputs) so a field never shows two icons at once.
+ */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+input[type='time']::-webkit-calendar-picker-indicator {
+  display: none;
+}
 .auth-field .mat-mdc-select-arrow-wrapper {
   @apply hidden;
 }
@@ -414,4 +425,33 @@ app-login .auth-check .mdc-label {
 }
 .onb-radio.mat-mdc-radio-checked {
   @apply border-kl-accent-text bg-[#2a1f6b]/60;
+}
+
+/* Weak password (US-01, US-02): orange warning, separate from the red error state.
+   The message text carries the meaning too; color is never the only signal. */
+:root {
+  --kl-warn: #fb923c;
+}
+
+.auth-field.auth-field--weak {
+  --mat-form-field-outlined-error-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-hover-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-focus-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-caret-color: var(--kl-warn);
+}
+.auth-field.auth-field--weak mat-error {
+  color: var(--kl-warn);
+}
+
+/* Los paneles de mat-select viven en el overlay del CDK, fuera del componente.
+   Sin fondo opaco, las opciones se transparentan sobre la pagina de atras. */
+.mat-mdc-select-panel {
+  background-color: var(--kl-surface) !important;
+  border: 1px solid var(--kl-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px #000000aa;
+}
+
+.mat-mdc-select-panel .mat-mdc-option {
+  color: var(--kl-text);
 }

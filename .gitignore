@@ -38,6 +38,8 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+.playwright-mcp/
+.atl/
 
 # System files
 .DS_Store

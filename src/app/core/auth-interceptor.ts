@@ -12,7 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const session = inject(Session);
   const router = inject(Router);
   const profiles = inject(ProfileApi);
-  const publicAuth = /\/auth\/(login|register|recovery)$/.test(request.url);
+  const publicAuth = /\/auth\/(login|register|password-reset\/(request|verify|confirm))$/.test(request.url);
   if (session.demo() && !publicAuth) {
     return throwError(() => new Error('La demostración no realiza operaciones contra la API.'));
   }
@@ -20,9 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   request = request.clone({ withCredentials: true });
   return next(token ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : request).pipe(
     catchError((error: unknown) => {
-      // An invalid recovery-code password is NOT an expired session.
-      if (error instanceof HttpErrorResponse && error.status === 401 && !publicAuth && session.authenticated() &&
-          !request.url.endsWith('/auth/recovery-code')) {
+      if (error instanceof HttpErrorResponse && error.status === 401 && !publicAuth && session.authenticated()) {
         session.logout();
         profiles.reset();
         void router.navigate(['/login'], { queryParams: { motivo: 'sesion-expirada' } });

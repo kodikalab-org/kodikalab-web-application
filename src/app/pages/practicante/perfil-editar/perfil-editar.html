@@ -1,4 +1,4 @@
-<div class="relative min-h-dvh overflow-hidden bg-kl-bg font-body leading-[1.26] text-kl-text">
+<div class="relative min-h-dvh overflow-clip bg-kl-bg font-body leading-[1.26] text-kl-text">
   <img
     class="profile-background"
     src="images/perfil/bg-1560.svg"
@@ -7,28 +7,24 @@
   />
 
   <mat-toolbar
-    class="auth-header relative z-10 h-[68px] justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
   >
-    <div class="flex items-center gap-14">
-      <a class="inline-flex items-center gap-2.5" routerLink="/" aria-label="Kodikalab, inicio">
+    <div class="flex min-w-0 items-center gap-2 xl:gap-14">
+      <a class="inline-flex items-center gap-2.5" routerLink="/inicio" aria-label="Kodikalab, inicio">
         <img class="max-[641px]:size-8" src="images/perfil/logo-40.svg" alt="" width="40" height="40" />
-        <span class="text-[25px] font-medium tracking-[-.4px] max-[641px]:text-xl"
+        <span class="text-[25px] font-medium tracking-[-.4px] max-[641px]:text-xl max-[359px]:hidden"
           >Kodikalab</span
         >
       </a>
-      <nav class="max-[1280px]:hidden" aria-label="Principal">
-        <ul class="m-0 flex list-none items-center gap-9 p-0 text-[15px] font-normal">
-          @for (enlace of enlaces; track enlace) {
-            <li>@if (enlace === 'Inicio') { <a routerLink="/inicio">Inicio</a> } @else { <span aria-disabled="true" title="Pendiente de integrar">{{ enlace }}</span> }</li>
-          }
-        </ul>
-      </nav>
+      <app-header-navigation />
     </div>
     <div class="flex items-center gap-[22px] max-[641px]:gap-3">
       <button
-        class="flex h-10 w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5 text-left font-body text-[14px] text-[#8d89a3] max-[1440px]:w-[260px] max-[900px]:hidden"
+        class="flex h-10 w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5 text-left font-body text-[14px] text-[#8d89a3] max-[1439px]:w-[260px] max-[900px]:hidden"
         type="button"
         aria-label="Buscar problemas, usuarios, concursos"
+        disabled
+        title="Búsqueda global pendiente de integración"
       >
         <img src="images/perfil/search-18.svg" alt="" width="18" height="18" />
         <span class="min-w-0 flex-1 truncate">Buscar problemas, usuarios, concursos…</span>
@@ -41,6 +37,8 @@
         class="inline-flex cursor-pointer border-0 bg-transparent p-0"
         type="button"
         aria-label="Notificaciones"
+        disabled
+        title="Notificaciones pendientes de integración"
       >
         <img src="images/perfil/bell-22.svg" alt="" width="22" height="22" />
       </button>
@@ -48,20 +46,12 @@
         class="inline-flex cursor-pointer border-0 bg-transparent p-0 max-[641px]:hidden"
         type="button"
         aria-label="Cambiar tema"
+        disabled
+        title="Cambio de tema pendiente de integración"
       >
         <img src="images/perfil/moon-22.svg" alt="" width="22" height="22" />
       </button>
-      <button
-        class="inline-flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-kl-text"
-        type="button"
-        aria-label="Menú de usuario"
-      >
-        <span
-          class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
-          >{{ iniciales }}</span
-        >
-        <img src="images/perfil/chevron-down-16.svg" alt="" width="16" height="16" />
-      </button>
+      <app-user-menu [iniciales]="iniciales" />
     </div>
   </mat-toolbar>
 
@@ -343,6 +333,9 @@
                     [attr.for]="'handle-' + plataforma.control"
                     >{{ plataforma.nombre }}</label
                   >
+                  @if (plataforma.control !== 'codeforces') {
+                    <span class="text-xs text-kl-muted">En mantenimiento</span>
+                  }
                   <mat-form-field
                     class="auth-field min-w-0 flex-1 text-[15px] [--auth-field-height:44px] [--auth-field-padding:10px] max-[641px]:basis-full"
                     appearance="outline"

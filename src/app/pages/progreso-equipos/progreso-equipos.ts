@@ -8,10 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
+import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-progreso-equipos',
-  imports: [ProgressLive,AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [ProgressLive, SiteFooter, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './progreso-equipos.html',
   styleUrl: './progreso-equipos.css',
 })

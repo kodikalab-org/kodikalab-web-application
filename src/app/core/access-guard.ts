@@ -14,7 +14,7 @@ export const accessGuard: CanActivateFn = (route, state) => {
   // Private pages are rendered only in the browser: no token or personal data in SSR HTML.
   if (!isPlatformBrowser(inject(PLATFORM_ID))) return router.parseUrl('/login');
   session.restore();
-  const role: Role = route.data['role'];
+  const role: Role = route.data['role'] ?? session.demo() ?? session.account()?.role ?? 'PRACTICANTE';
   if (session.demo()) return session.demo() === role ? true : router.parseUrl(homeFor(session.demo()!));
   if (!session.authenticated()) return router.parseUrl('/login');
   const actualRole = session.account()!.role;

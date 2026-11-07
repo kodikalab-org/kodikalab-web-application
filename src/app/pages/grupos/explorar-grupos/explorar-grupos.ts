@@ -1,4 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
@@ -11,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { apiError } from '../../../core/api';
 import {
+  Clarification,
   Membership,
   PractitionerGroup,
   StudyGroupSummary,
@@ -37,9 +40,12 @@ interface GrupoVm {
   descripcion: string;
   horario: string;
   cupo: number | null;
-  estado: 'Abierto' | 'Solicitud pendiente' | 'Aclaración solicitada' | 'Eres miembro';
+  estado: 'Abierto' | 'Solicitud pendiente' | 'Aclaración solicitada' | 'Eres miembro' | 'Expulsado';
   accion: string;
   tono: string;
+  membershipId?: number;
+  estadoMembresia?: Membership['status'];
+  aclaracion?: Clarification | null;
 }
 
 const TONOS = [
@@ -86,19 +92,72 @@ export class ExplorarGrupos {
   protected readonly seleccionado = signal<GrupoVm | null>(null);
   protected readonly grupoCodigo = signal<number | null>(null);
   protected readonly enviando = signal(false);
+  /** Respuesta del practicante cuando el coach pidió una aclaración. */
+  protected readonly respuesta = signal('');
+  protected readonly enviandoRespuesta = signal(false);
+  protected readonly respuestaOk = signal('');
+  protected readonly respuestaError = signal('');
 
   protected readonly total = computed(() => this.grupos().length);
 
   protected readonly filtros = new FormGroup({
     buscar: new FormControl('', { nonNullable: true }),
     principiante: new FormControl(false, { nonNullable: true }),
-    intermedio: new FormControl(true, { nonNullable: true }),
+    intermedio: new FormControl(false, { nonNullable: true }),
     avanzado: new FormControl(false, { nonNullable: true }),
     publico: new FormControl(false, { nonNullable: true }),
     protegido: new FormControl(false, { nonNullable: true }),
     miembro: new FormControl(false, { nonNullable: true }),
     pendiente: new FormControl(false, { nonNullable: true }),
   });
+
+  private readonly filtros$ = toSignal(
+    this.filtros.valueChanges.pipe(startWith(this.filtros.getRawValue())),
+    { initialValue: this.filtros.getRawValue() },
+  );
+
+  /** US05: búsqueda y filtros reales sobre los grupos que devuelve la API. */
+  protected readonly visibles = computed(() => {
+    const filtro = this.filtros$();
+    const texto = (filtro.buscar ?? '').trim().toLowerCase();
+
+    const niveles: string[] = [];
+    if (filtro.principiante) niveles.push('Principiante');
+    if (filtro.intermedio) niveles.push('Intermedio');
+    if (filtro.avanzado) niveles.push('Avanzado');
+
+    const publico = filtro.publico === true;
+    const protegido = filtro.protegido === true;
+    const filtraVisibilidad = publico !== protegido;
+
+    return this.grupos().filter((grupo) => {
+      if (texto && !grupo.nombre.toLowerCase().includes(texto)) return false;
+      if (niveles.length > 0 && !niveles.includes(grupo.nivel)) return false;
+      if (filtraVisibilidad && publico !== grupo.publico) return false;
+      if (filtro.miembro && grupo.estado !== 'Eres miembro') return false;
+      if (
+        filtro.pendiente &&
+        grupo.estado !== 'Solicitud pendiente' &&
+        grupo.estado !== 'Aclaración solicitada'
+      ) {
+        return false;
+      }
+      return true;
+    });
+  });
+
+  protected limpiarFiltros(): void {
+    this.filtros.reset({
+      buscar: '',
+      principiante: false,
+      intermedio: false,
+      avanzado: false,
+      publico: false,
+      protegido: false,
+      miembro: false,
+      pendiente: false,
+    });
+  }
 
   protected readonly codigo = new FormGroup({
     invitacion: new FormControl('', {
@@ -164,7 +223,37 @@ export class ExplorarGrupos {
 
   protected verEstado(grupo: GrupoVm): void {
     this.seleccionado.set(grupo);
+    this.respuesta.set('');
+    this.respuestaOk.set('');
+    this.respuestaError.set('');
     this.vista.set('estado');
+  }
+
+  /** US06: el postulante responde la aclaración y la solicitud vuelve a PENDIENTE. */
+  protected responder(): void {
+    const grupo = this.seleccionado();
+    if (!grupo?.membershipId || this.enviandoRespuesta()) return;
+
+    const texto = this.respuesta().trim();
+    if (!texto) {
+      this.respuestaError.set('Escribe una respuesta antes de enviarla.');
+      return;
+    }
+
+    this.enviandoRespuesta.set(true);
+    this.respuestaError.set('');
+    this.api.respondClarification(grupo.id, grupo.membershipId, texto).subscribe({
+      next: (response) => {
+        this.enviandoRespuesta.set(false);
+        this.respuestaOk.set(response.message);
+        this.respuesta.set('');
+        this.cargar();
+      },
+      error: (error: unknown) => {
+        this.enviandoRespuesta.set(false);
+        this.respuestaError.set(apiError(error));
+      },
+    });
   }
 
   private cargar(): void {
@@ -191,14 +280,15 @@ export class ExplorarGrupos {
     groups: StudyGroupSummary[],
     mine: (PractitionerGroup | { groupId: number })[],
   ): GrupoVm[] {
-    const memberships = new Map<number, Membership['status']>();
+    const memberships = new Map<number, PractitionerGroup['membership']>();
     for (const item of mine) {
       const membership = (item as PractitionerGroup).membership;
-      if (membership) memberships.set(item.groupId, membership.status);
+      if (membership) memberships.set(item.groupId, membership);
     }
 
     return groups.map((group, index) => {
-      const status = memberships.get(group.groupId);
+      const membership = memberships.get(group.groupId);
+      const status = membership?.status;
       return {
         id: group.groupId,
         iniciales: this.iniciales(group.name),
@@ -215,9 +305,14 @@ export class ExplorarGrupos {
               ? 'Solicitud pendiente'
               : status === 'ACLARACION_SOLICITADA'
                 ? 'Aclaración solicitada'
-                : 'Abierto',
+                : status === 'EXPULSADO'
+                  ? 'Expulsado'
+                  : 'Abierto',
         accion: group.visibility === 'PUBLICO' ? 'Unirme' : 'Solicitar ingreso',
         tono: TONOS[index % TONOS.length],
+        membershipId: membership?.membershipId,
+        estadoMembresia: status,
+        aclaracion: membership?.clarification ?? null,
       };
     });
   }

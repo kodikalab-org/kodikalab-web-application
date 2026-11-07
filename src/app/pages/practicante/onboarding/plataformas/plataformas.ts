@@ -11,6 +11,7 @@ import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
 import { PractitionerProfile, apiError } from '../../../../core/api';
+import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 
 const usuarioExterno = () =>
   new FormControl('', {
@@ -21,6 +22,7 @@ const usuarioExterno = () =>
 @Component({
   selector: 'app-onboarding-plataformas',
   imports: [
+    SiteFooter,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -39,6 +41,10 @@ export class OnboardingPlataformas {
   private readonly router = inject(Router);
   protected busy = false;
   protected error = '';
+  constructor() {
+    this.form.controls.atcoder.disable();
+    this.form.controls.vjudge.disable();
+  }
   protected async guardar(omitir = false): Promise<void> {
     if (this.busy || (!omitir && this.form.invalid)) return;
     if (this.session.demo()) { await this.router.navigateByUrl('/onboarding/practicante/completado'); return; }
@@ -51,11 +57,12 @@ export class OnboardingPlataformas {
     try {
       await firstValueFrom(this.profiles.save({
         codigoEstudiante: academic.codigo, carrera: academic.carrera,
+        district: academic.distrito || null,
         cicloAcademico: Number.parseInt(academic.ciclo, 10),
         nivelCompetitivo: nivel as PractitionerProfile['nivelCompetitivo'],
         codeforcesHandle: omitir ? null : handles.codeforces || null,
-        atcoderHandle: omitir ? null : handles.atcoder || null,
-        vjudgeHandle: omitir ? null : handles.vjudge || null,
+        atcoderHandle: null,
+        vjudgeHandle: null,
       }));
       await this.router.navigateByUrl('/onboarding/practicante/completado');
     } catch (error) { this.error = apiError(error); }

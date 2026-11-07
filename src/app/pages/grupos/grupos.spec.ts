@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { Type, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { ExplorarGrupos } from './explorar-grupos/explorar-grupos';
@@ -8,6 +8,7 @@ import { SolicitudesGrupo } from './solicitudes-grupo/solicitudes-grupo';
 import { CoachGroup, CreateGroupRequest, CreateGroupResponse, Membership, TeamsApi } from '../../core/teams-api';
 
 class TeamsStub {
+  readonly lastCreated = signal<CreateGroupResponse | null>(null);
   readonly groups = signal([
     {
       groupId: 1,
@@ -36,7 +37,6 @@ class TeamsStub {
     },
   ]);
   readonly requests = signal<Membership[]>([]);
-  readonly lastCreated = signal<CreateGroupResponse | null>(null);
 
   readonly calls = {
     join: [] as { groupId: number; code: string }[],
@@ -89,7 +89,8 @@ function configure<T>(component: Type<T>, prepare?: (stub: TeamsStub) => void) {
       { provide: ActivatedRoute, useValue: routeStub },
     ],
   });
-  return { stub, fixture: TestBed.createComponent(component) };
+  const navigation = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+  return { stub, navigation, fixture: TestBed.createComponent(component) };
 }
 
 async function settle<T>(fixture: { detectChanges(): void; whenStable(): Promise<unknown> }) {
@@ -138,7 +139,7 @@ describe('Interfaces de grupos (US04, US05 y US06)', () => {
   });
 
   it('crea un borrador sin exigir nivel ni cupo', async () => {
-    const { stub, fixture } = configure(CrearGrupo);
+    const { stub, navigation, fixture } = configure(CrearGrupo);
     await settle(fixture);
 
     const root = fixture.nativeElement as HTMLElement;
@@ -159,7 +160,8 @@ describe('Interfaces de grupos (US04, US05 y US06)', () => {
     expect(stub.calls.create[0].draft).toBe(true);
     expect(stub.calls.create[0].name).toBe('Grupo de prueba');
     expect(stub.lastCreated()?.groupId).toBe(9);
-    expect(root.textContent).toContain('Grupo creado correctamente');
+    expect(stub.lastCreated()).toMatchObject({ name: 'Grupo de prueba', status: 'BORRADOR' });
+    expect(navigation).toHaveBeenCalledWith(['/coach/grupos/creado']);
   });
 
   it('lista las solicitudes pendientes del grupo del coach', async () => {

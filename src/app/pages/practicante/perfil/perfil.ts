@@ -1,11 +1,15 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
+import { UserMenu } from '../../../shared/user-menu/user-menu';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
+import { ProfileStatistics } from './profile-statistics/profile-statistics';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
-import { RecoveryCode } from '../../../shared/recovery-code/recovery-code';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { profileIdentity } from '../../../core/profile-identity';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,21 +19,14 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import {
-  CODIGO_RECUPERACION_DEMO,
-  DIAS_HEATMAP,
-  ESTADISTICAS_DEMO,
   FILTROS_SOLICITUD_DEMO,
-  HEATMAP_ACTIVIDAD_DEMO,
-  HEATMAP_RATING_DEMO,
   IDIOMAS_AJUSTES,
   INFO_PERSONAL_DEMO,
   LENGUAJES_FILTRO,
-  MESES_HEATMAP,
   PAGINAS_SUBMISSIONS_DEMO,
   PERIODOS_FILTRO,
   PLATAFORMAS_FILTRO,
   PLATAFORMAS_PERFIL_DEMO,
-  PROBLEMAS_FILTRO,
   SOLICITUDES_DEMO,
   SUBMISSIONS_DEMO,
   VEREDICTOS_FILTRO,
@@ -38,7 +35,6 @@ import {
   EstadoPerfil,
   EstadoSolicitud,
   PestanaPerfil,
-  TonoEstadistica,
   VeredictoSubmission,
 } from '../../../models/perfil-practicante';
 
@@ -50,7 +46,7 @@ const ESTADOS_POR_PESTANA: Record<PestanaPerfil, readonly EstadoPerfil[]> = {
   info: ['cargando', 'sin-plataformas', 'actualizado'],
   solicitudes: ['vacio'],
   submissions: ['vacio'],
-  ajustes: ['ver-codigo', 'codigo-recuperacion'],
+  ajustes: [],
 };
 
 const PESTANAS: readonly PestanaPerfil[] = ['info', 'solicitudes', 'submissions', 'ajustes'];
@@ -61,16 +57,13 @@ function resolverVista(tab: string | null, estado: string | null) {
   return { pestana, estado: valido };
 }
 
-function aCeldas(filas: string[]): number[] {
-  return [...filas[0]].flatMap((_, columna) => filas.map((fila) => Number(fila[columna])));
-}
-
 @Component({
   selector: 'app-perfil',
   imports: [
-    RecoveryCode,
+    ProfileStatistics,
+    HeaderNavigation,
+    UserMenu,
     AsyncPipe,
-    CdkTrapFocus,
     NgTemplateOutlet,
     ReactiveFormsModule,
     RouterLink,
@@ -88,7 +81,27 @@ function aCeldas(filas: string[]): number[] {
 export class Perfil {
   protected readonly session = inject(Session);
   protected readonly profiles = inject(ProfileApi);
-  constructor() { if (!this.session.demo()) this.formAjustes.disable(); }
+  private readonly statsApi = inject(CodeforcesStatsApi);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly stats = signal<CodeforcesStats | null>(null);
+  protected readonly statsLoading = signal(false);
+  protected readonly statsError = signal(false);
+  constructor() {
+    if (!this.session.demo()) {
+      this.formAjustes.disable();
+      this.loadStats();
+    }
+  }
+  protected loadStats(): void {
+    if (this.session.demo() || this.statsLoading()) return;
+    this.statsLoading.set(true);
+    this.statsError.set(false);
+    this.stats.set(null);
+    this.statsApi.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: stats => { this.stats.set(stats); this.statsLoading.set(false); },
+      error: () => { this.statsError.set(true); this.statsLoading.set(false); },
+    });
+  }
   protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly route = inject(ActivatedRoute);
 
@@ -98,7 +111,6 @@ export class Perfil {
       params.get('estado') === 'actualizado' && this.profiles.message() ? 'actualizado' : null)),
   );
 
-  protected readonly enlaces = ['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos'];
   protected readonly pestanas: {
     id: PestanaPerfil;
     etiqueta: string;
@@ -133,62 +145,23 @@ export class Perfil {
 
   // ---- Información personal ----
   protected get info() {
-    if (this.session.demo()) return INFO_PERSONAL_DEMO;
+    if (this.session.demo()) return { ...INFO_PERSONAL_DEMO, email: 'practicante@example.invalid' };
     const p = this.profiles.profile();
-    return { iniciales: 'KL', nombreCompleto: p?.email ?? '', usuario: '', rol: 'Practicante',
+    const identity = profileIdentity(p?.fullName, p?.email ?? '', 'Practicante');
+    return { iniciales: identity.initials, nombreCompleto: identity.name, email: identity.email, usuario: '', rol: 'Practicante',
       carreraCiclo: p?.role === 'PRACTICANTE' ? `${p.carrera} · ${p.cicloAcademico}.º ciclo` : '',
-      universidad: 'Comunidad GPC UPC', ubicacion: 'Ubicación pendiente',
+      universidad: 'Comunidad GPC UPC', ubicacion: p?.role === 'PRACTICANTE' ? p.district || 'Distrito no indicado' : '',
       nivelCodigo: p?.role === 'PRACTICANTE' ? `${p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
-      objetivo: 'Objetivo pendiente de integración' };
+      objetivo: p?.role === 'PRACTICANTE' ? p.goal || 'Objetivo no indicado' : '' };
   }
   protected get plataformas() {
-    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO;
+    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO.filter(platform => platform.nombre === 'Codeforces');
     const p = this.profiles.profile();
     if (p?.role !== 'PRACTICANTE') return [];
-    return PLATAFORMAS_PERFIL_DEMO.map((platform) => ({ ...platform,
-      usuario: (platform.nombre === 'Codeforces' ? p.codeforcesHandle : platform.nombre === 'AtCoder' ? p.atcoderHandle : p.vjudgeHandle) ?? '',
+    return PLATAFORMAS_PERFIL_DEMO.filter(platform => platform.nombre === 'Codeforces').map((platform) => ({ ...platform,
+      usuario: p.codeforcesHandle ?? '',
     })).filter(platform => platform.usuario);
   }
-  protected get estadisticas() { return this.session.demo() ? ESTADISTICAS_DEMO : []; }
-  protected readonly tonos: Record<TonoEstadistica, { caja: string; detalle: string }> = {
-    exito: { caja: 'bg-[#4ade80]/14', detalle: 'text-[#4ade80]' },
-    alerta: { caja: 'bg-[#fb923c]/14', detalle: 'text-[#fbbf24]' },
-    turquesa: { caja: 'bg-[#5eead4]/14', detalle: 'text-[#a78bfa]' },
-    violeta: { caja: 'bg-[#a78bfa]/14', detalle: 'text-[#4ade80]' },
-  };
-  protected readonly meses = MESES_HEATMAP;
-  protected readonly diasHeatmap = DIAS_HEATMAP;
-  private readonly heatmapsDemo = [
-    {
-      titulo: 'Actividad de resolución de problemas',
-      celdas: aCeldas(HEATMAP_ACTIVIDAD_DEMO),
-      clases: ['bg-[#17163a]', 'bg-[#14532d]', 'bg-[#16a34a]', 'bg-[#4ade80]'],
-      form: new FormGroup({
-        problemas: new FormControl('todos', { nonNullable: true }),
-        periodo: new FormControl('ultimo-anio', { nonNullable: true }),
-      }),
-    },
-    {
-      titulo: 'Heatmap por rating',
-      celdas: aCeldas(HEATMAP_RATING_DEMO),
-      clases: [
-        'bg-[#17163a]',
-        'bg-[#2a2750]',
-        'bg-[#a78bfa]',
-        'bg-[#5eead4]',
-        'bg-[#d4d4d8]',
-        'bg-[#c4b5fd]',
-      ],
-      form: new FormGroup({
-        problemas: new FormControl('todos', { nonNullable: true }),
-        periodo: new FormControl('ultimo-anio', { nonNullable: true }),
-      }),
-    },
-  ];
-  protected get heatmaps() { return this.session.demo() ? this.heatmapsDemo : []; }
-  protected readonly opcionesProblemas = PROBLEMAS_FILTRO;
-  protected readonly opcionesPeriodo = PERIODOS_FILTRO;
-
   // ---- Solicitudes ----
   protected readonly filtrosSolicitud = FILTROS_SOLICITUD_DEMO;
   protected get solicitudes() { return this.session.demo() ? SOLICITUDES_DEMO : []; }
@@ -231,7 +204,6 @@ export class Perfil {
 
   // ---- Ajustes generales ----
   protected readonly idiomas = IDIOMAS_AJUSTES;
-  protected readonly codigoRecuperacion = CODIGO_RECUPERACION_DEMO;
   protected readonly filasAjustes = [
     {
       tipo: 'interruptor',
@@ -262,14 +234,6 @@ export class Perfil {
       descripcion: 'Activa o desactiva el tema oscuro.',
     },
     {
-      tipo: 'codigo',
-      control: null,
-      icono: 'images/perfil/row-key-22.svg',
-      titulo: 'Código de recuperación',
-      descripcion:
-        'Úsalo para recuperar el acceso si olvidas tu contraseña. Se muestra tras confirmar tu contraseña.',
-    },
-    {
       tipo: 'salir',
       control: null,
       icono: 'images/perfil/row-logout-22.svg',
@@ -283,13 +247,4 @@ export class Perfil {
     idioma: new FormControl('es_419', { nonNullable: true }),
     temaOscuro: new FormControl(true, { nonNullable: true }),
   });
-
-  protected readonly formPassword = new FormGroup({
-    password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-  });
-  protected mostrarPassword = false;
-
-  protected alternarPassword(): void {
-    this.mostrarPassword = !this.mostrarPassword;
-  }
 }

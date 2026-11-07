@@ -3,7 +3,6 @@ import { Session } from '../../core/session';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { vi } from 'vitest';
 import { InicioDashboard } from './inicio-dashboard';
 
 describe('InicioDashboard', () => {
@@ -14,6 +13,7 @@ describe('InicioDashboard', () => {
           { path: 'inicio', component: InicioDashboard, data: { coach: false } },
           { path: 'coach/inicio', component: InicioDashboard, data: { coach: true } },
           { path: 'login', component: InicioDashboard },
+          { path: 'grupos', component: InicioDashboard },
         ]),
       ],
     }).compileComponents();
@@ -64,20 +64,13 @@ describe('InicioDashboard', () => {
     expect(root.textContent).toContain('Aún no tienes problemas asignados');
   });
 
-  it('opens mobile navigation with no links to unavailable screens', async () => {
-    const { harness, root } = await setup('/coach/inicio');
-    const trigger = root.querySelector<HTMLButtonElement>('[aria-label="Abrir navegación"]')!;
-    trigger.click();
-    harness.detectChanges();
-    await harness.fixture.whenStable();
-    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
-    expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    expect(overlay.querySelector('a[href="/coach/inicio#contenido"]')).not.toBeNull();
-    expect(overlay.querySelector('a[href="/coach/inicio#problemas"]')?.textContent).toContain(
-      'Solicitudes',
-    );
-    expect(overlay.textContent).toContain('Recursos · próximamente');
-    expect(overlay.querySelector('a[href="/perfil"]')).toBeNull();
+  it('has no sidebar and keeps the Figma header links', async () => {
+    const { root } = await setup('/coach/inicio');
+    expect(root.querySelector('[aria-label="Abrir sidebar de la aplicación"]')).toBeNull();
+    expect(root.querySelector('[aria-controls="app-sidebar"]')).toBeNull();
+    expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/coach/grupos/crear"]')).not.toBeNull();
+    expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/recursos"]')).not.toBeNull();
+    expect(root.querySelector('[aria-label="Estado de la aplicación"]')).toBeNull();
   });
 
   it('keeps the header sticky above the content', async () => {
@@ -100,15 +93,15 @@ describe('InicioDashboard', () => {
     expect(panel.querySelector('[role="note"]')?.textContent).toContain('Practicante');
   });
 
-  it('navigates to a dashboard section while preserving the empty demo', async () => {
+  it('opens the existing groups interface instead of a dashboard fragment', async () => {
     const { harness, root } = await setup('/inicio?estado=nuevo');
-    const section = root.querySelector<HTMLElement>('#grupos')!;
-    section.scrollIntoView = vi.fn();
-    root.querySelector<HTMLAnchorElement>('nav a[href="/inicio?estado=nuevo#grupos"]')!.click();
+    root.querySelector<HTMLButtonElement>('[aria-label="Abrir accesos rápidos"]')!.click();
+    harness.detectChanges();
     await harness.fixture.whenStable();
-    expect(section.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
-    expect(TestBed.inject(Router).url).toBe('/inicio?estado=nuevo#grupos');
-    expect(root.textContent).toContain('Aún no estás en ningún grupo');
+    TestBed.inject(OverlayContainer).getContainerElement().querySelector<HTMLAnchorElement>('a[href="/grupos"]')!.click();
+    await harness.fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/grupos');
+    expect(TestBed.inject(Session).demo()).toBe('PRACTICANTE');
   });
 
   it('offers working section shortcuts from notifications', async () => {
@@ -118,9 +111,9 @@ describe('InicioDashboard', () => {
     await harness.fixture.whenStable();
     const overlay = TestBed.inject(OverlayContainer).getContainerElement();
     expect(overlay.textContent).toContain('todavía no están conectadas');
-    expect(overlay.querySelector('a[href="/coach/inicio#problemas"]')?.textContent).toContain(
+    expect(overlay.querySelector('a[href="/coach/grupos/solicitudes"]')?.textContent).toContain(
       'Revisar solicitudes',
     );
-    expect(overlay.querySelector('a[href="/coach/inicio#competencias"]')).not.toBeNull();
+    expect(overlay.querySelector('a[href="/coach/competencias"]')).not.toBeNull();
   });
 });

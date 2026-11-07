@@ -12,7 +12,7 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-progreso-equipos',
-  imports: [ProgressLive, SiteFooter, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [SiteFooter, ProgressLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './progreso-equipos.html',
   styleUrl: './progreso-equipos.css',
 })

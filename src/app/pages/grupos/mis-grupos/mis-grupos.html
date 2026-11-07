@@ -1,0 +1,320 @@
+<section aria-label="Mis grupos" class="min-w-0">
+  @if (error()) {
+    <section role="alert" class="mb-6 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
+      <strong class="text-kl-danger">No pudimos cargar tus grupos</strong>
+      <p class="mb-3">{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
+    </section>
+  } @else if (cargando()) {
+    <p role="status" class="mt-0 text-sm text-kl-muted">Cargando tus grupos…</p>
+    <div aria-busy="true" aria-label="Cargando tus grupos" class="flex flex-col gap-3">
+      @for (fila of [1, 2, 3]; track fila) {
+        <div
+          aria-hidden="true"
+          class="flex h-28 items-center gap-5 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface p-5"
+        >
+          <span class="size-16 rounded-xl bg-white/5"></span>
+          <div class="flex flex-1 flex-col gap-3">
+            <span class="h-4 w-1/2 rounded bg-white/5"></span
+            ><span class="h-3 w-3/4 rounded bg-white/5"></span>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (coach()) {
+    <mat-button-toggle-group
+      hideSingleSelectionIndicator
+      class="mb-5"
+      [value]="segmentoCoach()"
+      (change)="segmentoCoach.set($event.value)"
+      aria-label="Tipo de grupos"
+    >
+      <mat-button-toggle value="publicados"
+        >Publicados <span class="ml-1 text-xs text-kl-muted">{{ publicados().length }}</span></mat-button-toggle
+      >
+      <mat-button-toggle value="borradores"
+        >Borradores <span class="ml-1 text-xs text-kl-muted">{{ borradores().length }}</span></mat-button-toggle
+      >
+    </mat-button-toggle-group>
+
+    @if (avisoCopia()) {
+      <p role="status" class="mt-0 mb-4 text-sm text-amber-300">{{ avisoCopia() }}</p>
+    }
+
+    @if (coachVisible().length === 0) {
+      <mat-card
+        class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+      >
+        @if (segmentoCoach() === 'publicados') {
+          <h2 class="m-0 text-xl">Todavía no has publicado grupos</h2>
+          <p class="m-0 text-sm text-kl-muted">
+            Crea un grupo y publícalo para empezar a recibir integrantes y solicitudes.
+          </p>
+        } @else {
+          <h2 class="m-0 text-xl">No tienes borradores</h2>
+          <p class="m-0 text-sm text-kl-muted">
+            Guarda un grupo como borrador mientras lo completas; aparecerá aquí para que lo continúes.
+          </p>
+        }
+        <a mat-flat-button routerLink="/coach/grupos/crear">Crear grupo</a>
+      </mat-card>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (item of coachVisible(); track item.groupId) {
+          <mat-card
+            appearance="outlined"
+            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_220px_220px]"
+          >
+            <div class="flex items-start gap-4">
+              <span
+                class="mt-2 flex size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-xl font-semibold {{ tono(item) }}"
+                >{{ iniciales(item.name) }}</span
+              >
+              <div class="min-w-0">
+                <h2 class="mt-0 mb-2 text-base font-medium">{{ item.name }}</h2>
+                <div class="mb-2 flex flex-wrap gap-2 text-[11px]">
+                  <span
+                    class="rounded-full border border-solid border-kl-border-strong bg-white/3 px-2 py-0.5 text-kl-body"
+                    >Nivel: {{ nivelTexto(item.expectedLevel) }}</span
+                  ><span
+                    class="rounded-full border border-solid border-kl-border-strong bg-white/3 px-2 py-0.5 text-kl-body"
+                    >{{ item.visibility === 'PUBLICO' ? 'Público' : 'Protegido' }}</span
+                  >
+                </div>
+                <p class="m-0 text-[13px] leading-[18px] text-kl-muted">
+                  {{ item.description || 'Sin descripción.' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2 text-xs text-kl-body">
+              <span>{{ item.sessionSchedule || 'Horario por definir' }}</span>
+              @if (item.status === 'BORRADOR') {
+                <span class="text-kl-muted"
+                  >Aún no es visible para los practicantes.</span
+                >
+              } @else {
+                <span
+                  >Integrantes: {{ item.activeMembers }} / {{ item.maxCapacity ?? 'sin definir' }}</span
+                >
+                @if (item.pendingRequests !== undefined && item.pendingRequests > 0) {
+                  <a
+                    class="text-kl-accent-text"
+                    [routerLink]="['/coach/grupos/solicitudes']"
+                    [queryParams]="{ grupo: item.groupId }"
+                    >{{ solicitudesTexto(item.pendingRequests) }}</a
+                  >
+                } @else {
+                  <span class="text-kl-muted">Sin solicitudes pendientes</span>
+                }
+              }
+            </div>
+
+            <div class="flex flex-col items-start gap-2">
+              <span
+                class="rounded-full border border-solid px-3 py-1 text-[11px] {{ claseGrupo(item.status) }}"
+                >{{ etiquetaGrupo(item.status) }}</span
+              >
+              @if (item.status === 'BORRADOR') {
+                <a
+                  mat-flat-button
+                  class="w-full"
+                  routerLink="/coach/grupos/crear"
+                  [queryParams]="{ borrador: item.groupId }"
+                  >Continuar</a
+                >
+              } @else {
+                <div class="flex w-full items-center justify-between gap-2 rounded-lg border border-dashed border-kl-accent-text/60 bg-kl-accent/10 px-3 py-1.5">
+                  <code class="text-xs tracking-widest" [attr.aria-label]="'Código de invitación de ' + item.name">{{
+                    item.invitationCode
+                  }}</code>
+                  <button
+                    mat-button
+                    type="button"
+                    class="text-xs"
+                    (click)="copiar(item)"
+                    [attr.aria-label]="'Copiar código de invitación de ' + item.name"
+                  >
+                    {{ copiado() === item.groupId ? 'Copiado' : 'Copiar' }}
+                  </button>
+                </div>
+                <a
+                  mat-stroked-button
+                  class="w-full"
+                  routerLink="/coach/grupos/solicitudes"
+                  [queryParams]="{ grupo: item.groupId }"
+                  >Gestionar</a
+                >
+              }
+            </div>
+          </mat-card>
+        }
+      </div>
+    }
+  } @else {
+    <mat-button-toggle-group
+      hideSingleSelectionIndicator
+      class="mb-5"
+      [value]="segmentoPracticante()"
+      (change)="segmentoPracticante.set($event.value)"
+      aria-label="Estado de tus grupos"
+    >
+      <mat-button-toggle value="activos"
+        >Activos <span class="ml-1 text-xs text-kl-muted">{{ activos().length }}</span></mat-button-toggle
+      >
+      <mat-button-toggle value="pendientes"
+        >Pendientes <span class="ml-1 text-xs text-kl-muted">{{ pendientes().length }}</span></mat-button-toggle
+      >
+      <mat-button-toggle value="historial"
+        >Historial <span class="ml-1 text-xs text-kl-muted">{{ historial().length }}</span></mat-button-toggle
+      >
+    </mat-button-toggle-group>
+
+    @if (practicanteVisible().length === 0) {
+      <mat-card
+        class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+      >
+        @switch (segmentoPracticante()) {
+          @case ('activos') {
+            <h2 class="m-0 text-xl">Todavía no eres miembro de ningún grupo</h2>
+            <p class="m-0 text-sm text-kl-muted">
+              Explora los grupos disponibles o ingresa con un código de invitación.
+            </p>
+          }
+          @case ('pendientes') {
+            <h2 class="m-0 text-xl">No tienes solicitudes pendientes</h2>
+            <p class="m-0 text-sm text-kl-muted">
+              Las solicitudes que envíes a grupos protegidos aparecerán aquí hasta que el coach responda.
+            </p>
+          }
+          @default {
+            <h2 class="m-0 text-xl">Aún no tienes historial</h2>
+            <p class="m-0 text-sm text-kl-muted">
+              Aquí verás las solicitudes rechazadas y los grupos de los que te retiraron o saliste.
+            </p>
+          }
+        }
+        <a mat-flat-button routerLink="/grupos">Explorar grupos</a>
+      </mat-card>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (item of practicanteVisible(); track item.groupId) {
+          <mat-card
+            appearance="outlined"
+            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_200px_190px]"
+          >
+            <div class="flex items-start gap-4">
+              <span
+                class="mt-2 flex size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-xl font-semibold {{ tono(item) }}"
+                >{{ iniciales(item.name) }}</span
+              >
+              <div class="min-w-0">
+                <h2 class="mt-0 mb-2 text-base font-medium">{{ item.name }}</h2>
+                <div class="mb-2 flex flex-wrap gap-2 text-[11px]">
+                  <span
+                    class="rounded-full border border-solid border-kl-border-strong bg-white/3 px-2 py-0.5 text-kl-body"
+                    >Nivel: {{ nivelTexto(item.expectedLevel) }}</span
+                  ><span
+                    class="rounded-full border border-solid border-kl-border-strong bg-white/3 px-2 py-0.5 text-kl-body"
+                    >{{ item.visibility === 'PUBLICO' ? 'Público' : 'Protegido' }}</span
+                  >
+                </div>
+                <p class="m-0 text-[13px] leading-[18px] text-kl-muted">
+                  {{ item.description || 'Sin descripción.' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2 text-xs text-kl-body">
+              <span>{{ item.sessionSchedule || 'Horario por definir' }}</span>
+              @if (item.membership.joinedAt) {
+                <span class="text-kl-muted">Ingresaste el {{ fecha(item.membership.joinedAt) }}</span>
+              }
+              @if (item.membership.leftAt) {
+                <span class="text-kl-muted">Salida: {{ fecha(item.membership.leftAt) }}</span>
+              }
+            </div>
+
+            <div class="flex flex-col items-start gap-2">
+              <span
+                class="rounded-full border border-solid px-3 py-1 text-[11px] {{ claseMembresia(item.membership.status) }}"
+                >{{ etiquetaMembresia(item.membership.status) }}</span
+              >
+              @switch (item.membership.status) {
+                @case ('ACTIVO') {
+                  <a mat-stroked-button class="w-full" [routerLink]="['/grupos', item.groupId]"
+                    >Ver grupo</a
+                  >
+                }
+                @case ('PENDIENTE') {
+                  <p class="m-0 text-[11px] leading-4 text-kl-muted">
+                    El coach revisará tu solicitud.
+                  </p>
+                }
+                @case ('EXPULSADO') {
+                  <p class="m-0 text-[11px] leading-4 text-kl-muted">
+                    El coach te sacó del grupo; solo él puede readmitirte.
+                  </p>
+                }
+                @case ('RECHAZADO') {
+                  <p class="m-0 text-[11px] leading-4 text-kl-muted">
+                    El coach no aceptó tu solicitud.
+                  </p>
+                }
+                @case ('RETIRADO') {
+                  <p class="m-0 text-[11px] leading-4 text-kl-muted">Ya no formas parte de este grupo.</p>
+                }
+              }
+            </div>
+
+            @if (item.membership.status === 'ACLARACION_SOLICITADA') {
+              <div
+                class="rounded-xl border border-solid border-kl-accent/40 bg-white/4 p-4 text-sm xl:col-span-3"
+              >
+                <p class="m-0 text-xs uppercase tracking-wide text-kl-muted">Aclaración del coach</p>
+                <p class="my-2">{{ item.membership.clarification?.request }}</p>
+                <label [for]="'respuesta-' + item.groupId" class="mb-1 block text-xs text-kl-body"
+                  >Tu respuesta</label
+                >
+                <textarea
+                  [id]="'respuesta-' + item.groupId"
+                  rows="3"
+                  maxlength="500"
+                  class="w-full rounded-lg border border-solid border-kl-border-strong bg-kl-surface p-2 text-sm text-kl-text"
+                  placeholder="Escribe la información que te pidió el coach"
+                  [value]="respuestaDe(item.groupId)"
+                  (input)="escribirRespuesta(item.groupId, $any($event.target).value)"
+                ></textarea>
+                @if (avisos()[item.groupId]; as aviso) {
+                  <p
+                    role="status"
+                    class="mt-1 mb-0 text-xs"
+                    [class]="aviso.tipo === 'ok' ? 'text-green-300' : 'text-kl-danger'"
+                  >
+                    {{ aviso.texto }}
+                  </p>
+                }
+                <button
+                  mat-flat-button
+                  type="button"
+                  class="mt-2"
+                  [disabled]="enviandoId() !== null || !respuestaDe(item.groupId).trim()"
+                  (click)="responder(item)"
+                >
+                  {{ enviandoId() === item.groupId ? 'Enviando…' : 'Enviar respuesta' }}
+                </button>
+              </div>
+            } @else if (avisos()[item.groupId]; as aviso) {
+              <p
+                role="status"
+                class="m-0 rounded-lg bg-green-400/10 p-2 text-sm text-green-300 xl:col-span-3"
+              >
+                {{ aviso.texto }}
+              </p>
+            }
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</section>

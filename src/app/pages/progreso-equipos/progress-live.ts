@@ -7,6 +7,8 @@ import { DatePipe } from '@angular/common';
 import { TeamPage } from '../../shared/team-page';
 import { TeamFrame } from '../../shared/team-frame';
 import { AssignedProblem, Progress, Registration, positiveId } from '../../core/team-api';
+const OTHER_TEAM_PROGRESS = 'El avance recibido pertenece a otro equipo y se ignoró.';
+const OTHER_TEAM_ASSIGNMENTS = 'Los problemas recibidos pertenecen a otro equipo y se ignoraron.';
 @Component({
   selector: 'app-progress-live',
   imports: [TeamFrame, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
@@ -118,17 +120,28 @@ export class ProgressLive extends TeamPage {
     this.progress.set(null);
     this.registration.set(null);
     this.assignments.set([]);
-    this.read(this.api.assignments(id), (assignments) => {
-      this.assignments.set(assignments);
-      if (
-        !assignments.some(
-          (a) =>
-            a.competitionProblemId === positiveId(this.form.controls.competitionProblemId.value),
-        )
-      ) {
-        this.form.controls.competitionProblemId.setValue('');
-      }
-      this.read(this.api.progress(id), (p) => this.progress.set(p));
+    // Progress and assignments are independent: one failing must not hide the other.
+    this.readGroup((part) => {
+      part(this.api.assignments(id), (assignments) => {
+        const own = assignments.filter((a) => a.teamId === id);
+        if (own.length !== assignments.length) this.error.set(OTHER_TEAM_ASSIGNMENTS);
+        this.assignments.set(own);
+        if (
+          !own.some(
+            (a) =>
+              a.competitionProblemId === positiveId(this.form.controls.competitionProblemId.value),
+          )
+        ) {
+          this.form.controls.competitionProblemId.setValue('');
+        }
+      });
+      part(this.api.progress(id), (progress) => {
+        if (progress.teamId !== id) {
+          this.error.set(OTHER_TEAM_PROGRESS);
+          return;
+        }
+        this.progress.set(progress);
+      });
     });
   }
   register() {

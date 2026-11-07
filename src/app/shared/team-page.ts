@@ -4,7 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
 import { Session } from '../core/session';
+import { apiError } from '../core/api';
 import { positiveId, TeamApi } from '../core/team-api';
+/** One request of a `readGroup`; it settles independently of its siblings. */
+export type ReadPart = <T>(
+  request: Observable<T>,
+  success: (value: T) => void,
+  failure?: (e: unknown) => void,
+) => void;
 @Directive()
 export abstract class TeamPage implements OnInit, OnDestroy {
   readonly session = inject(Session);
@@ -86,7 +93,47 @@ export abstract class TeamPage implements OnInit, OnDestroy {
       }),
     );
   }
-  protected write<T>(request: Observable<T>, success: (value: T) => void) {
+  /**
+   * Runs several independent requests as a single read: `busy` stays on until all settle, a
+   * failure of one part is reported without hiding what the others return, and a newer read
+   * (or a team change) discards every part still in flight.
+   */
+  protected readGroup(start: (part: ReadPart) => void) {
+    const version = this.version;
+    const readVersion = ++this.readVersion;
+    const current = () => version === this.version && readVersion === this.readVersion;
+    let pending = 1; // released once every part has been registered
+    const settle = () => {
+      if (--pending === 0) this.busy.set(false);
+    };
+    this.busy.set(true);
+    this.error.set('');
+    this.fields.set([]);
+    start((request, success, failure) => {
+      pending++;
+      this.active.add(
+        request.subscribe({
+          next: (value) => {
+            if (!current()) return;
+            settle();
+            success(value);
+          },
+          error: (e) => {
+            if (!current()) return;
+            settle();
+            this.fail(e);
+            failure?.(e);
+          },
+        }),
+      );
+    });
+    settle();
+  }
+  protected write<T>(
+    request: Observable<T>,
+    success: (value: T) => void,
+    failure?: (e: unknown) => void,
+  ) {
     const version = this.version;
     this.saving.set(true);
     this.error.set('');
@@ -101,7 +148,10 @@ export abstract class TeamPage implements OnInit, OnDestroy {
         },
         error: (e) => {
           this.saving.set(false);
-          if (version === this.version) this.fail(e);
+          if (version === this.version) {
+            this.fail(e);
+            failure?.(e);
+          }
         },
       }),
     );
@@ -112,7 +162,7 @@ export abstract class TeamPage implements OnInit, OnDestroy {
       return;
     }
     const messages: Record<number, string> = {
-      0: 'No pudimos conectar. Verifica la API y el proxy.',
+      0: apiError(e),
       401: 'Inicia sesión de nuevo.',
       403: 'No tienes autorización para este equipo.',
       404: 'El recurso no existe.',

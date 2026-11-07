@@ -1,5 +1,7 @@
 # Frontend US-11 a US-14
 
+> Nota de integración con `develop` (6 de noviembre de 2026). Este informe lo redactó Luciano sobre una base anterior de `develop`. Al integrarlo se descartó lo que contradice el comportamiento actual: autenticación por cookie (sin token), `API_URL=/api` con `proxy.conf.json`, nuevo `Session.authenticated()`, la recuperación de contraseña por código en el interceptor, el selector de tema claro/oscuro con `theme.css`, la franja global de navegación del componente raíz, el cambio de versiones de `package.json` y el cambio de `pendingRequests` a opcional. Las secciones siguientes que los mencionan describen la rama original y no el estado integrado. En `develop` la sesión sigue usando JWT con cabecera `Authorization: Bearer`, el backend no usa cookies y la URL base de la API es la de `API_URL`.
+
 ## Estado de entrega
 
 Código implementado y compilado. Los 248 casos de pruebas ejecutables pasan. La suite global conserva un fallo preexistente por un archivo sin tests. Integración real y comparación visual completa pendientes; no declarar listo para producción. Rama comprobada: origin/feature/us-luciano. Backend exclusivamente leído; git status limpio al finalizar las verificaciones.
@@ -21,22 +23,25 @@ Código implementado y compilado. Los 248 casos de pruebas ejecutables pasan. La
 | US-12 | GET /analytics/teams/{teamId}/weaknesses |
 | US-13 | POST/PUT/GET /competitions/{competitionId}/official-result; GET /competitions/teams/{teamId}/official-results |
 | US-14 | GET /analytics/teams/{teamId}/progress/me; POST /competitions/teams/{teamId}/problems/{competitionProblemId}/resolutions |
+| Listados (US-13, US-14) | GET /teams/me; GET /competitions?teamId= (items con id, eventName, status, startsAt, endsAt, problemsCount); GET /problems/assigned?teamId= (items con competitionProblemId, letter, competition.id/name/status, problem.id/title) |
+
+Los endpoints GET /competitions/teams/{teamId} y GET /competitions/teams/{teamId}/problems ya no existen en el backend. TeamApi.competitions y TeamApi.assignments consumen los listados de develop y los aplanan a TeamCompetition (competitionId = item.id) y AssignedProblem (competitionProblemId = item.competitionProblemId, el identificador que exige el registro de resoluciones). GET /teams/me devuelve todos los estados de membresía; la pantalla solo ofrece membresías ACTIVO o, para el coach, sus grupos que no están en BORRADOR.
 
 ## Navegación y contexto real
 
 Se conservan /ranking, /coach/rendimiento, /coach/competencias y /progreso/equipos. Se agrega /coach/ranking para el coach autorizado. Ejemplos de forma (los IDs son ilustrativos, deben existir en la API): /ranking?teamId=<id>, /coach/competencias?teamId=<id>&competitionId=<id>, /progreso/equipos?teamId=<id>&competitionProblemId=<id>.
 
-No hay APIs de listados de equipos, competencias ni asignaciones en este backend. Se reciben IDs desde query params o se introducen manualmente con etiquetas explícitas. No se usan IDs por defecto. La API valida autorización; introducir un ID no concede permisos. No se implementaron flujos de otras historias para suplir estos listados.
+El selector de equipo se llena con GET /teams/me, y las competencias y asignaciones de cada equipo vienen de GET /competitions?teamId= y GET /problems/assigned?teamId=. No se usan IDs por defecto.
+
+Las pantallas de equipo usan la cabecera estándar de la aplicación (app-header-navigation y app-user-menu, como en grupos) sin icono de notificaciones ni de tema; el selector de equipo queda como contenido de la página debajo de la cabecera.
+
+Comportamiento por historia: US-11 muestra los criterios orderingCriterion y tieCriterion de la respuesta (el de empate solo cuando hay posiciones compartidas). US-13 explica con un mensaje propio que la competencia ya tiene un resultado registrado cuando el alta devuelve 409. US-14 carga el avance y los problemas asignados de forma independiente (el fallo de uno no oculta al otro) e ignora respuestas cuyo teamId no coincide con el equipo seleccionado. Sin conexión se usa el mensaje habitual de apiError. La API valida autorización; introducir un ID no concede permisos. No se implementaron flujos de otras historias para suplir estos listados.
 
 Las cuatro maquetas existentes permanecen exclusivamente bajo Session.demo() con franja visible de datos de ejemplo; no se llaman endpoints en demo. Los datos estáticos no se presentan como integración real. El guard del coach y las validaciones del backend conservan el límite de acceso. El selector no permite cambiar contexto durante un envío; también se ignoran respuestas tardías al navegar a otro equipo.
 
 ## Autenticación y comunicación
 
-app.config.ts utiliza API_URL=/api. proxy.conf.json y angular.json redirigen /api/** a http://localhost:8080 durante ng serve. No se modifica CORS en Spring. En producción, el host debe servir la API bajo el mismo origen mediante reverse proxy o configurar una solución de despliegue compatible; el proxy de Angular no funciona después de desplegar los archivos compilados.
-
-El interceptor envía credenciales solo a la API configurada. El login acepta AuthResponse sin token; guarda en sessionStorage únicamente una pista de cuenta/rol para navegación, no credenciales ni una sesión autenticada verificable. Cada entrada protegida valida mediante /users/me y las operaciones de equipo vuelven a ser autorizadas por el servidor. Un 401 protegido limpia la pista y redirige al login; 403 no elimina la sesión. Las cookies HttpOnly son administradas por el navegador. No se inventa fecha de expiración local para la sesión del servidor ni se promete Recordarme persistente para cookies.
-
-Se conserva la compatibilidad JWT preexistente si el host devuelve realmente token/expiración, para no romper sus otros flujos. La API Spring de referencia NO devuelve JWT. Cierre de sesión actual borra el estado local; NO se puede afirmar que invalide la cookie del servidor porque no hay endpoint de logout contratado. Recuperación y consulta de códigos existentes en el frontend tampoco están disponibles en este backend: requieren contrato externo y no se añadieron endpoints ficticios. Credenciales inválidas no se convierten en sesión. No se guardan contraseñas.
+Se reutiliza la sesión de `develop`: JWT en `Authorization: Bearer` (solo hacia `API_URL`), 401 protegido limpia la sesión y redirige al login, el modo demo bloquea cualquier llamada a la API. Las pantallas reales de equipo consultan la API solo con sesión real; la demo conserva las maquetas con datos de ejemplo.
 
 ## Diferencias frente a Figma
 
@@ -145,31 +150,3 @@ Creados:
 - src/app/shared/team-page.ts
 
 Sin commits, push, pull, merges, rebases, cambios de rama ni Pull Requests. Todos los cambios permanecen locales para revisión.
-
-
-## Integración local de origin/develop (5 de noviembre de 2026)
-
-Esta sección actualiza el estado de Git y las comprobaciones descritas anteriormente.
-
-- Rama conservada: `origin/feature/us-luciano`.
-- Commit de US-11 a US-14 conservado: `8362b409eeab1e1823b6b3bddfd87da5ec888495`.
-- Merge local: `465dccbfceae5eaf21f40986924859b3874f264e`, con padres `8362b409` y `624f7a3`.
-- Integración sin conflictos. `angular.json` conserva tanto los hosts locales de develop como el proxy de US-11 a US-14. `app.routes.ts` conserva tanto la redirección de grupos del coach como su ruta de ranking.
-- Los contratos, servicios, componentes y autorización de US-11 a US-14 no cambiaron durante el merge. No se modificó el backend.
-
-Ajustes posteriores al merge, sin commit adicional:
-
-- `src/app/pages/grupos/grupos.spec.ts`: la simulación de TeamsApi carecía de `lastCreated`, utilizado al guardar un grupo. Se añadió la señal y se verifican tanto el resultado almacenado como el mensaje de éxito; se elimina una excepción no controlada de RxJS sin modificar el servicio de producción.
-- `src/app/app.routes.server.ts`: `/grupos` estaba incluido en el prerenderizado y generaba `<meta http-equiv="refresh" content="0; url=/login">`. Se configura como Client, igual que las otras páginas privadas, para que la sesión y el guard se evalúen en el navegador al abrir directamente la ruta.
-- `src/app/merge-integration.spec.ts`: 17 pruebas de integración de Angular con RouterTestingHarness y HTTP simulado. Cubren redirección de grupos del coach, guardado de borrador y pantalla de confirmación, catálogo y membresías, solicitudes del grupo seleccionado, rutas de las cuatro historias con cookies, cambio de equipo sin reutilizar métricas anteriores, rechazo sin sesión y modo de renderizado de grupos.
-
-Verificaciones finales:
-
-- No fue necesario ejecutar npm ci: package.json y package-lock.json permanecen iguales al commit previo, node_modules ya estaba instalado y npm ls --depth=0 termina correctamente sin dependencias inválidas.
-- npm run build: correcto, con 7 rutas públicas prerenderizadas. Persiste la advertencia de tamaño inicial: 874.07 kB frente a un presupuesto de aviso de 500 kB, dentro del límite de error de 1 MB.
-- TypeScript: tsconfig.app.json y tsconfig.spec.json verificados con --noEmit, ambos correctos.
-- npm test -- --watch=false: 249 casos aprobados y 28 archivos aprobados; el proceso termina con error exclusivamente por el archivo vacío src/app/pages/coach/asignarproblema/asignarproblema.spec.ts. Se comprobó que ya tenía tamaño cero en ambos padres del merge y no se modificó.
-- npm test -- --watch=false --exclude=src/app/pages/coach/asignarproblema/asignarproblema.spec.ts: 249 casos y 28 archivos aprobados, código de salida 0, sin excepciones no controladas.
-- Servidor real de producción del frontend iniciado temporalmente en localhost:4301. Diez accesos directos devolvieron HTTP 200 con la aplicación Angular y sin redirección estática al login: /grupos, /coach/grupos, /coach/grupos/crear, /coach/grupos/creado, /coach/grupos/solicitudes?grupo=8, /ranking?teamId=8, /coach/ranking?teamId=8, /coach/rendimiento?teamId=8, /coach/competencias?teamId=8 y /progreso/equipos?teamId=8. Esta comprobación valida la entrega de las rutas, no una sesión real ni operaciones de negocio.
-- No se verificaron operaciones reales contra Spring Boot/PostgreSQL ni se escribieron datos. Las pruebas de integración funcional usan HTTP simulado y no constituyen validación de la API desplegada.
-- No se ejecutaron push, pull, rebase, reset, cambios de rama ni Pull Requests. El merge es local y los ajustes posteriores quedan pendientes de revisión y commit.

@@ -1,19 +1,16 @@
-# Integración de equipos y temas de apariencia
+# Integración de equipos (US-11 a US-14)
 
 Fecha: 6 de noviembre de 2026. Rama conservada: origin/feature/us-luciano. Cambios exclusivamente locales del frontend, sin operaciones Git de publicación o integración.
 
 ## Implementado
 
-- Theme centraliza el tema en data-theme del documento. Respeta prefers-color-scheme inicialmente, escucha cambios del sistema mientras no exista elección explícita y guarda la selección en localStorage con la clave kodikalab.theme. Si el almacenamiento está bloqueado, permite cambiar el tema en memoria. No lee almacenamiento durante SSR.
-- Selector accesible en el componente raíz, disponible en páginas públicas y privadas, con aria-label y aria-pressed. El menú de apariencia existente del dashboard usa el mismo servicio. El cambio no recarga la página.
-- src/theme.css contiene la paleta clara, ajustes de Angular Material y compatibilidad de colores fijos ya existentes. Los ajustes se limitan a data-theme=light, preservando la paleta oscura. Conserva los recursos SVG existentes y reduce la intensidad de las decoraciones oscuras en claro. Se adapta el color de advertencia de las barras de rendimiento a una variable.
 - TeamFrame reutiliza TeamsApi.loadMine() y GET /teams/me. Presenta nombres de equipos del coach o membresías ACTIVO del practicante. Si existe una sola opción y no hay contexto previo, la selecciona; con varias opciones pide selección. Conserva teamId en las rutas entre ranking, temas, historial y avance. Cancela la carga del catálogo al destruir la pantalla.
 - Ante catálogo vacío o error de /teams/me, informa la limitación y permite reintentar. Conserva la entrada de ID como alternativa explícita, sin generar IDs ni sustituir la autorización del servidor.
 - Explorar grupos conserva los enlaces anteriores y añade acceso al ranking y al avance de las membresías activas con teamId del grupo real.
 
 ## Contratos y autorización revisados
 
-Base /api y proxy de desarrollo a localhost:8080. Se conservan cookies con withCredentials y la compatibilidad JWT previa, el guard de rol, consulta de perfil, limpieza ante 401 y tratamiento de 403. La identidad no se envía como userId al registrar resoluciones.
+Base `API_URL` de `develop` (JWT con Bearer, sin cookies), guard de rol, consulta de perfil y limpieza ante 401. La identidad no se envía como userId al registrar resoluciones.
 
 | US | Contrato existente |
 | --- | --- |
@@ -30,8 +27,9 @@ El backend verifica usuario y membresía activa para ranking/progreso, y relaci�
 - No se encontraron listados implementados de competencias o problemas asignados para eliminar sus entradas manuales. US13 conserva la apertura por competitionId desde el historial confirmado, cuando existe; para nuevas participaciones y asignaciones manuales siguen siendo necesarios los IDs reales.
 - No había servicios escuchando en 8080 ni 5432. GET http://127.0.0.1:4200/api/users/me devolvió 502. No se inició Spring: no había .env de ejecución ni variables DB configuradas y su ddl-auto=update podría escribir el esquema. No se modificó PostgreSQL ni el backend.
 - No se verificaron login real, autorización real contra PostgreSQL ni escrituras de resultados/resoluciones. Se necesitan backend compatible, PostgreSQL configurado, cuentas y datos de prueba autorizados. No proporcionar credenciales por el chat; configurar el entorno local de forma privada.
-- Se consultó Figma en solo lectura, archivo prt67vzvXGvuuIORZvSH3A, referencia oscura 416:6178. La paleta clara es una adaptación de los tokens existentes; no se presenta como un diseño claro aprobado en Figma.
 - Se revisaron visualmente las cuatro historias, dashboard y login. La paleta global afecta toda la aplicación, pero no constituye una certificación visual de todas las combinaciones de estados de todas las historias del proyecto.
+
+> Los resultados de pruebas y compilación de esta sección y de las siguientes son los de la rama original de Luciano y no se reproducen tras la integración con `develop`.
 
 ## Pruebas ejecutadas
 
@@ -40,25 +38,15 @@ El backend verifica usuario y membresía activa para ranking/progreso, y relaci�
 - npm test -- --watch=false: 260 casos aprobados y un único archivo fallido sin pruebas, src/app/pages/coach/asignarproblema/asignarproblema.spec.ts, preexistente y sin modificar.
 - npm test -- --watch=false --exclude=src/app/pages/coach/asignarproblema/asignarproblema.spec.ts: 260 casos y 29 archivos aprobados, código 0. Se agregaron 11 casos respecto a los 249 anteriores: seis de tema, cuatro de catálogo y uno de enlaces de membresía.
 - Los casos HTTP son simulaciones con HttpTestingController; no prueban que Spring/PostgreSQL estén conectados.
-- Navegador real: cuatro historias demo en escritorio 1440x1000 y móvil 390x844, en claro y oscuro; sin desbordamiento horizontal móvil observado. Capturas completas fuera del repositorio. Se comprobó cambio sin recarga, persistencia al recargar y uso del menú de apariencia del dashboard. Sin errores de consola observados en la consulta final del navegador.
-- Contraste de paleta clara calculado: texto secundario/blanco 6.80:1, enlace/blanco 7.87:1, blanco/botón principal 6.45:1, error/blanco 6.48:1 e indicador de advertencia/fondo neutro 4.67:1. No equivale a una auditoría automática exhaustiva de accesibilidad de todas las pantallas.
 - git diff --check: correcto. No se añadieron dependencias.
 
 ## Archivos
 
 Creados:
-- src/app/core/theme.ts
-- src/app/core/theme.spec.ts
-- src/theme.css
 - docs/integracion-equipos-temas.md
 
 Modificados:
-- src/app/app.ts
-- src/app/app.html
-- src/styles.css
 - src/app/shared/team-frame.ts
-- src/app/pages/inicio-dashboard/inicio-dashboard.ts
-- src/app/pages/inicio-dashboard/inicio-dashboard.html
 - src/app/pages/grupos/explorar-grupos/explorar-grupos.html
 - src/app/pages/grupos/grupos.spec.ts
 - src/app/pages/rendimiento-equipo/rendimiento-equipo.html
@@ -68,15 +56,14 @@ Modificados:
 
 ## Actualización: navegación completa con API real
 
-Los bloqueos de listados descritos arriba corresponden al diagnóstico anterior. Ahora están implementados GET /api/teams/me, GET /api/competitions/teams/{teamId} y GET /api/competitions/teams/{teamId}/problems.
+Los bloqueos de listados descritos arriba corresponden al diagnóstico anterior. Esta versión usa GET /api/teams/me (en `develop`) y GET /api/competitions/teams/{teamId} y GET /api/competitions/teams/{teamId}/problems, que solo existen en la rama de backend `feature/US11-12-13-14` y no en `develop` del backend.
 
 - La navegación Mi entrenamiento inicia ranking y avance del practicante, o ranking, rendimiento y resultados del coach, sin escribir URLs ni IDs.
 - TeamFrame utiliza nombres de equipos y no ofrece entrada manual. Diferencia carga, fallo con reintento y lista vacía legítima.
 - ResultsLive muestra competencias por nombre y estado. Solo consulta una competencia ofrecida para ese equipo; conserva el historial y bloquea edición de confirmados. Una consulta fallida de historial no se presenta como historial vacío.
 - ProgressLive muestra competencia, letra y título del problema. Usa el competitionProblemId de la opción seleccionada; mantiene MANUAL_PROVISIONAL y las validaciones de registro existentes.
 - Cambiar equipo elimina competitionId/competitionProblemId anteriores, limpia los formularios y cancela lecturas pendientes. Se conservan URLs con contexto para enlaces existentes.
-- TeamsApi se reutiliza sin cambiar las operaciones de US04-US06. pendingRequests pasa a opcional porque este modelo de backend no contiene solicitudes; no se fabrica un cero.
-- Se conservan los temas y los estilos compartidos del cambio anterior.
+- TeamsApi se reutiliza sin cambiar las operaciones de US04-US06.
 
 Se agregaron regresiones de contratos, selección por nombre, vacíos, fallos de catálogo/historial, asignaciones distintas de un mismo problema y cancelación al cambiar equipo. El archivo vacío ajeno a estas historias sigue sin modificarse.
 
@@ -92,20 +79,5 @@ Resultados finales de esta actualización: Angular compila (890.43 kB iniciales,
 - npm test -- --watch=false: 269 casos aprobados; persiste únicamente el archivo vacío preexistente de asignarproblema.
 - npm test -- --watch=false --exclude=src/app/pages/coach/asignarproblema/asignarproblema.spec.ts: 269 casos y 29 archivos aprobados. No hubo fallos nuevos.
 - Navegador: ranking y progreso consultados con sesión real y datos existentes; no se registraron resoluciones ni resultados nuevos. Las vistas de coach se revisaron visualmente en demo; las validaciones y operaciones del cliente están cubiertas por las pruebas HTTP simuladas. Las pruebas reales anteriores permanecen documentadas arriba.
-- El selector de tema se comprobó en páginas públicas, inicio, perfiles, formularios y las cuatro historias, conservando la preferencia al navegar y recargar. No representa una auditoría exhaustiva de todos los estados visuales de todas las historias.
 - Explorar grupos conserva un error de carga del listado general contra este backend; no se cambió esa operación ajena a estas historias. La corrección de enlaces tiene cobertura automatizada.
 - Esta etapa modifica y publica exclusivamente el frontend. No se modifica el backend, PostgreSQL ni la configuración de autenticación.
-
-
-## Integración local con develop y cambio de nombre de rama
-
-- Rama nueva: feature/US11-US12-US13-US14-frontend. Se conservó el historial completo y la rama remota feature/us-luciano; no había Pull Requests asociados al nombre anterior ni al commit revisado.
-- Se publicó únicamente el HEAD original e01e9f3 con el nombre nuevo. La integración con develop 6366045 y sus resoluciones permanecen locales, pendientes de autorización para publicarse.
-- Se resolvieron diez archivos en conflicto: shell y tema global, interceptor, pruebas de sesión, imports de los cuatro componentes, enlaces de grupos y pruebas de borradores. Se conservaron los componentes reales y el footer compartido.
-- Se mantiene el menú compartido del equipo y se incorpora Ranking para el coach. Los enlaces de grupos conservan teamId y Ver grupo abre el detalle /grupos/:groupId de US-05.
-- La recuperación usa los contratos actuales de develop. Se mantienen cookies, Bearer y limpieza de sesiones ante un 401 protegido; un rechazo del restablecimiento público no cierra la sesión.
-- Se unificaron las opciones del servidor Angular y se retiró una propiedad duplicada del stub de grupos generadas por la fusión automática. Se conservan proxyConfig y prebundle.
-- El dashboard conserva los recuentos de solicitudes disponibles. Si el contrato no incluye pendingRequests, informa que el dato no está disponible en lugar de mostrar un cero inventado.
-- Compilación: correcta, 904.21 kB iniciales, con el aviso de presupuesto de 500 kB preexistente; cinco rutas prerenderizadas.
-- Pruebas: 438 aprobadas; un caso todo preexistente de asignarproblema. Cobertura de US-04 a US-06, las cuatro historias, cookies, selección de contexto, errores, confirmación de resultados y registro provisional.
-- Navegador: vistas demo de coach y practicante, claro/oscuro, menú compartido, detalle de grupo, enlace de avance con teamId y preferencia conservada tras recargar. El backend estaba detenido; no se realizaron pruebas nuevas con API real ni escrituras en PostgreSQL.

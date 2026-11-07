@@ -12,7 +12,7 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-ranking-equipo',
-  imports: [RankingLive, SiteFooter, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [SiteFooter, RankingLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './ranking-equipo.html',
   styleUrl: './ranking-equipo.css',
 })

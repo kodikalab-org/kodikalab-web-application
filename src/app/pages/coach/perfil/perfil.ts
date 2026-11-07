@@ -135,13 +135,6 @@ export class CoachPerfil {
   protected readonly filas: readonly FilaAjuste[] = [
     {
       tipo: 'interruptor',
-      campo: 'notificaciones',
-      icono: 'images/perfil-coach/bell-22-row.svg',
-      titulo: 'Notificaciones',
-      descripcion: 'Recibe avisos de concursos, menciones y actividad importante.',
-    },
-    {
-      tipo: 'interruptor',
       campo: 'privacidad',
       icono: 'images/perfil-coach/shield-22.svg',
       titulo: 'Privacidad del perfil',
@@ -153,13 +146,6 @@ export class CoachPerfil {
       icono: 'images/perfil-coach/globe-22.svg',
       titulo: 'Idioma',
       descripcion: 'Elige el idioma de la interfaz (es_419 o en_US).',
-    },
-    {
-      tipo: 'interruptor',
-      campo: 'temaOscuro',
-      icono: 'images/perfil-coach/moon-22-row.svg',
-      titulo: 'Tema oscuro',
-      descripcion: 'Activa o desactiva el tema oscuro.',
     },
     {
       tipo: 'salir',

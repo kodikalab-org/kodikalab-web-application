@@ -19,13 +19,75 @@ describe('Team API contracts', () => {
     http = TestBed.inject(HttpTestingController);
   });
   afterEach(() => http.verify());
-  it('lists competitions and assignments only in the selected team', async () => {
+  it('lists competitions with GET /competitions?teamId= and maps the list items', async () => {
     const competitions = firstValueFrom(api.competitions(12));
-    http.expectOne('/api/competitions/teams/12').flush([]);
-    expect(await competitions).toEqual([]);
+    const request = http.expectOne((r) => r.url === '/api/competitions');
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('teamId')).toBe('12');
+    request.flush({
+      teamId: 12,
+      total: 1,
+      items: [
+        {
+          id: 30,
+          eventName: 'Competencia real',
+          description: null,
+          status: 'EN_CURSO',
+          startsAt: '2026-11-01T10:00:00Z',
+          endsAt: '2026-11-01T14:00:00Z',
+          problemsCount: 3,
+        },
+      ],
+    });
+    expect(await competitions).toEqual([
+      {
+        competitionId: 30,
+        teamId: 12,
+        eventName: 'Competencia real',
+        status: 'EN_CURSO',
+        startsAt: '2026-11-01T10:00:00Z',
+        endsAt: '2026-11-01T14:00:00Z',
+        problemsCount: 3,
+      },
+    ]);
+  });
+  it('lists assignments with GET /problems/assigned?teamId= and exposes competitionProblemId', async () => {
     const assignments = firstValueFrom(api.assignments(12));
-    http.expectOne('/api/competitions/teams/12/problems').flush([]);
-    expect(await assignments).toEqual([]);
+    const request = http.expectOne((r) => r.url === '/api/problems/assigned');
+    expect(request.request.method).toBe('GET');
+    expect(request.request.params.get('teamId')).toBe('12');
+    request.flush({
+      teamId: 12,
+      total: 1,
+      items: [
+        {
+          competitionProblemId: 50,
+          letter: 'B',
+          competition: { id: 30, name: 'Competencia real', status: 'EN_CURSO' },
+          problem: { id: 3, title: 'Problema real' },
+          status: 'SIN_INTENTOS',
+        },
+      ],
+    });
+    expect(await assignments).toEqual([
+      {
+        competitionProblemId: 50,
+        competitionId: 30,
+        teamId: 12,
+        problemId: 3,
+        title: 'Problema real',
+        eventName: 'Competencia real',
+        letter: 'B',
+        status: 'EN_CURSO',
+      },
+    ]);
+  });
+  it('never calls the removed /competitions/teams/{id} listing endpoints', () => {
+    void firstValueFrom(api.competitions(12));
+    void firstValueFrom(api.assignments(12));
+    const urls = http.match(() => true).map((r) => r.request.url);
+    expect(urls).toHaveLength(2);
+    expect(urls.some((u) => /\/competitions\/teams\/12(\/problems)?$/.test(u))).toBe(false);
   });
   it('reads rankings without a client user identifier', async () => {
     const p = firstValueFrom(api.ranking(12));

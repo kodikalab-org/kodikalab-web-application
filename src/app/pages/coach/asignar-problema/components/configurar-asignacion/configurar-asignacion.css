@@ -1,0 +1,14 @@
+/* Solo tokens de Material; el diseño usa utilidades Tailwind. */
+:host {
+  --auth-field-height: 46px;
+  --auth-field-padding: 11px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-link);
+  --mat-radio-selected-icon-color: var(--kl-accent-text);
+  --mat-radio-selected-hover-icon-color: var(--kl-accent-text);
+  --mat-radio-selected-focus-icon-color: var(--kl-accent-text);
+  --mat-radio-unselected-icon-color: #6b6585;
+  --mat-radio-disabled-unselected-icon-color: #4a4560;
+  --mat-radio-label-text-color: var(--kl-text);
+  --mat-radio-label-text-font: var(--kl-font-body);
+}

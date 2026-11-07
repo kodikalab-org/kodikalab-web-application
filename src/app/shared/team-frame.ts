@@ -5,42 +5,46 @@ import { DestroyRef, OnInit, inject, signal, Component, input } from '@angular/c
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { HeaderNavigation } from './header-navigation/header-navigation';
+import { UserMenu } from './user-menu/user-menu';
 import { TeamPage } from './team-page';
 @Component({
   selector: 'app-team-frame',
-  imports: [RouterLink, ReactiveFormsModule, MatButtonModule],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatToolbarModule,
+    HeaderNavigation,
+    UserMenu,
+  ],
+  styles: [
+    `:host {
+      --mat-toolbar-container-background-color: transparent;
+      --mat-toolbar-container-text-color: var(--kl-text);
+    }`,
+  ],
   template: ` <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
     <div
       class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat"
     ></div>
-    <header class="border-b border-kl-border bg-kl-bg/80 px-4 py-4 lg:px-14">
-      <nav
-        aria-label="Navegación principal"
-        class="mx-auto flex max-w-[1328px] flex-wrap items-center gap-5 text-sm"
-      >
+    <header
+      class="sticky top-0 z-40 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/80 backdrop-blur-xl"
+    >
+      <mat-toolbar class="mx-auto flex h-[68px] max-w-[1600px] gap-4 px-4 lg:px-11">
         <a
           [routerLink]="coach() ? '/coach/inicio' : '/inicio'"
-          class="mr-auto flex items-center gap-2 font-display text-xl font-bold"
-          ><img src="/images/progreso-ranking/logo-movil.svg" alt="" />Kodikalab</a
+          aria-label="Kodikalab, inicio"
+          class="flex items-center gap-2.5 text-xl sm:text-[25px]"
         >
-        <a
-          [routerLink]="coach() ? '/coach/ranking' : '/ranking'"
-          [queryParams]="{ teamId: page().teamId() }"
-          >Ranking</a
-        >
-        @if (coach()) {
-          <a routerLink="/coach/rendimiento" [queryParams]="{ teamId: page().teamId() }"
-            >Rendimiento</a
-          ><a routerLink="/coach/competencias" [queryParams]="{ teamId: page().teamId() }"
-            >Competencias</a
-          >
-        } @else {
-          <a routerLink="/progreso/equipos" [queryParams]="{ teamId: page().teamId() }"
-            >Mi avance</a
-          >
-        }
-        <a [routerLink]="coach() ? '/coach/perfil' : '/perfil'" aria-label="Ver perfil">Perfil</a>
-      </nav>
+          <img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab
+        </a>
+        <app-header-navigation [coach]="coach()" />
+        <div class="ml-auto flex items-center gap-3">
+          <app-user-menu [coach]="coach()" />
+        </div>
+      </mat-toolbar>
     </header>
     <main class="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 py-6 lg:py-8">
       <div>
@@ -146,9 +150,11 @@ export class TeamFrame implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (groups) => {
+          // /teams/me returns every membership status: keep only the active practitioner
+          // memberships, or the coach's own published (non-draft) groups.
           const available = groups.filter((group) =>
             this.coach()
-              ? 'activeMembers' in group
+              ? 'activeMembers' in group && group.status !== 'BORRADOR'
               : 'membership' in group && group.membership.status === 'ACTIVO',
           );
           this.teams.set(available);

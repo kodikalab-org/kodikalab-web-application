@@ -146,7 +146,13 @@ export interface AssignedProblem {
     difficultyRating: string | null;
     topics: string[];
   };
-  competition: { name: string; startsAt: string | null; endsAt: string | null };
+  competition: {
+    id: number;
+    name: string;
+    status: 'PROGRAMADA' | 'EN_CURSO' | 'FINALIZADA';
+    startsAt: string | null;
+    endsAt: string | null;
+  };
 }
 
 export interface AssignedProblemsResponse {
@@ -227,6 +233,16 @@ export class TeamsApi {
       params,
       timeout: 15000,
     });
+  }
+
+  /** Ingreso directo con el código de invitación; el grupo lo resuelve el servidor. */
+  joinByCode(invitationCode: string) {
+    if (this.session.demo()) return this.demoWriteBlocked();
+    return this.http.post<JoinGroupResponse>(
+      `${this.url}/teams/join-by-code`,
+      { invitationCode: invitationCode.trim().toUpperCase() },
+      { timeout: 15000 },
+    );
   }
 
   loadRequests(

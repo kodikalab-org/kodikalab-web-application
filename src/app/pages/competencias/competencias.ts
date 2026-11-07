@@ -19,6 +19,7 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
   selector: 'app-competencias',
   imports: [ResultsLive,
     SiteFooter,
+    ResultsLive,
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,

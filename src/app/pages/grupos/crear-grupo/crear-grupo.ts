@@ -9,9 +9,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
-import { map, tap } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs';
 import { apiError } from '../../../core/api';
-import { CreateGroupRequest, TeamsApi } from '../../../core/teams-api';
+import { CoachGroup, CreateGroupRequest, TeamsApi } from '../../../core/teams-api';
 
 const NIVELES: Record<string, string> = {
   Principiante: 'PRINCIPIANTE',
@@ -45,6 +45,9 @@ export class CrearGrupo {
   protected readonly guardando = signal(false);
   protected readonly error = signal('');
   protected readonly exito = signal('');
+  /** Borrador que se está continuando (`?borrador=<id>`); `null` al crear un grupo nuevo. */
+  protected readonly borradorId = signal<number | null>(null);
+  protected readonly cargandoBorrador = signal(false);
 
   protected readonly pasos = ['Información general', 'Horario', 'Acceso y visibilidad', 'Resumen'];
   protected readonly ayudas = [
@@ -87,6 +90,8 @@ export class CrearGrupo {
   });
 
   constructor(private readonly route: ActivatedRoute) {
+    const borrador = Number(route.snapshot.queryParamMap.get('borrador'));
+    if (Number.isInteger(borrador) && borrador > 0) this.cargarBorrador(borrador);
     this.estado$ = route.queryParamMap.pipe(
       map((params) => params.get('estado') ?? ''),
       tap((estado) => {
@@ -183,6 +188,12 @@ export class CrearGrupo {
       draft,
     };
 
+    const borrador = this.borradorId();
+    if (borrador !== null) {
+      this.actualizarBorrador(borrador, body, draft);
+      return;
+    }
+
     this.guardando.set(true);
     this.api.create(body).subscribe({
       next: (response) => {
@@ -190,6 +201,77 @@ export class CrearGrupo {
         this.api.lastCreated.set(response);
         // Borrador y grupo publicado pasan por la confirmación: ahí se muestra el
         // código de invitación y, si quedó como borrador, se puede publicar.
+        this.router.navigate(['/coach/grupos/creado']);
+      },
+      error: (error: unknown) => {
+        this.guardando.set(false);
+        this.error.set(apiError(error));
+      },
+    });
+  }
+
+  /** US04: carga un borrador del coach (`GET /teams/me`) en el formulario para continuarlo. */
+  private cargarBorrador(id: number): void {
+    this.cargandoBorrador.set(true);
+    this.api.loadMine().subscribe({
+      next: (mine) => {
+        this.cargandoBorrador.set(false);
+        const borrador = mine.find(
+          (item): item is CoachGroup =>
+            'activeMembers' in item && item.groupId === id && item.status === 'BORRADOR',
+        );
+        if (!borrador) {
+          this.error.set('No encontramos ese borrador. Puede que ya esté publicado o que no sea tuyo.');
+          return;
+        }
+        this.borradorId.set(id);
+        this.general.patchValue({
+          nombre: borrador.name,
+          descripcion: borrador.description ?? '',
+          nivel: Object.keys(NIVELES).find((k) => NIVELES[k] === borrador.expectedLevel) ?? '',
+          cupo: borrador.maxCapacity,
+        });
+        this.acceso.patchValue({
+          visibilidad: borrador.visibility === 'PROTEGIDO' ? 'Protegido' : 'Público',
+        });
+        const horario = /^(.+) de (\d{2}:\d{2}) a (\d{2}:\d{2})$/.exec(borrador.sessionSchedule ?? '');
+        if (horario) {
+          const dias = horario[1].split(', ').filter((dia) => this.dias.includes(dia));
+          this.horario.patchValue({ dias, inicio: horario[2], fin: horario[3] });
+        }
+      },
+      error: (error: unknown) => {
+        this.cargandoBorrador.set(false);
+        this.error.set(apiError(error));
+      },
+    });
+  }
+
+  /** Guarda los cambios del borrador y, si corresponde, lo publica. */
+  private actualizarBorrador(id: number, body: CreateGroupRequest, soloBorrador: boolean): void {
+    const cambios: Partial<CreateGroupRequest> = { ...body };
+    delete cambios.draft;
+    this.guardando.set(true);
+    const guardado$ = this.api.updateDraft(id, cambios);
+    const flujo$ = soloBorrador
+      ? guardado$.pipe(map((detalle) => ({ detalle, message: 'Borrador actualizado correctamente.' })))
+      : guardado$.pipe(
+          switchMap(() => this.api.publish(id)),
+          map((detalle) => ({
+            detalle,
+            message: 'Grupo publicado: ya aparece en el listado y acepta solicitudes.',
+          })),
+        );
+    flujo$.subscribe({
+      next: ({ detalle, message }) => {
+        this.guardando.set(false);
+        this.api.lastCreated.set({
+          message,
+          groupId: detalle.groupId,
+          name: detalle.name,
+          status: detalle.status,
+          invitationCode: detalle.invitationCode,
+        });
         this.router.navigate(['/coach/grupos/creado']);
       },
       error: (error: unknown) => {

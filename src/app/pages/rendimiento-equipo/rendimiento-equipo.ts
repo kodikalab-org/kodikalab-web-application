@@ -17,6 +17,7 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
   selector: 'app-rendimiento-equipo',
   imports: [TopicsLive,
     SiteFooter,
+    TopicsLive,
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,

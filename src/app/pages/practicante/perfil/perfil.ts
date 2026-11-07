@@ -207,13 +207,6 @@ export class Perfil {
   protected readonly filasAjustes = [
     {
       tipo: 'interruptor',
-      control: 'notificaciones',
-      icono: 'images/perfil/row-bell-22.svg',
-      titulo: 'Notificaciones',
-      descripcion: 'Recibe avisos de concursos, menciones y actividad importante.',
-    },
-    {
-      tipo: 'interruptor',
       control: 'privacidad',
       icono: 'images/perfil/row-shield-22.svg',
       titulo: 'Privacidad del perfil',
@@ -225,13 +218,6 @@ export class Perfil {
       icono: 'images/perfil/row-globe-22.svg',
       titulo: 'Idioma',
       descripcion: 'Elige el idioma de la interfaz (es_419 o en_US).',
-    },
-    {
-      tipo: 'interruptor',
-      control: 'temaOscuro',
-      icono: 'images/perfil/row-moon-22.svg',
-      titulo: 'Tema oscuro',
-      descripcion: 'Activa o desactiva el tema oscuro.',
     },
     {
       tipo: 'salir',

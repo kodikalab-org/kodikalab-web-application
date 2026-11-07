@@ -68,7 +68,7 @@ describe('InicioDashboard', () => {
     const { root } = await setup('/coach/inicio');
     expect(root.querySelector('[aria-label="Abrir sidebar de la aplicación"]')).toBeNull();
     expect(root.querySelector('[aria-controls="app-sidebar"]')).toBeNull();
-    expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/coach/grupos/crear"]')).not.toBeNull();
+    expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/grupos"]')).not.toBeNull();
     expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/recursos"]')).not.toBeNull();
     expect(root.querySelector('[aria-label="Estado de la aplicación"]')).toBeNull();
   });
@@ -102,18 +102,5 @@ describe('InicioDashboard', () => {
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toBe('/grupos');
     expect(TestBed.inject(Session).demo()).toBe('PRACTICANTE');
-  });
-
-  it('offers working section shortcuts from notifications', async () => {
-    const { harness, root } = await setup('/coach/inicio');
-    root.querySelector<HTMLButtonElement>('[aria-label="Notificaciones"]')!.click();
-    harness.detectChanges();
-    await harness.fixture.whenStable();
-    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
-    expect(overlay.textContent).toContain('todavía no están conectadas');
-    expect(overlay.querySelector('a[href="/coach/grupos/solicitudes"]')?.textContent).toContain(
-      'Revisar solicitudes',
-    );
-    expect(overlay.querySelector('a[href="/coach/competencias"]')).not.toBeNull();
   });
 });

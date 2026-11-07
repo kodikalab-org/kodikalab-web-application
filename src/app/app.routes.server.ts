@@ -5,6 +5,8 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'progreso/equipos', renderMode: RenderMode.Client },
   { path: 'inicio', renderMode: RenderMode.Client },
   { path: 'grupos/**', renderMode: RenderMode.Client },
+  { path: 'concursos', renderMode: RenderMode.Client },
+  { path: 'concursos/**', renderMode: RenderMode.Client },
   { path: 'coach/**', renderMode: RenderMode.Client },
   { path: 'perfil', renderMode: RenderMode.Client },
   { path: 'perfil/**', renderMode: RenderMode.Client },

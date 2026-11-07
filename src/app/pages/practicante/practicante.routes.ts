@@ -1,15 +1,24 @@
 import { Routes } from '@angular/router';
-import { AppLayout } from '../../layouts/app-layout/app-layout';
-import { ProblemasAsignados } from './problemas-asignados/problemas-asignados';
-import { ProblemaElegido } from './problemas-asignados/components/problema-elegido/problema-elegido';
 
+/** Rutas del practicante para sus problemas asignados (US09); sin prefijo `coach/` el rol es PRACTICANTE. */
 export const PRACTICANTE_ROUTES: Routes = [
   {
-    path: '',
-    component: AppLayout,
+    path: 'practicante/problemas-asignados',
+    data: { coach: false },
+    loadComponent: () => import('../../layouts/app-layout/app-layout').then((m) => m.AppLayout),
     children: [
-      { path: 'problemas-asignados', component: ProblemasAsignados },
-      { path: 'problemas-asignados/detalle', component: ProblemaElegido },
+      {
+        path: '',
+        loadComponent: () =>
+          import('./problemas-asignados/problemas-asignados').then((m) => m.ProblemasAsignados),
+      },
+      {
+        path: 'detalle',
+        loadComponent: () =>
+          import('./problemas-asignados/components/problema-elegido/problema-elegido').then(
+            (m) => m.ProblemaElegido,
+          ),
+      },
     ],
   },
 ];

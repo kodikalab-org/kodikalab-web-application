@@ -77,6 +77,34 @@ describe('Teams API session boundaries', () => {
     expect(teams.lastCreated()?.groupId).toBe(9);
   });
 
+  it('joins by code with a JSON body and no query parameter', async () => {
+    const base = TestBed.inject(API_URL);
+    const joined = firstValueFrom(teams.joinByCode(' a1b2c3d4e5f6 '));
+    const post = http.expectOne(`${base}/teams/join-by-code`);
+    expect(post.request.method).toBe('POST');
+    expect(post.request.params.keys()).toEqual([]);
+    expect(post.request.body).toEqual({ invitationCode: 'A1B2C3D4E5F6' });
+    post.flush({ message: 'ok', membershipId: 4, groupId: 2, status: 'ACTIVO' });
+    expect((await joined).status).toBe('ACTIVO');
+  });
+
+  it('does not send a code query parameter when requesting a group', async () => {
+    const base = TestBed.inject(API_URL);
+    const joined = firstValueFrom(teams.join(2));
+    const post = http.expectOne(`${base}/teams/2/join`);
+    expect(post.request.params.keys()).toEqual([]);
+    post.flush({ message: 'ok', membershipId: 4, groupId: 2, status: 'PENDIENTE' });
+    await joined;
+  });
+
+  it('rejects join by code in a demo without contacting the API', async () => {
+    session.startDemo('PRACTICANTE');
+    await expect(firstValueFrom<unknown>(teams.joinByCode('A1B2C3D4E5F6'))).rejects.toMatchObject({ error: {
+      message: expect.stringContaining('Demostración: los cambios no se guardan.'),
+    } });
+    http.expectNone(() => true);
+  });
+
   it('clears group data and invitation codes when changing session or demo role', async () => {
     TestBed.tick();
     teams.lastCreated.set({ groupId: 9, name: 'Privado', status: 'BORRADOR', invitationCode: 'EXAMPLE12345', message: 'OK' });

@@ -21,6 +21,16 @@
       </p>
     </div>
   </div>
+  @if (cargandoBorrador()) {
+    <p role="status" class="mt-0 mb-4 text-sm text-kl-muted">Cargando tu borrador…</p>
+  } @else if (borradorId() !== null) {
+    <p
+      role="status"
+      class="mt-0 mb-4 rounded-xl border border-solid border-amber-300/50 bg-amber-300/10 p-3 text-sm text-amber-300"
+    >
+      Estás continuando un borrador. Guarda los cambios o publícalo cuando tenga nivel y cupo.
+    </p>
+  }
   @if (estado === 'sin-permisos') {
     <mat-card
       class="mx-auto my-16 w-full max-w-[560px] gap-4 rounded-2xl border border-solid border-kl-accent bg-kl-surface p-6 text-center"

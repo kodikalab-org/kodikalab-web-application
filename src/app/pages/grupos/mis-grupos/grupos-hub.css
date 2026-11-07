@@ -1,0 +1,17 @@
+@import '../grupos-material.css';
+
+:host {
+  --mat-tab-active-label-text-color: var(--kl-text-heading);
+  --mat-tab-inactive-label-text-color: var(--kl-text-body);
+  --mat-tab-active-hover-label-text-color: var(--kl-text-heading);
+  --mat-tab-active-focus-label-text-color: var(--kl-text-heading);
+  --mat-tab-inactive-hover-label-text-color: var(--kl-text-heading);
+  --mat-tab-inactive-focus-label-text-color: var(--kl-text-heading);
+  --mat-tab-active-indicator-color: var(--kl-accent-text);
+  --mat-tab-active-focus-indicator-color: var(--kl-accent-text);
+  --mat-tab-active-hover-indicator-color: var(--kl-accent-text);
+  --mat-tab-divider-color: #2b2760;
+  --mat-tab-active-ripple-color: var(--kl-accent);
+  --mat-tab-inactive-ripple-color: var(--kl-accent);
+  --mat-tab-label-text-size: 15px;
+}

@@ -1,7 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -10,7 +10,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { apiError } from '../../../core/api';
 import {
   Clarification,
@@ -19,13 +18,19 @@ import {
   StudyGroupSummary,
   TeamsApi,
 } from '../../../core/teams-api';
+import { TONOS, iniciales, nivelTexto } from '../mis-grupos/presentacion';
+import {
+  LONGITUD_CODIGO,
+  codigoValido,
+  mensajeErrorCodigo,
+  normalizarCodigo,
+} from './codigo-invitacion';
 
 type Vista =
   | ''
   | 'solicitar'
   | 'enviada'
   | 'ingreso'
-  | 'codigo'
   | 'estado'
   | 'duplicada'
   | 'sin-cupos'
@@ -40,31 +45,21 @@ interface GrupoVm {
   descripcion: string;
   horario: string;
   cupo: number | null;
-  estado: 'Abierto' | 'Solicitud pendiente' | 'Aclaración solicitada' | 'Eres miembro' | 'Expulsado';
+  estado:
+    | 'Abierto'
+    | 'Tuyo'
+    | 'Solicitud pendiente'
+    | 'Aclaración solicitada'
+    | 'Eres miembro'
+    | 'Expulsado';
   accion: string;
   tono: string;
   membershipId?: number;
   estadoMembresia?: Membership['status'];
   aclaracion?: Clarification | null;
+  /** El grupo pertenece al coach de la sesión. */
+  propio: boolean;
 }
-
-const TONOS = [
-  'from-[#7000ff] to-[#af6dff]',
-  'from-[#00a9a4] to-[#54e4cd]',
-  'from-[#2360e8] to-[#60a5fa]',
-  'from-[#a020dc] to-[#e7a5f9]',
-  'from-[#bf125d] to-[#f44d91]',
-  'from-[#078b3e] to-[#54d884]',
-];
-
-const NIVELES: Record<string, string> = {
-  PRINCIPIANTE: 'Principiante',
-  INTERMEDIO: 'Intermedio',
-  AVANZADO: 'Avanzado',
-  Div3: 'Div3',
-  Div2: 'Div2',
-  Regional: 'Regional',
-};
 
 @Component({
   selector: 'app-explorar-grupos',
@@ -77,7 +72,6 @@ const NIVELES: Record<string, string> = {
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
   ],
   templateUrl: './explorar-grupos.html',
   styleUrl: './explorar-grupos.css',
@@ -85,12 +79,26 @@ const NIVELES: Record<string, string> = {
 export class ExplorarGrupos {
   private readonly api = inject(TeamsApi);
 
-  protected readonly grupos = signal<GrupoVm[]>([]);
+  /** El coach ve el mismo listado, sin acciones de ingreso (lo decide `GruposHub`). */
+  readonly coach = input(false);
+
+  private readonly datos = signal<{ groups: StudyGroupSummary[]; mine: unknown[] }>({
+    groups: [],
+    mine: [],
+  });
+  protected readonly grupos = computed(() =>
+    this.mapear(
+      this.datos().groups,
+      this.datos().mine as (PractitionerGroup | { groupId: number })[],
+    ),
+  );
   protected readonly cargando = signal(true);
+  /** Error al cargar el listado. */
+  protected readonly errorCarga = signal('');
+  /** Error al enviar un ingreso o una solicitud. */
   protected readonly error = signal('');
   protected readonly vista = signal<Vista>('');
   protected readonly seleccionado = signal<GrupoVm | null>(null);
-  protected readonly grupoCodigo = signal<number | null>(null);
   protected readonly enviando = signal(false);
   /** Respuesta del practicante cuando el coach pidió una aclaración. */
   protected readonly respuesta = signal('');
@@ -98,7 +106,42 @@ export class ExplorarGrupos {
   protected readonly respuestaOk = signal('');
   protected readonly respuestaError = signal('');
 
+  /** «Ingresar con código»: el servidor resuelve el grupo a partir del código. */
+  protected readonly longitudCodigo = LONGITUD_CODIGO;
+  protected readonly codigoTexto = signal('');
+  protected readonly codigoCompleto = computed(() => codigoValido(this.codigoTexto()));
+  protected readonly codigoEnviando = signal(false);
+  protected readonly codigoError = signal('');
+  protected readonly codigoOk = signal('');
+
   protected readonly total = computed(() => this.grupos().length);
+
+  protected readonly secciones = computed(() => [
+    {
+      titulo: 'Nivel',
+      opciones: [
+        ['principiante', 'Principiante'],
+        ['intermedio', 'Intermedio'],
+        ['avanzado', 'Avanzado'],
+      ],
+    },
+    {
+      titulo: 'Visibilidad',
+      opciones: [
+        ['publico', 'Público'],
+        ['protegido', 'Protegido'],
+      ],
+    },
+    this.coach()
+      ? { titulo: 'Mis grupos', opciones: [['propio', 'Solo los míos']] }
+      : {
+          titulo: 'Mi participación',
+          opciones: [
+            ['miembro', 'Soy miembro'],
+            ['pendiente', 'Solicitud pendiente'],
+          ],
+        },
+  ]);
 
   protected readonly filtros = new FormGroup({
     buscar: new FormControl('', { nonNullable: true }),
@@ -109,6 +152,7 @@ export class ExplorarGrupos {
     protegido: new FormControl(false, { nonNullable: true }),
     miembro: new FormControl(false, { nonNullable: true }),
     pendiente: new FormControl(false, { nonNullable: true }),
+    propio: new FormControl(false, { nonNullable: true }),
   });
 
   private readonly filtros$ = toSignal(
@@ -135,6 +179,7 @@ export class ExplorarGrupos {
       if (niveles.length > 0 && !niveles.includes(grupo.nivel)) return false;
       if (filtraVisibilidad && publico !== grupo.publico) return false;
       if (filtro.miembro && grupo.estado !== 'Eres miembro') return false;
+      if (filtro.propio && !grupo.propio) return false;
       if (
         filtro.pendiente &&
         grupo.estado !== 'Solicitud pendiente' &&
@@ -156,15 +201,9 @@ export class ExplorarGrupos {
       protegido: false,
       miembro: false,
       pendiente: false,
+      propio: false,
     });
   }
-
-  protected readonly codigo = new FormGroup({
-    invitacion: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.pattern(/^[A-Za-z0-9]{12}$/)],
-    }),
-  });
 
   constructor() {
     this.cargar();
@@ -180,13 +219,6 @@ export class ExplorarGrupos {
     this.vista.set('solicitar');
   }
 
-  protected abrirConCodigo(): void {
-    this.seleccionado.set(null);
-    this.grupoCodigo.set(this.grupos()[0]?.id ?? null);
-    this.codigo.reset({ invitacion: '' });
-    this.vista.set('codigo');
-  }
-
   protected cerrar(): void {
     this.vista.set('');
     this.seleccionado.set(null);
@@ -195,30 +227,53 @@ export class ExplorarGrupos {
 
   protected enviar(): void {
     const grupo = this.seleccionado();
-    const groupId = this.vista() === 'codigo' ? this.grupoCodigo() : grupo?.id ?? null;
-    if (groupId === null || this.enviando()) return;
-
-    const esCodigo = this.vista() === 'codigo';
-    if (esCodigo && this.codigo.invalid) return;
+    if (!grupo || this.enviando()) return;
 
     this.enviando.set(true);
     this.error.set('');
 
-    this.api
-      .join(groupId, esCodigo ? this.codigo.controls.invitacion.value : '')
-      .subscribe({
-        next: (response) => {
-          this.enviando.set(false);
-          this.seleccionado.set(this.grupos().find((g) => g.id === groupId) ?? null);
-          this.vista.set(response.status === 'ACTIVO' ? 'ingreso' : 'enviada');
-          this.cargar();
-        },
-        error: (error: unknown) => {
-          this.enviando.set(false);
-          this.vista.set(this.vistaDeError(error));
-          this.error.set(apiError(error));
-        },
-      });
+    this.api.join(grupo.id).subscribe({
+      next: (response) => {
+        this.enviando.set(false);
+        this.vista.set(response.status === 'ACTIVO' ? 'ingreso' : 'enviada');
+        this.cargar();
+      },
+      error: (error: unknown) => {
+        this.enviando.set(false);
+        this.vista.set(this.vistaDeError(error));
+        this.error.set(apiError(error));
+      },
+    });
+  }
+
+  /** Mantiene el código en mayúsculas, sin símbolos y con 12 caracteres como máximo. */
+  protected escribirCodigo(campo: HTMLInputElement): void {
+    const codigo = normalizarCodigo(campo.value);
+    campo.value = codigo;
+    this.codigoTexto.set(codigo);
+    this.codigoError.set('');
+    this.codigoOk.set('');
+  }
+
+  protected ingresarConCodigo(): void {
+    const codigo = this.codigoTexto();
+    if (!codigoValido(codigo) || this.codigoEnviando()) return;
+
+    this.codigoEnviando.set(true);
+    this.codigoError.set('');
+    this.codigoOk.set('');
+    this.api.joinByCode(codigo).subscribe({
+      next: (response) => {
+        this.codigoEnviando.set(false);
+        this.codigoTexto.set('');
+        this.codigoOk.set(response.message || 'Ingresaste al grupo correctamente.');
+        this.cargar();
+      },
+      error: (error: unknown) => {
+        this.codigoEnviando.set(false);
+        this.codigoError.set(mensajeErrorCodigo(error));
+      },
+    });
   }
 
   protected verEstado(grupo: GrupoVm): void {
@@ -256,22 +311,24 @@ export class ExplorarGrupos {
     });
   }
 
-  private cargar(): void {
+  protected cargar(): void {
     this.cargando.set(true);
+    this.errorCarga.set('');
     this.api.loadGroups().subscribe({
-      next: (groups) => this.api.loadMine().subscribe({
-        next: (mine) => {
-          this.grupos.set(this.mapear(groups, mine));
-          this.cargando.set(false);
-        },
-        error: () => {
-          this.grupos.set(this.mapear(groups, []));
-          this.cargando.set(false);
-        },
-      }),
+      next: (groups) =>
+        this.api.loadMine().subscribe({
+          next: (mine) => {
+            this.datos.set({ groups, mine });
+            this.cargando.set(false);
+          },
+          error: () => {
+            this.datos.set({ groups, mine: [] });
+            this.cargando.set(false);
+          },
+        }),
       error: (error: unknown) => {
         this.cargando.set(false);
-        this.error.set(apiError(error));
+        this.errorCarga.set(apiError(error));
       },
     });
   }
@@ -280,26 +337,31 @@ export class ExplorarGrupos {
     groups: StudyGroupSummary[],
     mine: (PractitionerGroup | { groupId: number })[],
   ): GrupoVm[] {
+    const esCoach = this.coach();
     const memberships = new Map<number, PractitionerGroup['membership']>();
+    const propios = new Set<number>();
     for (const item of mine) {
       const membership = (item as PractitionerGroup).membership;
       if (membership) memberships.set(item.groupId, membership);
+      else if (esCoach) propios.add(item.groupId);
     }
 
     return groups.map((group, index) => {
-      const membership = memberships.get(group.groupId);
+      const membership = esCoach ? undefined : memberships.get(group.groupId);
       const status = membership?.status;
+      const propio = esCoach && propios.has(group.groupId);
       return {
         id: group.groupId,
-        iniciales: this.iniciales(group.name),
+        iniciales: iniciales(group.name),
         nombre: group.name,
-        nivel: NIVELES[group.expectedLevel ?? ''] ?? (group.expectedLevel || 'Sin definir'),
+        nivel: nivelTexto(group.expectedLevel),
         publico: group.visibility === 'PUBLICO',
         descripcion: group.description || 'Sin descripción.',
         horario: group.sessionSchedule || 'Horario por definir',
         cupo: group.maxCapacity,
-        estado:
-          status === 'ACTIVO'
+        estado: propio
+          ? 'Tuyo'
+          : status === 'ACTIVO'
             ? 'Eres miembro'
             : status === 'PENDIENTE'
               ? 'Solicitud pendiente'
@@ -313,6 +375,7 @@ export class ExplorarGrupos {
         membershipId: membership?.membershipId,
         estadoMembresia: status,
         aclaracion: membership?.clarification ?? null,
+        propio,
       };
     });
   }
@@ -324,14 +387,5 @@ export class ExplorarGrupos {
     if (message.includes('solicitud activa') || message.includes('miembro')) return 'duplicada';
     if (message.includes('no está publicado') || message.includes('no admite')) return 'sin-cupos';
     return 'error';
-  }
-
-  private iniciales(name: string): string {
-    return name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) => word[0]?.toUpperCase() ?? '')
-      .join('');
   }
 }

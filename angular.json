@@ -38,6 +38,11 @@
             }
           },
           "configurations": {
+            "vercel": {
+              "outputMode": "static",
+              "ssr": false,
+              "outputHashing": "all"
+            },
             "production": {
               "budgets": [
                 {

@@ -1,0 +1,22 @@
+:host {
+  --auth-field-height: 46px;
+  --auth-field-padding: 12px;
+  --auth-input-color: var(--kl-text);
+  --auth-focus-color: var(--kl-accent-text);
+  --mat-form-field-container-text-size: 14px;
+  --mat-button-filled-container-height: 44px;
+  --mat-button-outlined-container-height: 36px;
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-outlined-container-shape: 10px;
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+}
+
+select {
+  color: var(--kl-text);
+}
+
+select option {
+  background: #110d2e;
+  color: var(--kl-text);
+}

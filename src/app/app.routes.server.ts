@@ -1,6 +1,8 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
+  { path: 'ranking', renderMode: RenderMode.Client },
+  { path: 'progreso/equipos', renderMode: RenderMode.Client },
   { path: 'inicio', renderMode: RenderMode.Client },
   { path: 'grupos/**', renderMode: RenderMode.Client },
   { path: 'coach/**', renderMode: RenderMode.Client },

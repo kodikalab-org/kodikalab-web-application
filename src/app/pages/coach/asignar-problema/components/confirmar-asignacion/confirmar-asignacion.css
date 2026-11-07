@@ -1,0 +1,4 @@
+/* Solo tokens de Material; el diseño usa utilidades Tailwind. */
+:host {
+  --mat-button-filled-container-height: 48px;
+}

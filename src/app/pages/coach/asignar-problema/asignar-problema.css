@@ -1,0 +1,13 @@
+/* Solo tokens de Material; el diseño usa utilidades Tailwind. */
+:host {
+  --auth-field-height: 46px;
+  --auth-field-padding: 11px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-link);
+  --mat-paginator-container-background-color: transparent;
+  --mat-paginator-container-text-color: var(--kl-text-body);
+  --mat-paginator-container-text-font: var(--kl-font-body);
+  --mat-paginator-container-text-size: 13px;
+  --mat-paginator-enabled-icon-color: var(--kl-text);
+  --mat-paginator-disabled-icon-color: #5f5a78;
+}

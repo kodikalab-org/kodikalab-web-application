@@ -1,3 +1,6 @@
+import { inject as injectSession } from '@angular/core';
+import { Session } from '../../core/session';
+import { ProgressLive } from './progress-live';
 import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -9,11 +12,12 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-progreso-equipos',
-  imports: [SiteFooter, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [SiteFooter, ProgressLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './progreso-equipos.html',
   styleUrl: './progreso-equipos.css',
 })
 export class ProgresoEquipos {
+  readonly session = injectSession(Session);
   protected readonly estado$;
   // Solo alterna dos frames de demostración: no consulta ni calcula progreso real.
   protected readonly contexto$;

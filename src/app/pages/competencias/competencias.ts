@@ -1,3 +1,6 @@
+import { inject as injectSession } from '@angular/core';
+import { Session } from '../../core/session';
+import { ResultsLive } from './results-live';
 import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -16,6 +19,7 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
   selector: 'app-competencias',
   imports: [
     SiteFooter,
+    ResultsLive,
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,
@@ -31,6 +35,7 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
   styleUrl: './competencias.css',
 })
 export class Competencias {
+  readonly session = injectSession(Session);
   protected readonly estado$;
   protected readonly accion$;
   protected readonly resultados = [

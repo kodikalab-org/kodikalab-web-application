@@ -1,0 +1,11 @@
+<div class="relative isolate flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text">
+  <img
+    class="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-top"
+    src="/images/login/bg.svg"
+    alt=""
+    aria-hidden="true"
+  />
+  <app-header [coach]="coach" />
+  <main class="flex flex-1 flex-col"><router-outlet /></main>
+  <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
+</div>

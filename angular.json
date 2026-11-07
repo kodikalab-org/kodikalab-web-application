@@ -31,13 +31,18 @@
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {
-              "allowedHosts": []
+              "allowedHosts": ["localhost", "127.0.0.1"]
             },
             "ssr": {
               "entry": "src/server.ts"
             }
           },
           "configurations": {
+            "vercel": {
+              "outputMode": "static",
+              "ssr": false,
+              "outputHashing": "all"
+            },
             "production": {
               "budgets": [
                 {
@@ -63,6 +68,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "prebundle": false
+          },
           "configurations": {
             "production": {
               "buildTarget": "kodikalab_application:build:production"

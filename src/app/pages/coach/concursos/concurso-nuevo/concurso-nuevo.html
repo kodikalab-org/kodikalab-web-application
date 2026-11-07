@@ -1,0 +1,276 @@
+<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+  <app-header [coach]="true" />
+  <main class="mx-auto w-full max-w-[860px] px-4 pt-6 pb-12 md:px-10">
+    <a
+      routerLink="/coach/concursos"
+      [queryParams]="form.controls.teamId.value ? { teamId: form.controls.teamId.value } : null"
+      class="inline-flex items-center gap-2 text-[13px] text-kl-accent-link"
+    >
+      <img src="images/app/arrow-left-accent.svg" alt="" width="16" height="16" />
+      Volver a concursos
+    </a>
+    <header class="mt-5 mb-6">
+      <h1
+        class="m-0 font-display text-[32px] leading-[38px] font-bold tracking-[-1px] md:text-[40px] md:leading-[44px]"
+      >
+        Crear concurso
+      </h1>
+      <p class="mt-2 mb-0 text-base font-light text-kl-body">
+        Define la configuración del concurso y, si quieres, sus problemas.
+      </p>
+    </header>
+
+    @if (teamsError()) {
+      <p role="alert" class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4">
+        {{ teamsError() }}
+        <button mat-stroked-button type="button" (click)="loadTeams()">Reintentar</button>
+      </p>
+    }
+    @if (!loadingTeams() && !teamsError() && !teams().length) {
+      <p role="status" class="rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
+        No tienes grupos publicados. Publica un grupo para poder crear concursos.
+      </p>
+    }
+    @if (error()) {
+      <section
+        role="alert"
+        class="mb-4 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+      >
+        <strong class="text-amber-400">{{ error() }}</strong>
+        @if (otherErrors().length) {
+          <ul class="mt-2 mb-0">
+            @for (item of otherErrors(); track item[0]) {
+              <li>{{ item[0] }}: {{ item[1] }}</li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    <mat-card
+      appearance="outlined"
+      class="rounded-[18px] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
+    >
+      <form
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+        class="flex flex-col gap-5"
+        aria-label="Datos del concurso"
+        [attr.aria-busy]="saving() ? 'true' : null"
+      >
+        <div class="flex flex-col gap-2">
+          <label for="concurso-grupo" class="text-sm font-bold">Grupo *</label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="auth-field w-full">
+            <select
+              matNativeControl
+              id="concurso-grupo"
+              aria-label="Grupo"
+              formControlName="teamId"
+              required
+            >
+              <option value="">Selecciona un grupo</option>
+              @for (team of teams(); track team.groupId) {
+                <option [value]="team.groupId">{{ team.name }}</option>
+              }
+            </select>
+            <mat-error>{{ message('teamId') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="concurso-nombre" class="text-sm font-bold">Nombre *</label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="auth-field w-full">
+            <input
+              matInput
+              id="concurso-nombre"
+              formControlName="eventName"
+              placeholder="Ej. Maratón interna de grafos"
+              autocomplete="off"
+            />
+            <mat-hint>Hasta 150 caracteres.</mat-hint>
+            <mat-error>{{ message('eventName') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="concurso-descripcion" class="text-sm font-bold"
+            >Descripción <span class="font-normal text-kl-faint">(opcional)</span></label
+          >
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="auth-field w-full">
+            <textarea
+              matInput
+              id="concurso-descripcion"
+              formControlName="description"
+              rows="3"
+              placeholder="Objetivo, reglas particulares o temas del concurso."
+            ></textarea>
+            <mat-hint>Hasta 500 caracteres.</mat-hint>
+            <mat-error>{{ message('description') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div class="flex flex-col gap-2">
+            <label for="concurso-acceso" class="text-sm font-bold">Tipo de acceso *</label>
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="auth-field w-full"
+            >
+              <select matNativeControl id="concurso-acceso" formControlName="accessType">
+                <option value="PUBLICO_GRUPO">Público para el grupo</option>
+                <option value="PRIVADO_PASS">Privado con clave</option>
+              </select>
+              <mat-error>{{ message('accessType') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="concurso-penalizacion" class="text-sm font-bold"
+              >Regla de penalización *</label
+            >
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="auth-field w-full"
+            >
+              <select matNativeControl id="concurso-penalizacion" formControlName="penaltyRule">
+                <option value="ICPC_20_MIN">ICPC (20 minutos por intento fallido)</option>
+                <option value="IOI_POINTS">IOI (puntos)</option>
+              </select>
+              <mat-error>{{ message('penaltyRule') }}</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        @if (form.controls.accessType.value === 'PRIVADO_PASS') {
+          <div class="flex flex-col gap-2">
+            <label for="concurso-clave" class="text-sm font-bold">Clave de acceso *</label>
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="auth-field w-full"
+            >
+              <input
+                matInput
+                id="concurso-clave"
+                type="password"
+                formControlName="accessKey"
+                autocomplete="new-password"
+              />
+              <mat-hint>La necesitarán los practicantes para entrar. Máximo 72 bytes.</mat-hint>
+              <mat-error>{{ message('accessKey') }}</mat-error>
+            </mat-form-field>
+          </div>
+        }
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div class="flex flex-col gap-2">
+            <label for="concurso-fecha" class="text-sm font-bold">Fecha de inicio *</label>
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="auth-field w-full"
+            >
+              <input
+                matInput
+                id="concurso-fecha"
+                formControlName="startDate"
+                [matDatepicker]="calendario"
+                readonly
+                aria-haspopup="dialog"
+                (click)="calendario.open()"
+                (keydown.enter)="calendario.open()"
+              />
+              <mat-datepicker-toggle matIconSuffix [for]="calendario" aria-label="Abrir calendario" />
+              <mat-datepicker #calendario />
+              <mat-error>{{ message('startDate') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="concurso-hora" class="text-sm font-bold">Hora de inicio *</label>
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="auth-field w-full"
+            >
+              <input matInput id="concurso-hora" type="time" formControlName="startTime" />
+              <mat-error>{{ message('startTime') }}</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div class="flex flex-col gap-2">
+            <label for="concurso-duracion" class="text-sm font-bold">Duración (minutos) *</label>
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="auth-field w-full"
+            >
+              <input
+                matInput
+                id="concurso-duracion"
+                type="number"
+                min="1"
+                step="1"
+                formControlName="durationMinutes"
+                placeholder="120"
+              />
+              <mat-hint>El fin se calcula desde el inicio.</mat-hint>
+              <mat-error>{{ message('durationMinutes') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="concurso-congelamiento" class="text-sm font-bold"
+              >Congelamiento del marcador (minutos)
+              <span class="font-normal text-kl-faint">(opcional)</span></label
+            >
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="auth-field w-full"
+            >
+              <input
+                matInput
+                id="concurso-congelamiento"
+                type="number"
+                min="0"
+                step="1"
+                formControlName="freezeMinutes"
+                placeholder="60"
+              />
+              <mat-hint>Vacío: 60 minutos, o la duración si es menor.</mat-hint>
+              <mat-error>{{ message('freezeMinutes') }}</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <section class="flex flex-col gap-3" aria-labelledby="concurso-problemas">
+          <div>
+            <h2 id="concurso-problemas" class="m-0 font-display text-lg font-bold">
+              Problemas <span class="text-sm font-normal text-kl-faint">(opcional)</span>
+            </h2>
+            <p class="m-0 mt-1 text-sm text-kl-muted">
+              Agrega problemas por su código de Codeforces o búscalos. Se asignan al crear el
+              concurso; también puedes hacerlo después.
+            </p>
+          </div>
+          <app-problem-picker [(rows)]="picked" [defaultScore]="defaultScore()" />
+        </section>
+
+        <div class="flex flex-wrap justify-end gap-3 pt-2">
+          <a
+            mat-stroked-button
+            routerLink="/coach/concursos"
+            [queryParams]="form.controls.teamId.value ? { teamId: form.controls.teamId.value } : null"
+            >Cancelar</a
+          >
+          <button mat-flat-button type="submit" [disabled]="saving()">
+            {{ saving() ? 'Creando…' : 'Crear concurso' }}
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </main>
+  <app-site-footer audience="coach" />
+</div>

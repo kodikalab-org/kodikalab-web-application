@@ -1,0 +1,10 @@
+<div class="relative isolate flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text">
+  <img
+    [src]="coach ? '/images/grupos/crear-fondo.svg' : '/images/grupos/415-19197-imgIcon.svg'"
+    alt=""
+    class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-none object-right-top lg:object-cover lg:object-top"
+  />
+  <app-header [coach]="coach" />
+  <div class="flex flex-1 flex-col"><router-outlet /></div>
+  <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
+</div>

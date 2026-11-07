@@ -1,0 +1,47 @@
+<button
+  mat-button
+  type="button"
+  [matMenuTriggerFor]="usuario"
+  aria-label="Abrir menú de usuario"
+  matTooltip="Cuenta y navegación"
+  class="min-w-0 px-1"
+>
+  <span
+    class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-kl-accent to-[#b780ff] text-xs text-white"
+    >{{ displayInitials }}</span
+  ><img src="/images/dashboard/0-imgIcon5.svg" width="16" height="16" alt="" />
+</button>
+<mat-menu #usuario="matMenu" [class]="clasesMenu" [overlapTrigger]="false" xPosition="before">
+  <div class="mb-1 flex items-center gap-3 border-b border-kl-border-strong px-4 pt-2 pb-4" role="note">
+    <span
+      class="flex size-10 shrink-0 items-center justify-center rounded-full bg-kl-accent text-sm font-medium text-white"
+      aria-hidden="true"
+      >{{ displayInitials }}</span
+    >
+    <div>
+      <strong class="block text-sm font-medium text-kl-heading">{{ displayName }}</strong
+      ><span class="mt-1 block text-xs text-kl-muted"
+        >{{ coach ? 'Coach' : 'Practicante' }} · {{ session.demo() ? 'Vista de demostración' : 'Sesión iniciada' }}</span
+      >
+    </div>
+  </div>
+  @for (enlace of headerLinks; track enlace.label) {
+    <a mat-menu-item class="xl:hidden" [routerLink]="enlace.path" [fragment]="enlace.fragment">{{ enlace.label }}</a>
+  }
+  @for (enlace of accountLinks; track enlace.label) {
+    <a mat-menu-item [routerLink]="enlace.path">{{ enlace.label }}</a>
+  }
+  <a mat-menu-item [routerLink]="settingsPath" [queryParams]="{ tab: 'ajustes' }">Ajustes generales</a>
+  @if (session.demo()) {
+    @for (extra of extras; track extra.label) {
+      <a mat-menu-item [routerLink]="extra.path" [queryParams]="extra.queryParams">{{ extra.label }}</a>
+    }
+    <a mat-menu-item [routerLink]="onboardingPath">Ver onboarding</a>
+    <a mat-menu-item [routerLink]="coach ? '/demo/practicante' : '/demo/coach'">{{
+      coach ? 'Ver demo de practicante' : 'Ver demo de coach'
+    }}</a>
+  }
+  <button mat-menu-item type="button" (click)="salir()" class="mt-1 border-t border-kl-border-strong">
+    {{ session.demo() ? 'Salir de la demo' : 'Cerrar sesión' }}
+  </button>
+</mat-menu>

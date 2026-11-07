@@ -38,7 +38,17 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+.playwright-mcp/
+.atl/
 
 # System files
 .DS_Store
 Thumbs.db
+
+# Local environment and generated public build configuration
+.env
+.env.*
+!.env.example
+!.env.production.example
+/src/environments/environment.generated.ts
+.vercel/

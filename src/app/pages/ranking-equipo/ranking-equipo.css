@@ -1,0 +1,7 @@
+:host {
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+  --mat-card-elevated-container-color: transparent;
+  --mat-card-elevated-container-shape: 16px;
+  --mat-card-elevated-container-elevation: none;
+}

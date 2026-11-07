@@ -1,0 +1,5 @@
+@import '../grupos-material.css';
+
+:host {
+  display: block;
+}

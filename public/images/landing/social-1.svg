@@ -1,12 +1,5 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Icon" clip-path="url(#clip0_0_8)">
-<path id="Vector" d="M7 5H17C19.2091 5 21 6.79086 21 9V15C21 17.2091 19.2091 19 17 19H7C4.79086 19 3 17.2091 3 15V9C3 6.79086 4.79086 5 7 5Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#C9C5DB"/>
-<path id="Vector_2" d="M10.2 12C10.2 12.6627 9.66274 13.2 9 13.2C8.33726 13.2 7.8 12.6627 7.8 12C7.8 11.3373 8.33726 10.8 9 10.8C9.66274 10.8 10.2 11.3373 10.2 12Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#C9C5DB"/>
-<path id="Vector_3" d="M16.2 12C16.2 12.6627 15.6627 13.2 15 13.2C14.3373 13.2 13.8 12.6627 13.8 12C13.8 11.3373 14.3373 10.8 15 10.8C15.6627 10.8 16.2 11.3373 16.2 12Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke="#C9C5DB"/>
-</g>
-<defs>
-<clipPath id="clip0_0_8">
-<rect width="20" height="20" fill="white"/>
-</clipPath>
-</defs>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M14.861 3.19434H5.139C2.991 3.19434 1.25 4.93534 1.25 7.08334V12.9163C1.25 15.0643 2.991 16.8053 5.139 16.8053H14.861C17.009 16.8053 18.75 15.0643 18.75 12.9163V7.08334C18.75 4.93534 17.009 3.19434 14.861 3.19434Z" stroke="#C9C5DB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M7.08363 11.1663C7.72763 11.1663 8.24963 10.6443 8.24963 10.0003C8.24963 9.35525 7.72763 8.83325 7.08363 8.83325C6.43863 8.83325 5.91663 9.35525 5.91663 10.0003C5.91663 10.6443 6.43863 11.1663 7.08363 11.1663Z" stroke="#C9C5DB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12.917 11.1663C13.561 11.1663 14.083 10.6443 14.083 10.0003C14.083 9.35525 13.561 8.83325 12.917 8.83325C12.272 8.83325 11.75 9.35525 11.75 10.0003C11.75 10.6443 12.272 11.1663 12.917 11.1663Z" stroke="#C9C5DB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

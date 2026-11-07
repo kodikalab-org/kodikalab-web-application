@@ -1,0 +1,169 @@
+<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+  <app-header [coach]="true" />
+  <main class="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-12 md:px-10">
+    <header class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1
+          class="m-0 font-display text-[32px] leading-[38px] font-bold tracking-[-1px] md:text-[40px] md:leading-[44px]"
+        >
+          Concursos
+        </h1>
+        <p class="mt-2 mb-0 text-base font-light text-kl-body">
+          Crea concursos para tus grupos, asígnales problemas y controla cuándo empiezan y
+          terminan.
+        </p>
+      </div>
+      <a
+        mat-flat-button
+        class="h-11 px-6"
+        routerLink="/coach/concursos/nuevo"
+        [queryParams]="teamId() ? { teamId: teamId() } : null"
+        >Crear concurso</a
+      >
+    </header>
+
+    <div class="mt-6 flex max-w-[420px] flex-col gap-2">
+      <label for="concursos-grupo" class="text-sm font-bold">Grupo</label>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="auth-field w-full">
+        <select
+          matNativeControl
+          id="concursos-grupo"
+          aria-label="Grupo"
+          [formControl]="context"
+          (change)="selectTeam()"
+        >
+          <option value="">Selecciona un grupo</option>
+          @for (team of teams(); track team.groupId) {
+            <option [value]="team.groupId">{{ team.name }}</option>
+          }
+        </select>
+      </mat-form-field>
+    </div>
+
+    @if (created(); as contest) {
+      <p
+        role="status"
+        class="mt-5 mb-0 rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+      >
+        El concurso «{{ contest.name }}» se creó correctamente.
+        @if (teamId()) {
+          <a
+            class="ml-2 font-bold text-kl-accent-link"
+            routerLink="/coach/asignar-problema"
+            [queryParams]="{ competitionId: contest.id, teamId: teamId() }"
+            >Asignar problemas ahora</a
+          >
+        }
+      </p>
+      @if (assignmentError()) {
+        <p
+          role="alert"
+          class="mt-3 mb-0 rounded-xl border border-solid border-amber-300/60 bg-amber-300/10 p-4 text-sm text-amber-200"
+        >
+          No pudimos asignar los problemas: {{ assignmentError() }} Puedes asignarlos con el enlace de arriba.
+        </p>
+      }
+    } @else if (notice()) {
+      <p
+        role="status"
+        class="mt-5 mb-0 rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+      >
+        {{ notice() }}
+      </p>
+    }
+    @if (teamsError()) {
+      <p role="alert" class="mt-5 mb-0 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm">
+        {{ teamsError() }}
+        <button mat-stroked-button type="button" (click)="loadTeams()">Reintentar</button>
+      </p>
+    }
+    @if (error()) {
+      <p role="alert" class="mt-5 mb-0 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm">
+        {{ error() }}
+      </p>
+    }
+    @if (!loadingTeams() && !teamsError() && !teams().length) {
+      <p class="mt-5 mb-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
+        No tienes grupos publicados. Publica un grupo para poder crear concursos.
+      </p>
+    } @else if (!teamId()) {
+      <p class="mt-5 mb-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
+        Selecciona un grupo para ver sus concursos.
+      </p>
+    } @else {
+      @if (loading()) {
+        <p class="mt-5 mb-0 text-kl-muted" aria-live="polite">Consultando concursos…</p>
+      }
+      @for (section of sections(); track section.title) {
+        <section class="mt-8" [attr.aria-labelledby]="'titulo-' + $index">
+          <h2 [id]="'titulo-' + $index" class="m-0 mb-3 text-xl font-bold">{{ section.title }}</h2>
+          @if (section.rows.length) {
+            <div
+              class="overflow-x-auto rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86"
+            >
+              <table class="w-full min-w-[760px] border-collapse text-left text-sm" [attr.aria-label]="section.label">
+                <thead>
+                  <tr class="text-xs text-kl-muted">
+                    <th scope="col" class="px-4 py-3 font-normal">Nombre</th>
+                    <th scope="col" class="px-4 py-3 font-normal">Inicio</th>
+                    <th scope="col" class="px-4 py-3 font-normal">Duración</th>
+                    <th scope="col" class="px-4 py-3 font-normal">Estado</th>
+                    <th scope="col" class="px-4 py-3 font-normal">Problemas</th>
+                    <th scope="col" class="px-4 py-3 font-normal">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of section.rows; track c.competitionId) {
+                    <tr class="border-0 border-t border-solid border-kl-divider">
+                      <td class="px-4 py-3 font-semibold text-kl-heading">{{ c.eventName }}</td>
+                      <td class="px-4 py-3 whitespace-nowrap">{{ formatStart(c.startsAt) }}</td>
+                      <td class="px-4 py-3 whitespace-nowrap">
+                        {{ formatDuration(c.startsAt, c.endsAt) }}
+                      </td>
+                      <td class="px-4 py-3">
+                        <span
+                          class="inline-block rounded-full border border-solid px-2.5 py-0.5 text-xs"
+                          [class]="badge[c.status]"
+                          >{{ label[c.status] }}</span
+                        >
+                      </td>
+                      <td class="px-4 py-3">{{ c.problemsCount }}</td>
+                      <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-2">
+                          @if (c.status !== 'FINALIZADA') {
+                            <a
+                              mat-stroked-button
+                              routerLink="/coach/asignar-problema"
+                              [queryParams]="{ competitionId: c.competitionId, teamId: c.teamId }"
+                              >Asignar problemas</a
+                            >
+                          }
+                          @if (nextStatus(c.status); as target) {
+                            <button
+                              mat-stroked-button
+                              type="button"
+                              [disabled]="changing() !== null"
+                              (click)="changeStatus(c)"
+                            >
+                              {{ actionLabel[target] }}
+                            </button>
+                          }
+                          <a mat-stroked-button routerLink="/coach/competencias">Resultado oficial</a>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (!loading()) {
+            <p class="m-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
+              {{ section.empty }}
+            </p>
+          }
+        </section>
+      }
+    }
+  </main>
+  <app-site-footer audience="coach" />
+</div>

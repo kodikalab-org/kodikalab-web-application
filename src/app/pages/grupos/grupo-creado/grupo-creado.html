@@ -1,0 +1,87 @@
+<main class="flex min-h-[calc(100dvh-148px)] items-center justify-center px-4 py-14">
+  <mat-card
+    appearance="outlined"
+    class="w-full max-w-[600px] rounded-[26px] border-kl-accent bg-linear-to-b from-[#1a1446]/90 to-[#09071a]/90 p-6 text-center shadow-[0_0_28px_#643cff44] sm:p-10"
+  >
+    <span
+      class="mx-auto flex size-[72px] items-center justify-center rounded-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] text-3xl shadow-[0_0_20px_#7357f366]"
+      ><img src="/images/grupos/415-19101-imgIcon6.svg" width="38" height="38" alt=""
+    /></span>
+
+    @if (grupo(); as creado) {
+      <h1 class="mt-5 mb-3 font-display text-[28px] font-bold">
+        {{ session.demo() ? 'Vista previa: grupo creado' : esBorrador() ? 'Borrador guardado' : '¡Grupo creado!' }}
+      </h1>
+      <p class="mt-0 text-sm text-kl-body">
+        @if (session.demo()) {
+          Confirmación y código de invitación de ejemplo. No se guardaron cambios.
+        } @else if (esBorrador()) {
+          {{ creado.name }} quedó guardado como borrador. Puedes publicarlo ahora o más tarde.
+        } @else {
+          {{ creado.name }} ya aparece en el listado de grupos disponibles.
+        }
+      </p>
+      <div
+        class="my-3 rounded-xl border border-solid border-green-400/40 bg-green-400/10 p-4 text-left text-sm text-green-300"
+      >
+        <strong>{{ mensajePrincipal() }}</strong>
+        <p class="mt-1 mb-0 text-kl-body">
+          {{ session.demo() ? 'Datos de demostración' : 'Quedaste como responsable del grupo' }} · estado: {{ estadoTexto() }}.
+        </p>
+      </div>
+
+      @if (esBorrador() && !session.demo()) {
+        <div class="my-4 rounded-xl border border-solid border-amber-400/50 bg-amber-400/10 p-4 text-left text-sm">
+          <strong class="text-amber-300">Todavía no es visible para los practicantes</strong>
+          <p class="mt-1 mb-0 text-kl-body">
+            Para publicarlo se exige nivel esperado y cupo entre 1 y 1000. Si ya los completaste,
+            publícalo aquí mismo.
+          </p>
+        </div>
+      }
+
+      @if (error()) {
+        <p class="my-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm text-kl-danger">
+          {{ error() }}
+        </p>
+      }
+
+      <div class="mt-4 text-left">
+        <span class="mb-2 block text-[13px] text-kl-body">Código de invitación</span>
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-kl-accent-text bg-kl-accent/10 p-4"
+        >
+          <code class="text-base tracking-widest">{{ creado.invitationCode }}</code>
+        </div>
+        <p class="mt-2 text-xs leading-5 text-kl-muted">
+          {{ session.demo() ? 'Código de ejemplo: no permite ingresar a un grupo real.' : 'Compártelo con quienes quieras que ingresen directamente. Podrás consultarlo en «Mis grupos».' }}
+        </p>
+      </div>
+    } @else {
+      <h1 class="mt-5 mb-3 font-display text-[28px] font-bold">No hay un grupo recién creado</h1>
+      <p class="mt-0 text-sm text-kl-body">
+        Abre el formulario para crear un grupo nuevo.
+      </p>
+    }
+
+    <div class="my-4 flex flex-wrap justify-center gap-2 text-xs text-kl-body">
+      @if (grupo(); as creado) {
+        <span class="rounded-lg border border-solid border-kl-border-strong bg-white/3 px-3 py-1.5"
+          >Estado: {{ estadoActual() }}</span
+        >
+      }
+    </div>
+    <div class="flex flex-wrap justify-center gap-3">
+      @if (esBorrador() && !session.demo()) {
+        <button mat-flat-button type="button" [disabled]="publicando()" (click)="publicar()">
+          {{ publicando() ? 'Publicando…' : 'Publicar ahora' }}
+        </button>
+      }
+      <a mat-stroked-button routerLink="/grupos" [queryParams]="{ tab: 'mis-grupos' }">Ir a Mis grupos</a>
+      <a mat-stroked-button routerLink="/coach/grupos/crear">Crear otro grupo</a
+      ><a mat-stroked-button routerLink="/coach/grupos/solicitudes"
+        >Ver solicitudes<img src="/images/login/arrow-right-18.svg" width="18" height="18" alt=""
+      /></a>
+    </div>
+  </mat-card>
+</main>

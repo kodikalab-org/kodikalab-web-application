@@ -1,0 +1,258 @@
+<div
+  class="page relative flex min-h-[calc(100dvh-1px)] flex-col overflow-clip bg-kl-bg font-body text-kl-text"
+  #pageStart
+>
+  <img
+    class="page__bg pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
+    src="images/login/bg.svg"
+    alt=""
+    aria-hidden="true"
+  />
+
+  <mat-toolbar
+    class="header auth-header sticky top-0 z-40 backdrop-blur-xl justify-between border-0 border-b border-solid border-kl-divider px-14 font-body max-[641px]:px-4"
+  >
+    <a
+      class="brand inline-flex items-center gap-2.5"
+      routerLink="/"
+      aria-label="Kodikalab, inicio"
+      (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+    >
+      <img src="images/login/logo-40.svg" alt="" width="40" height="40" />
+      <span class="brand__name text-[25px] font-medium tracking-[-.4px] max-[641px]:text-[22px]"
+        >Kodikalab</span
+      >
+    </a>
+    <div class="header__actions flex items-center gap-5 max-[641px]:gap-2.5">
+      <a
+        class="back inline-flex items-center gap-2 text-[15px] text-kl-body hover:text-kl-accent-text max-[641px]:gap-1.5 max-[641px]:text-[13px]"
+        routerLink="/"
+        aria-label="Volver al inicio"
+        (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+      >
+        <img src="images/login/arrow-left-18.svg" alt="" width="18" height="18" />
+        <span class="back__text max-[461px]:hidden">Volver al inicio</span>
+      </a>
+    </div>
+  </mat-toolbar>
+
+  <main
+    class="main relative z-10 flex flex-1 items-center justify-center px-4 py-8 [@media(max-height:760px)]:p-4"
+  >
+    <mat-card
+      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[#201454]/75 via-[#140d34]/82 to-[#0a071a]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7 [@media(max-height:760px)]:px-8 [@media(max-height:760px)]:py-6 [@media(max-height:760px)_and_(max-width:640px)]:px-5"
+      appearance="outlined"
+    >
+      @if ((estado$ | async) === 'cuenta-deshabilitada') {
+        <h1 class="m-0 font-display text-2xl font-bold lg:text-[40px]">Iniciar sesión</h1>
+        <p class="text-sm text-kl-muted">Accede a tu espacio de entrenamiento competitivo.</p>
+        <dl class="flex w-full flex-col gap-3 text-sm">
+          <dt class="font-bold">Correo institucional</dt>
+          <dd class="m-0 break-all rounded-xl bg-[#212121] p-3">camila.rojas@upc.edu.pe</dd>
+          <dt class="font-bold">Contraseña</dt>
+          <dd class="m-0 rounded-xl bg-[#212121] p-3" aria-label="Contraseña oculta">
+            ••••••••••••
+          </dd>
+        </dl>
+        <section
+          role="alert"
+          class="my-6 flex flex-col gap-2 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+        >
+          <strong class="text-kl-danger">Tu cuenta no está habilitada</strong
+          ><span
+            >No se ha iniciado ninguna sesión. Contacta con el responsable de la plataforma para
+            revisar el estado de tu cuenta.</span
+          >
+        </section>
+        <a mat-flat-button routerLink="/login" class="w-full">Reintentar</a>
+        <p class="text-xs text-kl-muted">
+          Vista estática de ejemplo · No cambia el estado de tu cuenta.
+        </p>
+      } @else {
+        <div class="card__brand inline-flex items-center gap-2.5">
+          <img src="images/login/logo-48.svg" alt="" width="48" height="48" />
+          <span
+            class="brand__name brand__name--card text-[30px] font-medium tracking-[-.4px] [@media(max-height:760px)]:text-[26px]"
+            >Kodikalab</span
+          >
+        </div>
+        <h1
+          class="card__title mt-[18px] mb-0 text-center font-display text-[34px] leading-[38px] font-bold tracking-[-1px] max-[641px]:text-[30px] max-[641px]:leading-[34px] [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:text-[28px] [@media(max-height:760px)]:leading-8"
+        >
+          Iniciar sesión
+        </h1>
+        <p
+          class="card__subtitle mt-2.5 mb-0 text-center text-base leading-6 font-light text-kl-body [@media(max-height:760px)]:mt-1.5 [@media(max-height:760px)]:text-sm [@media(max-height:760px)]:leading-5"
+        >
+          Accede a tu espacio de entrenamiento competitivo
+        </p>
+
+        <form
+          class="form flex w-full flex-col gap-3.5 pt-6 [@media(max-height:760px)]:gap-2.5 [@media(max-height:760px)]:pt-4"
+          [formGroup]="form"
+          novalidate
+          (ngSubmit)="ingresar()"
+        >
+          @if (notice) {
+            <p
+              role="status"
+              class="m-0 flex items-start gap-2.5 rounded-xl border border-solid border-green-400/40 bg-green-400/10 px-3.5 py-3 text-sm text-green-200"
+            >
+              <img src="images/onboarding/check-circle-20.svg" width="20" height="20" alt="" />
+              {{ notice }}
+            </p>
+          }
+          <div class="field flex min-w-0 flex-col gap-1.5">
+            <label class="field__label text-[13px] font-medium text-kl-body" for="email"
+              >Correo institucional</label
+            >
+            <mat-form-field
+              class="auth-field w-full text-[15px]"
+              appearance="outline"
+              subscriptSizing="dynamic"
+            >
+              <img matPrefix src="images/login/mail-20.svg" alt="" width="20" height="20" />
+              <input
+                matInput
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="nombre@upc.edu.pe"
+                autocomplete="email"
+                required
+              />
+              <mat-error>
+                <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                @if (form.controls.email.hasError('required')) {
+                  Ingresa tu correo institucional
+                } @else if (form.controls.email.hasError('maxlength')) {
+                  El correo no puede superar 100 caracteres
+                } @else {
+                  Ingresa un correo válido, por ejemplo nombre@upc.edu.pe
+                }
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="field flex min-w-0 flex-col gap-1.5">
+            <label class="field__label text-[13px] font-medium text-kl-body" for="password"
+              >Contraseña</label
+            >
+            <mat-form-field
+              class="auth-field w-full text-[15px]"
+              appearance="outline"
+              subscriptSizing="dynamic"
+            >
+              <img matPrefix src="images/login/lock-20.svg" alt="" width="20" height="20" />
+              <input
+                matInput
+                id="password"
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Contraseña"
+                autocomplete="current-password"
+                required
+              />
+              <button
+                matSuffix
+                type="button"
+                class="toggle flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
+                (click)="togglePassword()"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                [attr.aria-pressed]="showPassword"
+              >
+                <img
+                  [src]="showPassword ? 'images/login/eye-20.svg' : 'images/login/eye-off-20.svg'"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+              </button>
+              <mat-error>
+                <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+                @if (form.controls.password.hasError('required')) {
+                  Ingresa tu contraseña
+                } @else {
+                  La contraseña no puede superar 72 bytes. Las letras con tilde o símbolos ocupan más de uno.
+                }
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div
+            class="options flex min-h-5 items-center justify-between gap-3 max-[641px]:flex-wrap [@media(max-height:760px)]:min-h-[18px]"
+          >
+            <mat-checkbox formControlName="remember" class="remember auth-check"
+              >Recordarme</mat-checkbox
+            >
+            <a
+              routerLink="/recuperar-contrasena"
+              class="forgot text-sm font-medium whitespace-nowrap text-kl-accent-text"
+              >¿Olvidaste tu contraseña?</a
+            >
+          </div>
+
+          <button
+            mat-flat-button
+            class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+            type="submit"
+            [disabled]="form.invalid || busy"
+          >
+            {{ busy ? 'Ingresando…' : 'Ingresar' }}
+            <img src="images/login/arrow-right-18.svg" alt="" width="18" height="18" />
+          </button>
+
+          <div
+            class="separator h-px bg-linear-to-r from-transparent via-[#34304a] to-transparent"
+            aria-hidden="true"
+          ></div>
+
+          <a
+            class="register flex h-[54px] items-center justify-center gap-2 rounded-xl border border-solid border-[#34304a] text-[15px] text-[#e7e3f5] transition-colors hover:border-kl-accent [@media(max-height:760px)]:h-12"
+            routerLink="/registro"
+            (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
+          >
+            <span class="register__text">¿No tienes cuenta?</span>
+            <span class="register__link font-medium text-kl-accent-text">Regístrate</span>
+            <img src="images/login/arrow-right-accent-18.svg" alt="" width="18" height="18" />
+          </a>
+          @if (error) {
+            <div
+              role="alert"
+              class="m-0 flex flex-col items-start gap-3 rounded-xl border border-solid border-red-400/40 bg-red-400/10 p-3 text-sm text-red-200"
+            >
+              <p class="m-0">{{ error }}</p>
+              @if (failure === 'credentials') {
+                <p class="m-0 text-xs text-kl-body">
+                  Revisa tu correo y tu contraseña e inténtalo de nuevo.
+                </p>
+              }
+              @if (failure) {
+                <div class="flex flex-wrap gap-3">
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="retry"
+                    [disabled]="busy"
+                    (click)="retry()"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+              }
+            </div>
+          }
+          <p class="m-0 text-center text-xs text-kl-muted">
+            Explora sin iniciar sesión. La demo no guarda cambios.
+          </p>
+          <div class="flex flex-wrap justify-center gap-4 text-sm text-kl-accent-text">
+            <a routerLink="/demo/practicante">Ver demo practicante</a>
+            <a routerLink="/demo/coach">Ver demo coach</a>
+          </div>
+        </form>
+      }
+    </mat-card>
+  </main>
+
+  <app-site-footer variant="compact" class="legal relative z-10 m-0 px-4 pb-[22px] text-center text-xs text-kl-faint [@media(max-height:760px)]:pb-3" />
+</div>

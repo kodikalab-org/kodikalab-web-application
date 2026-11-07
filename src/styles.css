@@ -1,4 +1,34 @@
-/* Global styles: Kodikalab palette, Angular Material dark system tokens and shared component tokens. */
+/* No Preflight: preserve Angular Material's controls and the existing browser reset. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) important source('./app');
+
+@theme inline {
+  --color-kl-bg: var(--kl-bg);
+  --color-kl-bg-alt: var(--kl-bg-alt);
+  --color-kl-surface: var(--kl-surface);
+  --color-kl-inset: var(--kl-surface-inset);
+  --color-kl-raised: var(--kl-surface-raised);
+  --color-kl-border: var(--kl-border);
+  --color-kl-border-strong: var(--kl-border-strong);
+  --color-kl-divider: var(--kl-divider);
+  --color-kl-text: var(--kl-text);
+  --color-kl-heading: var(--kl-text-heading);
+  --color-kl-body: var(--kl-text-body);
+  --color-kl-soft: var(--kl-text-soft);
+  --color-kl-muted: var(--kl-text-muted);
+  --color-kl-faint: var(--kl-text-faint);
+  --color-kl-inactive: var(--kl-text-inactive);
+  --color-kl-accent: var(--kl-accent);
+  --color-kl-accent-text: var(--kl-accent-text);
+  --color-kl-accent-link: var(--kl-accent-link);
+  --color-kl-danger: var(--kl-danger);
+  --font-body: var(--kl-font-body);
+  --font-display: var(--kl-font-display);
+  --spacing-gutter: var(--gutter);
+}
+
+/* Kodikalab palette, Angular Material dark tokens and shared component tokens. */
 
 :root {
   color-scheme: dark;
@@ -119,6 +149,33 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Shared Material integration. Layout belongs to Tailwind in the templates. */
+app-landing-page,
+app-login,
+app-registro {
+  display: block;
+}
+
+:where(a, button):focus-visible {
+  outline: 2px solid var(--kl-accent-text);
+  outline-offset: 4px;
+}
+
+app-root {
+  display: block;
+}
+
 *,
 *::before,
 *::after {
@@ -127,6 +184,20 @@ body {
 
 img {
   vertical-align: middle;
+}
+
+/* Full-bleed decoration: never expose the fixed-size SVG's side or bottom edges. */
+.profile-background {
+  @apply pointer-events-none absolute inset-0 z-0 size-full object-cover object-top;
+  mask-image: linear-gradient(to bottom, #000 85%, transparent);
+}
+
+.profile-notice {
+  @apply flex items-start gap-3 rounded-xl border border-solid border-[#4ade80]/50 bg-[#0a281a]/95 px-[18px] py-3.5;
+}
+
+.profile-notice > img {
+  @apply shrink-0;
 }
 
 /* Material buttons with a leading/trailing icon image */
@@ -139,4 +210,246 @@ img {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Material internals are shared here, scoped to explicit auth integration classes.
+   This replaces duplicated ::ng-deep rules in login and registro. */
+.auth-header {
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+  --mat-toolbar-standard-height: 68px;
+}
+
+.auth-card {
+  --mat-card-outlined-container-color: transparent;
+  --mat-card-outlined-outline-color: #5b44c9;
+  --mat-card-outlined-container-shape: 24px;
+}
+
+.auth-field {
+  --mat-form-field-container-height: var(--auth-field-height);
+  --mat-form-field-container-vertical-padding: var(--auth-field-padding);
+  --mat-form-field-outlined-container-shape: 12px;
+  --mat-form-field-outlined-outline-color: #34304a;
+  --mat-form-field-outlined-hover-outline-color: #4c4670;
+  --mat-form-field-outlined-focus-outline-color: var(--auth-focus-color);
+  --mat-form-field-outlined-outline-width: 1px;
+  --mat-form-field-outlined-focus-outline-width: 1px;
+  --mat-form-field-outlined-error-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-error-hover-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-error-focus-outline-color: var(--kl-danger);
+  --mat-form-field-outlined-input-text-color: var(--auth-input-color);
+  --mat-form-field-outlined-input-text-placeholder-color: #8d89a3;
+  --mat-form-field-outlined-caret-color: var(--kl-accent-text);
+  --mat-form-field-outlined-error-caret-color: var(--kl-danger);
+}
+
+.auth-field .mat-mdc-text-field-wrapper {
+  @apply rounded-xl bg-white/4 shadow-none;
+}
+.auth-field:focus-within,
+.auth-field input:focus {
+  outline: none;
+}
+.auth-field .mat-mdc-form-field-icon-prefix {
+  @apply flex items-center py-0 pr-3 pl-4;
+}
+.auth-field .mat-mdc-form-field-icon-suffix {
+  @apply flex items-center py-0 pr-4 pl-3;
+}
+.auth-field .mat-mdc-form-field-error-wrapper {
+  @apply p-0;
+}
+.auth-field mat-error {
+  @apply flex items-start gap-1.5 pt-1.5 text-[13px] leading-[18px] text-kl-danger;
+}
+.auth-field mat-error img {
+  @apply mt-[1.5px] shrink-0;
+}
+
+.auth-check {
+  --mat-checkbox-unselected-icon-color: #6b6585;
+  --mat-checkbox-unselected-hover-icon-color: var(--kl-accent-text);
+  --mat-checkbox-unselected-focus-icon-color: var(--kl-accent-text);
+  --mat-checkbox-selected-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-hover-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-focus-icon-color: var(--kl-accent);
+  --mat-checkbox-selected-checkmark-color: #ffffff;
+  --mat-checkbox-label-text-color: #e7e3f5;
+  --mat-checkbox-label-text-size: 14px;
+  --mat-checkbox-label-text-font: var(--kl-font-body);
+  --mat-checkbox-state-layer-size: 20px;
+}
+
+app-login .auth-check {
+  --mat-checkbox-touch-target-size: 20px;
+}
+app-login .auth-check .mdc-checkbox {
+  @apply m-0 p-0;
+}
+app-login .auth-check .mdc-checkbox__background {
+  @apply size-5 rounded-md;
+}
+app-login .auth-check .mdc-label {
+  @apply ml-2.5;
+}
+.auth-check.ng-invalid.ng-touched {
+  --mat-checkbox-unselected-icon-color: var(--kl-danger);
+}
+
+.auth-role {
+  --mat-button-toggle-background-color: rgba(255, 255, 255, 0.03);
+  --mat-button-toggle-text-color: var(--kl-text-body);
+  --mat-button-toggle-selected-state-background-color: transparent;
+  --mat-button-toggle-selected-state-text-color: var(--kl-text);
+  --mat-button-toggle-divider-color: transparent;
+  --mat-button-toggle-height: 40px;
+  --mat-button-toggle-shape: 12px;
+}
+
+.auth-role .mat-button-toggle {
+  @apply flex-1 rounded-[9px] border-0 bg-transparent font-body text-[15px];
+}
+.auth-role .mat-button-toggle + .mat-button-toggle {
+  @apply border-l-0;
+}
+.auth-role .mat-button-toggle-button {
+  @apply rounded-[9px];
+}
+.auth-role .mat-button-toggle-label-content {
+  @apply flex h-10 items-center justify-center gap-2 px-4 py-0 leading-normal;
+}
+.auth-role .mat-button-toggle-checked {
+  @apply border border-solid border-kl-accent-text bg-linear-to-b from-[#4b36b8] to-[#3a2a98];
+}
+
+.auth-submit {
+  --mat-button-filled-container-height: var(--auth-submit-height);
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-label-text-size: 16px;
+}
+
+/* Onboarding (US-03): selects, hints, level cards, chips and radio options. */
+.auth-field {
+  --mat-select-enabled-trigger-text-color: var(--kl-text);
+  --mat-select-placeholder-text-color: #8d89a3;
+  --mat-select-enabled-arrow-color: #cfcbe0;
+}
+/*
+ * Each field draws its own icons. Hide the browser's built-in ones (the password reveal eye of Edge and the
+ * clock of time inputs) so a field never shows two icons at once.
+ */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+input[type='time']::-webkit-calendar-picker-indicator {
+  display: none;
+}
+.auth-field .mat-mdc-select-arrow-wrapper {
+  @apply hidden;
+}
+.auth-field .mat-mdc-form-field-hint-wrapper {
+  @apply p-0;
+}
+.auth-field mat-hint {
+  @apply block pt-1.5 text-xs leading-[17px] text-kl-muted;
+}
+
+.onb-select-panel {
+  --mat-select-panel-background-color: var(--kl-surface-raised);
+  --mat-option-label-text-color: var(--kl-text-body);
+  --mat-option-selected-state-label-text-color: var(--kl-text);
+  --mat-option-selected-state-layer-color: rgba(115, 87, 243, 0.25);
+  --mat-option-hover-state-layer-color: rgba(255, 255, 255, 0.06);
+  --mat-option-focus-state-layer-color: rgba(255, 255, 255, 0.06);
+}
+
+.onb-level {
+  --mat-button-toggle-background-color: rgba(255, 255, 255, 0.03);
+  --mat-button-toggle-text-color: var(--kl-text);
+  --mat-button-toggle-selected-state-background-color: rgba(115, 87, 243, 0.22);
+  --mat-button-toggle-selected-state-text-color: var(--kl-text);
+  --mat-button-toggle-divider-color: transparent;
+  --mat-button-toggle-height: auto;
+}
+.onb-level .mat-button-toggle {
+  @apply rounded-[14px] border border-solid border-[#34304a];
+}
+.onb-level .mat-button-toggle + .mat-button-toggle {
+  @apply border-l border-solid border-[#34304a];
+}
+.onb-level .mat-button-toggle-button {
+  @apply h-full w-full text-left;
+}
+.onb-level .mat-button-toggle-label-content {
+  @apply flex flex-col items-start gap-2 p-4 leading-normal whitespace-normal;
+}
+.onb-level .mat-button-toggle-checked {
+  @apply border-kl-accent-text;
+}
+.onb-level.ng-invalid.ng-touched .mat-button-toggle {
+  @apply border-kl-danger;
+}
+
+.onb-chips {
+  --mat-chip-container-height: 38px;
+  --mat-chip-container-shape-radius: 10px;
+  --mat-chip-elevated-container-color: rgba(255, 255, 255, 0.03);
+  --mat-chip-elevated-selected-container-color: rgba(115, 87, 243, 0.3);
+  --mat-chip-outline-color: #34304a;
+  --mat-chip-outline-width: 1px;
+  --mat-chip-label-text-color: var(--kl-text-body);
+  --mat-chip-selected-label-text-color: var(--kl-text);
+  --mat-chip-label-text-font: var(--kl-font-body);
+  --mat-chip-label-text-size: 14px;
+  --mat-chip-label-text-weight: 400;
+}
+.onb-chips .mat-mdc-chip-selected {
+  box-shadow: inset 0 0 0 1px var(--kl-accent-text);
+}
+
+.onb-radio {
+  --mat-radio-selected-icon-color: var(--kl-accent-text);
+  --mat-radio-selected-hover-icon-color: var(--kl-accent-text);
+  --mat-radio-selected-focus-icon-color: var(--kl-accent-text);
+  --mat-radio-unselected-icon-color: #6b6585;
+  --mat-radio-unselected-hover-icon-color: var(--kl-accent-text);
+  --mat-radio-label-text-color: #e7e3f5;
+  --mat-radio-label-text-font: var(--kl-font-body);
+  --mat-radio-label-text-size: 14px;
+  --mat-radio-state-layer-size: 18px;
+  --mat-radio-touch-target-display: none;
+}
+.onb-radio.mat-mdc-radio-checked {
+  @apply border-kl-accent-text bg-[#2a1f6b]/60;
+}
+
+/* Weak password (US-01, US-02): orange warning, separate from the red error state.
+   The message text carries the meaning too; color is never the only signal. */
+:root {
+  --kl-warn: #fb923c;
+}
+
+.auth-field.auth-field--weak {
+  --mat-form-field-outlined-error-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-hover-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-focus-outline-color: var(--kl-warn);
+  --mat-form-field-outlined-error-caret-color: var(--kl-warn);
+}
+.auth-field.auth-field--weak mat-error {
+  color: var(--kl-warn);
+}
+
+/* Los paneles de mat-select viven en el overlay del CDK, fuera del componente.
+   Sin fondo opaco, las opciones se transparentan sobre la pagina de atras. */
+.mat-mdc-select-panel {
+  background-color: var(--kl-surface) !important;
+  border: 1px solid var(--kl-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px #000000aa;
+}
+
+.mat-mdc-select-panel .mat-mdc-option {
+  color: var(--kl-text);
 }

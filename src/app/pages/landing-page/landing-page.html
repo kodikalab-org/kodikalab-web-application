@@ -1,264 +1,551 @@
-<div class="page">
-  <!-- Hero -->
-  <section class="hero" id="inicio">
-    <picture class="hero__bg" aria-hidden="true">
-      <source media="(max-width: 767px)" srcset="images/landing/hero-bg-mobile.svg" />
-      <img src="images/landing/hero-bg-web.svg" alt="" />
-    </picture>
+<div
+  class="page overflow-x-clip bg-kl-bg font-body text-kl-text [--gutter:20px] md:[--gutter:40px] xl:[--gutter:max(40px,calc((100%-1220px)/2))]"
+>
+  <a
+    routerLink="/"
+    fragment="contenido"
+    (click)="contenido.focus(); contenido.scrollIntoView()"
+    class="sr-only fixed top-3 left-3 z-[100] rounded-lg bg-kl-accent px-4 py-3 focus:not-sr-only"
+    >Saltar al contenido</a
+  >
 
-    <mat-toolbar class="header">
-      <a class="brand" routerLink="/" aria-label="Kodikalab, inicio">
-        <picture>
-          <source media="(max-width: 767px)" srcset="images/landing/logo-32.svg" />
-          <img src="images/landing/logo-40.svg" alt="" width="40" height="40" />
-        </picture>
-        <span class="brand__name">Kodikalab</span>
-      </a>
-
-      <nav class="header__nav" aria-label="Principal">
-        @for (link of navLinks; track link.label) {
-          <a class="header__link" [class.header__link--active]="$first" routerLink="/" [fragment]="link.fragment">
-            {{ link.label }}
-          </a>
+  <mat-toolbar
+    #header
+    class="header fixed inset-x-0 top-0 z-50 grid h-16 w-full grid-cols-[1fr_auto] items-center gap-6 border-0 border-b border-solid border-kl-divider bg-kl-bg/85 px-gutter font-body backdrop-blur-xl md:h-20 xl:grid-cols-[auto_1fr_auto]"
+    role="banner"
+  >
+    <a
+      class="brand flex items-center gap-2.5"
+      routerLink="/"
+      (click)="scrollToSection('inicio', inicio)"
+      aria-label="Kodikalab, inicio"
+    >
+      <picture>
+        <source media="(max-width: 767px)" srcset="images/landing/logo-32.svg" />
+        <img
+          class="size-8 md:size-10"
+          src="images/landing/logo-40.svg"
+          alt=""
+          width="40"
+          height="40"
+        />
+      </picture>
+      <span class="brand__name text-[22px] font-medium md:text-[26px]">Kodikalab</span>
+    </a>
+    <nav class="header__nav hidden items-center gap-11 pl-[42px] xl:flex" aria-label="Principal">
+      @for (link of navLinks; track link.label) {
+        @if (link.fragment) {
+          <a
+            class="header__link text-[15px] font-normal text-kl-inactive transition-colors hover:text-kl-accent-text aria-[current=location]:text-kl-text aria-[current=location]:underline aria-[current=location]:decoration-kl-accent aria-[current=location]:decoration-2 aria-[current=location]:underline-offset-[12px]"
+            [class.header__link--active]="activeSection === link.fragment"
+            [attr.aria-current]="activeSection === link.fragment ? 'location' : null"
+            routerLink="/"
+            [fragment]="$first ? undefined : link.fragment"
+            (click)="scrollToSection(link.fragment, inicio, caracteristicas, comunidad, precios)"
+            >{{ link.label }}</a
+          >
+        } @else {
+          <span
+            class="header__link cursor-default text-[15px] font-normal text-kl-inactive"
+            aria-disabled="true"
+            title="Próximamente"
+            >{{ link.label }}</span
+          >
         }
-      </nav>
-
-      <div class="header__actions">
-        <div class="lang" role="group" aria-label="Idioma">
-          <span class="lang__option lang__option--active" aria-current="true">ES</span>
-          <span class="lang__option">EN</span>
-        </div>
-        <a mat-stroked-button class="header__login" routerLink="/login">Iniciar sesión</a>
-        <a mat-flat-button class="header__signup" routerLink="/registro">
-          Registrarse
-          <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
-        </a>
-        <button type="button" class="header__menu" aria-label="Abrir menú">
-          <img src="images/landing/menu-20.svg" alt="" width="20" height="20" />
-        </button>
-      </div>
-    </mat-toolbar>
-
-    <div class="hero__content">
-      <mat-chip-set aria-label="Descripción de la plataforma">
-        <mat-chip class="badge" disableRipple>
-          <span class="badge__dot" aria-hidden="true"></span>
-          <span class="badge__strong">GPC UPC</span>
-          <span class="badge__text">Plataforma de entrenamiento en programación competitiva</span>
-        </mat-chip>
-      </mat-chip-set>
-
-      <h1 class="hero__title">
-        Entrena.<br />
-        Analiza.<br />
-        <span class="hero__title-accent">Compite.</span>
-      </h1>
-      <p class="hero__text">
-        Un entorno completo para la práctica, análisis y preparación en programación competitiva,
-        impulsado por la comunidad del GPC UPC.
-      </p>
-      <div class="hero__actions">
-        <a mat-flat-button class="btn btn--lg" routerLink="/registro">
-          Comenzar ahora
-          <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
-        </a>
-        <button mat-stroked-button class="btn btn--lg btn--outline" type="button">
-          <img src="images/landing/play-18.svg" alt="" width="18" height="18" />
-          Ver video
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats -->
-  <section class="stats" aria-label="Cifras de la plataforma">
-    @for (stat of stats; track stat.label) {
-      <div class="stats__item">
-        <p class="stats__value">{{ stat.value }}</p>
-        <p class="stats__label">{{ stat.label }}</p>
-      </div>
-    }
-  </section>
-
-  <!-- Características -->
-  <section class="features section" id="caracteristicas">
-    <div class="features__head">
-      <div>
-        <p class="eyebrow"><span class="eyebrow__bar"></span>Características</p>
-        <h2 class="title">
-          Todo lo que necesitas<br class="title__break" />
-          para llegar <span class="title__accent">más lejos</span>
-        </h2>
-      </div>
-      <div class="features__intro">
-        <p>Herramientas, análisis y acompañamiento diseñados para la comunidad competitiva.</p>
-        <a class="link" routerLink="/" fragment="caracteristicas">
-          Conocer todas
-          <img src="images/landing/arrow-right-14-link.svg" alt="" width="14" height="14" />
-        </a>
-      </div>
-    </div>
-
-    <div class="features__grid">
-      @for (feature of features; track feature.title) {
-        <mat-card appearance="outlined" class="feature">
-          <div class="feature__icon" [style.background-image]="feature.gradient">
-            <img [src]="feature.icon" alt="" width="24" height="24" />
-          </div>
-          <div class="feature__body">
-            <h3 class="feature__title">{{ feature.title }}</h3>
-            <p class="feature__text">{{ feature.description }}</p>
-          </div>
-          <span class="feature__arrow" aria-hidden="true">
-            <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
-          </span>
-        </mat-card>
       }
-    </div>
-  </section>
-
-  <!-- Comunidad -->
-  <section class="community section" id="comunidad">
-    <div class="community__copy">
-      <p class="eyebrow"><span class="eyebrow__bar"></span>GPC UPC</p>
-      <h2 class="title">
-        Más que una plataforma,<br class="title__break" />
-        una <span class="title__accent">comunidad.</span>
-      </h2>
-      <p class="community__text">
-        Entrena junto a personas que comparten tu pasión por la programación competitiva. Participa
-        en entrenamientos, contests internos y accede a recursos creados por y para el GPC UPC.
-      </p>
-      <a mat-flat-button class="btn btn--md community__cta" routerLink="/">
-        Conocer la comunidad
-        <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+    </nav>
+    <div class="header__actions flex items-center justify-end gap-3.5">
+      <a
+        mat-stroked-button
+        class="header__login hidden h-[46px] bg-kl-inset px-6 text-[15px] md:inline-flex"
+        routerLink="/login"
+        (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+        >Iniciar sesión</a
+      >
+      <a
+        mat-flat-button
+        class="header__signup hidden h-[46px] px-6 text-[15px] md:inline-flex"
+        routerLink="/registro"
+        (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+      >
+        Registrarse <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
       </a>
+      <button
+        type="button"
+        class="header__menu grid size-11 cursor-pointer place-items-center rounded-[10px] border border-solid border-kl-border-strong bg-transparent transition-colors hover:border-kl-accent xl:hidden"
+        aria-label="Abrir menú de navegación"
+        [matMenuTriggerFor]="mobileMenu"
+      >
+        <img src="images/landing/menu-20.svg" alt="" width="20" height="20" />
+      </button>
     </div>
+  </mat-toolbar>
+  <mat-menu
+    #mobileMenu="matMenu"
+    xPosition="before"
+    class="rounded-xl border border-solid border-kl-border bg-kl-surface font-body shadow-xl"
+  >
+    @for (link of navLinks; track link.label) {
+      @if (link.fragment) {
+        <a
+          mat-menu-item
+          class="aria-[current=location]:text-kl-accent-text"
+          [attr.aria-current]="activeSection === link.fragment ? 'location' : null"
+          routerLink="/"
+          [fragment]="$first ? undefined : link.fragment"
+          (click)="scrollToSection(link.fragment, inicio, caracteristicas, comunidad, precios)"
+          >{{ link.label }}</a
+        >
+      } @else {
+        <button mat-menu-item disabled>{{ link.label }} · Próximamente</button>
+      }
+    }
+    <mat-divider></mat-divider>
+    <a mat-menu-item routerLink="/login" (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+      >Iniciar sesión</a
+    >
+    <a mat-menu-item routerLink="/registro" (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+      >Registrarse</a
+    >
+  </mat-menu>
 
-    <mat-card appearance="outlined" class="quote">
-      <div class="quote__people">
-        <div class="avatars">
-          @for (avatar of avatars; track avatar.letter) {
-            <span class="avatar" [style.background-image]="avatar.gradient">{{ avatar.letter }}</span>
-          }
-        </div>
-        <mat-chip-set aria-label="Miembros de la comunidad">
-          <mat-chip class="count" disableRipple>+150</mat-chip>
-        </mat-chip-set>
-      </div>
-      <blockquote class="quote__text">
-        “Kodikalab nos permite entrenar en equipo, seguir nuestro progreso y prepararnos mejor para
-        las competencias.”
-      </blockquote>
-      <div class="quote__footer">
-        <div class="dots" aria-hidden="true">
-          <span class="dots__item"></span>
-          <span class="dots__item dots__item--dim"></span>
-        </div>
-        <div class="quote__controls">
-          <button type="button" class="round-btn" aria-label="Testimonio anterior">
-            <img src="images/landing/chevron-left-14.svg" alt="" width="14" height="14" />
+  <main id="contenido" #contenido tabindex="-1" class="outline-none">
+    <section
+      class="hero relative min-h-dvh overflow-hidden"
+      id="inicio"
+      #inicio
+      aria-labelledby="hero-title"
+    >
+      <picture class="hero__bg pointer-events-none absolute inset-0" aria-hidden="true">
+        <source media="(max-width: 767px)" srcset="images/landing/hero-bg-mobile.svg" />
+        <img
+          class="size-full object-cover object-top"
+          src="images/landing/hero-bg-web.svg"
+          alt=""
+        />
+      </picture>
+      <div
+        class="hero__content relative flex flex-col items-center px-6 pt-28 pb-16 text-center md:pt-[170px] md:[@media(max-height:800px)]:pt-[130px]"
+      >
+        <h1
+          class="hero__title m-0 font-display text-[52px] leading-[50px] font-extrabold tracking-[-2px] text-kl-heading md:text-[86px] md:leading-[80px] md:tracking-[-3.4px] md:[@media(max-height:800px)]:text-[72px] md:[@media(max-height:800px)]:leading-[70px]"
+          id="hero-title"
+        >
+          Entrena.<br />Analiza.<br /><span class="hero__title-accent text-[#b794ff]"
+            >Compite.</span
+          >
+        </h1>
+        <p
+          class="hero__text mt-5 mb-0 max-w-[340px] text-base leading-6 font-light text-kl-soft md:mt-[30px] md:max-w-[520px] md:text-xl md:leading-[30px] md:[@media(max-height:800px)]:text-lg md:[@media(max-height:800px)]:leading-[26px]"
+        >
+          Un entorno completo para la práctica, análisis y preparación en programación competitiva,
+          impulsado por la comunidad del GPC UPC.
+        </p>
+        <div
+          class="hero__actions mt-7 flex w-full max-w-[342px] flex-col justify-center gap-3 md:mt-9 md:max-w-none md:flex-row md:gap-5"
+        >
+          <a
+            mat-flat-button
+            class="btn h-[50px] px-7 text-base motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 md:h-12"
+            routerLink="/registro"
+            (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+          >
+            Comenzar ahora
+            <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+          </a>
+          <button
+            mat-stroked-button
+            class="btn h-[50px] bg-kl-inset px-7 text-base md:h-12"
+            type="button"
+            disabled
+            title="Video próximamente disponible"
+          >
+            <img src="images/landing/play-18.svg" alt="" width="18" height="18" /> Ver video
           </button>
-          <button type="button" class="round-btn round-btn--accent" aria-label="Testimonio siguiente">
-            <img src="images/landing/arrow-right-14-carousel.svg" alt="" width="14" height="14" />
-          </button>
         </div>
       </div>
-    </mat-card>
-  </section>
+    </section>
 
-  <!-- Plataformas integradas -->
-  <section class="platforms" id="plataformas">
-    <img class="platforms__bg" src="images/landing/platforms-bg.svg" alt="" aria-hidden="true" />
-    <div class="platforms__inner">
-      <p class="eyebrow"><span class="eyebrow__bar"></span>Plataformas integradas</p>
-      <h2 class="title">Practica en un solo lugar</h2>
-      <p class="platforms__text">
-        Conecta tus cuentas y visualiza tu progreso en las principales plataformas de programación
-        competitiva.
-      </p>
-      <div class="platforms__list">
-        @for (platform of platforms; track platform.name) {
-          <mat-card appearance="outlined" class="platform">
-            <img [src]="platform.icon" alt="" width="40" height="40" />
-            <span class="platform__name">{{ platform.name }}</span>
+    <section
+      class="stats grid grid-cols-2 gap-y-[22px] border-0 border-y border-solid border-kl-divider px-gutter py-7 md:grid-cols-4 md:py-11"
+      aria-label="Cifras de la plataforma"
+    >
+      @for (stat of stats; track stat.label) {
+        <div
+          class="stats__item border-0 border-solid border-kl-border pl-0 even:border-l even:pl-5 md:[&+div]:border-l md:[&+div]:pl-6"
+        >
+          <p
+            class="stats__value m-0 font-display text-[34px] leading-[38px] font-semibold tracking-[-1.5px] md:text-[44px] md:leading-[48px]"
+          >
+            {{ stat.value }}
+          </p>
+          <p class="stats__label mt-2 mb-0 text-sm leading-[18px] text-kl-muted">
+            {{ stat.label }}
+          </p>
+        </div>
+      }
+    </section>
+
+    <section
+      class="features section px-gutter py-12 md:py-[84px]"
+      id="caracteristicas"
+      #caracteristicas
+      aria-labelledby="features-title"
+    >
+      <div
+        class="features__head flex flex-col gap-3.5 xl:flex-row xl:items-end xl:justify-between xl:gap-8"
+      >
+        <div>
+          <p
+            class="eyebrow m-0 flex items-center gap-3 text-xs leading-[15px] tracking-[3.4px] text-kl-accent-text uppercase"
+          >
+            <span class="h-0.5 w-[9px] bg-current"></span>Características
+          </p>
+          <h2
+            class="title mt-3.5 mb-0 font-display text-[32px] leading-9 font-bold tracking-[-1px] text-kl-heading md:text-[44px] md:leading-[48px] md:tracking-[-1.4px]"
+            id="features-title"
+          >
+            Todo lo que necesitas<br class="hidden md:inline" />
+            para llegar <span class="text-kl-accent-text">más lejos</span>
+          </h2>
+        </div>
+        <div class="features__intro max-w-[350px] xl:w-[260px] xl:shrink-0">
+          <p class="mt-0 mb-3 text-[15px] leading-[22px] text-kl-soft">
+            Herramientas, análisis y acompañamiento diseñados para la comunidad competitiva.
+          </p>
+          <a
+            class="link inline-flex items-center gap-2 text-[15px] leading-[22px] text-kl-accent-link hover:underline"
+            routerLink="/"
+            fragment="caracteristicas"
+            (click)="scrollToSection('caracteristicas', caracteristicas)"
+          >
+            Conocer todas
+            <img src="images/landing/arrow-right-14-link.svg" alt="" width="14" height="14" />
+          </a>
+        </div>
+      </div>
+      <div class="features__grid mt-[26px] grid grid-cols-1 gap-3 md:mt-10 md:grid-cols-2 md:gap-5">
+        @for (feature of features; track feature.title) {
+          <mat-card
+            appearance="outlined"
+            class="feature min-h-28 flex-row items-center gap-4 p-5 md:min-h-32 md:gap-5 md:px-7 md:py-[26px]"
+          >
+            <div
+              class="feature__icon grid size-12 shrink-0 place-items-center rounded-xl"
+              [style.background-image]="feature.gradient"
+            >
+              <img [src]="feature.icon" alt="" width="24" height="24" />
+            </div>
+            <div class="feature__body min-w-0 flex-1">
+              <h3 class="feature__title m-0 text-[19px] leading-6 font-medium">
+                {{ feature.title }}
+              </h3>
+              <p class="feature__text mt-1.5 mb-0 text-sm leading-5 text-kl-muted md:max-w-[220px]">
+                {{ feature.description }}
+              </p>
+            </div>
+            <span
+              class="feature__arrow grid size-9 shrink-0 place-items-center rounded-full border border-solid border-kl-border-strong max-[360px]:hidden md:max-xl:hidden"
+              aria-hidden="true"
+            >
+              <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+            </span>
           </mat-card>
         }
       </div>
-    </div>
-    <p class="platforms__note">
-      Sincroniza tu progreso automáticamente
-      <img class="platforms__note-arrow" src="images/landing/curved-arrow.svg" alt="" width="60" height="40" />
-    </p>
-  </section>
+    </section>
 
-  <!-- CTA -->
-  <section class="cta">
-    <picture class="cta__bg" aria-hidden="true">
-      <source media="(max-width: 767px)" srcset="images/landing/cta-bg-mobile.svg" />
-      <img src="images/landing/cta-bg-web.svg" alt="" />
-    </picture>
-    <div class="cta__content">
-      <p class="eyebrow"><span class="eyebrow__bar"></span>¿Listo para comenzar?</p>
-      <h2 class="title title--center">Únete a <span class="title__accent">Kodikalab</span></h2>
-      <p class="cta__text">
-        Forma parte del entorno de entrenamiento del GPC UPC y lleva tu preparación al siguiente
-        nivel.
-      </p>
-      <div class="cta__actions">
-        <a mat-flat-button class="btn btn--lg" routerLink="/registro">
-          Crear mi cuenta
+    <section
+      class="community section flex flex-col gap-7 border-0 border-y border-solid border-kl-divider bg-kl-bg-alt px-gutter py-12 md:gap-10 md:py-[84px] xl:flex-row xl:gap-[70px]"
+      id="comunidad"
+      #comunidad
+      aria-labelledby="community-title"
+    >
+      <div class="community__copy min-w-0 xl:flex-[1_1_590px]">
+        <p
+          class="eyebrow m-0 flex items-center gap-3 text-xs leading-[15px] tracking-[3.4px] text-kl-accent-text uppercase"
+        >
+          <span class="h-0.5 w-[9px] bg-current"></span>GPC UPC
+        </p>
+        <h2
+          class="title mt-3.5 mb-0 font-display text-[32px] leading-9 font-bold tracking-[-1px] text-kl-heading md:text-[44px] md:leading-[48px] md:tracking-[-1.4px]"
+          id="community-title"
+        >
+          Más que una plataforma,<br class="hidden md:inline" />
+          una <span class="text-kl-accent-text">comunidad.</span>
+        </h2>
+        <p
+          class="community__text mt-[22px] mb-0 text-[17px] leading-[26px] font-light text-kl-body"
+        >
+          Entrena junto a personas que comparten tu pasión por la programación competitiva.
+          Participa en entrenamientos, contests internos y accede a recursos creados por y para el
+          GPC UPC.
+        </p>
+        <a
+          mat-flat-button
+          class="community__cta mt-7 h-[50px] w-full px-6 text-[15px] md:w-auto"
+          routerLink="/"
+          disabled
+          title="Página de la comunidad próximamente disponible"
+        >
+          Conocer la comunidad
           <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
         </a>
-        <button mat-stroked-button class="btn btn--lg btn--outline" type="button">Ver planes</button>
       </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer__top">
-      <div class="footer__brand">
-        <div class="footer__logo">
-          <picture>
-            <source media="(max-width: 767px)" srcset="images/landing/logo-footer-28.svg" />
-            <img src="images/landing/logo-footer-32.svg" alt="" width="32" height="32" />
-          </picture>
-          <span class="footer__name">Kodikalab</span>
+      <mat-card appearance="outlined" class="quote gap-[22px] p-5 md:p-[26px] xl:flex-[1_1_560px]">
+        <div class="quote__people flex items-center">
+          <div class="avatars flex" aria-hidden="true">
+            @for (avatar of avatars; track avatar.letter) {
+              <span
+                class="avatar -mr-2 grid size-[38px] place-items-center rounded-full border-2 border-solid border-kl-surface text-[13px] font-semibold"
+                [style.background-image]="avatar.gradient"
+                >{{ avatar.letter }}</span
+              >
+            }
+          </div>
+          <span
+            class="count ml-6 rounded-full bg-kl-raised px-2.5 py-1 text-xs"
+            aria-label="Más de 150 miembros de la comunidad"
+            >+150</span
+          >
         </div>
-        <p class="footer__text">
-          Plataforma de entrenamiento en programación competitiva del GPC UPC.
+        <blockquote class="quote__text m-0 text-base leading-6 font-light text-kl-body">
+          “Kodikalab nos permite entrenar en equipo, seguir nuestro progreso y prepararnos mejor
+          para las competencias.”
+        </blockquote>
+        <div class="quote__footer flex items-center justify-between">
+          <div class="dots flex gap-1.5" aria-hidden="true">
+            <span class="size-1.5 rounded-full bg-kl-accent-text"></span
+            ><span class="size-1.5 rounded-full bg-kl-accent-text opacity-40"></span>
+          </div>
+          <div class="quote__controls flex gap-2.5">
+            <button
+              type="button"
+              class="grid size-[34px] place-items-center rounded-full border border-solid border-kl-border-strong bg-transparent p-0"
+              aria-label="Testimonio anterior"
+              disabled
+              title="Testimonio de ejemplo"
+            >
+              <img src="images/landing/chevron-left-14.svg" alt="" width="14" height="14" />
+            </button>
+            <button
+              type="button"
+              class="grid size-[34px] place-items-center rounded-full border border-solid border-kl-accent bg-transparent p-0"
+              aria-label="Testimonio siguiente"
+              disabled
+              title="Testimonio de ejemplo"
+            >
+              <img src="images/landing/arrow-right-14-carousel.svg" alt="" width="14" height="14" />
+            </button>
+          </div>
+        </div>
+      </mat-card>
+    </section>
+    <section
+      class="platforms relative overflow-hidden"
+      id="plataformas"
+      aria-labelledby="platforms-title"
+    >
+      <img
+        class="platforms__bg pointer-events-none absolute inset-0 hidden h-[520px] w-full object-cover md:block"
+        src="images/landing/platforms-bg.svg"
+        alt=""
+        aria-hidden="true"
+      />
+      <div class="platforms__inner relative px-gutter pt-12 pb-14 md:py-[84px]">
+        <p
+          class="eyebrow m-0 flex items-center gap-3 text-xs leading-[15px] tracking-[3.4px] text-kl-accent-text uppercase"
+        >
+          <span class="h-0.5 w-[9px] bg-current"></span>Plataformas integradas
+        </p>
+        <h2
+          class="title mt-3.5 mb-0 font-display text-[32px] leading-9 font-bold tracking-[-1px] text-kl-heading md:text-[44px] md:leading-[48px] md:tracking-[-1.4px]"
+          id="platforms-title"
+        >
+          Practica en un solo lugar
+        </h2>
+        <p
+          class="platforms__text mt-[18px] mb-0 max-w-[620px] text-[15px] leading-[23px] font-light text-kl-body md:text-[17px] md:leading-[26px]"
+        >
+          Conecta tus cuentas y visualiza tu progreso en las principales plataformas de programación
+          competitiva.
+        </p>
+        <div
+          class="platforms__list mt-[26px] grid grid-cols-2 gap-3 md:mt-10 md:flex md:flex-wrap md:gap-4"
+        >
+          @for (platform of platforms; track platform.name) {
+            <mat-card
+              appearance="outlined"
+              class="platform h-[100px] items-center justify-center gap-3.5 md:h-[116px] md:w-[140px]"
+            >
+              <img [src]="platform.icon" alt="" width="40" height="40" />
+              <span class="platform__name text-sm font-medium">{{ platform.name }}</span>
+            </mat-card>
+          }
+        </div>
+      </div>
+      <p
+        class="platforms__note absolute top-[150px] right-[calc(var(--gutter)+40px)] m-0 hidden w-[140px] text-sm leading-[18px] font-light text-kl-accent-link xl:block"
+      >
+        Sincroniza tu progreso automáticamente
+        <img
+          class="absolute top-4 -left-[70px]"
+          src="images/landing/curved-arrow.svg"
+          alt=""
+          width="60"
+          height="40"
+        />
+      </p>
+    </section>
+
+    <section
+      class="pricing border-0 border-y border-solid border-kl-divider bg-kl-bg-alt px-gutter py-12 md:py-[84px]"
+      id="precios"
+      #precios
+      aria-labelledby="pricing-title"
+      aria-describedby="pricing-note"
+    >
+      <div class="mx-auto max-w-[640px] text-center">
+        <p
+          class="eyebrow m-0 flex items-center justify-center gap-3 text-xs leading-[15px] tracking-[3.4px] text-kl-accent-text uppercase"
+        >
+          <span class="h-0.5 w-[9px] bg-current"></span>Un plan para tu siguiente paso
+        </p>
+        <h2
+          class="title mt-3.5 mb-0 font-display text-[32px] leading-9 font-bold tracking-[-1px] text-kl-heading md:text-[44px] md:leading-[48px] md:tracking-[-1.4px]"
+          id="pricing-title"
+        >
+          Empieza gratis.<br />Llega más lejos con <span class="text-kl-accent-text">GO.</span>
+        </h2>
+        <p class="mt-[18px] mb-0 text-[17px] leading-[26px] font-light text-kl-body">
+          Elige cómo quieres entrenar: lo esencial para comenzar o más apoyo del agente y análisis
+          para mejorar.
         </p>
       </div>
-
-      <nav class="footer__nav" aria-label="Pie de página">
-        @for (link of navLinks; track link.label) {
-          <a routerLink="/" [fragment]="link.fragment">{{ link.label }}</a>
-        }
-      </nav>
-
-      <div class="footer__social">
-        @for (social of socials; track social.label) {
-          <img [src]="social.icon" [alt]="social.label" width="20" height="20" />
+      <div
+        class="pricing__grid mx-auto mt-8 grid max-w-[960px] grid-cols-1 gap-5 md:mt-10 md:grid-cols-2 md:gap-6"
+      >
+        @for (plan of plans; track plan.id) {
+          <mat-card
+            appearance="outlined"
+            class="pricing-card p-6 md:p-8"
+            [class.pricing-card--featured]="plan.featured"
+            [attr.aria-labelledby]="'plan-' + plan.id"
+          >
+            <div class="flex min-h-8 flex-wrap items-center justify-between gap-3">
+              <h3 class="m-0 font-display text-2xl leading-8 font-bold" [id]="'plan-' + plan.id">
+                {{ plan.name }}
+              </h3>
+              @if (plan.featured) {
+                <span
+                  class="rounded-full border border-solid border-kl-accent/40 bg-kl-accent/15 px-3 py-1 text-xs font-medium text-kl-accent-text"
+                  >Para ir más lejos</span
+                >
+              }
+            </div>
+            <p class="mt-3 mb-0 text-[15px] leading-[22px] text-kl-soft">{{ plan.description }}</p>
+            <p class="mt-7 mb-0 flex flex-wrap items-baseline gap-2">
+              <span class="text-xl font-medium text-kl-body">S/</span>
+              <span class="font-display text-[52px] leading-[60px] font-bold tracking-[-2px]">{{
+                plan.price
+              }}</span>
+              <span class="text-sm text-kl-muted">{{ plan.period }}</span>
+            </p>
+            <mat-divider class="pricing-card__divider my-6"></mat-divider>
+            <ul
+              class="m-0 flex list-none flex-col gap-3.5 p-0 text-[15px] leading-[22px] text-kl-body"
+            >
+              @for (feature of plan.features; track feature) {
+                <li class="flex items-start gap-3">
+                  <span class="shrink-0 text-kl-accent-text" aria-hidden="true">✓</span>
+                  <span>{{ feature }}</span>
+                </li>
+              }
+            </ul>
+            <div class="mt-auto pt-8">
+              @if (plan.featured) {
+                <a
+                  mat-flat-button
+                  class="h-[50px] w-full px-6 text-base motion-safe:transition-transform motion-safe:hover:-translate-y-0.5"
+                  routerLink="/registro"
+                  (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+                  aria-describedby="pricing-note"
+                >
+                  {{ plan.action
+                  }}<img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16" />
+                </a>
+              } @else {
+                <a
+                  mat-stroked-button
+                  class="h-[50px] w-full bg-kl-inset px-6 text-base"
+                  routerLink="/registro"
+                  (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+                  aria-describedby="pricing-note"
+                  >{{ plan.action }}</a
+                >
+              }
+            </div>
+          </mat-card>
         }
       </div>
-    </div>
+      <p
+        class="mx-auto mt-6 mb-0 max-w-[720px] text-center text-[13px] leading-5 text-kl-muted"
+        id="pricing-note"
+      >
+        Comparación de planes de referencia. El registro no activa GO ni genera cobros; la
+        contratación todavía no está disponible.
+      </p>
+    </section>
 
-    <mat-divider class="footer__divider"></mat-divider>
-
-    <div class="footer__bottom">
-      <div class="footer__legal">
-        <span>© 2026 Kodikalab. Todos los derechos reservados.</span>
-        <span>Términos de Servicio</span>
-        <span>Política de privacidad</span>
-      </div>
-      <div class="footer__lang">
-        <div class="lang lang--sm" role="group" aria-label="Idioma">
-          <span class="lang__option lang__option--active" aria-current="true">ES</span>
-          <span class="lang__option">EN</span>
+    <section class="cta relative overflow-hidden" aria-labelledby="cta-title">
+      <picture class="cta__bg pointer-events-none absolute inset-0" aria-hidden="true">
+        <source media="(max-width: 767px)" srcset="images/landing/cta-bg-mobile.svg" />
+        <img class="size-full object-cover object-top" src="images/landing/cta-bg-web.svg" alt="" />
+      </picture>
+      <div
+        class="cta__content relative flex flex-col items-center px-5 pt-14 pb-16 text-center md:px-6 md:pt-24 md:pb-[100px]"
+      >
+        <p
+          class="eyebrow m-0 flex items-center gap-3 text-xs leading-[15px] tracking-[3.4px] text-kl-accent-text uppercase"
+        >
+          <span class="h-0.5 w-[9px] bg-current"></span>¿Listo para comenzar?
+        </p>
+        <h2
+          class="title mt-3.5 mb-0 font-display text-[32px] leading-9 font-bold tracking-[-1px] text-kl-heading md:text-5xl md:leading-[52px] md:tracking-[-1.4px]"
+          id="cta-title"
+        >
+          Únete a <span class="text-kl-accent-text">Kodikalab</span>
+        </h2>
+        <p
+          class="cta__text mt-[18px] mb-0 max-w-[520px] text-[15px] leading-[26px] font-light text-kl-body md:text-[17px]"
+        >
+          Forma parte del entorno de entrenamiento del GPC UPC y lleva tu preparación al siguiente
+          nivel.
+        </p>
+        <div
+          class="cta__actions mt-7 flex w-full flex-col justify-center gap-3 md:mt-[34px] md:w-auto md:flex-row md:gap-5"
+        >
+          <a
+            mat-flat-button
+            class="btn h-[50px] px-7 text-base motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 md:h-12"
+            routerLink="/registro"
+            (click)="inicio.scrollIntoView({ behavior: 'instant' })"
+            >Crear mi cuenta
+            <img src="images/landing/arrow-right-16.svg" alt="" width="16" height="16"
+          /></a>
+          <a
+            mat-stroked-button
+            class="btn h-[50px] bg-kl-inset px-7 text-base md:h-12"
+            routerLink="/"
+            fragment="precios"
+            (click)="scrollToSection('precios', precios)"
+          >
+            Ver planes
+          </a>
         </div>
-        <span>GPC UPC</span>
       </div>
-    </div>
-  </footer>
+    </section>
+  </main>
+
+  <app-site-footer />
 </div>

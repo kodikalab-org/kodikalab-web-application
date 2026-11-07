@@ -1,0 +1,168 @@
+<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 pt-8 pb-12 md:px-10">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
+        <a routerLink="/inicio">Inicio</a> / Concursos
+      </p>
+      <h1 class="m-0 font-display text-[32px] leading-[38px] font-bold tracking-[-1px] md:text-[40px] md:leading-[44px]">
+        Concursos
+      </h1>
+      <p class="mt-2 mb-0 text-base font-light text-kl-body">
+        Los concursos que tu coach programó en tus grupos y tu avance en cada uno.
+      </p>
+    </div>
+    @if (teams().length > 1) {
+      <label class="flex flex-col gap-1.5 text-sm text-kl-body">
+        Grupo
+        <select
+          aria-label="Grupo"
+          class="h-[44px] min-w-[220px] rounded-xl border border-solid border-kl-border-strong bg-[#0b0824] px-3 text-sm text-kl-heading outline-none focus:border-kl-accent-text"
+          (change)="selectTeam($any($event.target).value)"
+        >
+          <option value="">Todos mis grupos</option>
+          @for (team of teams(); track team.groupId) {
+            <option [value]="team.groupId">{{ team.name }}</option>
+          }
+        </select>
+      </label>
+    }
+  </header>
+
+  @switch (state()) {
+    @case ('loading') {
+      <p role="status" class="m-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
+        Cargando tus concursos…
+      </p>
+    }
+    @case ('error') {
+      <section
+        role="alert"
+        class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+      >
+        <span>No se pudieron cargar tus concursos. Revisa tu conexión e inténtalo de nuevo.</span>
+        <button
+          type="button"
+          class="cursor-pointer rounded-lg border border-solid border-kl-danger bg-transparent px-4 py-2 text-sm text-kl-heading"
+          (click)="retry()"
+        >
+          Reintentar
+        </button>
+      </section>
+    }
+    @default {
+      @let resumen = summary();
+      <section aria-label="Resumen de progreso" class="grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-5">
+          <p class="m-0 text-xs text-kl-muted">Concursos activos</p>
+          <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.active }}</p>
+        </div>
+        <div class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-5">
+          <p class="m-0 text-xs text-kl-muted">Problemas resueltos</p>
+          <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.solved }} / {{ resumen.assigned }}</p>
+        </div>
+        <div class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-5">
+          <p class="m-0 text-xs text-kl-muted">Pendientes de verificación</p>
+          <p class="mt-1 mb-0 font-display text-3xl font-bold text-amber-200">{{ resumen.pending }}</p>
+        </div>
+      </section>
+
+      @if (!teams().length) {
+        <section class="rounded-2xl border border-solid border-[#2b2760] bg-[#0b0824]/70 p-8 text-center">
+          <h2 class="m-0 text-lg font-medium">Todavía no perteneces a ningún grupo activo</h2>
+          <p class="mt-2 mb-4 text-sm text-kl-muted">Únete a un grupo para ver sus concursos.</p>
+          <a routerLink="/grupos" class="text-kl-accent-link underline">Explorar grupos</a>
+        </section>
+      } @else if (!contests().current.length && !contests().past.length) {
+        <section class="rounded-2xl border border-solid border-[#2b2760] bg-[#0b0824]/70 p-8 text-center">
+          <h2 class="m-0 text-lg font-medium">Tu grupo todavía no tiene concursos</h2>
+          <p class="mt-2 mb-0 text-sm text-kl-muted">
+            Cuando tu coach programe uno, aparecerá aquí con su fecha y tus problemas.
+          </p>
+        </section>
+      } @else {
+        @for (tabla of tables(); track tabla.id) {
+          <section [attr.aria-labelledby]="tabla.id + '-titulo'">
+            <h2 [id]="tabla.id + '-titulo'" class="mt-0 mb-3 text-xl font-medium">{{ tabla.title }}</h2>
+            <div
+              class="overflow-x-auto rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/60 via-[#140d34]/70 to-[#0a071a]/80"
+            >
+              @if (tabla.rows.length) {
+                <table class="w-full min-w-[860px] border-collapse text-left text-sm" [attr.aria-label]="tabla.title">
+                  <thead>
+                    <tr class="text-xs text-kl-muted">
+                      <th scope="col" class="px-4 py-3 font-normal">Nombre</th>
+                      <th scope="col" class="px-4 py-3 font-normal">Inicio</th>
+                      <th scope="col" class="px-4 py-3 font-normal">Duración</th>
+                      <th scope="col" class="px-4 py-3 font-normal">Estado</th>
+                      <th scope="col" class="px-4 py-3 font-normal">Problemas</th>
+                      <th scope="col" class="px-4 py-3 font-normal">Mi progreso</th>
+                      <th scope="col" class="px-4 py-3 text-right font-normal"><span class="sr-only">Acción</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of tabla.rows; track row.competition.teamId + '-' + row.competition.competitionId) {
+                      @let c = row.competition;
+                      <tr class="border-0 border-t border-solid border-kl-divider">
+                        <td class="px-4 py-3.5">
+                          <a
+                            class="font-semibold text-kl-heading hover:text-kl-accent-text"
+                            [routerLink]="['/concursos', c.teamId, c.competitionId]"
+                            >{{ c.eventName }}</a
+                          >
+                          <p class="m-0 text-xs text-kl-muted">{{ row.teamName }}</p>
+                        </td>
+                        <td class="px-4 py-3.5 font-mono text-[13px] text-kl-body">{{ formatDateTime(c.startsAt) }}</td>
+                        <td class="px-4 py-3.5 font-mono text-[13px] text-kl-body">{{ duration(c) }}</td>
+                        <td class="px-4 py-3.5">
+                          <span
+                            class="inline-block rounded-full border border-solid px-2.5 py-0.5 text-[11px]"
+                            [class]="statusBadge[c.status]"
+                            >{{ statusLabel[c.status] }}</span
+                          >
+                          @if (countdown(c); as texto) {
+                            <p class="mt-1 mb-0 text-xs text-kl-muted">{{ texto }}</p>
+                          }
+                        </td>
+                        <td class="px-4 py-3.5 font-mono text-[13px] text-kl-body">{{ c.problemsCount }}</td>
+                        <td class="px-4 py-3.5">
+                          @if (row.progress; as progreso) {
+                            <span class="font-mono text-[13px] text-kl-heading">{{ progreso.solved }}/{{ progreso.total }}</span>
+                            <div
+                              role="progressbar"
+                              aria-label="Mi progreso en el concurso"
+                              aria-valuemin="0"
+                              [attr.aria-valuemax]="progreso.total"
+                              [attr.aria-valuenow]="progreso.solved"
+                              class="mt-1.5 h-1.5 w-28 overflow-hidden rounded-full bg-white/10"
+                            >
+                              <div
+                                class="h-full rounded-full bg-linear-to-r from-[#8a6cff] to-[#6e52f2]"
+                                [style.width.%]="percent(row)"
+                              ></div>
+                            </div>
+                          } @else {
+                            <span class="text-kl-muted" title="No se pudo leer tu avance">—</span>
+                          }
+                        </td>
+                        <td class="px-4 py-3.5 text-right">
+                          <a
+                            class="inline-block rounded-lg bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-4 py-2 text-[13px] font-medium text-white"
+                            [routerLink]="['/concursos', c.teamId, c.competitionId]"
+                            [attr.aria-label]="'Entrar al concurso ' + c.eventName"
+                            >Entrar</a
+                          >
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              } @else {
+                <p class="m-0 p-5 text-sm text-kl-muted">{{ tabla.empty }}</p>
+              }
+            </div>
+          </section>
+        }
+      }
+    }
+  }
+</div>

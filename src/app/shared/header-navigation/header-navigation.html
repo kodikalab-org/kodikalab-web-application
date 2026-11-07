@@ -1,0 +1,22 @@
+<nav aria-label="Navegación principal" class="hidden items-center gap-9 text-[15px] font-normal xl:flex">
+  @for (enlace of enlaces; track enlace.label) {
+    <a [routerLink]="enlace.path" [fragment]="enlace.fragment" routerLinkActive="text-kl-accent-text" [routerLinkActiveOptions]="{ paths: enlace.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }" ariaCurrentWhenActive="page" class="text-kl-body transition-colors hover:text-kl-text focus-visible:outline-2 focus-visible:outline-kl-accent">{{ enlace.label }}</a>
+  }
+</nav>
+<button
+  mat-icon-button
+  type="button"
+  class="xl:hidden"
+  [matMenuTriggerFor]="menu"
+  aria-label="Abrir menú de navegación"
+  matTooltip="Menú de navegación"
+>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+</button>
+<mat-menu #menu="matMenu" [overlapTrigger]="false">
+  @for (enlace of enlaces; track enlace.label) {
+    <a mat-menu-item [routerLink]="enlace.path" [fragment]="enlace.fragment" routerLinkActive="text-kl-accent-text" [routerLinkActiveOptions]="{ paths: enlace.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }" ariaCurrentWhenActive="page">{{ enlace.label }}</a>
+  }
+</mat-menu>

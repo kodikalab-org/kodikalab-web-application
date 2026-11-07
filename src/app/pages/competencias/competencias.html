@@ -1,0 +1,387 @@
+@if (session.demo()) {
+  <p role="note" class="m-0 bg-kl-accent p-3 text-center text-white">Demostración: datos de ejemplo, sin conexión a la API.</p>
+@let accion = accion$ | async;
+@let estado = (estado$ | async) ?? '';
+<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+  <img
+    src="/images/competencias/fondo.svg"
+    alt=""
+    width="1440"
+    height="900"
+    class="pointer-events-none absolute -z-10 top-0 right-[-50px] max-w-none lg:right-auto lg:left-0 lg:w-full"
+  />
+  <a
+    routerLink="/coach/competencias"
+    fragment="contenido"
+    class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-kl-surface focus:p-4"
+    >Saltar al contenido</a
+  >
+  <app-header [coach]="true" />
+  <main id="contenido" class="mx-auto flex max-w-[1232px] flex-col gap-6 px-4 py-4 lg:py-8">
+    <div class="flex flex-col gap-2">
+      <nav aria-label="Ruta de navegación" class="font-mono text-xs text-kl-muted">
+        <a routerLink="/coach/inicio">Inicio</a> /
+        <a routerLink="/coach/grupos/seguimiento">Mi equipo</a>
+      </nav>
+      <h1
+        class="m-0 font-display text-2xl leading-[30px] font-bold tracking-[-0.12px] lg:text-[40px] lg:leading-[48px] lg:tracking-[-1px]"
+      >
+        Historial competitivo
+      </h1>
+      <p class="m-0 text-base leading-[22px] text-kl-muted">
+        Conserva las participaciones y resultados oficiales de tu equipo.
+      </p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-bold">Equipo</span>
+      <div
+        class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] px-3 py-3 text-sm"
+      >
+        Equipo Alfa
+      </div>
+      <span class="text-xs text-kl-muted">Responsable: Marco Paredes</span>
+    </div>
+    <p class="m-0 text-xs leading-[17px] text-kl-muted" role="note">
+      Maqueta · Datos de ejemplo. El guardado, la validación del coach y la publicación no están
+      conectados.
+    </p>
+    @if (estado === 'registrado') {
+      <section
+        role="status"
+        class="rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+      >
+        <strong class="text-green-400">Resultado registrado</strong>
+        <p class="mb-0">
+          La participación en ICPC Regional 2026 se añadió al historial del Equipo Alfa.
+        </p>
+      </section>
+      <mat-card
+        class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+        ><h2 class="m-0 text-2xl font-bold">ICPC Regional 2026</h2>
+        <dl
+          class="m-0 grid gap-4 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm sm:grid-cols-4"
+        >
+          @for (
+            dato of [
+              ['Competencia', 'ICPC Regional 2026'],
+              ['Fecha', '31 oct. 2026'],
+              ['Puesto', '12 / 80'],
+              ['Problemas resueltos', '7 / 12'],
+            ];
+            track dato[0]
+          ) {
+            <div>
+              <dt class="text-kl-muted">{{ dato[0] }}</dt>
+              <dd class="mx-0 mt-2">{{ dato[1] }}</dd>
+            </div>
+          }
+        </dl>
+        <p class="m-0 text-sm text-kl-muted">
+          Estado: Confirmado y publicado en el historial del equipo. Ejemplo, sin guardado real.
+        </p></mat-card
+      >
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <a mat-flat-button routerLink="/coach/competencias">Registrar otra participación</a
+        ><a mat-stroked-button routerLink="/coach/competencias" fragment="historial"
+          >Ver historial</a
+        >
+      </div>
+    } @else if (estado === 'incompletos') {
+      <section
+        role="alert"
+        class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+      >
+        <strong class="text-kl-danger">Revisa los datos antes de publicar</strong>
+        <p class="mb-0">
+          Falta el nombre de la competencia y el puesto supera el total de participantes.
+          Conservamos la fecha, el equipo y el respaldo. No se guardó ni publicó un resultado
+          inválido.
+        </p>
+      </section>
+      <mat-card
+        class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+        ><dl class="m-0 flex flex-col gap-4 text-sm">
+          @for (
+            dato of [
+              ['Equipo', 'Equipo Alfa', 'Coach responsable: Marco Paredes'],
+              ['Competencia *', 'Sin completar', 'Ingresa el nombre oficial de la competencia.'],
+              ['Fecha de participación', '31 / 10 / 2026', 'Dato conservado'],
+              ['Puesto obtenido', '85', 'El puesto debe estar entre 1 y 80.'],
+              ['Total de participantes', '80', 'Dato conservado'],
+            ];
+            track dato[0]
+          ) {
+            <div>
+              <dt class="mb-2 font-bold">{{ dato[0] }}</dt>
+              <dd class="m-0 rounded-xl bg-[#212121] p-3">{{ dato[1] }}</dd>
+              <dd class="mx-0 mt-2 text-xs text-kl-muted">{{ dato[2] }}</dd>
+            </div>
+          }
+        </dl>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <button mat-flat-button disabled>Guardar resultado</button
+          ><a mat-stroked-button routerLink="/coach/competencias">Corregir datos</a>
+        </div></mat-card
+      >
+    } @else {
+      @if (estado === 'duplicado') {
+        <section
+          role="alert"
+          class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+        >
+          <strong class="text-kl-danger">Ya existe una participación equivalente</strong>
+          <p class="mb-0">
+            Equipo Alfa ya tiene un resultado para ICPC Regional 2026 del 31 oct. Revisa el registro
+            existente. No se creó un duplicado y conservamos los datos ingresados.
+          </p>
+        </section>
+      }
+      @if (estado === 'validacion-pendiente') {
+        <section
+          role="status"
+          class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+        >
+          <strong class="text-amber-400">Participación guardada como pendiente</strong>
+          <p class="mb-0">
+            Aún falta confirmar el puesto y el acta oficial. Solo el coach puede verla; no se
+            publica ni modifica el historial confirmado. Estado estático de ejemplo.
+          </p>
+        </section>
+      }
+      @if (accion === 'resultado' || accion === 'pendiente') {
+        <div
+          id="aviso"
+          role="status"
+          class="rounded-xl border border-solid border-kl-accent/50 bg-kl-raised p-4 text-sm leading-5"
+        >
+          <strong class="block text-kl-accent-text">{{
+            accion === 'pendiente'
+              ? 'Guardado como pendiente no disponible'
+              : 'Guardado de resultados no disponible'
+          }}</strong>
+          <p class="mb-0 mt-2">
+            Esta interfaz es una maqueta. Los datos no se han guardado ni publicado; puedes seguir
+            editándolos.
+          </p>
+        </div>
+      }
+      <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,816fr)_minmax(0,360fr)]">
+        <mat-card
+          class="min-w-0 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 p-6"
+        >
+          <form [formGroup]="form" class="flex flex-col gap-4" aria-labelledby="titulo-formulario">
+            <h2 id="titulo-formulario" class="m-0 text-xl leading-[26px] font-bold">
+              {{
+                estado === 'validacion-pendiente'
+                  ? 'Participación pendiente'
+                  : 'Registrar participación'
+              }}
+            </h2>
+            <div class="flex flex-col gap-2">
+              <label for="competencia" class="text-sm font-bold">Nombre de la competencia *</label>
+              <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="auth-field w-full"
+              >
+                <input
+                  matInput
+                  id="competencia"
+                  formControlName="nombre"
+                  required
+                  maxlength="120"
+                />
+                <mat-hint>Usa el nombre oficial del evento.</mat-hint>
+                <mat-error>Ingresa el nombre oficial de la competencia.</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="fecha" class="text-sm font-bold">Fecha de participación *</label>
+              <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="auth-field w-full"
+              >
+                <input
+                  matInput
+                  id="fecha"
+                  formControlName="fecha"
+                  [matDatepicker]="calendario"
+                  required
+                  readonly
+                  aria-haspopup="dialog"
+                  (click)="calendario.open()"
+                  (keydown.enter)="calendario.open()"
+                />
+                <mat-datepicker-toggle
+                  matIconSuffix
+                  [for]="calendario"
+                  aria-label="Abrir calendario"
+                />
+                <mat-datepicker #calendario />
+                <mat-hint
+                  >Fecha de la ronda o evento oficial. Selección desde el calendario.</mat-hint
+                >
+                <mat-error>Selecciona una fecha válida.</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="puesto" class="text-sm font-bold">Puesto obtenido</label>
+              <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="auth-field w-full"
+              >
+                <input
+                  matInput
+                  id="puesto"
+                  type="number"
+                  min="1"
+                  step="1"
+                  formControlName="puesto"
+                  placeholder="Pendiente de confirmar"
+                  [attr.aria-describedby]="form.hasError('puesto') ? 'error-puesto' : null"
+                />
+                <mat-hint>Obligatorio para publicar el resultado.</mat-hint>
+                <mat-error>Ingresa un puesto entero mayor o igual a 1.</mat-error>
+              </mat-form-field>
+              @if (
+                form.hasError('puesto') &&
+                (form.controls.puesto.touched || form.controls.total.touched)
+              ) {
+                <mat-error id="error-puesto" role="alert" class="m-0 text-xs text-kl-danger"
+                  >El puesto no puede superar el total de equipos participantes.</mat-error
+                >
+              }
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="total" class="text-sm font-bold">Total de equipos participantes</label>
+              <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="auth-field w-full"
+              >
+                <input matInput id="total" type="number" min="1" step="1" formControlName="total" />
+                <mat-hint>El puesto no puede superar este total.</mat-hint>
+                <mat-error>Ingresa un total entero mayor o igual a 1.</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="problemas" class="text-sm font-bold">Problemas resueltos</label>
+              <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="auth-field w-full"
+              >
+                <input matInput id="problemas" formControlName="problemas" placeholder="7 de 12" />
+                <mat-hint>Información del resultado oficial.</mat-hint>
+                <mat-error>Usa el formato «7 de 12», sin superar el total de problemas.</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex flex-col gap-2">
+              <label for="respaldo" class="text-sm font-bold">Enlace de respaldo</label>
+              <mat-form-field
+                appearance="outline"
+                subscriptSizing="dynamic"
+                class="auth-field w-full"
+              >
+                <input matInput id="respaldo" type="url" formControlName="respaldo" />
+                <mat-hint>Referencia al acta o clasificación oficial.</mat-hint>
+                <mat-error>Ingresa un enlace válido que empiece con https:// o http://.</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              @if (estado === 'duplicado') {
+                <a
+                  mat-flat-button
+                  routerLink="/coach/competencias"
+                  [queryParams]="{ estado: 'registrado' }"
+                  >Revisar registro existente</a
+                ><a mat-stroked-button routerLink="/coach/competencias">Corregir datos</a>
+              } @else {
+                <button
+                  type="button"
+                  mat-flat-button
+                  routerLink="/coach/competencias"
+                  [queryParams]="{ accion: 'resultado', estado: estado }"
+                  fragment="aviso"
+                  [disabled]="form.invalid"
+                  class="w-full px-5 sm:w-auto"
+                >
+                  {{
+                    estado === 'validacion-pendiente' ? 'Confirmar y publicar' : 'Guardar resultado'
+                  }}
+                </button>
+                <button
+                  type="button"
+                  mat-stroked-button
+                  routerLink="/coach/competencias"
+                  [queryParams]="{ accion: 'pendiente', estado: estado }"
+                  fragment="aviso"
+                  [disabled]="form.controls.nombre.invalid || form.controls.fecha.invalid"
+                  class="w-full px-5 sm:w-auto"
+                >
+                  {{
+                    estado === 'validacion-pendiente'
+                      ? 'Conservar pendiente'
+                      : 'Guardar como pendiente'
+                  }}
+                </button>
+              }
+            </div>
+          </form>
+        </mat-card>
+        <aside class="flex min-w-0 flex-col gap-6" aria-label="Contexto del historial">
+          <mat-card
+            class="flex flex-col gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          >
+            <h2 class="m-0 text-xl leading-[26px] font-bold">Antes de publicar</h2>
+            <p class="m-0 text-sm leading-5 text-kl-muted">
+              Confirma la competencia, la fecha y el equipo. El resultado solo se publica cuando la
+              información requerida está completa y validada.
+            </p>
+          </mat-card>
+          <mat-card
+            class="flex flex-col gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          >
+            <h2 id="historial" class="m-0 text-xl leading-[26px] font-bold">Últimos resultados</h2>
+            @for (resultado of resultados; track resultado.nombre) {
+              <article
+                class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4"
+              >
+                <h3 class="m-0 text-sm font-bold">{{ resultado.nombre }}</h3>
+                <p class="m-0 text-sm leading-5 text-kl-muted">
+                  {{
+                    estado === 'validacion-pendiente' && resultado.nombre === 'ICPC Regional 2026'
+                      ? 'Falta confirmar el puesto'
+                      : resultado.detalle
+                  }}
+                </p>
+                <span class="font-mono text-xs text-kl-accent-text">{{
+                  estado === 'validacion-pendiente' && resultado.nombre === 'ICPC Regional 2026'
+                    ? 'Pendiente · no publicado'
+                    : 'Confirmado · Ejemplo'
+                }}</span>
+              </article>
+            }
+          </mat-card>
+        </aside>
+      </div>
+    }
+    <nav
+      aria-label="Estados de competencias"
+      class="flex flex-wrap gap-3 text-xs text-kl-accent-text"
+    >
+      @for (
+        variante of ['registrado', 'duplicado', 'validacion-pendiente', 'incompletos'];
+        track variante
+      ) {
+        <a routerLink="/coach/competencias" [queryParams]="{ estado: variante }">{{ variante }}</a>
+      }
+      <a routerLink="/coach/competencias">Formulario</a>
+    </nav>
+  </main>
+  <app-site-footer audience="coach" />
+</div>
+
+} @else { <app-results-live /> }

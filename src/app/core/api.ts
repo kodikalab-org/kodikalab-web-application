@@ -1,9 +1,10 @@
 import { InjectionToken } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../environments/environment.generated';
 
 // Override at deployment if the API is hosted elsewhere. No credentials belong here.
 export const API_URL = new InjectionToken<string>('API_URL', {
-  providedIn: 'root', factory: () => 'http://localhost:8080/api',
+  providedIn: 'root', factory: () => environment.apiUrl,
 });
 
 export type Role = 'PRACTICANTE' | 'COACH';

@@ -44,3 +44,11 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local environment and generated public build configuration
+.env
+.env.*
+!.env.example
+!.env.production.example
+/src/environments/environment.generated.ts
+.vercel/

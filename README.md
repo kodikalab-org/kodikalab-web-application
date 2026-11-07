@@ -123,3 +123,11 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+# Despliegue: Vercel + Render + Supabase
+
+- Desarrollo: `npm start` carga `.env` y genera la configuración pública de Angular.
+- Vercel: importar este repositorio; `vercel.json` configura la compilación estática y las rutas de Angular.
+- Definir `API_BASE_URL=https://TU-BACKEND.onrender.com/api` en las variables de Vercel y volver a desplegar al cambiarla. Consultar `.env.production.example`.
+- Usar Node.js 22.12 o superior. No ejecutar `ng build` directamente: usar los scripts de npm para generar el entorno.
+- El navegador solo llama al backend. Nunca colocar contraseñas de Supabase, claves privadas ni `JWT_SECRET` en este repositorio o en variables públicas del frontend.
+- En Render, `CORS_ALLOWED_ORIGINS` debe contener el origen exacto de Vercel, sin `/` final ni `/api`. Agregar dominios adicionales separados por comas; no autorizar globalmente `*.vercel.app`.

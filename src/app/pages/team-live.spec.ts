@@ -182,6 +182,34 @@ describe('Live team features', () => {
     expect(root.textContent).toContain('No tienes equipos disponibles');
     expect(root.querySelector('[role="alert"]')).toBeNull();
   });
+  it('uses the standard app header with the user menu and no notifications or theme icons', async () => {
+    const { root } = await setup(ProgressLive);
+    http.expectOne('/api/analytics/teams/1/progress/me').flush({ teamId: 1, acceptedProblems: 0 });
+    expect(root.querySelector('header app-header-navigation')).not.toBeNull();
+    expect(root.querySelector('header app-user-menu')).not.toBeNull();
+    expect(root.querySelectorAll('nav[aria-label="Navegación principal"]')).toHaveLength(1);
+    expect(root.querySelector('header img[alt*="Notificaciones"]')).toBeNull();
+    expect(root.querySelector('header img[alt*="Tema"]')).toBeNull();
+    expect(root.querySelector('header a[aria-label="Ver perfil"]')).toBeNull();
+    expect(root.querySelector('header a[aria-label="Kodikalab, inicio"]')?.getAttribute('href')).toBe(
+      '/inicio',
+    );
+  });
+  it('points the header logo to the coach home for coach pages', async () => {
+    const { root } = await setup(TopicsLive);
+    http.expectOne('/api/analytics/teams/1/weaknesses').flush({ teamId: 1, topics: [] });
+    expect(root.querySelector('header a[aria-label="Kodikalab, inicio"]')?.getAttribute('href')).toBe(
+      '/coach/inicio',
+    );
+  });
+  it('keeps the team selector as page content below the header', async () => {
+    const { root } = await setup(RankingLive);
+    http
+      .expectOne('/api/analytics/teams/1/standings')
+      .flush({ teamId: 1, status: 'NO_ACTIVITY', members: [] });
+    expect(root.querySelector('header select')).toBeNull();
+    expect(root.querySelector('main select[aria-label="Equipo"]')).not.toBeNull();
+  });
   it('does not request anything without team context', async () => {
     const { root } = await setup(RankingLive, {});
     http.expectNone(() => true);

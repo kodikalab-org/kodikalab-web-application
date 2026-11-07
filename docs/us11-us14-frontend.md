@@ -33,6 +33,8 @@ Se conservan /ranking, /coach/rendimiento, /coach/competencias y /progreso/equip
 
 El selector de equipo se llena con GET /teams/me, y las competencias y asignaciones de cada equipo vienen de GET /competitions?teamId= y GET /problems/assigned?teamId=. No se usan IDs por defecto.
 
+Las pantallas de equipo usan la cabecera estándar de la aplicación (app-header-navigation y app-user-menu, como en grupos) sin icono de notificaciones ni de tema; el selector de equipo queda como contenido de la página debajo de la cabecera.
+
 Comportamiento por historia: US-11 muestra los criterios orderingCriterion y tieCriterion de la respuesta (el de empate solo cuando hay posiciones compartidas). US-13 explica con un mensaje propio que la competencia ya tiene un resultado registrado cuando el alta devuelve 409. US-14 carga el avance y los problemas asignados de forma independiente (el fallo de uno no oculta al otro) e ignora respuestas cuyo teamId no coincide con el equipo seleccionado. Sin conexión se usa el mensaje habitual de apiError. La API valida autorización; introducir un ID no concede permisos. No se implementaron flujos de otras historias para suplir estos listados.
 
 Las cuatro maquetas existentes permanecen exclusivamente bajo Session.demo() con franja visible de datos de ejemplo; no se llaman endpoints en demo. Los datos estáticos no se presentan como integración real. El guard del coach y las validaciones del backend conservan el límite de acceso. El selector no permite cambiar contexto durante un envío; también se ignoran respuestas tardías al navegar a otro equipo.

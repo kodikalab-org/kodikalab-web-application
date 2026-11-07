@@ -44,13 +44,14 @@ src/app/
 │   │   ├── practicante.routes.ts    # Rutas del grupo
 │   │   ├── perfil/                  # Perfil y plataformas competitivas
 │   │   ├── equipos/                 # Equipos y solicitudes de ingreso
-│   │   ├── problemas/               # Problemas asignados y resoluciones
+│   │   ├── problemas-asignados/     # Problemas asignados y resoluciones
 │   │   └── progreso/                # Progreso por tema
+│   │   └── registro-problemas-resueltos/ # Registrar problemas resueltos    
 │   └── coach/                       # Propuesto: pantallas del coach
 │       ├── coach.routes.ts          # Rutas del grupo
 │       ├── equipos/                 # Creación y gestión de equipos
 │       ├── postulantes/             # Solicitudes de ingreso
-│       ├── asignaciones/           # Asignación de problemas
+│       ├── asignar-problema/           # Asignación de problemas
 │       └── analitica/               # Ranking y desempeño del equipo
 └── layouts/                         # Propuestos, si los grupos los necesitan
     ├── auth-layout/

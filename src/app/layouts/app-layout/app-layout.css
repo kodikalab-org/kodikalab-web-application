@@ -1,0 +1,7 @@
+/* Solo tokens de Material; el diseño usa utilidades Tailwind. */
+:host {
+  --auth-field-height: 40px;
+  --auth-field-padding: 9px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-link);
+}

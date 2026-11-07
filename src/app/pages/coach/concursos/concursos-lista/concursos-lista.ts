@@ -82,6 +82,8 @@ export class ConcursosLista implements OnInit {
   protected readonly notice = signal('');
   /** Contest the coach just created (navigation state of the form), to offer assigning problems. */
   protected readonly created = signal<{ id: number; name: string } | null>(null);
+  /** The contest was created but assigning its problems failed (message from the create form). */
+  protected readonly assignmentError = signal('');
   private readonly items = signal<TeamCompetition[]>([]);
   protected readonly groups = computed(() => splitCompetitions(this.items()));
 
@@ -114,6 +116,8 @@ export class ConcursosLista implements OnInit {
     const state = this.router.currentNavigation()?.extras.state?.['created'];
     if (state && typeof state.id === 'number' && typeof state.name === 'string') {
       this.created.set({ id: state.id, name: state.name });
+      const assignmentError = this.router.currentNavigation()?.extras.state?.['assignmentError'];
+      if (typeof assignmentError === 'string') this.assignmentError.set(assignmentError);
     }
     this.load$
       .pipe(

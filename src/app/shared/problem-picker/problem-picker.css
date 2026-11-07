@@ -1,0 +1,9 @@
+/* Tokens only; the layout uses Tailwind utilities. */
+:host {
+  --auth-field-height: 46px;
+  --auth-field-padding: 11px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-link);
+  --mat-button-outlined-container-height: 36px;
+  --mat-button-outlined-container-shape: 10px;
+}

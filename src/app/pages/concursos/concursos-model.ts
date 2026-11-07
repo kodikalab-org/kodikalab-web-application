@@ -181,3 +181,10 @@ export function injectNow(intervalMs: number): Signal<number> {
   inject(DestroyRef).onDestroy(() => clearInterval(timer));
   return now;
 }
+
+/** Banner shown after registering a submission, derived from the status the problem has after the refresh. */
+export function registrationMessage(letter: string, status: ProblemStatus | null): string {
+  if (status === 'RESUELTO') return `Envío registrado: el problema ${letter} quedó como resuelto.`;
+  if (status === 'PENDIENTE') return `Envío registrado para el problema ${letter}. Quedó pendiente de verificación.`;
+  return `Envío registrado para el problema ${letter}.`;
+}

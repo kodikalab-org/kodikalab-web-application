@@ -16,7 +16,7 @@ import { submitUrl } from '../../../core/problem-links';
 import {
   ActiveTeam, PROBLEM_BADGE, PROBLEM_LABEL, ProblemStatus, STATUS_BADGE, STATUS_LABEL, activeTeams,
   balloonColor, durationMinutes, formatCountdown, formatDateTime, formatDuration, formatSolveTime,
-  injectNow, penaltyLabel, problemStatus, standingCellText,
+  injectNow, penaltyLabel, problemStatus, registrationMessage, standingCellText,
 } from '../concursos-model';
 
 export type ContestTab = 'problemas' | 'clasificacion' | 'grupo' | 'progreso';
@@ -125,6 +125,12 @@ export class ConcursoDetalle {
   protected readonly isIoi = computed(() => this.standings()?.penaltyRule === 'IOI_POINTS');
   protected readonly canRegister = computed(() => this.competition()?.status !== 'PROGRAMADA');
 
+  /** Why "Registrar envío" is unavailable for a problem, or `null` when it can be registered. */
+  protected registerBlock(status: ProblemStatus): string | null {
+    if (status === 'RESUELTO') return 'Ya resolviste este problema';
+    return this.canRegister() ? null : 'Disponible cuando empiece el concurso';
+  }
+
   protected readonly teamId = computed(() => this.team()?.groupId ?? null);
 
   constructor() {
@@ -221,10 +227,7 @@ export class ConcursoDetalle {
         next: () => {
           this.saving.set(false);
           this.registering.set(null);
-          this.message.set(
-            `Envío registrado para el problema ${item.letter}. Quedó pendiente de verificación.`,
-          );
-          this.refreshStatuses();
+          this.refreshStatuses(item);
         },
         error: (error: unknown) => {
           this.saving.set(false);
@@ -235,8 +238,11 @@ export class ConcursoDetalle {
       });
   }
 
-  /** Re-reads my statuses (and the standings) after a registration. */
-  private refreshStatuses() {
+  /**
+   * Re-reads my statuses (and the standings) after registering `registered`; the banner reports the
+   * status the problem actually has after the refresh, so it never contradicts the table.
+   */
+  private refreshStatuses(registered: AssignedProblem) {
     const competition = this.competition();
     const teamId = this.teamId();
     if (!competition || !teamId) return;
@@ -244,8 +250,12 @@ export class ConcursoDetalle {
       .assignedProblems(teamId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) =>
-          this.items.set(response.items.filter((item) => item.competition.id === competition.competitionId)),
+        next: (response) => {
+          const items = response.items.filter((item) => item.competition.id === competition.competitionId);
+          this.items.set(items);
+          const current = items.find((item) => item.competitionProblemId === registered.competitionProblemId);
+          this.message.set(registrationMessage(registered.letter, current ? problemStatus(current) : null));
+        },
         error: () => this.message.set('Tu envío se registró, pero no pudimos actualizar tus estados.'),
       });
     this.loadStandings();

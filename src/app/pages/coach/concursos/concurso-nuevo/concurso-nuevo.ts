@@ -1,5 +1,5 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,15 +7,24 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { catchError, map, of, switchMap } from 'rxjs';
 import { apiError, fieldErrors } from '../../../../core/api';
 import {
   CompetitionAccessType,
   CompetitionsApi,
   PenaltyRule,
 } from '../../../../core/competitions-api';
+import { ProblemsApi, problemsError } from '../../../../core/problems-api';
 import { CoachGroup, TeamsApi } from '../../../../core/teams-api';
 import { positiveId } from '../../../../core/team-api';
 import { AppHeader } from '../../../../shared/app-header/app-header';
+import {
+  ICPC_SCORE,
+  IOI_SCORE,
+  PickedProblem,
+  toAssignItems,
+} from '../../../../shared/problem-picker/picked-problems';
+import { ProblemPicker } from '../../../../shared/problem-picker/problem-picker';
 import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 import {
   ACCESS_KEY_MAX_BYTES,
@@ -72,6 +81,7 @@ const MESSAGES: Record<string, Record<string, string>> = {
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
+    ProblemPicker,
   ],
   templateUrl: './concurso-nuevo.html',
   styleUrl: './concurso-nuevo.css',
@@ -79,6 +89,7 @@ const MESSAGES: Record<string, Record<string, string>> = {
 export class ConcursoNuevo implements OnInit {
   private readonly api = inject(CompetitionsApi);
   private readonly teamsApi = inject(TeamsApi);
+  private readonly problemsApi = inject(ProblemsApi);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -98,6 +109,16 @@ export class ConcursoNuevo implements OnInit {
     durationMinutes: new FormControl<number | null>(null, { validators: [durationValidator] }),
     freezeMinutes: new FormControl<number | null>(null, { validators: [freezeValidator] }),
   });
+
+  /** Problems chosen in the picker; assigned to the contest right after it is created. Optional. */
+  readonly picked = signal<PickedProblem[]>([]);
+  /** Points a new problem starts with: 1 per problem in ICPC contests, 100 in IOI ones. */
+  protected readonly defaultScore = toSignal(
+    this.form.controls.penaltyRule.valueChanges.pipe(
+      map((rule) => (rule === 'IOI_POINTS' ? IOI_SCORE : ICPC_SCORE)),
+    ),
+    { initialValue: ICPC_SCORE },
+  );
 
   protected readonly teams = signal<CoachGroup[]>([]);
   protected readonly loadingTeams = signal(false);
@@ -182,28 +203,47 @@ export class ConcursoNuevo implements OnInit {
     this.error.set('');
     this.saving.set(true);
     const request = buildCreateRequest(this.form.getRawValue());
-    this.api.create(request).subscribe({
-      next: (created) => {
-        this.saving.set(false);
-        void this.router.navigate(['/coach/concursos'], {
-          queryParams: { teamId: request.teamId },
-          state: { created: { id: created.id, name: request.eventName } },
-        });
-      },
-      error: (e: unknown) => {
-        this.saving.set(false);
-        this.error.set(apiError(e));
-        const others: [string, string][] = [];
-        for (const [field, text] of Object.entries(fieldErrors(e))) {
-          const name = BACKEND_FIELDS[field];
-          const control = name ? this.form.get(name) : null;
-          if (control) {
-            control.setErrors({ backend: text });
-            control.markAsTouched();
-          } else others.push([field, text]);
-        }
-        this.otherErrors.set(others);
-      },
-    });
+    const rows = this.picked();
+    this.api
+      .create(request)
+      .pipe(
+        // The contest exists once created: a failing assignment must not turn into a failed creation.
+        switchMap((created) =>
+          rows.length === 0
+            ? of({ created, assignmentError: null })
+            : this.problemsApi
+                .assign({ competitionId: created.id, problems: toAssignItems(rows) })
+                .pipe(
+                  map(() => ({ created, assignmentError: null })),
+                  catchError((e: unknown) => of({ created, assignmentError: problemsError(e) })),
+                ),
+        ),
+      )
+      .subscribe({
+        next: ({ created, assignmentError }) => {
+          this.saving.set(false);
+          void this.router.navigate(['/coach/concursos'], {
+            queryParams: { teamId: request.teamId },
+            state: {
+              created: { id: created.id, name: request.eventName },
+              ...(assignmentError ? { assignmentError } : {}),
+            },
+          });
+        },
+        error: (e: unknown) => {
+          this.saving.set(false);
+          this.error.set(apiError(e));
+          const others: [string, string][] = [];
+          for (const [field, text] of Object.entries(fieldErrors(e))) {
+            const name = BACKEND_FIELDS[field];
+            const control = name ? this.form.get(name) : null;
+            if (control) {
+              control.setErrors({ backend: text });
+              control.markAsTouched();
+            } else others.push([field, text]);
+          }
+          this.otherErrors.set(others);
+        },
+      });
   }
 }

@@ -6,12 +6,12 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { API_URL } from '../../../../../core/api';
 import { ProblemasAsignadosCoach } from './problemas-asignados-coach';
 
-const group = (groupId: number, name: string, status = 'ACTIVO') => ({
+const group = (groupId: number, name: string, status = 'ACTIVO', activeMembers = 14) => ({
   groupId,
   name,
   status,
   visibility: 'PUBLICO',
-  activeMembers: 14,
+  activeMembers,
   pendingRequests: 0,
   invitationCode: 'X',
 });
@@ -114,6 +114,16 @@ describe('ProblemasAsignadosCoach', () => {
     expect(root.textContent).not.toContain('Borrador');
   });
 
+  it('writes the active members of each team in the singular for one and in the plural otherwise', async () => {
+    const { root, loadTeams } = await setup('/', [group(12, 'Equipo Alfa', 'ACTIVO', 1), group(13, 'Equipo Beta', 'ACTIVO', 5)]);
+    await loadTeams();
+    const text = root.querySelector('mat-radio-group[aria-label="Equipo"]')!.textContent!;
+    expect(text).toContain('1 integrante activo');
+    expect(text).not.toContain('1 integrantes');
+    expect(text).toContain('5 integrantes activos');
+    http.expectOne((r) => r.url === '/api/problems/assigned').flush(LIST);
+  });
+
   it('links to the assignment flow', async () => {
     const { root, loadTeams, loadList } = await setup();
     await loadTeams();
@@ -131,6 +141,7 @@ describe('ProblemasAsignadosCoach', () => {
     expect(aside.textContent).toMatch(/Problemas asignados\s*3/);
     expect(aside.textContent).toMatch(/Competencias\s*2/);
     expect(aside.textContent).toMatch(/Integrantes activos\s*14/);
+    expect(root.textContent).toContain('14 integrantes activos');
     expect(aside.textContent).toContain('Simulacro semanal');
   });
 

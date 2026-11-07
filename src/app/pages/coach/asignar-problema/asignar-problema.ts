@@ -1,7 +1,7 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -18,6 +18,7 @@ import {
   SourcePlatform,
   problemsError,
 } from '../../../core/problems-api';
+import { CodeforcesCodeAdd } from '../../../shared/problem-picker/codeforces-code-add';
 import { AssignmentStore, MAX_PROBLEMS_PER_ASSIGNMENT } from './assignment-store';
 import { PasosAsignacion } from './components/pasos-asignacion/pasos-asignacion';
 
@@ -52,6 +53,7 @@ const PUNTO_PLATAFORMA: Record<SourcePlatform, string> = {
     MatFormFieldModule,
     MatInputModule,
     MatPaginatorModule,
+    CodeforcesCodeAdd,
     PasosAsignacion,
   ],
   providers: [{ provide: MatPaginatorIntl, useClass: PaginadorEs }],
@@ -71,6 +73,8 @@ export class AsignarProblema {
   protected readonly indice = signal(0);
   protected readonly cargando = signal(false);
   protected readonly error = signal<string | null>(null);
+  /** Result of the last quick add by Codeforces code (added, already selected, limit reached). */
+  protected readonly avisoCodigo = signal<string | null>(null);
 
   // The backend has no endpoint for filter values: they come from the problems it has returned so far.
   protected readonly plataformas = signal<SourcePlatform[]>([]);
@@ -92,6 +96,12 @@ export class AsignarProblema {
       .pipe(takeUntilDestroyed(inject(DestroyRef)))
       .subscribe(() => this.aplicar());
     this.cargar(0);
+    const query = inject(ActivatedRoute).snapshot.queryParamMap;
+    const teamId = Number(query.get('teamId'));
+    const competitionId = Number(query.get('competitionId'));
+    if (Number.isInteger(teamId) && teamId > 0 && Number.isInteger(competitionId) && competitionId > 0) {
+      this.store.preselect(teamId, competitionId);
+    }
   }
 
   /** Applies the search box and filters, going back to the first page. */
@@ -113,6 +123,17 @@ export class AsignarProblema {
 
   protected alternar(problema: CatalogProblem): void {
     this.store.toggle(problema);
+  }
+
+  /** Puts a problem imported by its Codeforces code into the selection; it is never toggled off. */
+  protected agregarImportado(problema: CatalogProblem): void {
+    if (this.store.isSelected(problema.id)) {
+      this.avisoCodigo.set(`«${problema.title}» ya está en tu selección.`);
+    } else if (this.store.toggle(problema)) {
+      this.avisoCodigo.set(`«${problema.title}» se agregó a tu selección.`);
+    } else {
+      this.avisoCodigo.set(`Llegaste al máximo de ${this.maximo} problemas.`);
+    }
   }
 
   protected punto(plataforma: SourcePlatform | null): string {

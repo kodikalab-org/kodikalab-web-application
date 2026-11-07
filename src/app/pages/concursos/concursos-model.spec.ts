@@ -1,5 +1,6 @@
 import {
-  durationMinutes, formatCountdown, formatDuration, formatSolveTime, penaltyLabel, standingCellText,
+  durationMinutes, formatCountdown, formatDuration, formatSolveTime, penaltyLabel, registrationMessage,
+  standingCellText,
 } from './concursos-model';
 
 describe('concursos model helpers', () => {
@@ -32,5 +33,15 @@ describe('concursos model helpers', () => {
     expect(standingCellText({ result: 'PENDIENTE', attempts: 1 })).toBe('?');
     expect(standingCellText({ result: 'SIN_INTENTOS', attempts: 0 })).toBe('');
     expect(formatSolveTime(85)).toBe('1:25');
+  });
+
+  it('derives the post-registration message from the resulting status of the problem', () => {
+    expect(registrationMessage('A', 'RESUELTO')).toBe('Envío registrado: el problema A quedó como resuelto.');
+    expect(registrationMessage('B', 'PENDIENTE')).toBe(
+      'Envío registrado para el problema B. Quedó pendiente de verificación.',
+    );
+    expect(registrationMessage('C', 'EN_PROGRESO')).toBe('Envío registrado para el problema C.');
+    expect(registrationMessage('D', 'SIN_INTENTOS')).toBe('Envío registrado para el problema D.');
+    expect(registrationMessage('D', null)).toBe('Envío registrado para el problema D.');
   });
 });

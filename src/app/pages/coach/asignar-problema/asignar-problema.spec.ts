@@ -217,4 +217,62 @@ describe('AsignarProblema (catalog step)', () => {
     const hrefs = Array.from(root.querySelectorAll('a')).map((a) => a.getAttribute('href'));
     expect(hrefs).toContain('/coach/problemas-asignados');
   });
+
+  describe('quick add by Codeforces code', () => {
+    const IMPORTED = problem(99, 'To My Critics', 'CODEFORCES', 'Matemática', '800');
+    const addByCode = (fixture: { detectChanges(): void }, root: HTMLElement, code: string) => {
+      const input = root.querySelector<HTMLInputElement>('input[aria-label="Código de Codeforces"]')!;
+      input.value = code;
+      input.dispatchEvent(new Event('input'));
+      root.querySelector<HTMLButtonElement>('button[aria-label="Agregar por código"]')!.click();
+      fixture.detectChanges();
+    };
+
+    it('imports the code and puts the problem into the shared selection', async () => {
+      const { fixture, root, store, flush } = await setup();
+      await flush();
+      addByCode(fixture, root, '1850a');
+      const request = http.expectOne('/api/problems/codeforces/import');
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual({ code: '1850A' });
+      request.flush({ created: true, problem: IMPORTED });
+      fixture.detectChanges();
+      expect(store.selected().map((p) => p.id)).toEqual([99]);
+      expect(root.querySelector('aside')?.textContent).toContain('To My Critics');
+    });
+
+    it('keeps the catalog table and the rest of the selection when a problem is imported', async () => {
+      const { fixture, root, store, flush } = await setup();
+      await flush();
+      store.toggle(PAGE.items[0]);
+      addByCode(fixture, root, '1850A');
+      http.expectOne('/api/problems/codeforces/import').flush({ created: false, problem: IMPORTED });
+      fixture.detectChanges();
+      expect(store.selected().map((p) => p.id)).toEqual([1, 99]);
+      expect(root.querySelectorAll('tbody tr').length).toBe(3);
+    });
+
+    it('does not select the same imported problem twice and says so', async () => {
+      const { fixture, root, store, flush } = await setup();
+      await flush();
+      store.toggle(IMPORTED);
+      addByCode(fixture, root, '1850A');
+      http.expectOne('/api/problems/codeforces/import').flush({ created: false, problem: IMPORTED });
+      fixture.detectChanges();
+      expect(store.selected().map((p) => p.id)).toEqual([99]);
+      expect(root.textContent).toContain('ya está en tu selección');
+    });
+
+    it('shows the import error and selects nothing', async () => {
+      const { fixture, root, store, flush } = await setup();
+      await flush();
+      addByCode(fixture, root, '9999Z');
+      http
+        .expectOne('/api/problems/codeforces/import')
+        .flush({ message: 'x' }, { status: 404, statusText: 'Not Found' });
+      fixture.detectChanges();
+      expect(root.textContent).toContain('El problema no existe en Codeforces');
+      expect(store.selected()).toEqual([]);
+    });
+  });
 });

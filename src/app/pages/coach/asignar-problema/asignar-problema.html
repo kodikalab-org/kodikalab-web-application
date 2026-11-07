@@ -30,6 +30,16 @@
       <div class="p-4 md:p-6">
         <h2 class="sr-only">Catálogo de problemas</h2>
 
+        <section class="mb-5" aria-label="Agregar por código de Codeforces">
+          <p class="m-0 mb-2 text-sm text-kl-body">
+            ¿Tu problema no está en el catálogo? Impórtalo con su código de Codeforces.
+          </p>
+          <app-codeforces-code-add (imported)="agregarImportado($event)" />
+          @if (avisoCodigo(); as aviso) {
+            <p role="status" class="mt-2 mb-0 text-sm text-kl-muted">{{ aviso }}</p>
+          }
+        </section>
+
         <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-[minmax(0,1fr)_repeat(3,150px)]">
           <mat-form-field
             class="auth-field sm:col-span-3 lg:col-span-1"

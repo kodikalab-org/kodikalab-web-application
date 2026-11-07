@@ -181,8 +181,9 @@
                           <button
                             type="button"
                             class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-3 py-1.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                            [disabled]="!canRegister()"
-                            [attr.title]="canRegister() ? null : 'Disponible cuando empiece el concurso'"
+                            [disabled]="registerBlock(row.status) !== null"
+                            [attr.title]="registerBlock(row.status)"
+                            [attr.aria-description]="registerBlock(row.status)"
                             [attr.aria-label]="'Registrar envío del problema ' + row.item.letter"
                             (click)="openRegister(row.item)"
                           >

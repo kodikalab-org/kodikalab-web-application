@@ -16,7 +16,7 @@
         Crear concurso
       </h1>
       <p class="mt-2 mb-0 text-base font-light text-kl-body">
-        Define la configuración del concurso. Después podrás asignarle problemas.
+        Define la configuración del concurso y, si quieres, sus problemas.
       </p>
     </header>
 
@@ -244,6 +244,19 @@
             </mat-form-field>
           </div>
         </div>
+
+        <section class="flex flex-col gap-3" aria-labelledby="concurso-problemas">
+          <div>
+            <h2 id="concurso-problemas" class="m-0 font-display text-lg font-bold">
+              Problemas <span class="text-sm font-normal text-kl-faint">(opcional)</span>
+            </h2>
+            <p class="m-0 mt-1 text-sm text-kl-muted">
+              Agrega problemas por su código de Codeforces o búscalos. Se asignan al crear el
+              concurso; también puedes hacerlo después.
+            </p>
+          </div>
+          <app-problem-picker [(rows)]="picked" [defaultScore]="defaultScore()" />
+        </section>
 
         <div class="flex flex-wrap justify-end gap-3 pt-2">
           <a

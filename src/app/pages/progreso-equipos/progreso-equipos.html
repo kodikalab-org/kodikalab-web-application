@@ -6,36 +6,7 @@
     <div
       class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
     ></div>
-    <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
-      <mat-toolbar
-        class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14"
-      >
-        <a routerLink="/inicio" class="flex items-center gap-2 text-xl font-bold"
-          ><picture
-            ><source media="(min-width: 1024px)" srcset="/images/progreso-ranking/logo.svg" />
-            <img src="/images/progreso-ranking/logo-movil.svg" alt="" /></picture
-          >Kodikalab</a
-        >
-        <nav
-          aria-label="Navegación principal"
-          class="mr-auto ml-10 hidden items-center gap-8 text-sm lg:flex"
-        >
-          <a routerLink="/inicio">Inicio</a
-          ><a routerLink="/inicio" fragment="problemas">Problemas</a
-          ><a routerLink="/inicio" fragment="competencias">Concursos</a
-          ><a routerLink="/inicio" fragment="grupos" class="text-kl-accent-text">Grupos</a
-          ><span class="text-kl-muted" title="Próximamente">Recursos</span>
-        </nav>
-        <div class="flex items-center gap-4">
-          <a
-            routerLink="/perfil"
-            aria-label="Ver perfil"
-            class="flex size-9 items-center justify-center rounded-full bg-kl-accent text-xs"
-            >CR</a
-          ><img class="lg:hidden" src="/images/progreso-ranking/abajo.svg" alt="" />
-        </div>
-      </mat-toolbar>
-    </header>
+    <app-header [coach]="false" />
     <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
       <div>
         <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">

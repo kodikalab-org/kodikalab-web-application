@@ -1,5 +1,5 @@
 <nav aria-label="Navegación principal" class="hidden items-center gap-9 text-[15px] font-normal xl:flex">
   @for (enlace of enlaces; track enlace.label) {
-    <a [routerLink]="enlace.path" [fragment]="enlace.fragment" routerLinkActive="text-kl-accent-text" [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'exact' }" ariaCurrentWhenActive="page" class="text-kl-body transition-colors hover:text-kl-text focus-visible:outline-2 focus-visible:outline-kl-accent">{{ enlace.label }}</a>
+    <a [routerLink]="enlace.path" [fragment]="enlace.fragment" routerLinkActive="text-kl-accent-text" [routerLinkActiveOptions]="{ paths: enlace.exact ? 'exact' : 'subset', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' }" ariaCurrentWhenActive="page" class="text-kl-body transition-colors hover:text-kl-text focus-visible:outline-2 focus-visible:outline-kl-accent">{{ enlace.label }}</a>
   }
 </nav>

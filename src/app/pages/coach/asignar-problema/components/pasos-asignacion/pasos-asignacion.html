@@ -1,0 +1,28 @@
+<ol class="m-0 grid list-none gap-3 p-0 md:grid-cols-3" aria-label="Pasos de la asignación">
+  @for (item of pasos; track item.numero) {
+    <li
+      class="flex items-center gap-3 rounded-xl border border-solid px-4 py-3"
+      [class]="item.numero === paso() ? 'border-[#8a6cff] bg-[#241a5c]/60' : 'border-kl-border bg-white/3'"
+      [attr.aria-current]="item.numero === paso() ? 'step' : null"
+    >
+      <span
+        class="flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold"
+        [class]="
+          item.numero <= paso()
+            ? 'bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-white'
+            : 'bg-white/8 text-kl-muted'
+        "
+      >
+        @if (item.numero < paso()) {
+          <img src="images/app/check-white.svg" alt="Completado" width="16" height="16" />
+        } @else {
+          {{ item.numero }}
+        }
+      </span>
+      <div>
+        <p class="m-0 text-sm font-semibold text-kl-text">{{ item.titulo }}</p>
+        <p class="m-0 text-xs text-kl-muted">{{ item.detalle }}</p>
+      </div>
+    </li>
+  }
+</ol>

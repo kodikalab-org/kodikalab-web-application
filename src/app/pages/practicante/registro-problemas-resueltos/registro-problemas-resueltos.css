@@ -5,9 +5,3 @@
   --auth-input-color: var(--kl-text-heading);
   --auth-focus-color: var(--kl-accent-link);
 }
-
-/* El campo de código crece con su contenido. */
-.code-field {
-  --auth-field-height: auto;
-  --mat-form-field-container-height: auto;
-}

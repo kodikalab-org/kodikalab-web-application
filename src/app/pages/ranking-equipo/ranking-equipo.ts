@@ -7,12 +7,12 @@ import { AsyncPipe } from '@angular/common';
 import { map } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { SiteFooter } from '../../shared/site-footer/site-footer';
+import { AppHeader } from '../../shared/app-header/app-header';
 
 @Component({
   selector: 'app-ranking-equipo',
-  imports: [SiteFooter, RankingLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [AppHeader, SiteFooter, RankingLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule],
   templateUrl: './ranking-equipo.html',
   styleUrl: './ranking-equipo.css',
 })

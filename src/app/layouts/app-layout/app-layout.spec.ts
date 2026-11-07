@@ -13,9 +13,10 @@ describe('AppLayout', () => {
     return fixture.nativeElement as HTMLElement;
   }
 
-  it('muestra la cabecera de la app y el pie de página', async () => {
+  it('usa la cabecera compartida de la app y el pie de página', async () => {
     const root = await crear();
-    expect(root.querySelector('header mat-toolbar')).not.toBeNull();
+    expect(root.querySelector('app-header header mat-toolbar')).not.toBeNull();
+    expect(root.querySelectorAll('header').length).toBe(1);
     expect(root.querySelector('app-user-menu')).not.toBeNull();
     expect(root.querySelector('footer')).not.toBeNull();
   });

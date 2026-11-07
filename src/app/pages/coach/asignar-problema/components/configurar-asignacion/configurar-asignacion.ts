@@ -1,13 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject, untracked } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
-import { ElegirDestinatarios } from '../elegir-destinatarios/elegir-destinatarios';
+import { COMPETITION_STATUS, PLATFORM_LABEL, formatDateTime } from '../../../../../core/problems-api';
+import { AssignmentStore } from '../../assignment-store';
+import { PasosAsignacion } from '../pasos-asignacion/pasos-asignacion';
 
+/** Step 2 of US-07: team, competition, and letter, score and balloon color of each selected problem. */
 @Component({
   selector: 'app-configurar-asignacion',
   imports: [
@@ -18,92 +21,39 @@ import { ElegirDestinatarios } from '../elegir-destinatarios/elegir-destinatario
     MatFormFieldModule,
     MatInputModule,
     MatRadioModule,
-    ElegirDestinatarios,
+    PasosAsignacion,
   ],
   templateUrl: './configurar-asignacion.html',
   styleUrl: './configurar-asignacion.css',
   host: { class: 'block' },
 })
 export class ConfigurarAsignacion {
-  protected readonly pasos = [
-    {
-      numero: 1,
-      titulo: 'Seleccionar problemas',
-      detalle: 'Elige del catálogo',
-      hecho: true,
-      actual: false,
-      clase: 'border-kl-border bg-white/3',
-      claseNumero: 'bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-white',
-    },
-    {
-      numero: 2,
-      titulo: 'Configurar asignación',
-      detalle: 'Competencia, letras y puntaje',
-      hecho: false,
-      actual: true,
-      clase: 'border-[#8a6cff] bg-[#241a5c]/60',
-      claseNumero: 'bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-white',
-    },
-    {
-      numero: 3,
-      titulo: 'Revisar y confirmar',
-      detalle: 'Verifica antes de asignar',
-      hecho: false,
-      actual: false,
-      clase: 'border-kl-border bg-white/3',
-      claseNumero: 'bg-white/8 text-kl-muted',
-    },
-  ];
+  protected readonly store = inject(AssignmentStore);
+  private readonly router = inject(Router);
 
-  // Datos de ejemplo del Figma.
-  protected readonly competencias = [
-    {
-      valor: 'simulacro',
-      nombre: 'Simulacro semanal',
-      estado: 'Programada',
-      claseEstado: 'border-indigo-300/50 bg-indigo-400/10 text-indigo-200',
-      detalle: 'Sáb 1 nov · 7:00 p. m. · 5 h · Penalización ICPC 20 min',
-      clase: 'border-[#8a6cff] bg-[#241a5c]/60',
-    },
-    {
-      valor: 'maraton',
-      nombre: 'Maratón interna UPC',
-      estado: 'En curso',
-      claseEstado: 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300',
-      detalle: 'Termina dom 2 nov · 11:59 p. m. · 24 h',
-      clase: 'border-kl-border bg-white/3',
-    },
-    {
-      valor: 'practica',
-      nombre: 'Contest de práctica',
-      estado: 'Finalizada',
-      claseEstado: 'border-kl-border-strong bg-white/4 text-kl-muted',
-      detalle: 'Finalizó el 12 oct. · No admite nuevos problemas',
-      clase: 'border-kl-border bg-white/3 opacity-50',
-    },
-  ];
-
-  protected readonly filas = [
-    { titulo: 'Theatre Square', detalle: 'CF-1A · Codeforces', color: '#FF0000' },
-    { titulo: 'Weird Algorithm', detalle: 'CSES-1068 · CSES', color: '#22C55E' },
-    { titulo: 'Shortest Routes I', detalle: 'CSES-1671 · CSES', color: '#3B82F6' },
-    { titulo: 'I Hate Non-integer Number', detalle: 'ABC262-D · AtCoder', color: '#FACC15' },
-  ];
+  protected readonly estado = COMPETITION_STATUS;
+  protected readonly etiquetaPlataforma = PLATFORM_LABEL;
+  protected readonly fecha = formatDateTime;
 
   protected readonly form = new FormGroup({
-    competencia: new FormControl('simulacro', {
+    equipo: new FormControl(this.store.teamId() === null ? '' : String(this.store.teamId()), {
       nonNullable: true,
-      validators: [Validators.required],
     }),
+    competencia: new FormControl<number | null>(this.store.competitionId(), [Validators.required]),
     problemas: new FormArray(
-      this.filas.map(
-        (fila, i) =>
+      this.store.rows().map(
+        (fila) =>
           new FormGroup({
-            letra: new FormControl('CDEF'[i], {
+            letra: new FormControl(fila.letter, {
               nonNullable: true,
-              validators: [Validators.pattern(/^[A-Z]{1,5}$/)],
+              validators: [Validators.pattern(/^[A-Za-z]{1,5}$/)],
             }),
-            puntaje: new FormControl<number | null>(100, [Validators.required, Validators.min(1)]),
+            puntaje: new FormControl<number | null>(fila.score, [
+              Validators.required,
+              Validators.min(1),
+              Validators.max(2147483647),
+              Validators.pattern(/^\d+$/),
+            ]),
             color: new FormControl(fila.color, {
               nonNullable: true,
               validators: [Validators.required, Validators.pattern(/^#[0-9A-Fa-f]{6}$/)],
@@ -112,4 +62,61 @@ export class ConfigurarAsignacion {
       ),
     ),
   });
+
+  constructor() {
+    this.store.loadTeams();
+    // Back from creating a contest (or from the confirmation step): the competitions may have changed.
+    this.store.refreshCompetitions();
+
+    this.form.controls.equipo.valueChanges.subscribe((valor) => {
+      this.form.controls.competencia.setValue(null, { emitEvent: false });
+      this.store.selectTeam(valor ? Number(valor) : null);
+    });
+    this.form.controls.competencia.valueChanges.subscribe((valor) => this.store.competitionId.set(valor));
+    this.form.valueChanges.subscribe(() => {
+      this.guardar();
+      this.store.clearErrors();
+    });
+
+    // A coach with a single team does not have to pick it.
+    effect(() => {
+      const equipos = this.store.teams();
+      if (equipos.length === 1 && this.store.teamId() === null) {
+        untracked(() => {
+          this.form.controls.equipo.setValue(String(equipos[0].groupId), { emitEvent: false });
+          this.store.selectTeam(equipos[0].groupId);
+        });
+      }
+    });
+  }
+
+  protected reintentarEquipos(): void {
+    this.store.loadTeams();
+  }
+
+  protected continuar(): void {
+    if (this.form.invalid || this.store.selected().length === 0) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.guardar();
+    this.router.navigate(['/coach/asignar-problema/confirmar']);
+  }
+
+  /** Copies the form into the store so the confirmation step (and a trip back here) sees the same values. */
+  private guardar(): void {
+    const { problemas, competencia } = this.form.getRawValue();
+    this.store.competitionId.set(competencia);
+    const configuracion = Object.fromEntries(
+      this.store.selected().map((problema, i) => [
+        problema.id,
+        {
+          letter: problemas[i]?.letra ?? '',
+          score: problemas[i]?.puntaje ?? null,
+          color: problemas[i]?.color ?? '',
+        },
+      ]),
+    );
+    this.store.setSettings(configuracion);
+  }
 }

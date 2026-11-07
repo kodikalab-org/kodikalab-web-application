@@ -6,13 +6,13 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import { SiteFooter } from '../../shared/site-footer/site-footer';
+import { AppHeader } from '../../shared/app-header/app-header';
 
 @Component({
   selector: 'app-progreso-equipos',
-  imports: [SiteFooter, ProgressLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [AppHeader, SiteFooter, ProgressLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule],
   templateUrl: './progreso-equipos.html',
   styleUrl: './progreso-equipos.css',
 })

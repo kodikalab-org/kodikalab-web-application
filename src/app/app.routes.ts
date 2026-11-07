@@ -7,6 +7,8 @@ import { passwordResetStepGuard } from './core/password-reset-flow';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { COACH_ROUTES } from './pages/coach/coach.routes';
 import { PRACTICANTE_ROUTES } from './pages/practicante/practicante.routes';
+import { CONCURSOS_ROUTES } from './pages/concursos/concursos.routes';
+import { COACH_CONCURSOS_ROUTES } from './pages/coach/concursos/coach-concursos.routes';
 
 const appRoutes: Routes = [
   { path: 'coach/ranking', loadComponent: () => import('./pages/ranking-equipo/ranking-equipo').then(m => m.RankingEquipo) },
@@ -44,6 +46,8 @@ const appRoutes: Routes = [
   { path: 'registro', component: Registro },
   ...COACH_ROUTES,
   ...PRACTICANTE_ROUTES,
+  ...CONCURSOS_ROUTES,
+  ...COACH_CONCURSOS_ROUTES,
   {
     path: 'recuperar-contrasena',
     data: { paso: 'correo' },

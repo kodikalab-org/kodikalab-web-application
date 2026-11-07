@@ -1,14 +1,5 @@
-<div class="mx-auto w-full max-w-[1360px] px-4 pt-6 pb-12 md:px-10">
-  <span
-    class="inline-flex cursor-default items-center gap-2 text-[13px] text-kl-accent-link"
-    aria-disabled="true"
-    title="Próximamente"
-  >
-    <img src="images/app/arrow-left-accent.svg" alt="" width="16" height="16" />
-    Volver a Equipo Alfa
-  </span>
-
-  <header class="mt-5 flex flex-wrap items-end justify-between gap-4">
+<div class="mx-auto w-full max-w-[1360px] px-4 pt-8 pb-12 md:px-10">
+  <header class="flex flex-wrap items-end justify-between gap-4">
     <div>
       <h1
         class="m-0 font-display text-[32px] leading-[38px] font-bold tracking-[-1px] md:text-[40px] md:leading-[44px]"
@@ -16,7 +7,7 @@
         Asignar problemas
       </h1>
       <p class="mt-2 mb-0 text-base font-light text-kl-body">
-        Equipo Alfa · confirma los problemas y la competencia.
+        Confirma los problemas y la competencia. Se asignan a todo el equipo.
       </p>
     </div>
     <a mat-stroked-button class="h-11 px-5" routerLink="/coach/problemas-asignados"
@@ -24,30 +15,26 @@
     >
   </header>
 
-  <ol class="m-0 mt-6 grid list-none gap-3 p-0 md:grid-cols-3" aria-label="Pasos de la asignación">
-    @for (paso of pasos; track paso.numero) {
-      <li
-        class="flex items-center gap-3 rounded-xl border border-solid px-4 py-3"
-        [class]="paso.clase"
-        [attr.aria-current]="paso.actual ? 'step' : null"
-      >
-        <span
-          class="flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold"
-          [class]="paso.claseNumero"
-        >
-          @if (paso.hecho) {
-            <img src="images/app/check-white.svg" alt="Completado" width="16" height="16" />
-          } @else {
-            {{ paso.numero }}
-          }
-        </span>
-        <div>
-          <p class="m-0 text-sm font-semibold text-kl-text">{{ paso.titulo }}</p>
-          <p class="m-0 text-xs text-kl-muted">{{ paso.detalle }}</p>
-        </div>
-      </li>
-    }
-  </ol>
+  <app-pasos-asignacion class="mt-6" [paso]="3" />
+
+  @if (!store.request()) {
+    <p
+      class="mt-6 mb-0 rounded-xl border border-solid border-kl-border-strong bg-white/3 px-4 py-3 text-sm text-kl-body"
+      role="status"
+    >
+      Completa los pasos anteriores: elige problemas y una competencia.
+      <a class="text-kl-accent-link" routerLink="/coach/asignar-problema/configurar">Ir a configurar</a>
+    </p>
+  }
+
+  @if (store.errorMessage(); as mensaje) {
+    <div
+      class="mt-6 rounded-xl border border-solid border-red-400/50 bg-red-400/10 px-4 py-3 text-sm text-red-300"
+      role="alert"
+    >
+      {{ mensaje }}
+    </div>
+  }
 
   <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
     <div class="flex min-w-0 flex-col gap-6">
@@ -65,25 +52,30 @@
           <dl class="m-0 mt-3 text-sm">
             <div class="flex justify-between gap-4 border-0 border-b border-solid border-kl-divider py-3">
               <dt class="text-kl-muted">Equipo</dt>
-              <dd class="m-0 font-medium">Equipo Alfa</dd>
+              <dd class="m-0 font-medium">{{ store.team()?.name ?? '—' }}</dd>
             </div>
             <div class="flex items-center justify-between gap-4 border-0 border-b border-solid border-kl-divider py-3">
               <dt class="text-kl-muted">Competencia</dt>
               <dd class="m-0 flex items-center gap-2 font-medium">
-                Simulacro semanal
-                <span
-                  class="rounded-full border border-solid border-indigo-300/50 bg-indigo-400/10 px-2 py-0.5 text-[11px] font-normal text-indigo-200"
-                  >Programada</span
-                >
+                @if (store.competition(); as competencia) {
+                  {{ competencia.eventName }}
+                  <span
+                    class="rounded-full border border-solid px-2 py-0.5 text-[11px] font-normal"
+                    [class]="estado[competencia.status].badge"
+                    >{{ estado[competencia.status].label }}</span
+                  >
+                } @else {
+                  —
+                }
               </dd>
             </div>
             <div class="flex justify-between gap-4 border-0 border-b border-solid border-kl-divider py-3">
-              <dt class="text-kl-muted">Destinatarios</dt>
-              <dd class="m-0 font-medium">Todo el equipo (14 integrantes)</dd>
+              <dt class="text-kl-muted">Alcance</dt>
+              <dd class="m-0 font-medium">Todo el equipo</dd>
             </div>
             <div class="flex justify-between gap-4 py-3">
               <dt class="text-kl-muted">Puntaje total</dt>
-              <dd class="m-0 font-medium">400</dd>
+              <dd class="m-0 font-medium">{{ store.totalScore() }}</dd>
             </div>
           </dl>
         </div>
@@ -101,28 +93,33 @@
               </span>
               Problemas a asignar
             </h2>
-            <span class="text-xs text-kl-muted">4 problemas</span>
+            <span class="text-xs text-kl-muted">{{ store.selected().length }} problemas</span>
           </div>
 
           <ul class="m-0 mt-3 list-none p-0">
-            @for (problema of problemas; track problema.detalle) {
+            @for (fila of store.rows(); track fila.problem.id) {
               <li
-                class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1 border-0 border-t border-solid border-kl-divider py-3 text-sm sm:grid-cols-[minmax(0,1fr)_60px_70px_130px]"
+                class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1 border-0 border-t border-solid border-kl-divider py-3 text-sm sm:grid-cols-[minmax(0,1fr)_110px_70px_130px]"
               >
                 <div class="min-w-0">
-                  <p class="m-0 font-semibold text-kl-heading">{{ problema.titulo }}</p>
-                  <p class="m-0 font-mono text-xs text-kl-muted">{{ problema.detalle }}</p>
+                  <p class="m-0 font-semibold text-kl-heading">{{ fila.problem.title }}</p>
+                  <p class="m-0 font-mono text-xs text-kl-muted">
+                    {{ fila.problem.sourceCode || '—' }}
+                    @if (fila.problem.sourcePlatform; as plataforma) {
+                      · {{ etiquetaPlataforma[plataforma] }}
+                    }
+                  </p>
                 </div>
-                <p class="m-0 font-semibold sm:order-none">
+                <p class="m-0 font-semibold">
                   <span class="text-xs font-normal text-kl-muted sm:sr-only">Letra </span
-                  >{{ problema.letra }}
+                  >{{ fila.letter.trim() ? fila.letter.trim().toUpperCase() : 'Primera libre' }}
                 </p>
                 <p class="m-0 font-mono text-[13px] text-kl-body">
-                  <span class="text-xs text-kl-muted sm:sr-only">Puntaje </span>{{ problema.puntaje }}
+                  <span class="text-xs text-kl-muted sm:sr-only">Puntaje </span>{{ fila.score }}
                 </p>
                 <p class="m-0 flex items-center gap-2 font-mono text-[13px] text-kl-body">
-                  <span class="size-3 rounded-full" [style.background-color]="problema.color"></span>
-                  {{ problema.color }}
+                  <span class="size-3 rounded-full" [style.background-color]="fila.color"></span>
+                  {{ fila.color.toUpperCase() }}
                 </p>
               </li>
             }
@@ -160,8 +157,10 @@
         <button
           mat-flat-button
           type="button"
-          class="h-12 flex-1 bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-base shadow-[0_0_24px_rgba(115,87,243,.45)]"
-          (click)="exito.showModal()"
+          class="h-12 flex-1 bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-base shadow-[0_0_24px_rgba(115,87,243,.45)] disabled:opacity-50 disabled:shadow-none"
+          [disabled]="!store.request() || store.submitting()"
+          [attr.aria-busy]="store.submitting()"
+          (click)="confirmar()"
         >
           Asignar problemas
           <img src="images/app/send-white.svg" alt="" width="18" height="18" />
@@ -169,44 +168,4 @@
       </div>
     </aside>
   </div>
-
-  <!-- Resultado de ejemplo del Figma: solo visual, no registra ninguna asignación. -->
-  <dialog
-    #exito
-    class="m-auto w-[min(440px,calc(100%-2rem))] rounded-3xl border border-solid border-[#8a6cff] bg-[#140d34] p-0 text-kl-text shadow-[0_0_40px_rgba(100,60,255,.45)] backdrop:bg-black/70"
-    aria-labelledby="exito-titulo"
-  >
-    <div class="flex flex-col items-center gap-3 px-6 py-8 text-center">
-      <span
-        class="flex size-14 items-center justify-center rounded-full bg-linear-to-b from-[#8a6cff] to-[#6e52f2]"
-      >
-        <img src="images/app/check-white.svg" alt="" width="26" height="26" />
-      </span>
-      <h2 id="exito-titulo" class="m-0 font-display text-2xl font-bold">Problemas asignados</h2>
-      <p class="m-0 text-sm text-kl-body">
-        Asignaste 4 problemas a <strong class="text-kl-text">Simulacro semanal</strong>. Todo el
-        equipo ya los ve en "Problemas asignados".
-      </p>
-      <ul class="m-0 flex list-none flex-wrap justify-center gap-2 p-0">
-        @for (problema of problemas; track problema.detalle) {
-          <li
-            class="rounded-full border border-solid border-kl-border-strong bg-white/4 px-2.5 py-1 text-xs text-kl-body"
-          >
-            <strong class="text-kl-text">{{ problema.letra }}</strong> · {{ problema.titulo }}
-          </li>
-        }
-      </ul>
-      <div class="mt-3 flex flex-wrap justify-center gap-3">
-        <a mat-stroked-button class="h-11 px-5" routerLink="/coach/asignar-problema"
-          >Asignar más</a
-        >
-        <a
-          mat-flat-button
-          class="h-11 bg-linear-to-b from-[#8a6cff] to-[#6e52f2] px-5"
-          routerLink="/coach/problemas-asignados"
-          >Ver asignados</a
-        >
-      </div>
-    </div>
-  </dialog>
 </div>

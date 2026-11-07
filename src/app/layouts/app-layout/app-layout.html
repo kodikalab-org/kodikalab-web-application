@@ -5,28 +5,7 @@
     alt=""
     aria-hidden="true"
   />
-  <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[#1b1840] bg-[#060414]/80">
-    <mat-toolbar class="mx-auto flex h-[68px] max-w-[1600px] gap-4 px-4 lg:px-11">
-      <a
-        [routerLink]="coach ? '/coach/inicio' : '/inicio'"
-        aria-label="Kodikalab, inicio"
-        class="flex items-center gap-2.5 text-xl sm:text-[25px]"
-      >
-        <img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab
-      </a>
-      <app-header-navigation [coach]="coach" />
-      <div class="ml-auto flex items-center gap-3">
-        <div
-          aria-label="Búsqueda global pendiente"
-          class="hidden h-10 items-center gap-3 rounded-xl border border-solid border-kl-border-strong bg-white/4 px-3 text-sm text-kl-faint min-[1400px]:flex"
-        >
-          <img src="/images/dashboard/0-imgIcon2.svg" width="18" height="18" alt="" />Buscar
-          problemas, usuarios, concursos… <kbd class="ml-3 text-xs">⌘ K</kbd>
-        </div>
-        <app-user-menu [coach]="coach" />
-      </div>
-    </mat-toolbar>
-  </header>
+  <app-header [coach]="coach" />
   <main class="flex flex-1 flex-col"><router-outlet /></main>
   <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
 </div>

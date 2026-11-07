@@ -1,9 +1,29 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { combineLatest } from 'rxjs';
+import { positiveId } from '../../../../../core/team-api';
+import {
+  ASSIGNMENT_STATUS,
+  AssignedDetail,
+  AttemptInfo,
+  COMPETITION_STATUS,
+  PLATFORM_LABEL,
+  ProblemsApi,
+  VERDICT_LABEL,
+  formatDateTime,
+  problemsError,
+} from '../../../../../core/problems-api';
 import { RegistroProblemasResueltos } from '../../../registro-problemas-resueltos/registro-problemas-resueltos';
 
+const PENALIZACION: Record<string, string> = {
+  ICPC_20_MIN: 'ICPC · 20 min',
+  IOI_POINTS: 'IOI · por puntos',
+};
+
+/** US-08/US-09 (practitioner): one assigned problem with its conditions, the personal attempts and the registration. */
 @Component({
   selector: 'app-problema-elegido',
   imports: [RouterLink, MatButtonModule, MatCardModule, RegistroProblemasResueltos],
@@ -12,31 +32,110 @@ import { RegistroProblemasResueltos } from '../../../registro-problemas-resuelto
   host: { class: 'block' },
 })
 export class ProblemaElegido {
-  // Datos de ejemplo del Figma (problema «Weird Algorithm»).
-  protected readonly condiciones = [
-    { etiqueta: 'Plataforma', valor: 'CSES' },
-    { etiqueta: 'Código de origen', valor: 'CSES-1068', mono: true },
-    { etiqueta: 'Dificultad', valor: '—' },
-    { etiqueta: 'Límite de tiempo', valor: '1 s' },
-    { etiqueta: 'Límite de memoria', valor: '512 MB' },
-    { etiqueta: 'Puntaje · globo', valor: '100 · #22C55E', mono: true },
-  ];
+  private readonly api = inject(ProblemsApi);
+  private readonly route = inject(ActivatedRoute);
 
-  protected readonly competencia = [
-    { etiqueta: 'Competencia', valor: 'Maratón interna UPC' },
-    { etiqueta: 'Inicio', valor: 'Mar 28 oct 2026 · 12:00 a. m.' },
-    { etiqueta: 'Fin', valor: 'Dom 2 nov 2026 · 11:59 p. m.' },
-    { etiqueta: 'Duración', valor: '24 horas' },
-    { etiqueta: 'Penalización', valor: 'ICPC · 20 min' },
-  ];
+  protected readonly estadoAsignacion = ASSIGNMENT_STATUS;
+  protected readonly estadoCompetencia = COMPETITION_STATUS;
+  protected readonly etiquetaPlataforma = PLATFORM_LABEL;
+  protected readonly etiquetaVeredicto = VERDICT_LABEL;
+  protected readonly fecha = formatDateTime;
 
-  protected readonly avance = [
-    { etiqueta: 'Intentos', valor: '2' },
-    { etiqueta: 'Último intento', valor: '29 oct. 2026 · 8:14 p. m.' },
-  ];
+  protected readonly detalle = signal<AssignedDetail | null>(null);
+  protected readonly cargando = signal(true);
+  protected readonly error = signal<string | null>(null);
+  protected readonly teamId = signal<number | null>(null);
+  protected readonly registroAbierto = signal(false);
+  protected readonly recienRegistrado = signal(false);
 
-  protected readonly intentos = [
-    { fecha: '29 oct. 2026 · 8:14 p. m.', lenguaje: 'C++17', veredicto: 'Rechazado', evidencia: '—' },
-    { fecha: '28 oct. 2026 · 7:40 p. m.', lenguaje: 'C++17', veredicto: 'Rechazado', evidencia: '—' },
-  ];
+  private competitionProblemId: number | null = null;
+  private request = 0;
+
+  protected readonly asignacion = computed(() => this.detalle()?.assignment ?? null);
+  /** Attempts, most recent first. */
+  protected readonly intentos = computed<AttemptInfo[]>(() =>
+    [...(this.detalle()?.attempts ?? [])].sort(
+      (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
+    ),
+  );
+  protected readonly ultimoIntento = computed(() => this.intentos()[0] ?? null);
+
+  /** Reason the registration is not available, or `null` when the practitioner can register the problem. */
+  protected readonly bloqueo = computed(() => {
+    const item = this.asignacion();
+    if (!item) return null;
+    if (item.status === 'RESUELTO') return 'Ya registraste este problema como resuelto.';
+    if (item.competition.status === 'PROGRAMADA') return 'La competencia aún no ha comenzado.';
+    if (this.teamId() === null) return 'Abre el problema desde tu lista de problemas asignados para registrarlo en tu equipo.';
+    return null;
+  });
+
+  constructor() {
+    combineLatest([this.route.paramMap, this.route.queryParamMap])
+      .pipe(takeUntilDestroyed(inject(DestroyRef)))
+      .subscribe(([params, query]) => {
+        this.teamId.set(positiveId(query.get('teamId')));
+        this.competitionProblemId = positiveId(params.get('competitionProblemId'));
+        this.detalle.set(null);
+        this.recienRegistrado.set(false);
+        this.cargar();
+      });
+  }
+
+  protected reintentar(): void {
+    this.cargar();
+  }
+
+  protected abrirRegistro(dialogo: HTMLDialogElement): void {
+    this.registroAbierto.set(true);
+    if (typeof dialogo.showModal === 'function') dialogo.showModal();
+    else dialogo.setAttribute('open', '');
+  }
+
+  protected cerrarRegistro(dialogo: HTMLDialogElement): void {
+    if (typeof dialogo.close === 'function') dialogo.close();
+    else dialogo.removeAttribute('open');
+    this.registroAbierto.set(false);
+  }
+
+  /** The registration was accepted: close the form and reload the state and the attempts. */
+  protected alRegistrar(dialogo: HTMLDialogElement): void {
+    this.cerrarRegistro(dialogo);
+    this.recienRegistrado.set(true);
+    this.cargar();
+  }
+
+  protected penalizacion(regla: string | null): string {
+    return regla ? (PENALIZACION[regla] ?? regla) : '—';
+  }
+
+  protected duracion(minutos: number | null): string {
+    if (minutos === null) return '—';
+    const horas = minutos / 60;
+    return Number.isInteger(horas) ? `${horas} ${horas === 1 ? 'hora' : 'horas'}` : `${minutos} min`;
+  }
+
+  private cargar(): void {
+    const id = this.competitionProblemId;
+    const actual = ++this.request;
+    if (id === null) {
+      this.error.set('El problema solicitado no es válido.');
+      this.cargando.set(false);
+      return;
+    }
+    this.cargando.set(true);
+    this.error.set(null);
+    this.api.assignedDetail(id).subscribe({
+      next: (detalle) => {
+        if (actual !== this.request) return;
+        this.detalle.set(detalle);
+        this.cargando.set(false);
+      },
+      error: (error) => {
+        if (actual !== this.request) return;
+        this.error.set(problemsError(error));
+        this.cargando.set(false);
+      },
+    });
+  }
 }

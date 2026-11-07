@@ -154,7 +154,7 @@
               </span>
               Configurar problemas
             </h2>
-            <span class="text-xs text-kl-muted">{{ store.selected().length }} problemas</span>
+            <span class="text-xs text-kl-muted">{{ store.selected().length }} {{ store.selected().length === 1 ? 'problema' : 'problemas' }}</span>
           </div>
           <p class="mt-3 mb-0 text-[13px] text-kl-body">
             Si dejas la letra vacía se asigna la primera libre. Puntaje por defecto: 1. Color por

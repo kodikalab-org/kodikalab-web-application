@@ -71,7 +71,7 @@
                 >
                 <span>
                   <span class="block text-sm font-semibold text-kl-text">{{ grupo.name }}</span>
-                  <span class="block text-xs text-kl-muted">{{ grupo.activeMembers }} integrantes activos</span>
+                  <span class="block text-xs text-kl-muted">{{ plural(grupo.activeMembers, 'integrante activo', 'integrantes activos') }}</span>
                 </span>
               </span>
             </mat-radio-button>

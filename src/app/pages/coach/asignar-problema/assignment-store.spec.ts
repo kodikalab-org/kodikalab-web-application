@@ -37,6 +37,26 @@ describe('AssignmentStore', () => {
   });
   afterEach(() => http.verify());
 
+  it('preselects the team and the contest that arrive in the URL once its competitions load', () => {
+    store.preselect(8, 4);
+    expect(store.teamId()).toBe(8);
+    http.expectOne((req) => req.url === '/api/competitions' && req.params.get('teamId') === '8').flush({
+      teamId: 8,
+      total: 2,
+      items: [
+        { id: 3, eventName: 'Semanal 1', status: 'EN_CURSO', startsAt: null, endsAt: null, problemsCount: 0 },
+        { id: 4, eventName: 'Semanal 2', status: 'PROGRAMADA', startsAt: null, endsAt: null, problemsCount: 0 },
+      ],
+    });
+    expect(store.competitionId()).toBe(4);
+  });
+
+  it('ignores a preselected contest that does not belong to the team', () => {
+    store.preselect(8, 99);
+    http.expectOne((req) => req.url === '/api/competitions').flush({ teamId: 8, total: 0, items: [] });
+    expect(store.competitionId()).toBeNull();
+  });
+
   it('keeps the selection between steps and toggles a problem on and off', () => {
     store.toggle(catalogProblem(7));
     store.toggle(catalogProblem(9));

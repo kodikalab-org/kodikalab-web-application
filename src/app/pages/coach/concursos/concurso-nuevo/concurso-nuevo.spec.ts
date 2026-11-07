@@ -7,6 +7,8 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { API_URL } from '../../../../core/api';
 import { ConcursoNuevo } from './concurso-nuevo';
 import { buildCreateRequest, offsetIso } from '../concurso-form';
+import type { CatalogProblem } from '../../../../core/problems-api';
+import { PALETTE, type PickedProblem } from '../../../../shared/problem-picker/picked-problems';
 
 const GROUPS = [
   { groupId: 7, name: 'Grupo Alfa', status: 'ACTIVO', activeMembers: 4, pendingRequests: 0 },
@@ -59,6 +61,22 @@ describe('buildCreateRequest', () => {
     });
   });
 });
+
+const CF_PROBLEM: CatalogProblem = {
+  id: 11,
+  title: 'To My Critics',
+  url: 'https://codeforces.com/problemset/problem/1850/A',
+  sourcePlatform: 'CODEFORCES',
+  sourceCode: '1850A',
+  difficultyRating: '800',
+  timeLimitMs: null,
+  memoryLimitMb: null,
+  topics: [],
+};
+const PICKED: PickedProblem[] = [
+  { problem: CF_PROBLEM, letter: 'A', score: 1, balloonColor: PALETTE[0] },
+  { problem: { ...CF_PROBLEM, id: 12, title: 'Ten Words of Wisdom', sourceCode: '1850B' }, letter: 'B', score: 5, balloonColor: '#00ff00' },
+];
 
 describe('ConcursoNuevo', () => {
   let http: HttpTestingController;
@@ -238,5 +256,92 @@ describe('ConcursoNuevo', () => {
     await settle();
     expect(root.querySelector('[role="alert"]')?.textContent).toContain('Ya existe una competencia');
     expect(page.form.controls.eventName.value).toBe('Maratón interna');
+  });
+
+  describe('problems', () => {
+    it('offers the Problemas section with the picker and lets the contest be created without problems', async () => {
+      const { page, settle, root } = await open();
+      expect(root.querySelector('app-problem-picker')).not.toBeNull();
+      expect(root.textContent).toContain('Problemas');
+      fill(page, {});
+      submit(root);
+      http.expectOne('/api/competitions').flush({ id: 12, teamId: 7, eventName: 'Maratón interna' });
+      http.expectNone('/api/problems/assign');
+      await settle();
+      expect(TestBed.inject(Router).url).toBe('/coach/concursos?teamId=7');
+    });
+
+    it('creates the contest and then assigns the picker rows to it', async () => {
+      const { page, settle, root } = await open();
+      fill(page, {});
+      page.picked.set(PICKED);
+      submit(root);
+      http.expectOne('/api/competitions').flush({ id: 12, teamId: 7, eventName: 'Maratón interna' });
+      const assign = http.expectOne('/api/problems/assign');
+      expect(assign.request.method).toBe('POST');
+      expect(assign.request.body).toEqual({
+        competitionId: 12,
+        problems: [
+          { problemId: 11, letter: 'A', score: 1, balloonColor: PALETTE[0].toUpperCase() },
+          { problemId: 12, letter: 'B', score: 5, balloonColor: '#00FF00' },
+        ],
+      });
+      assign.flush({ competitionId: 12, teamId: 7, assigned: [] }, { status: 201, statusText: 'Created' });
+      await settle();
+      expect(TestBed.inject(Router).url).toBe('/coach/concursos?teamId=7');
+    });
+
+    it('does not lose the created contest when the assignment fails and links to assign them again', async () => {
+      const { page, settle, root } = await open();
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      fill(page, {});
+      page.picked.set(PICKED);
+      submit(root);
+      http.expectOne('/api/competitions').flush({ id: 12, teamId: 7, eventName: 'Maratón interna' });
+      http
+        .expectOne('/api/problems/assign')
+        .flush({ message: 'Una de las letras ya existe en la competencia' }, { status: 409, statusText: 'Conflict' });
+      await settle();
+      expect(navigate).toHaveBeenCalledTimes(1);
+      const [commands, extras] = navigate.mock.calls[0];
+      expect(commands).toEqual(['/coach/concursos']);
+      expect(extras?.queryParams).toEqual({ teamId: 7 });
+      expect(extras?.state).toMatchObject({
+        created: { id: 12, name: 'Maratón interna' },
+        assignmentError: 'Una de las letras ya existe en la competencia',
+      });
+    });
+
+    it('does not assign anything when creating the contest fails and keeps the picked problems', async () => {
+      const { page, settle, root } = await open();
+      fill(page, {});
+      page.picked.set(PICKED);
+      submit(root);
+      http
+        .expectOne('/api/competitions')
+        .flush({ message: 'Ya existe una competencia', errors: {} }, { status: 409, statusText: 'Conflict' });
+      http.expectNone('/api/problems/assign');
+      await settle();
+      expect(page.picked()).toEqual(PICKED);
+    });
+
+    it('uses 100 points as default for IOI contests when a problem is added from the picker', async () => {
+      const { page, settle, root } = await open();
+      fill(page, { penaltyRule: 'IOI_POINTS' });
+      await settle();
+      const input = root.querySelector<HTMLInputElement>('input[aria-label="Código de Codeforces"]')!;
+      input.value = '1850A';
+      input.dispatchEvent(new Event('input'));
+      root.querySelector<HTMLButtonElement>('button[aria-label="Agregar por código"]')!.click();
+      http.expectOne('/api/problems/codeforces/import').flush({ created: true, problem: CF_PROBLEM });
+      await settle();
+      expect(page.picked().map((row) => row.score)).toEqual([100]);
+      submit(root);
+      http.expectOne('/api/competitions').flush({ id: 3, teamId: 7, eventName: 'Maratón interna' });
+      const assign = http.expectOne('/api/problems/assign');
+      expect(assign.request.body.problems[0]).toMatchObject({ problemId: 11, letter: 'A', score: 100 });
+      assign.flush({ competitionId: 3, teamId: 7, assigned: [] });
+      await settle();
+    });
   });
 });

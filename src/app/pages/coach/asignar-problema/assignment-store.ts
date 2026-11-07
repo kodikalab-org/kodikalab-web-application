@@ -147,7 +147,17 @@ export class AssignmentStore {
       });
   }
 
+  /** Contest requested in the URL, applied when the team's competitions arrive. */
+  private pendingCompetitionId: number | null = null;
+
+  /** Opens the flow with a team and contest already chosen (links from the contest list). */
+  preselect(teamId: number, competitionId: number): void {
+    this.selectTeam(teamId);
+    this.pendingCompetitionId = competitionId;
+  }
+
   selectTeam(teamId: number | null): void {
+    this.pendingCompetitionId = null;
     this.teamId.set(teamId);
     this.competitionId.set(null);
     this.competitions.set([]);
@@ -168,7 +178,13 @@ export class AssignmentStore {
       .pipe(finalize(() => this.competitionsLoading.set(false)))
       .subscribe({
         next: (competitions) => {
-          if (this.teamId() === teamId) this.competitions.set(competitions);
+          if (this.teamId() !== teamId) return;
+          this.competitions.set(competitions);
+          const pending = this.pendingCompetitionId;
+          this.pendingCompetitionId = null;
+          if (pending !== null && competitions.some((c) => c.competitionId === pending)) {
+            this.competitionId.set(pending);
+          }
         },
         error: (error) => {
           if (this.teamId() === teamId) this.competitionsError.set(problemsError(error));

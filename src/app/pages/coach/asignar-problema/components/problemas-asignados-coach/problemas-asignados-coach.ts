@@ -22,6 +22,7 @@ import {
   problemsError,
 } from '../../../../../core/problems-api';
 import { CoachGroup, TeamsApi } from '../../../../../core/teams-api';
+import { plural } from '../../../../../shared/plural';
 
 const COLOR_EQUIPO = [
   'from-[#8a6cff] to-[#6e52f2]',
@@ -69,6 +70,7 @@ export class ProblemasAsignadosCoach {
     { valor: 'assignedAt', etiqueta: 'Fecha de asignación' },
   ];
   protected readonly fecha = formatDateTime;
+  protected readonly plural = plural;
 
   /** Message after a successful assignment, read from the redirect of the confirmation step. */
   protected readonly exito = (() => {
@@ -76,7 +78,7 @@ export class ProblemasAsignadosCoach {
     const cantidad = Number(query.get('asignados'));
     if (!Number.isInteger(cantidad) || cantidad < 1) return null;
     const competencia = query.get('competencia')?.trim();
-    return `Asignaste ${cantidad} ${cantidad === 1 ? 'problema' : 'problemas'}${competencia ? ` a ${competencia}` : ''}. Todo el equipo ya los ve.`;
+    return `Asignaste ${plural(cantidad, 'problema')}${competencia ? ` a ${competencia}` : ''}. Todo el equipo ya los ve.`;
   })();
 
   protected readonly equipos = signal<CoachGroup[]>([]);

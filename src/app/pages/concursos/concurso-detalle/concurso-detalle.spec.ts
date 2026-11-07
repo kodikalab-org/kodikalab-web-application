@@ -145,6 +145,58 @@ describe('ConcursoDetalle', () => {
     expect(root.textContent).toContain('Envío registrado');
   });
 
+  async function registerProblemD(refreshedStatus: string) {
+    const { harness, root } = await open('/concursos/1/10');
+    const row = root.querySelectorAll('table[aria-label="Problemas del concurso"] tbody tr')[3];
+    Array.from(row.querySelectorAll('button')).find((b) => b.textContent?.includes('Registrar envío'))!.click();
+    harness.detectChanges();
+    const dialog = root.querySelector('[role="dialog"]')!;
+    Array.from(dialog.querySelectorAll('button')).find((b) => b.textContent?.includes('Guardar envío'))!.click();
+    http.expectOne('/api/competitions/teams/1/problems/104/resolutions').flush({
+      resolution: { resolutionId: 5, membershipId: 10, membershipTeamId: 1, competitionProblemId: 104, competitionId: 10, competitionTeamId: 1, problemId: 104, verdict: 'PENDIENTE' },
+      registrationMethod: 'MANUAL',
+      progress: { teamId: 1, membershipId: 10, userId: 7, acceptedProblems: 1 },
+    });
+    const body = assignedBody();
+    assignedRequest(http, 1).flush({
+      ...body,
+      items: body.items.map((item) => (item.competitionProblemId === 104 ? { ...item, status: refreshedStatus } : item)),
+    });
+    http.expectOne('/api/competitions/10/standings').flush(STANDINGS);
+    harness.detectChanges();
+    return root;
+  }
+
+  it('says the problem is solved when the refreshed status is RESUELTO, not that it is pending', async () => {
+    const root = await registerProblemD('RESUELTO');
+    const text = root.textContent!;
+    expect(text).toContain('Envío registrado: el problema D quedó como resuelto.');
+    expect(text).not.toContain('Quedó pendiente de verificación');
+  });
+
+  it('says it is pending verification only when the refreshed status is PENDIENTE', async () => {
+    const root = await registerProblemD('PENDIENTE');
+    expect(root.textContent).toContain('Envío registrado para el problema D. Quedó pendiente de verificación.');
+  });
+
+  it('uses a neutral message for any other resulting status', async () => {
+    const root = await registerProblemD('EN_PROGRESO');
+    expect(root.textContent).toContain('Envío registrado para el problema D.');
+    expect(root.textContent).not.toContain('Quedó pendiente de verificación');
+    expect(root.textContent).not.toContain('quedó como resuelto');
+  });
+
+  it('disables "Registrar envío" for a solved problem with an explanation and keeps the others enabled', async () => {
+    const { root } = await open('/concursos/1/10');
+    const buttons = Array.from(root.querySelectorAll('table[aria-label="Problemas del concurso"] tbody tr')).map(
+      (row) => Array.from(row.querySelectorAll('button')).find((b) => b.textContent?.includes('Registrar envío'))!,
+    );
+    expect(buttons.map((b) => b.disabled)).toEqual([true, false, false, false]);
+    expect(buttons[0].getAttribute('aria-description')).toBe('Ya resolviste este problema');
+    expect(buttons[0].getAttribute('title')).toBe('Ya resolviste este problema');
+    expect(buttons[1].hasAttribute('aria-description')).toBe(false);
+  });
+
   it('disables registering submissions while the contest is PROGRAMADA', async () => {
     const { root } = await open('/concursos/1/10', 'PROGRAMADA');
     const buttons = Array.from(root.querySelectorAll('table[aria-label="Problemas del concurso"] button')).filter(

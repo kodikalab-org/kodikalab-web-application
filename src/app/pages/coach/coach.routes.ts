@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AssignmentStore } from './asignar-problema/assignment-store';
 
 /**
  * Rutas del coach para asignar problemas (US07 y US08). Las rutas llevan el prefijo `coach/`
@@ -8,6 +9,8 @@ export const COACH_ROUTES: Routes = [
   {
     path: 'coach/asignar-problema',
     data: { coach: true },
+    // Selection and configuration shared by the three steps of the assignment.
+    providers: [AssignmentStore],
     loadComponent: () => import('../../layouts/app-layout/app-layout').then((m) => m.AppLayout),
     children: [
       {

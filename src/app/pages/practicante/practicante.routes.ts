@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-/** Rutas del practicante para sus problemas asignados (US09); sin prefijo `coach/` el rol es PRACTICANTE. */
+/** Rutas del practicante para sus problemas asignados (US08 y US09); sin prefijo `coach/` el rol es PRACTICANTE. */
 export const PRACTICANTE_ROUTES: Routes = [
   {
     path: 'practicante/problemas-asignados',
@@ -13,7 +13,7 @@ export const PRACTICANTE_ROUTES: Routes = [
           import('./problemas-asignados/problemas-asignados').then((m) => m.ProblemasAsignados),
       },
       {
-        path: 'detalle',
+        path: 'detalle/:competitionProblemId',
         loadComponent: () =>
           import('./problemas-asignados/components/problema-elegido/problema-elegido').then(
             (m) => m.ProblemaElegido,

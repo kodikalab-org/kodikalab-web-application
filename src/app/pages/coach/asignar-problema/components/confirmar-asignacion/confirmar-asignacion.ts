@@ -1,27 +1,40 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { COMPETITION_STATUS, PLATFORM_LABEL } from '../../../../../core/problems-api';
+import { AssignmentStore } from '../../assignment-store';
+import { PasosAsignacion } from '../pasos-asignacion/pasos-asignacion';
 
+/** Step 3 of US-07: review the assignment and send it with `POST /problems/assign`. */
 @Component({
   selector: 'app-confirmar-asignacion',
-  imports: [RouterLink, MatButtonModule, MatCardModule],
+  imports: [RouterLink, MatButtonModule, MatCardModule, PasosAsignacion],
   templateUrl: './confirmar-asignacion.html',
   styleUrl: './confirmar-asignacion.css',
   host: { class: 'block' },
 })
 export class ConfirmarAsignacion {
-  protected readonly pasos = [
-    { numero: 1, titulo: 'Seleccionar problemas', detalle: 'Elige del catálogo', hecho: true, actual: false, clase: 'border-kl-border bg-white/3', claseNumero: 'bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-white' },
-    { numero: 2, titulo: 'Configurar asignación', detalle: 'Competencia, letras y puntaje', hecho: true, actual: false, clase: 'border-kl-border bg-white/3', claseNumero: 'bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-white' },
-    { numero: 3, titulo: 'Revisar y confirmar', detalle: 'Verifica antes de asignar', hecho: false, actual: true, clase: 'border-[#8a6cff] bg-[#241a5c]/60', claseNumero: 'bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-white' },
-  ];
+  protected readonly store = inject(AssignmentStore);
+  private readonly router = inject(Router);
 
-  // Datos de ejemplo del Figma.
-  protected readonly problemas = [
-    { titulo: 'Theatre Square', detalle: 'CF-1A · Codeforces', letra: 'C', puntaje: '100', color: '#FF0000' },
-    { titulo: 'Weird Algorithm', detalle: 'CSES-1068 · CSES', letra: 'D', puntaje: '100', color: '#22C55E' },
-    { titulo: 'Shortest Routes I', detalle: 'CSES-1671 · CSES', letra: 'E', puntaje: '100', color: '#3B82F6' },
-    { titulo: 'I Hate Non-integer Number', detalle: 'ABC262-D · AtCoder', letra: 'F', puntaje: '100', color: '#FACC15' },
-  ];
+  protected readonly estado = COMPETITION_STATUS;
+  protected readonly etiquetaPlataforma = PLATFORM_LABEL;
+
+  protected confirmar(): void {
+    const solicitud = this.store.request();
+    if (!solicitud || this.store.submitting()) return;
+    // The store forgets the competition once the assignment succeeds, so the name is read first.
+    const competencia = this.store.competition()?.eventName ?? '';
+    this.store.submit().subscribe({
+      next: () =>
+        this.router.navigate(['/coach/problemas-asignados'], {
+          queryParams: { asignados: solicitud.problems.length, competencia },
+        }),
+      // Errors that point at fields are shown on the configuration step, where they can be fixed.
+      error: () => {
+        if (this.store.hasFieldErrors()) this.router.navigate(['/coach/asignar-problema/configurar']);
+      },
+    });
+  }
 }

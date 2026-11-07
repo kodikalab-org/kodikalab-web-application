@@ -5,6 +5,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { routes } from './app.routes';
 import { Session } from './core/session';
+import { API_URL } from './core/api';
+import { AssignmentStore } from './pages/coach/asignar-problema/assignment-store';
 
 describe('Group routes', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()] }));
@@ -49,5 +51,43 @@ describe('rutas de asignación de problemas', () => {
 
   it('las pantallas del practicante exigen el rol PRACTICANTE', () => {
     expect(rol('practicante/problemas-asignados')).toBe('PRACTICANTE');
+  });
+
+  it('el flujo de asignación del coach comparte su estado entre los tres pasos y ya no tiene el paso de destinatarios', () => {
+    const flujo = routes.find((r) => r.path === 'coach/asignar-problema');
+    expect(flujo?.providers).toContain(AssignmentStore);
+    expect(flujo?.children?.map((paso) => paso.path)).toEqual(['', 'configurar', 'confirmar']);
+  });
+});
+
+describe('rutas con parámetros de problemas asignados', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_URL, useValue: '/api' },
+      ],
+    }),
+  );
+  afterEach(() => {
+    TestBed.inject(HttpTestingController).verify();
+    TestBed.inject(Session).logout();
+  });
+
+  it('el detalle del practicante lleva el id de la asignación en la ruta y pide ese problema', async () => {
+    TestBed.inject(Session).startDemo('PRACTICANTE');
+    await RouterTestingHarness.create('/practicante/problemas-asignados/detalle/51?teamId=12');
+    expect(TestBed.inject(Router).url).toBe('/practicante/problemas-asignados/detalle/51?teamId=12');
+    const request = TestBed.inject(HttpTestingController).expectOne('/api/problems/assigned/51');
+    expect(request.request.method).toBe('GET');
+    request.flush({}, { status: 404, statusText: 'Not Found' });
+  });
+
+  it('el detalle sin id de asignación ya no existe', async () => {
+    TestBed.inject(Session).startDemo('PRACTICANTE');
+    await RouterTestingHarness.create('/practicante/problemas-asignados/detalle');
+    expect(TestBed.inject(Router).url).toBe('/');
   });
 });

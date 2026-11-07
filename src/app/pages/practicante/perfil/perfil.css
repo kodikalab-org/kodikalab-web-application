@@ -1,0 +1,41 @@
+/* Only Material tokens remain local; visual layout uses Tailwind utilities. */
+:host {
+  display: block;
+  --auth-field-height: 38px;
+  --auth-field-padding: 7px;
+  --auth-input-color: var(--kl-text-heading);
+  --auth-focus-color: var(--kl-accent-bar);
+  --mat-button-filled-container-height: 46px;
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-label-text-size: 16px;
+  --mat-button-filled-label-text-weight: 500;
+  --mat-slide-toggle-track-width: 48px;
+  --mat-slide-toggle-track-height: 26px;
+  --mat-slide-toggle-track-shape: 9999px;
+  --mat-slide-toggle-selected-track-color: #7357f3;
+  --mat-slide-toggle-selected-hover-track-color: #7357f3;
+  --mat-slide-toggle-selected-focus-track-color: #7357f3;
+  --mat-slide-toggle-selected-pressed-track-color: #7357f3;
+  --mat-slide-toggle-selected-handle-color: #ffffff;
+  --mat-slide-toggle-selected-hover-handle-color: #ffffff;
+  --mat-slide-toggle-selected-focus-handle-color: #ffffff;
+  --mat-slide-toggle-selected-pressed-handle-color: #ffffff;
+  --mat-slide-toggle-selected-handle-size: 20px;
+  --mat-slide-toggle-selected-handle-horizontal-margin: 0 3px;
+  --mat-slide-toggle-selected-pressed-handle-horizontal-margin: 0 3px;
+  --mat-slide-toggle-selected-with-icon-handle-horizontal-margin: 0 3px;
+  --mat-slide-toggle-handle-width: 16px;
+  --mat-slide-toggle-handle-height: 16px;
+  --mat-slide-toggle-pressed-handle-size: 20px;
+  --mat-slide-toggle-state-layer-size: 26px;
+  --mat-slide-toggle-unselected-track-color: #34304a;
+  --mat-slide-toggle-unselected-hover-track-color: #34304a;
+  --mat-slide-toggle-unselected-focus-track-color: #34304a;
+  --mat-slide-toggle-unselected-pressed-track-color: #34304a;
+  --mat-slide-toggle-track-outline-color: transparent;
+  --mat-slide-toggle-unselected-handle-color: #cfcbe0;
+  --mat-slide-toggle-unselected-hover-handle-color: #cfcbe0;
+  --mat-slide-toggle-unselected-focus-handle-color: #cfcbe0;
+  --mat-slide-toggle-unselected-pressed-handle-color: #cfcbe0;
+  --mat-slide-toggle-label-text-color: var(--kl-text);
+}

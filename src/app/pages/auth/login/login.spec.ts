@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
+import { Session } from '../../../core/session';
 import { Login } from './login';
 
 describe('Login', () => {
@@ -42,14 +45,68 @@ describe('Login', () => {
     await type('email', '');
     await type('password', '');
     const text = root.textContent ?? '';
-    expect(text).toContain('Ingresa un correo válido, por ejemplo nombre@upc.edu.pe');
+    expect(text).toContain('Ingresa tu correo institucional');
     expect(text).toContain('Ingresa tu contraseña');
+  });
+
+  it('treats a whitespace-only email as missing', async () => {
+    const { root, type } = await setup();
+    await type('email', '   ');
+    expect(root.textContent).toContain('Ingresa tu correo institucional');
   });
 
   it('rejects a malformed email', async () => {
     const { root, type } = await setup();
     await type('email', 'camila.rojas@');
     expect(root.textContent).toContain('Ingresa un correo válido, por ejemplo nombre@upc.edu.pe');
+  });
+
+  it('rejects an email above 100 characters', async () => {
+    const { root, type } = await setup();
+    await type('email', `${'a'.repeat(60)}@${'b'.repeat(30)}.${'c'.repeat(20)}.pe`);
+    expect(root.textContent).toContain('El correo no puede superar 100 caracteres');
+  });
+
+  it('does not trim or reject a password with spaces, but blocks passwords above 72 bytes', async () => {
+    const { root, submit, type } = await setup();
+    await type('email', 'camila.rojas@upc.edu.pe');
+    await type('password', '  Password123  ');
+    expect(submit().disabled).toBe(false);
+    await type('password', '€'.repeat(25));
+    expect(root.textContent).toContain('La contraseña no puede superar 72 bytes');
+    expect(submit().disabled).toBe(true);
+  });
+
+  describe('Remember me', () => {
+    async function submitWith(remember: boolean | null) {
+      const ctx = await setup();
+      const login = vi
+        .spyOn(TestBed.inject(Session), 'login')
+        .mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401, error: { message: 'x' } })));
+      await ctx.type('email', 'camila.rojas@upc.edu.pe');
+      await ctx.type('password', 'Prueba2026');
+      const box = ctx.root.querySelector<HTMLInputElement>('mat-checkbox input')!;
+      if (remember !== null && box.checked !== remember) {
+        box.click();
+        ctx.fixture.detectChanges();
+        await ctx.fixture.whenStable();
+      }
+      ctx.root.querySelector('form')!.dispatchEvent(new Event('submit', { cancelable: true }));
+      await ctx.fixture.whenStable();
+      return { ...ctx, login, box };
+    }
+
+    it('is checked by default and asks the session to remember the login', async () => {
+      const { login, box } = await submitWith(null);
+      expect(box.checked).toBe(true);
+      expect(login).toHaveBeenCalledWith('camila.rojas@upc.edu.pe', 'Prueba2026', true);
+    });
+
+    it('asks the session not to remember the login when the user unchecks it', async () => {
+      const { login, box } = await submitWith(false);
+      expect(box.checked).toBe(false);
+      expect(login).toHaveBeenCalledWith('camila.rojas@upc.edu.pe', 'Prueba2026', false);
+    });
   });
 
   it('enables the submit button when the form is valid', async () => {

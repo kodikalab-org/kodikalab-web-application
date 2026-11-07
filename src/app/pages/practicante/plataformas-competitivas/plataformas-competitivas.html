@@ -1,0 +1,164 @@
+@let estado = estado$ | async;
+<div class="relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text">
+  <img
+    class="pointer-events-none absolute top-0 left-0 z-0 h-[900px] w-[1440px] max-w-none max-[641px]:-left-[1000px]"
+    src="images/onboarding/bg.svg"
+    alt=""
+    aria-hidden="true"
+  />
+
+  <mat-toolbar
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl h-[68px] justify-between border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-14 font-body font-normal max-[641px]:h-[60px] max-[641px]:px-4"
+  >
+    <div class="flex items-center gap-10">
+      <a class="inline-flex items-center gap-2" routerLink="/inicio" aria-label="Kodikalab, inicio">
+        <img
+          class="max-[641px]:size-7"
+          src="images/plataformas/isotipo-34.svg"
+          alt=""
+          width="34"
+          height="34"
+        />
+        <span class="text-xl font-bold tracking-[-.12px]">Kodikalab</span>
+      </a>
+      <app-header-navigation />
+    </div>
+    <div class="flex items-center gap-4">
+      <button
+        class="inline-flex cursor-pointer border-0 bg-transparent p-0"
+        type="button"
+        aria-label="Notificaciones"
+      >
+        <img src="images/plataformas/bell-22.svg" alt="" width="22" height="22" />
+      </button>
+      <app-user-menu />
+    </div>
+  </mat-toolbar>
+
+  <main
+    class="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-6 px-[120px] py-8 max-[1200px]:px-6 max-[641px]:p-4"
+  >
+    <header class="flex flex-col gap-2">
+      <p class="m-0 font-mono text-xs leading-4 font-medium text-kl-muted">Inicio / Mi espacio</p>
+      <h1
+        class="m-0 font-display text-[40px] leading-[48px] font-bold tracking-[-1px] max-[641px]:text-2xl max-[641px]:leading-[30px] max-[641px]:tracking-[-.12px]"
+      >
+        Mis plataformas competitivas
+      </h1>
+      <p class="m-0 text-base leading-[22.4px] text-kl-muted">
+        Mantén tu perfil actualizado aunque una plataforma externa no esté disponible.
+      </p>
+    </header>
+
+    @if (estado === 'confirmada') {
+      <div
+        class="flex flex-col gap-2 rounded-xl border border-solid border-[#4ade80] bg-[#0f2a1b] p-4 text-sm leading-5"
+        role="status"
+      >
+        <p class="m-0 font-bold text-[#4ade80]">Vinculación confirmada</p>
+        <p class="m-0">
+          Validamos camila_rc en Codeforces. La plataforma quedó vinculada sin modificar los demás
+          datos del perfil.
+        </p>
+      </div>
+    } @else {
+      <div
+        class="flex flex-col gap-2 rounded-xl border border-solid border-[#fbbf24] bg-[#2e2410] p-4 text-sm leading-5"
+        role="status"
+      >
+        <p class="m-0 font-bold text-[#fbbf24]">Perfil guardado · Vinculación pendiente</p>
+        <p class="m-0">
+          Tus datos personales y nivel se guardaron. Codeforces no pudo validar el identificador; la
+          vinculación sigue pendiente.
+        </p>
+      </div>
+    }
+
+    <div class="grid grid-cols-[minmax(0,1fr)_360px] items-start gap-6 max-[1000px]:grid-cols-1">
+      <section
+        class="flex flex-col gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 p-6"
+        aria-labelledby="vinculadas-titulo"
+      >
+        <h2 class="m-0 text-xl leading-[25.8px] font-bold tracking-[-.12px]" id="vinculadas-titulo">
+          Plataformas vinculadas
+        </h2>
+        @for (plataforma of plataformas; track plataforma.nombre) {
+          <div class="flex flex-col gap-2">
+            <p class="m-0 text-sm leading-5 font-bold">{{ plataforma.nombre }}</p>
+            <p
+              class="m-0 rounded-xl border border-solid border-[#2e2e2e] bg-[#212121] p-3 text-sm leading-5"
+            >
+              {{ plataforma.usuario }}
+            </p>
+            <p class="m-0 text-xs leading-[16.6px] text-kl-muted">
+              Estado:
+              {{ plataforma.pendiente && estado !== 'confirmada' ? 'Pendiente de validación externa' : 'Vinculada' }}
+            </p>
+          </div>
+        }
+        <div class="flex items-start gap-3 max-[641px]:flex-col">
+          <p aria-disabled="true" class="text-sm text-kl-muted">AtCoder · En mantenimiento<br />VJudge · En mantenimiento</p>
+          @if (estado === 'confirmada') {
+            <button
+              mat-flat-button
+              class="px-5 shadow-[inset_0_1px_1px_#a881fe] drop-shadow-[0_2px_6px_rgba(168,129,254,.64)] max-[641px]:w-full"
+              type="button"
+              routerLink="/perfil"
+            >
+              Ver mi perfil
+            </button>
+          } @else {
+            <button
+              mat-flat-button
+              class="px-5 shadow-[inset_0_1px_1px_#a881fe] drop-shadow-[0_2px_6px_rgba(168,129,254,.64)] max-[641px]:w-full"
+              type="button"
+            >
+              Reintentar vinculación
+            </button>
+            <button
+              mat-stroked-button
+              class="px-5 max-[641px]:w-full"
+              type="button"
+              routerLink="/perfil"
+            >
+              Ver mi perfil
+            </button>
+          }
+        </div>
+      </section>
+
+      <div class="flex flex-col gap-6">
+        <section
+          class="flex flex-col gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 p-6"
+          aria-labelledby="guardados-titulo"
+        >
+          <h2 class="m-0 text-xl leading-[25.8px] font-bold tracking-[-.12px]" id="guardados-titulo">
+            Datos guardados
+          </h2>
+          <div class="text-sm leading-5 text-kl-muted">
+            <p class="m-0">Camila Rojas · Ingeniería de Software</p>
+            <p class="m-0">Nivel intermedio</p>
+            <p class="m-0">Los datos válidos se conservan aunque falle una consulta externa.</p>
+          </div>
+        </section>
+        <section
+          class="flex flex-col gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 p-6"
+          aria-labelledby="independiente-titulo"
+        >
+          <h2
+            class="m-0 text-xl leading-[25.8px] font-bold tracking-[-.12px]"
+            id="independiente-titulo"
+          >
+            Estado independiente
+          </h2>
+          <p class="m-0 text-sm leading-5 text-kl-muted">
+            Una vinculación pendiente no debe mostrarse como confirmada. Puedes volver a verificarla
+            más adelante sin repetir el registro.
+          </p>
+        </section>
+      </div>
+    </div>
+
+  </main>
+  <app-site-footer audience="practicante" />
+</div>

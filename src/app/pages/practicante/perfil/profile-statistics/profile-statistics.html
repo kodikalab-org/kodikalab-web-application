@@ -1,0 +1,129 @@
+<section
+  class="stats-panel"
+  aria-labelledby="titulo-estadisticas"
+  [attr.aria-busy]="supported() && loading()"
+>
+  <div class="stats-heading">
+    <div>
+      <p class="eyebrow">TU PROGRESO COMPETITIVO</p>
+      <h2 id="titulo-estadisticas">
+        <img src="images/perfil/stats-bars-20.svg" alt="" width="22" height="22" />Estadísticas
+      </h2>
+    </div>
+    <label class="platform-filter"
+      >Plataforma
+      <select
+        aria-label="Filtrar estadísticas por plataforma"
+        [value]="platform()"
+        (change)="selectPlatform($event)"
+      >
+        @for (option of platforms; track option.id) {
+          <option [value]="option.id">{{ option.name }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (demo()) {
+    <p class="demo-notice" role="note">Datos de ejemplo · No se consultó ninguna plataforma.</p>
+  }
+
+  @if (!supported()) {
+    <div class="stats-empty pending-platform" role="status">
+      <span class="pending-mark" aria-hidden="true">{{
+        platform() === 'atcoder' ? 'AC' : 'LC'
+      }}</span>
+      <span class="status-badge muted">Integración pendiente</span>
+      <h3>{{ pendingName() }} todavía no aporta estadísticas</h3>
+      <p>
+        Esta vista estará disponible cuando se conecte su fuente de datos. Por ahora no mostramos
+        ceros ni cifras de otras plataformas como si fueran de {{ pendingName() }}.
+      </p>
+      <div class="state-actions">
+        <button class="action-button" type="button" (click)="platform.set('codeforces')">
+          Ver Codeforces
+        </button>
+        <a class="text-link" [href]="pendingUrl()" target="_blank" rel="noopener noreferrer"
+          >Visitar {{ pendingName() }} <span aria-hidden="true">↗</span></a
+        >
+      </div>
+    </div>
+  } @else if (loading()) {
+    <div class="stats-skeleton animate-pulse motion-reduce:animate-none" aria-hidden="true">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div class="wide"></div>
+      <div class="wide"></div>
+    </div>
+    <span class="sr-only" role="status">Cargando estadísticas de Codeforces</span>
+  } @else if (failed()) {
+    <div class="stats-empty error-state" role="alert">
+      <span class="status-badge warning">Fuente no disponible</span>
+      <h3>No pudimos cargar las estadísticas de Codeforces</h3>
+      <p>
+        Tu perfil sigue disponible. Reintenta para consultar la fuente; no mostraremos datos de
+        ejemplo en su lugar.
+      </p>
+      <button class="action-button" type="button" (click)="retry.emit()">Reintentar</button>
+    </div>
+  } @else if (stats(); as current) {
+    @if (!current.linked) {
+      <div class="stats-empty" role="status">
+        <img src="images/onboarding/codeforces-34.svg" alt="" width="48" height="48" />
+        <h3>Vincula tu usuario de Codeforces</h3>
+        <p>
+          Conecta tu cuenta para descubrir tu actividad, tus problemas resueltos y tu distribución
+          por dificultad.
+        </p>
+        <a class="action-button" routerLink="/perfil/editar" fragment="plataformas"
+          >Vincula tu usuario de Codeforces</a
+        >
+      </div>
+    } @else {
+      <div class="source-strip">
+        <div class="source-account">
+          <img src="images/onboarding/codeforces-34.svg" alt="" width="30" height="30" />
+          <div>
+            <strong>Codeforces</strong
+            ><a [href]="profileUrl()" target="_blank" rel="noopener noreferrer"
+              >{{ demo() ? 'Cuenta de ejemplo' : '@' + current.handle }}
+              <span aria-hidden="true">↗</span></a
+            >
+          </div>
+        </div>
+        <span class="status-badge" [class.muted]="demo()"
+          ><span aria-hidden="true">●</span> {{ demo() ? 'Demo' : 'Datos del backend' }}</span
+        >
+      </div>
+      @if (platform() === 'all') {
+        <p class="coverage-note">
+          <strong>1 de 3 fuentes disponibles.</strong> Este resumen incluye solo Codeforces.
+          LeetCode y AtCoder aún no están integrados; sus datos no se suman ni se cuentan como cero.
+        </p>
+      }
+      @if (current.acceptedSubmissions === 0) {
+        <p class="empty-activity" role="status">Aún no hay envíos aceptados</p>
+      }
+
+      <app-statistics-metrics [data]="current" />
+
+      <app-statistics-charts [data]="current" />
+      <footer class="stats-footer">
+        <p>
+          {{
+            demo()
+              ? 'Vista de demostración.'
+              : 'Fuente: API pública de Codeforces. Caché del servidor de hasta 15 minutos.'
+          }}
+          El rating no se suma entre plataformas.
+        </p>
+        <a class="text-link" [href]="submissionsUrl()" target="_blank" rel="noopener noreferrer"
+          >{{ demo() ? 'Explorar Codeforces' : 'Ver envíos en Codeforces' }}
+          <span aria-hidden="true">↗</span></a
+        >
+      </footer>
+    }
+  }
+</section>

@@ -1,0 +1,77 @@
+@if (estado$ | async; as estado) {
+  <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/recursos/fondo-movil.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat lg:bg-[url('/images/recursos/fondo.svg')] lg:bg-size-[100%_900px]"></div>
+    <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+      <mat-toolbar class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14">
+        <a [routerLink]="coach ? '/coach/inicio' : '/inicio'" class="flex items-center gap-2 text-xl font-bold">
+          <picture><source media="(min-width: 1024px)" srcset="/images/recursos/logo.svg" /><img src="/images/recursos/logo-movil.svg" alt="" /></picture>Kodikalab
+        </a>
+        <app-header-navigation [coach]="coach" class="mr-auto ml-10" />
+        <div class="flex items-center gap-4">
+          <img src="/images/recursos/campana.svg" alt="Notificaciones no disponibles en esta maqueta" />
+          <app-user-menu [coach]="coach" />
+        </div>
+      </mat-toolbar>
+    </header>
+    <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
+      <div>
+        <p class="mt-0 mb-2 font-mono text-xs text-kl-muted"><a [routerLink]="coach ? '/coach/inicio' : '/inicio'">Inicio</a> / Mi espacio</p>
+        <h1 class="m-0 font-display text-2xl leading-tight font-bold lg:text-[40px]">Recursos para este problema</h1>
+        <p class="mt-2 mb-0 text-base text-kl-muted">Material de apoyo según el tema y la dificultad del reto que estás practicando.</p>
+      </div>
+      @if (estado === 'contexto-no-disponible') {
+        <section role="alert" class="flex flex-col gap-2 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
+          <strong class="text-kl-danger">No está disponible el contexto del problema</strong>
+          <span>No pudimos identificar el tema ni la dificultad. No se mostraron materiales para evitar sugerencias no relacionadas.</span>
+        </section>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <button mat-flat-button disabled>Volver al problema</button><button mat-stroked-button disabled>Reintentar consulta</button>
+        </div>
+      } @else {
+        <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,816fr)_minmax(0,360fr)]">
+          <mat-card class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6">
+            <h2 class="m-0 text-xl font-bold">Material de apoyo</h2>
+            @switch (estado) {
+              @case ('catalogo-no-disponible') {
+                <section role="alert" class="flex flex-col gap-2 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
+                  <strong class="text-kl-danger">No pudimos consultar el catálogo</strong><span>El servicio de recursos no está disponible. Conservamos el contexto de Camino mínimo en grilla; no se mostraron resultados ajenos al problema.</span>
+                </section>
+                <div class="flex flex-col gap-3 sm:flex-row"><button mat-flat-button disabled>Reintentar consulta</button><button mat-stroked-button disabled>Volver al problema</button></div>
+              }
+              @default {
+                @if (estado === 'relacionados') {
+                  <section role="status" class="flex flex-col gap-2 rounded-xl border border-solid border-[#fbbf24] bg-[#2e2410] p-4 text-sm"><strong class="text-[#fbbf24]">No hay materiales vinculados directamente</strong><span>Estas son alternativas de temas relacionados, no coincidencias directas. Revisa su relación con el problema antes de utilizarlas.</span></section>
+                } @else {
+                  <section role="status" class="flex flex-col gap-2 rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"><strong class="text-[#60b0ff]">Recursos relacionados con tu reto</strong><span>Grafos y caminos mínimos, de nivel intermedio. Estos materiales apoyan las ideas necesarias para resolverlo.</span></section>
+                }
+                @for (recurso of estado === 'relacionados' ? relacionados : pertinentes; track recurso.nombre) {
+                  <article class="flex min-w-0 flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm">
+                    <h3 class="m-0 text-sm font-bold">{{ recurso.nombre }}</h3>
+                    <p class="m-0 text-kl-muted">{{ recurso.detalle }}</p>
+                    <p class="m-0 font-mono text-xs text-[#ccb2ff]">{{ estado === 'relacionados' ? 'Tema relacionado · No es coincidencia directa' : 'Coincidencia por tema y dificultad' }}</p>
+                    <p class="m-0 text-kl-muted">Relación: {{ recurso.relacion }}</p>
+                    <button mat-flat-button disabled class="w-full self-start sm:w-auto">Abrir recurso</button>
+                  </article>
+                }
+                <p class="m-0 text-xs text-kl-muted">Catálogo de ejemplo · La disponibilidad y las condiciones de acceso se consultan en cada recurso.</p>
+              }
+            }
+          </mat-card>
+          <aside class="flex min-w-0 flex-col gap-6">
+            <mat-card class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6">
+              <h2 class="m-0 text-xl font-bold">Problema en contexto</h2><p class="m-0 text-sm leading-5 text-kl-muted">Camino mínimo en grilla<br />Tema: grafos · Caminos mínimos<br />Dificultad: intermedio<br />Equipo: Equipo Alfa</p>
+            </mat-card>
+            <mat-card class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"><h2 class="m-0 text-xl font-bold">Aprende, no copies</h2><p class="m-0 text-sm leading-5 text-kl-muted">Los recursos explican conceptos y técnicas. Úsalos para construir tu propia solución y comprobar tus ideas.</p></mat-card>
+          </aside>
+        </div>
+      }
+      <div class="flex flex-col gap-2 text-xs text-kl-muted">
+        <p class="m-0">Maqueta estática · Sin IA. Apertura de recursos, consulta del catálogo y vista del problema pendientes de integración.</p>
+        <nav aria-label="Variantes de demostración" class="flex flex-wrap gap-x-4 gap-y-2">
+          <a routerLink="/recursos">Recursos pertinentes</a><a routerLink="/recursos" [queryParams]="{ estado: 'relacionados' }">Temas relacionados</a><a routerLink="/recursos" [queryParams]="{ estado: 'catalogo-no-disponible' }">Catálogo no disponible</a><a routerLink="/recursos" [queryParams]="{ estado: 'contexto-no-disponible' }">Contexto no disponible</a>
+        </nav>
+      </div>
+    </main>
+    <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
+  </div>
+}

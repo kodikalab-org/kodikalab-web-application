@@ -1,0 +1,239 @@
+<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+  @let estado = (estado$ | async) ?? '';
+  <div
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
+  ></div>
+  <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+    <mat-toolbar
+      class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14"
+    >
+      <a routerLink="/coach/inicio" class="flex items-center gap-2 text-xl font-bold"
+        ><picture
+          ><source media="(min-width: 1024px)" srcset="/images/progreso-ranking/logo.svg" />
+          <img src="/images/progreso-ranking/logo-movil.svg" alt="" /></picture
+        >Kodikalab</a
+      >
+      <nav
+        aria-label="Navegación principal"
+        class="mr-auto ml-10 hidden items-center gap-8 text-sm lg:flex"
+      >
+        <a routerLink="/coach/inicio">Inicio</a
+        ><a routerLink="/coach/inicio" fragment="problemas">Problemas</a
+        ><a routerLink="/coach/inicio" fragment="competencias">Concursos</a
+        ><a routerLink="/coach/inicio" fragment="grupos" class="text-kl-accent-text">Grupos</a
+        ><span class="text-kl-muted" title="Próximamente">Recursos</span>
+      </nav>
+      <div class="flex items-center gap-4">
+        <img
+          src="/images/progreso-ranking/campana.svg"
+          alt="Notificaciones no disponibles en esta maqueta"
+        /><a
+          routerLink="/coach/perfil"
+          aria-label="Ver perfil de coach"
+          class="flex size-9 items-center justify-center rounded-full bg-kl-accent text-xs"
+          >MP</a
+        ><img class="lg:hidden" src="/images/progreso-ranking/abajo.svg" alt="" />
+      </div>
+    </mat-toolbar>
+  </header>
+  <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
+    <div>
+      <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
+        <a routerLink="/coach/inicio">Inicio</a> / Mi equipo
+      </p>
+      <h1 class="m-0 font-display text-2xl leading-tight font-bold lg:text-[40px]">
+        Rendimiento del equipo
+      </h1>
+      <p class="mt-2 mb-0 text-base text-kl-muted">
+        Identifica las áreas que necesitan refuerzo y define la prioridad del entrenamiento.
+      </p>
+    </div>
+    <div class="flex flex-col gap-2">
+      <span class="text-sm font-bold">Equipo</span>
+      <div class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm">
+        Equipo Alfa
+      </div>
+      <span class="text-xs text-kl-muted">Reporte del grupo que administras · últimos 30 días</span>
+    </div>
+    @if (estado === 'insuficiente') {
+      <section
+        role="alert"
+        class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+      >
+        <strong class="text-kl-danger">No hay información suficiente para emitir un reporte</strong>
+        <p class="mb-0">
+          No se pudo recuperar la clasificación de 8 problemas. No se muestran porcentajes ni
+          conclusiones para evitar una evaluación incorrecta.
+        </p>
+      </section>
+      <mat-card class="gap-4 border border-solid border-[#2b2760] bg-kl-surface p-6">
+        @for (
+          dato of [
+            [
+              'Clasificación temática pendiente',
+              '8 problemas todavía no tienen un tema validado.',
+              'No se generó un reporte',
+            ],
+            [
+              'Resoluciones no disponibles',
+              'La última consulta no pudo recuperar todas las resoluciones.',
+              'El historial se conserva',
+            ],
+          ];
+          track dato[0]
+        ) {
+          <article class="rounded-xl bg-[#1e1536] p-4">
+            <h2 class="mt-0 text-sm font-bold">{{ dato[0] }}</h2>
+            <p class="text-sm text-kl-muted">{{ dato[1] }}</p>
+            <span class="font-mono text-xs text-kl-accent-text">{{ dato[2] }}</span>
+          </article>
+        }
+      </mat-card>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <button mat-flat-button disabled>Consultar nuevamente</button
+        ><a mat-stroked-button routerLink="/coach/inicio">Volver al inicio</a>
+      </div>
+    } @else {
+      <section aria-label="Resumen del rendimiento" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        @for (indicador of indicadores; track indicador.etiqueta) {
+          <mat-card
+            class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+            ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
+            ><strong class="font-display text-2xl">{{
+              estado === 'igual-prioridad' && indicador.etiqueta === 'Áreas prioritarias'
+                ? '2'
+                : indicador.valor
+            }}</strong
+            ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span></mat-card
+          >
+        }
+      </section>
+      @if (estado === 'igual-prioridad') {
+        <section
+          role="status"
+          class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+        >
+          <strong class="text-amber-400">Hay dos temas con el mismo nivel de resolución</strong>
+          <p class="mb-0">
+            Teoría de números y Geometría tienen 25%. Ambos se mantienen visibles; elige cuál
+            trabajar primero.
+          </p>
+        </section>
+      }
+      <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <mat-card
+          class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+        >
+          <h2 class="m-0 text-xl font-bold">Resolución por tema</h2>
+          <p class="m-0 text-sm text-kl-muted">De menor a mayor cobertura del equipo</p>
+          @for (tema of temas; track tema.nombre) {
+            <article
+              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4"
+            >
+              <h3 class="m-0 text-sm font-bold">{{ tema.nombre }}</h3>
+              <p class="m-0 text-sm text-kl-muted">
+                {{
+                  estado === 'igual-prioridad' && tema.nombre === 'Geometría'
+                    ? '1 de 4 problemas distintos resueltos'
+                    : tema.detalle
+                }}
+              </p>
+              <span class="font-mono text-xs text-[#ccb2ff]"
+                >{{
+                  estado === 'igual-prioridad' && tema.nombre === 'Geometría' ? 25 : tema.cobertura
+                }}% de resolución</span
+              >
+              <div
+                role="progressbar"
+                [attr.aria-label]="tema.nombre"
+                [attr.aria-valuenow]="
+                  estado === 'igual-prioridad' && tema.nombre === 'Geometría' ? 25 : tema.cobertura
+                "
+                aria-valuemin="0"
+                aria-valuemax="100"
+                class="h-1.5 overflow-hidden rounded-full bg-[#2e2e2e]"
+              >
+                <div
+                  class="h-full rounded-full"
+                  [style.background-color]="
+                    tema.cobertura === 25 ||
+                    (estado === 'igual-prioridad' && tema.nombre === 'Geometría')
+                      ? '#fbbf24'
+                      : 'var(--kl-accent)'
+                  "
+                  [style.width.%]="
+                    estado === 'igual-prioridad' && tema.nombre === 'Geometría'
+                      ? 25
+                      : tema.cobertura
+                  "
+                ></div>
+              </div>
+            </article>
+          }
+        </mat-card>
+        <aside class="flex min-w-0 flex-col gap-6">
+          <mat-card
+            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          >
+            <h2 class="m-0 text-xl font-bold">Priorizar entrenamiento</h2>
+            <form [formGroup]="form" class="flex flex-col gap-4">
+              <mat-form-field appearance="fill" class="w-full"
+                ><mat-label>Primer tema</mat-label
+                ><mat-select formControlName="primero">
+                  @for (tema of temas; track tema.nombre) {
+                    <mat-option [value]="tema.nombre">{{ tema.nombre }}</mat-option>
+                  }</mat-select
+                ><mat-hint>La elección no cambia las estadísticas.</mat-hint
+                ><mat-error>Selecciona el primer tema.</mat-error></mat-form-field
+              >
+              <mat-form-field appearance="fill" class="w-full"
+                ><mat-label>Segundo tema</mat-label
+                ><mat-select formControlName="segundo">
+                  @for (tema of temas; track tema.nombre) {
+                    <mat-option [value]="tema.nombre">{{ tema.nombre }}</mat-option>
+                  }</mat-select
+                ><mat-hint>Temas detectados por menor cobertura.</mat-hint
+                ><mat-error>Selecciona el segundo tema.</mat-error></mat-form-field
+              >
+              <a
+                mat-flat-button
+                routerLink="/coach/rendimiento"
+                [disabled]="form.invalid"
+                aria-describedby="prioridad-pendiente"
+                class="w-full self-start lg:w-auto"
+                >Guardar prioridad</a
+              >
+            </form>
+            <p id="prioridad-pendiente" role="note" class="m-0 text-xs text-kl-muted">
+              Maqueta: la selección no se guarda. Persistencia pendiente de conexión al backend.
+            </p>
+          </mat-card>
+          <mat-card
+            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            ><h2 class="m-0 text-xl font-bold">Criterio de comparación</h2>
+            <p class="m-0 text-sm leading-5 text-kl-muted">
+              Cobertura por tema = problemas distintos resueltos por el equipo / problemas distintos
+              asignados de ese tema. Si varias áreas tienen la cobertura mínima, se presentan todas.
+            </p></mat-card
+          >
+        </aside>
+      </div>
+    }
+    <nav
+      aria-label="Estados del rendimiento"
+      class="flex flex-wrap gap-3 text-xs text-kl-accent-text"
+    >
+      <a routerLink="/coach/rendimiento" [queryParams]="{ estado: 'insuficiente' }"
+        >Información insuficiente</a
+      ><a routerLink="/coach/rendimiento" [queryParams]="{ estado: 'igual-prioridad' }"
+        >Igual prioridad</a
+      ><a routerLink="/coach/rendimiento">Reporte por tema</a>
+    </nav>
+    <div class="flex flex-col gap-2 text-xs text-kl-muted">
+      <p role="note" class="m-0">
+        Vista de demostración · Métricas fijas del diseño, sin cálculo real.
+      </p>
+    </div>
+  </main>
+  <app-site-footer audience="coach" />
+</div>

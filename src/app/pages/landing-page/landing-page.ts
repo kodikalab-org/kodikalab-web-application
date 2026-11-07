@@ -13,10 +13,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
+import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-landing-page',
   imports: [
+    SiteFooter,
     RouterLink,
     MatButtonModule,
     MatCardModule,
@@ -117,12 +119,6 @@ export class LandingPage {
     { name: 'AtCoder', icon: 'images/landing/platform-atcoder.svg' },
     { name: 'LeetCode', icon: 'images/landing/platform-leetcode.svg' },
     { name: 'vJudge', icon: 'images/landing/platform-vjudge.svg' },
-  ];
-
-  protected readonly socials = [
-    { label: 'Discord', icon: 'images/landing/social-1.svg' },
-    { label: 'GitHub', icon: 'images/landing/social-github.svg' },
-    { label: 'Instagram', icon: 'images/landing/social-3.svg' },
   ];
 
   protected readonly plans = [

@@ -1,5 +1,5 @@
 <div
-  class="page relative flex min-h-dvh flex-col overflow-hidden bg-kl-bg font-body text-kl-text"
+  class="page relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text"
   #pageStart
 >
   <img
@@ -10,7 +10,7 @@
   />
 
   <mat-toolbar
-    class="header auth-header relative z-10 justify-between border-0 border-b border-solid border-kl-divider px-14 font-body max-[641px]:px-4"
+    class="header auth-header sticky top-0 z-40 backdrop-blur-xl justify-between border-0 border-b border-solid border-kl-divider px-14 font-body max-[641px]:px-4"
   >
     <a
       class="brand inline-flex items-center gap-2.5"
@@ -57,7 +57,7 @@
         Únete a la plataforma de entrenamiento del GPC UPC
       </p>
 
-      <form class="form flex w-full flex-col gap-3.5 pt-6" [formGroup]="form" novalidate>
+      <form class="form flex w-full flex-col gap-3.5 pt-6" [formGroup]="form" (ngSubmit)="registrar()" novalidate>
         <div class="form__row grid grid-cols-2 gap-3 max-[641px]:grid-cols-1">
           <div class="field flex min-w-0 flex-col gap-1.5">
             <label class="field__label text-[13px] font-medium text-kl-body" for="firstName"
@@ -80,7 +80,13 @@
               />
               <mat-error>
                 <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                Ingresa tu nombre
+                @if (form.controls.firstName.hasError('server')) {
+                  {{ form.controls.firstName.getError('server') }}
+                } @else if (form.controls.firstName.hasError('required')) {
+                  Ingresa tu nombre
+                } @else {
+                  El nombre no puede superar 80 caracteres
+                }
               </mat-error>
             </mat-form-field>
           </div>
@@ -106,11 +112,23 @@
               />
               <mat-error>
                 <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                Ingresa tu apellido
+                @if (form.controls.lastName.hasError('server')) {
+                  {{ form.controls.lastName.getError('server') }}
+                } @else if (form.controls.lastName.hasError('required')) {
+                  Ingresa tu apellido
+                } @else {
+                  El apellido no puede superar 80 caracteres
+                }
               </mat-error>
             </mat-form-field>
           </div>
         </div>
+        @if (form.hasError('fullNameTooLong') && (form.controls.firstName.touched || form.controls.lastName.touched)) {
+          <p class="m-0 -mt-1.5 flex items-start gap-1.5 text-[13px] leading-[18px] text-kl-danger">
+            <img class="mt-[1.5px] shrink-0" src="images/registro/alert-15.svg" alt="" width="15" height="15" />
+            Nombre y apellido juntos no pueden superar 150 caracteres
+          </p>
+        }
 
         <div class="field flex min-w-0 flex-col gap-1.5">
           <label class="field__label text-[13px] font-medium text-kl-body" for="email"
@@ -133,7 +151,15 @@
             />
             <mat-error>
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-              Ingresa un correo válido
+              @if (form.controls.email.hasError('server')) {
+                {{ form.controls.email.getError('server') }}
+              } @else if (form.controls.email.hasError('required')) {
+                Ingresa tu correo institucional
+              } @else if (form.controls.email.hasError('maxlength')) {
+                El correo no puede superar 100 caracteres
+              } @else {
+                Ingresa un correo válido, por ejemplo nombre@upc.edu.pe
+              }
             </mat-error>
           </mat-form-field>
         </div>
@@ -144,6 +170,7 @@
           >
           <mat-form-field
             class="auth-field w-full text-[15px]"
+            [class.auth-field--weak]="isWeakPassword(form.controls.password)"
             appearance="outline"
             subscriptSizing="dynamic"
           >
@@ -151,19 +178,37 @@
             <input
               matInput
               id="password"
-              type="password"
+              [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
               placeholder="Contraseña"
               autocomplete="new-password"
               required
             />
-            <img matSuffix src="images/registro/eye-off-20.svg" alt="" width="20" height="20" />
+            <button
+              matSuffix
+              type="button"
+              class="toggle flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <img
+                [src]="showPassword ? 'images/login/eye-20.svg' : 'images/login/eye-off-20.svg'"
+                alt=""
+                width="20"
+                height="20"
+              />
+            </button>
             <mat-error>
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-              @if (form.controls.password.hasError('required')) {
+              @if (form.controls.password.hasError('server')) {
+                {{ form.controls.password.getError('server') }}
+              } @else if (form.controls.password.hasError('required')) {
                 Crea una contraseña
-              } @else {
+              } @else if (form.controls.password.hasError('weakPassword')) {
                 La contraseña debe contener al menos 8 caracteres, una mayúscula y un número
+              } @else {
+                La contraseña no puede superar 72 bytes. Las letras con tilde o símbolos ocupan más de uno.
               }
             </mat-error>
           </mat-form-field>
@@ -182,14 +227,28 @@
             <input
               matInput
               id="confirmPassword"
-              type="password"
+              [type]="showPassword ? 'text' : 'password'"
               formControlName="confirmPassword"
               placeholder="Confirmar contraseña"
               autocomplete="new-password"
               [errorStateMatcher]="confirmPasswordMatcher"
               required
             />
-            <img matSuffix src="images/registro/eye-off-20.svg" alt="" width="20" height="20" />
+            <button
+              matSuffix
+              type="button"
+              class="toggle flex size-5 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kl-accent-text"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseñas' : 'Mostrar contraseñas'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <img
+                [src]="showPassword ? 'images/login/eye-20.svg' : 'images/login/eye-off-20.svg'"
+                alt=""
+                width="20"
+                height="20"
+              />
+            </button>
             <mat-error>
               <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
               @if (form.controls.confirmPassword.hasError('required')) {
@@ -249,29 +308,12 @@
         <button
           mat-flat-button
           class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
-          type="button"
-          routerLink="/registro-exitoso"
-          [disabled]="form.invalid"
+          type="submit"
+          [disabled]="form.invalid || busy"
         >
-          Crear cuenta
+          {{ busy ? 'Creando cuenta…' : 'Crear cuenta' }}
           <img src="images/registro/arrow-right-18.svg" alt="" width="18" height="18" />
         </button>
-
-        <p
-          class="note m-0 flex items-start justify-center gap-2 text-center text-xs leading-[17px] text-kl-muted"
-        >
-          <img
-            class="shrink-0"
-            src="images/registro/info-16.svg"
-            alt=""
-            width="13.2812"
-            height="16"
-          />
-          <span>
-            Al registrarte recibirás un código de recuperación. Guárdalo: lo necesitarás si olvidas
-            tu contraseña.
-          </span>
-        </p>
 
         <div
           class="separator h-px bg-linear-to-r from-transparent via-[#34304a] to-transparent"
@@ -287,12 +329,30 @@
             >Inicia sesión</a
           >
         </p>
+        @if (error || connectionError) {
+          <div
+            role="alert"
+            class="m-0 flex flex-col items-start gap-3 rounded-xl border border-solid border-red-400/40 bg-red-400/10 p-3 text-sm text-red-200"
+          >
+            @if (error) {
+              <p class="m-0">{{ error }}</p>
+            }
+            @if (connectionError) {
+              <button
+                mat-stroked-button
+                type="button"
+                class="retry"
+                [disabled]="busy || form.invalid"
+                (click)="registrar()"
+              >
+                Reintentar
+              </button>
+            }
+          </div>
+        }
       </form>
     </mat-card>
   </main>
 
-  <p class="legal relative z-10 m-0 px-4 pb-5 text-center text-xs text-kl-faint">
-    © 2026 Kodikalab · <span class="legal__link text-kl-accent-text">Términos de Servicio</span> ·
-    Política de privacidad
-  </p>
+  <app-site-footer variant="compact" class="legal relative z-10 m-0 px-4 pb-5 text-center text-xs text-kl-faint" />
 </div>

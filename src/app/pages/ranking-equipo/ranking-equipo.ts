@@ -1,3 +1,6 @@
+import { inject as injectSession } from '@angular/core';
+import { Session } from '../../core/session';
+import { RankingLive } from './ranking-live';
 import { Component } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
@@ -9,11 +12,12 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-ranking-equipo',
-  imports: [SiteFooter, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
+  imports: [SiteFooter, RankingLive, AsyncPipe, RouterLink, MatButtonModule, MatCardModule, MatToolbarModule],
   templateUrl: './ranking-equipo.html',
   styleUrl: './ranking-equipo.css',
 })
 export class RankingEquipo {
+  readonly session = injectSession(Session);
   protected readonly estado$;
   protected readonly compartidos = [
     { posicion: 1, nombre: 'Sebastián Cruz', resueltos: 21, estado: 'Activo' },

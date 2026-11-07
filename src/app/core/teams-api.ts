@@ -146,7 +146,13 @@ export interface AssignedProblem {
     difficultyRating: string | null;
     topics: string[];
   };
-  competition: { name: string; startsAt: string | null; endsAt: string | null };
+  competition: {
+    id: number;
+    name: string;
+    status: 'PROGRAMADA' | 'EN_CURSO' | 'FINALIZADA';
+    startsAt: string | null;
+    endsAt: string | null;
+  };
 }
 
 export interface AssignedProblemsResponse {

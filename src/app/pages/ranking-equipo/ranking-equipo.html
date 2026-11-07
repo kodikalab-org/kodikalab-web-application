@@ -1,3 +1,5 @@
+@if (session.demo()) {
+  <p role="note" class="m-0 bg-kl-accent p-3 text-center text-white">Demostración: datos de ejemplo, sin conexión a la API.</p>
 <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
   @let estado = (estado$ | async) ?? '';
   <div
@@ -212,3 +214,5 @@
   </main>
   <app-site-footer audience="practicante" />
 </div>
+
+} @else { <app-ranking-live /> }

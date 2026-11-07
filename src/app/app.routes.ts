@@ -9,6 +9,7 @@ import { COACH_ROUTES } from './pages/coach/coach.routes';
 import { PRACTICANTE_ROUTES } from './pages/practicante/practicante.routes';
 
 const appRoutes: Routes = [
+  { path: 'coach/ranking', loadComponent: () => import('./pages/ranking-equipo/ranking-equipo').then(m => m.RankingEquipo) },
   {
     path: 'recursos',
     data: { shared: true },

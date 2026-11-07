@@ -10,14 +10,14 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { map, tap, distinctUntilChanged } from 'rxjs';
 import { SiteFooter } from '../../shared/site-footer/site-footer';
+import { AppHeader } from '../../shared/app-header/app-header';
 
 @Component({
   selector: 'app-competencias',
   imports: [
+    AppHeader,
     SiteFooter,
     ResultsLive,
     AsyncPipe,
@@ -28,8 +28,6 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
-    MatMenuModule,
-    MatToolbarModule,
   ],
   templateUrl: './competencias.html',
   styleUrl: './competencias.css',

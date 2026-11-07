@@ -44,7 +44,7 @@ describe('UserMenu', () => {
 
   it('puts group follow-up and team performance in the coach dropdown', async () => {
     const { items } = await open('COACH');
-    expect(items).toEqual(expect.arrayContaining(['Seguimiento de grupos', 'Rendimiento', 'Mi perfil', 'Editar perfil']));
+    expect(items).toEqual(expect.arrayContaining(['Solicitudes', 'Seguimiento de grupos', 'Rendimiento', 'Resultados oficiales', 'Mi perfil', 'Editar perfil']));
     expect(items).not.toContain('Ranking');
   });
 

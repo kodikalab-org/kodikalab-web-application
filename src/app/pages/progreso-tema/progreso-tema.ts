@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { PractitionerGroup, TeamsApi } from '../../core/teams-api';
 import {
   TopicProgress,
@@ -14,6 +13,7 @@ import {
   TopicProgressErrorKind,
   TopicStatus,
 } from '../../core/topic-progress-api';
+import { AppHeader } from '../../shared/app-header/app-header';
 
 interface ErrorView {
   chip: string;
@@ -40,13 +40,13 @@ const STATUS_LABELS: Record<TopicStatus, string> = {
 @Component({
   selector: 'app-progreso-tema',
   imports: [
+    AppHeader,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatToolbarModule,
   ],
   templateUrl: './progreso-tema.html',
   styleUrl: './progreso-tema.css',

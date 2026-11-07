@@ -10,12 +10,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { SiteFooter } from '../../shared/site-footer/site-footer';
+import { AppHeader } from '../../shared/app-header/app-header';
 
 @Component({
   selector: 'app-rendimiento-equipo',
   imports: [
+    AppHeader,
     SiteFooter,
     TopicsLive,
     AsyncPipe,
@@ -25,7 +26,6 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
     MatCardModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatToolbarModule,
   ],
   templateUrl: './rendimiento-equipo.html',
   styleUrl: './rendimiento-equipo.css',

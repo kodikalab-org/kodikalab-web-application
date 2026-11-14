@@ -81,37 +81,28 @@ El backend ya consulta Codeforces (`CodeforcesApiClient`: `user.info`, `user.sta
 
 ---
 
-## 2. Decisiones que necesito de ti
+## 2. Decisiones tomadas (2026-11-14)
 
-Cada una trae mi recomendación; el plan está escrito asumiéndola.
+| # | Decisión |
+| --- | --- |
+| D1 | **KodikaLab no envía soluciones.** El practicante envía en la plataforma de origen con su propia cuenta. KodikaLab solo **lee** (peticiones GET): busca el envío entre los últimos 10 de la cuenta vinculada, toma su veredicto y, si el practicante adjunta su archivo, lo compara con el código de ese envío. Es el modelo de VJudge, pero sin escribir nunca en la plataforma. |
+| D2 | Se elimina el «marcar como resuelto» autodeclarado para las plataformas con verificación automática. Queda solo como respaldo, pendiente de aprobación del coach. |
+| D3 | Se retira LeetCode. Plataformas: Codeforces, AtCoder y VJudge; CSES solo como origen de problemas. |
+| D4 | El backend sigue en Render `free`; el frontend tolera el arranque en frío. |
+| D5 | Se elimina SSR y prerender: la web es una SPA estática. |
 
-### D1 — Cómo se envía una solución
+Consecuencia de D1: no se guardan contraseñas, cookies ni sesiones de terceros. «Vincular la sesión» de una plataforma significa registrar el handle y **demostrar que es del usuario** (fase 4).
 
-Codeforces **no tiene API de envío** y protege el login y el formulario con Cloudflare. AtCoder tampoco tiene API. Hay tres caminos:
+Trabajo en la rama `feature/mejoras-us` de cada repositorio.
 
-| Opción | Cómo funciona | Coste y riesgo |
-| --- | --- | --- |
-| **A. Archivo + veredicto verificado (recomendada)** | El practicante sube su archivo en KodikaLab; se guarda y se abre la página de envío de la plataforma. KodikaLab consulta la API y enlaza el envío real con su veredicto, tiempo, memoria y lenguaje. | Sin credenciales de terceros. El usuario elige el archivo dos veces (KodikaLab y Codeforces): el navegador no permite rellenar un formulario de otro dominio. |
-| B. Juez remoto con cuentas bot (como VJudge) | El backend envía el archivo con cuentas de KodikaLab mediante un navegador sin interfaz. | Experiencia de un solo paso. Requiere un worker con Chromium (no cabe en Render `free`), se rompe cuando la plataforma cambia y puede incumplir sus condiciones de uso. Los envíos quedan a nombre del bot, no del practicante. |
-| C. Sesión del usuario (cookies) | El usuario pega su cookie de sesión y el backend envía en su nombre. | KodikaLab custodia credenciales ajenas. Lo desaconsejo. |
+### Estado
 
-Recomendación: **A ahora**, con la interfaz `JudgeGateway` preparada para añadir B después, solo si el spike demuestra que es estable.
-
-### D2 — Qué pasa con el registro manual
-
-Recomendación: eliminar el «marcar como resuelto» para Codeforces (el veredicto viene de la API) y dejarlo solo como respaldo para plataformas sin verificación automática, en estado `PENDIENTE` hasta que el coach lo apruebe.
-
-### D3 — Plataformas a vincular
-
-Recomendación: Codeforces, AtCoder y VJudge con verificación de propiedad; CSES solo como handle informativo; **retirar LeetCode** de la interfaz salvo que se añada al ERD.
-
-### D4 — Backend en Render `free`
-
-Recomendación: pasar a un plan sin suspensión, o aceptar el arranque en frío y que el frontend lo tolere (fase 1). Los sondeos de veredictos de la fase 4 no funcionan bien con un servicio que se duerme.
-
-### D5 — Eliminar SSR
-
-El despliegue real es estático (Vercel). Recomendación: **quitar SSR y prerender** (`server.ts`, `main.server.ts`, `app.routes.server.ts`, hidratación) y prerenderizar como mucho la landing. Elimina de raíz las causas A y B y la regla «no tocar `window`».
+| Fase | Estado |
+| --- | --- |
+| 0 Preparación | Parcial: borrado `aaaa.md`; falta Flyway y reescribir `SPEC.md`/`README.md` |
+| 1 Sesión y despliegue | **Frontend hecho** (ver 1.1): sin SSR, guard sin expulsiones por red, pantalla de reconexión, retorno a la página de origen, sesión compartida entre pestañas, nombre real en el menú. Pendiente backend: `POST /auth/refresh`, `GET /health`, exponer `WWW-Authenticate` |
+| D3 LeetCode | **Hecho** en frontend |
+| 2 a 7 | Pendientes |
 
 ---
 
@@ -209,48 +200,74 @@ Frontend:
 
 - Rehacer `practicante/plataformas-competitivas` con datos reales: una tarjeta por plataforma con estado (sin vincular, pendiente, verificada, error), asistente de verificación paso a paso, rating y última sincronización. Quitar la redirección del guard y la sección duplicada de `perfil-editar`.
 - Onboarding (`onboarding/plataformas`): mismo componente, con la verificación como paso opcional.
-- Estadísticas del perfil: pestañas solo para plataformas vinculadas; quitar LeetCode (D3).
+- Estadísticas del perfil: pestañas solo para plataformas vinculadas.
 
 Aceptación: un practicante vincula y verifica Codeforces de principio a fin; un handle ya verificado por otra cuenta se rechaza con 409; si la plataforma no responde, el perfil se guarda y el estado queda `PENDIENTE` con reintento.
 
-### Fase 5 — Envíos por archivo y veredictos reales (6 días)
+### Fase 5 — Verificación de soluciones solo con lectura (6 días)
 
-Modelo (migración sobre `resolucion_problema`):
+**Flujo del practicante**
 
-- Columnas nuevas: `origen` (`PLATAFORMA`, `MANUAL`), `id_envio_externo`, `nombre_archivo`, `codigo_fuente` (texto, máx. 64 kB), `sha256`, `estado_sincronizacion` (`ESPERANDO_ENVIO`, `EN_COLA`, `VEREDICTO_FINAL`, `CADUCADO`), `pruebas_superadas`.
-- `Verdict` añade `COMPILATION_ERROR`, `RUNTIME_ERROR`, `EN_EVALUACION`, `OTRO`; mapa explícito desde los veredictos de Codeforces (`OK`, `WRONG_ANSWER`, `TIME_LIMIT_EXCEEDED`, `MEMORY_LIMIT_EXCEEDED`, `COMPILATION_ERROR`, `RUNTIME_ERROR`, `TESTING`…).
-- Único por `(plataforma, id_envio_externo)` para no importar dos veces el mismo envío.
+1. Abre el problema en KodikaLab y pulsa «Resolver en Codeforces» (enlace a la plataforma). Envía allí con su cuenta.
+2. Vuelve a KodikaLab y pulsa **«Verificar mi solución»**; puede adjuntar el archivo que envió.
+3. El backend lee los **últimos 10 envíos** de su cuenta vinculada y verificada, se queda con los de ese problema y registra cada uno con su veredicto real. No hay nada que el practicante pueda declarar a mano.
+4. Si adjuntó archivo, se compara con el código del envío encontrado y el resultado se muestra junto al veredicto.
 
-Endpoints:
+**Lectura por plataforma** (todo GET; a confirmar en el spike de la fase 4)
+
+| Plataforma | Últimos 10 envíos | Código del envío |
+| --- | --- | --- |
+| Codeforces | API oficial: `user.status?handle=H&from=1&count=10` | Scraping de `codeforces.com/contest/{c}/submission/{id}`. Solo visible si el concurso terminó; Cloudflare puede bloquearlo |
+| AtCoder | Scraping de `atcoder.jp/contests/{c}/submissions?f.User=H&f.Task=T`; respaldo: API de AtCoder Problems (con minutos de retraso) | Scraping de `atcoder.jp/contests/{c}/submissions/{id}` |
+| VJudge | JSON no oficial `vjudge.net/status/data?un=H&length=10` | No disponible sin sesión: solo veredicto |
+
+**Técnica de scraping** (paquete `integrations`, fase 4)
+
+- `jsoup` para HTML; un `PlatformGateway` por plataforma con los selectores aislados en una clase, de modo que un cambio de maquetación se corrige en un solo sitio.
+- Pruebas con páginas guardadas como *fixtures* y una prueba «canario» diaria en CI contra la plataforma real, que avisa cuando el HTML cambia.
+- Cortesía y resistencia: `User-Agent` identificable, una cola por plataforma con espera entre peticiones, caché corta (20–30 s por cuenta), reintentos con retroceso, y corte del circuito tras fallos seguidos.
+- Degradación: si la plataforma bloquea o cambia, el envío queda `NO_VERIFICABLE` con el motivo y reintento; nunca se inventa un veredicto. Si el bloqueo de Cloudflare resulta permanente desde el servidor, la alternativa es que el navegador del practicante haga la lectura (JSONP de la API de Codeforces) y el backend la revalide cuando pueda.
+
+**Comparación del archivo**
+
+- Normalizar (finales de línea, espacios finales, BOM) y comparar por SHA-256; si no coincide, calcular similitud por líneas y mostrar el porcentaje.
+- Estados: `COINCIDE`, `DIFERENTE` (con porcentaje), `NO_COMPARADO` (la plataforma no deja leer el código). Un `DIFERENTE` no anula el veredicto: lo ve el coach.
+- Límites del archivo: 64 kB, extensiones `.cpp .c .py .java .kt .rs .js .go`, UTF-8. Se guarda como texto; nunca se ejecuta ni se sirve como HTML.
+
+**Modelo** (migración sobre `resolucion_problema`)
+
+- Columnas nuevas: `origen` (`PLATAFORMA`, `MANUAL`), `id_envio_externo`, `pruebas_superadas`, `nombre_archivo`, `codigo_fuente`, `sha256`, `comparacion_archivo`, `similitud`.
+- Único por `(plataforma, id_envio_externo)`: verificar dos veces no duplica intentos.
+- `Verdict` añade `COMPILATION_ERROR`, `RUNTIME_ERROR`, `EN_EVALUACION`, `OTRO`, con un mapa explícito desde los veredictos de cada plataforma.
+- `CodeforcesSubmission` conserva id, lenguaje, tiempo, memoria y pruebas superadas (hoy se descartan).
+
+**Endpoints**
 
 | Método | Ruta | Uso |
 | --- | --- | --- |
-| `POST` | `/problems/assigned/{id}/submissions` (multipart: `file`, `language`) | Crea el envío en `ESPERANDO_ENVIO`; devuelve `submissionId` y `submitUrl` |
-| `GET` | `/problems/assigned/{id}/submissions` | Mis envíos en KodikaLab para ese problema |
-| `GET` | `/submissions/{id}` | Estado y veredicto; dispara la sincronización si está pendiente |
-| `GET` | `/submissions/{id}/source` | Descarga el archivo (autor y coach del equipo) |
-| `GET` | `/problems/assigned/{id}/platform-submissions?scope=me\|all&count=10` | **Últimos 10 envíos del problema en Codeforces** |
+| `POST` | `/problems/assigned/{id}/verification` (multipart, `file` opcional) | Lee los últimos 10 envíos, importa los del problema y compara el archivo. Devuelve los envíos importados y el estado de la asignación |
+| `GET` | `/problems/assigned/{id}/platform-submissions` | Los últimos 10 envíos de la cuenta en la plataforma, marcando cuáles son de este problema |
+| `GET` | `/problems/assigned/{id}/submissions` | Envíos ya importados en KodikaLab para ese problema |
+| `GET` | `/submissions/{id}/source` | Archivo adjunto (autor y coach del equipo) |
+| `POST` | `/competitions/{id}/sync` (coach) | Verifica a todo el equipo, encolado y con límite |
 
-Reglas:
+**Reglas**
 
-- Validar extensión (`.cpp .c .py .java .kt .rs .js .go`), tamaño (64 kB, el límite de Codeforces), UTF-8 y que la competencia esté `EN_CURSO` o `FINALIZADA` según la regla de práctica. Límite de envíos por minuto.
-- Exigir cuenta **verificada** de la plataforma del problema (fase 4): es lo que garantiza que el veredicto es del practicante.
-- Sincronización: `contest.status?contestId=X&handle=H&from=1&count=10`, filtrado por índice del problema; el envío de KodikaLab se enlaza con el primer envío externo posterior a la subida, del mismo problema. Mientras el veredicto sea `TESTING` se sigue consultando; a los 15 minutos sin envío externo pasa a `CADUCADO`.
-- «Últimos 10»: `scope=me` usa la llamada anterior; `scope=all` usa `contest.status` sin handle y filtra por índice. Respuesta: id, autor, lenguaje, veredicto, pruebas superadas, tiempo, memoria, fecha y enlace al envío.
-- El ranking y los standings (`CompetitionStandingsServiceImpl`, `RankingService`) pasan a contar solo veredictos verificados; los manuales cuentan cuando el coach los aprueba (D2). Penalización ICPC con los intentos fallidos reales.
-- AtCoder: mismo flujo, con AtCoder Problems como fuente. Su rastreo llega con minutos de retraso: la interfaz lo dice («AtCoder puede tardar unos minutos en reflejar el veredicto»). Si el spike muestra que no es viable, AtCoder usa el respaldo manual con aprobación.
-- `JudgeGateway.submit()` queda como punto de extensión para la opción B.
+- Exige cuenta **verificada** de la plataforma del problema (fase 4).
+- Solo cuentan envíos posteriores al inicio de la competencia; los anteriores se muestran como «resuelto antes del concurso» y no puntúan.
+- La ventana es de 10 envíos: si el del problema ya salió de la ventana, la interfaz lo explica y ofrece ampliar la búsqueda (hasta 100) antes de dar el problema por no enviado.
+- Mientras el veredicto sea «en evaluación», la pantalla vuelve a consultar cada 5 s con retroceso.
+- Ranking y standings (`CompetitionStandingsServiceImpl`, `RankingService`) pasan a contar solo veredictos verificados, con penalización ICPC por los intentos fallidos reales.
 
-Frontend — pantalla del problema (`practicante/problemas-asignados/components/problema-elegido`) y vista de concurso (`concursos/concurso-detalle`):
+**Frontend** — pantalla del problema (`practicante/problemas-asignados/components/problema-elegido`) y concurso (`concursos/concurso-detalle`)
 
-1. **Panel «Enviar solución»:** zona para soltar o elegir archivo, lenguaje detectado por extensión y editable, vista previa del código, botón «Enviar». Tras subirlo: pasos visibles — «1. Archivo guardado → 2. Envíalo en Codeforces (botón que abre la página de envío) → 3. Esperando veredicto».
-2. **Resultado por archivo:** tarjeta del envío con nombre del archivo, lenguaje, veredicto, pruebas superadas, tiempo, memoria y enlaces (envío en la plataforma y descarga del archivo). Sondeo cada 5 s mientras esté pendiente, con retroceso y botón «Comprobar ahora».
-3. **Tabla «Últimos 10 envíos»** con pestañas «Míos» y «Recientes en Codeforces», estilo tabla de estado de Codeforces, con actualización manual.
-4. **Historial** de mis envíos en KodikaLab con su archivo.
-5. Vista del coach: envíos del equipo por problema, con acceso al código y aprobación de los manuales.
-6. Retirar `registro-problemas-resueltos` como flujo principal (D2).
+1. Bloque «Tu solución»: botón «Resolver en {plataforma}», selector de archivo opcional y botón «Verificar mi solución», con el estado de la cuenta vinculada a la vista.
+2. Resultado: veredicto, lenguaje, tiempo, memoria, pruebas superadas, enlace al envío y la etiqueta de comparación del archivo.
+3. Tabla «Tus últimos 10 envíos en {plataforma}», con los de este problema resaltados y botón de actualizar.
+4. Coach: envíos del equipo por problema, acceso al archivo, aviso de archivos `DIFERENTE` y sincronización del concurso.
+5. Se retira `registro-problemas-resueltos` como flujo principal (D2).
 
-Aceptación: subo `a.cpp`, lo envío en Codeforces y en menos de 30 s veo en KodikaLab el veredicto real enlazado a ese archivo; la tabla muestra los últimos 10 envíos del problema; un WA cuenta como intento y penaliza; los standings cambian sin recargar.
+Aceptación: resuelvo un problema en Codeforces, pulso «Verificar mi solución» adjuntando `a.cpp` y veo el veredicto real y «archivo coincide»; un WA previo aparece como intento y penaliza; verificar otra vez no duplica nada; con la plataforma caída veo «no verificable» y puedo reintentar.
 
 ### Fase 6 — Conectar lo que falta (4 días)
 
@@ -285,7 +302,7 @@ Aceptación: subo `a.cpp`, lo envío en Codeforces y en menos de 30 s veo en Kod
 | 2 Retirar demo | 1,5 | 1 |
 | 3 Marco y diseño | 4 | 2 |
 | 4 Plataformas | 5 | 0 (el spike puede empezar ya) |
-| 5 Envíos | 6 | 4 |
+| 5 Verificación de soluciones | 6 | 4 |
 | 6 Conectar lo que falta | 4 | 3 |
 | 7 Calidad y salida | 3 | todas |
 
@@ -296,7 +313,8 @@ Total: unos **26 días-persona**. Con dos personas —una en las fases 1→2→3
 | Riesgo | Mitigación |
 | --- | --- |
 | Las plataformas cambian o bloquean al servidor (Cloudflare, límites) | Todo pasa por `PlatformGateway` con caché y degradación a estado `PENDIENTE`; el spike decide el alcance de AtCoder y VJudge antes de construir |
-| El límite de Codeforces (una petición cada 2 s por IP) no escala con sondeos | Caché compartida por `(concurso, handle)`, sondeo iniciado por el usuario y no por un cron, y como alivio mostrar la tabla de «recientes» desde el navegador si JSONP está disponible |
-| Enlazar un envío externo con el archivo equivocado | Se exige cuenta verificada y se enlaza por problema, ventana de tiempo y lenguaje; el coach puede ver el código subido |
+| El límite de Codeforces (una petición cada 2 s por IP) no escala | Caché por cuenta, verificación iniciada por el usuario y no por un cron, cola por plataforma |
+| El scraping se rompe o Cloudflare bloquea al servidor | Selectores aislados, prueba canario diaria, estado `NO_VERIFICABLE` y lectura desde el navegador como alternativa |
+| Un practicante vincula la cuenta de otra persona | Prueba de propiedad obligatoria antes de verificar (fase 4) y handle único por plataforma |
 | Migrar `resolucion_problema` con datos en producción | Flyway, columnas nuevas anulables, los registros actuales pasan a `origen = MANUAL` |
 | Render `free` duerme el backend | D4; la fase 1 hace que el frontend lo tolere |

@@ -7,6 +7,7 @@ import { ProfileApi } from '../../../core/profile-api';
 import { Role, authApiError, isConnectionError } from '../../../core/api';
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, map } from 'rxjs';
+import { safeReturnUrl } from '../../../core/return-url';
 import { emailRule, normalizeEmail, passwordBytesRule } from '../auth-rules';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -45,6 +46,17 @@ export class Login {
   private readonly cdr = inject(ChangeDetectorRef);
   protected readonly estado$ = this.route.queryParamMap.pipe(map((params) => params.get('estado')));
   protected busy = false;
+  /** Set after a few seconds without answer: the backend may be waking up. */
+  protected slow = false;
+  private readonly volver = safeReturnUrl(this.route.snapshot.queryParamMap.get('volver'));
+
+  constructor() {
+    // An open session does not need the form again.
+    const role = this.session.token() ? this.session.account()?.role : null;
+    if (role && !this.route.snapshot.queryParamMap.has('motivo')) {
+      void this.router.navigateByUrl(this.volver ?? homeFor(role));
+    }
+  }
   protected error =
     this.route.snapshot.queryParamMap.get('motivo') === 'sesion-expirada'
       ? 'Tu sesión ha expirado. Inicia sesión de nuevo.'
@@ -75,6 +87,8 @@ export class Login {
   protected async ingresar(): Promise<void> {
     if (this.form.invalid || this.busy) return;
     this.busy = true;
+    this.slow = false;
+    const aviso = setTimeout(() => { this.slow = true; this.cdr.markForCheck(); }, 8000);
     this.error = '';
     this.failure = null;
     const { email, password, remember } = this.form.getRawValue();
@@ -96,6 +110,8 @@ export class Login {
         ? 'Tu sesión ha expirado. Inicia sesión de nuevo.'
         : authApiError(error);
     } finally {
+      clearTimeout(aviso);
+      this.slow = false;
       this.busy = false;
       this.cdr.markForCheck();
     }
@@ -130,7 +146,9 @@ export class Login {
   }
 
   private async routeAfterLogin(role: Role): Promise<void> {
-    let destination = homeFor(role);
+    // The page the user was sent away from, when it belongs to the same role area.
+    const coachArea = (url: string) => url.startsWith('/coach/');
+    let destination = this.volver && (role === 'COACH' || !coachArea(this.volver)) ? this.volver : homeFor(role);
     try {
       await firstValueFrom(this.profiles.load());
     } catch (error) {

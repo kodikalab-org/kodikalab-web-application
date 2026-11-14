@@ -5,6 +5,7 @@ import { catchError, throwError } from 'rxjs';
 import { API_URL } from './api';
 import { Session } from './session';
 import { ProfileApi } from './profile-api';
+import { safeReturnUrl } from './return-url';
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const url = inject(API_URL);
@@ -22,7 +23,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
       if (error instanceof HttpErrorResponse && error.status === 401 && token) {
         session.logout();
         profiles.reset();
-        void router.navigate(['/login'], { queryParams: { motivo: 'sesion-expirada' } });
+        const volver = safeReturnUrl(router.url);
+        void router.navigate(['/login'], { queryParams: { motivo: 'sesion-expirada', ...(volver ? { volver } : {}) } });
       }
       return throwError(() => error);
     }),

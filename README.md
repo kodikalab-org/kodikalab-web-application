@@ -42,16 +42,9 @@ La URL es configurable mediante el token `API_URL` de `src/app/core/api.ts`; pro
 `app.config.ts` para otro entorno. Autoriza ese origen con `CORS_ALLOWED_ORIGINS` en Spring Boot.
 No agregues claves JWT ni credenciales del backend al frontend.
 
-Se conserva prerenderizado/hidratación para las páginas públicas. Las privadas usan `RenderMode.Client`:
-el servidor no lee almacenamiento del navegador ni emite perfiles o tokens en HTML compartido.
-Para probar el servidor compilado en PowerShell, sin desactivar la protección SSR de hosts:
-
-```powershell
-npm run build
-$env:PORT = '3000'
-$env:NG_ALLOWED_HOSTS = 'localhost,127.0.0.1'
-npm run serve:ssr:kodikalab_application
-```
+La aplicación es una SPA estática: no hay renderizado en servidor. `npm run build` deja el sitio en
+`dist/kodikalab_application/browser`, con `index.html` como entrada de todas las rutas. Si el backend no
+responde con una sesión válida, la app muestra `/sin-conexion` y reintenta sola, sin cerrar la sesión.
 
 Pruebas de esta entrega:
 

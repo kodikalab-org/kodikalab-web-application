@@ -7,6 +7,16 @@ import { API_URL, AuthResponse, RegisterRequest, Role } from './api';
 interface SessionData { token: string; email: string; role: Role; expiresAt: number; }
 const KEY = 'kodikalab.session';
 const DEMO_KEY = 'kodikalab.demo';
+/** A sleeping backend (free hosting) can take close to a minute to answer its first request. */
+export const COLD_START_TIMEOUT = 60000;
+
+function parseSession(raw: string): SessionData | null {
+  try {
+    const saved = JSON.parse(raw);
+    return saved && typeof saved.token === 'string' && typeof saved.email === 'string' &&
+      ['PRACTICANTE', 'COACH'].includes(saved.role) && saved.expiresAt > Date.now() ? saved : null;
+  } catch { return null; }
+}
 
 @Injectable({ providedIn: 'root' })
 export class Session {
@@ -21,16 +31,39 @@ export class Session {
   restore(): void {
     if (!this.browser || this.restored) return;
     this.restored = true;
+    const win = this.document.defaultView;
+    if (!win) return;
+    const stored = this.readStored(win);
+    if (stored) this.account.set(stored);
     try {
-      const win = this.document.defaultView!;
-      const raw = win.sessionStorage.getItem(KEY) ?? win.localStorage.getItem(KEY);
-      const saved = raw ? JSON.parse(raw) : null;
-      if (saved && typeof saved.token === 'string' && typeof saved.email === 'string' &&
-          ['PRACTICANTE', 'COACH'].includes(saved.role) && saved.expiresAt > Date.now()) this.account.set(saved);
-      else this.clearStorage();
       const demo = win.sessionStorage.getItem(DEMO_KEY);
       if (demo === 'PRACTICANTE' || demo === 'COACH') this.demo.set(demo);
-    } catch { this.account.set(null); }
+    } catch { /* optional */ }
+    // A login or logout in another tab reaches this one, so every tab shows the same account.
+    win.addEventListener('storage', (event) => {
+      if (event.key !== KEY && event.key !== null) return;
+      const next = this.readStored(win);
+      if (next?.token !== this.account()?.token) this.account.set(next);
+    });
+  }
+
+  /**
+   * The valid stored session, preferring the one of this tab. A copy that expired or is corrupted is
+   * removed on its own: it must not take a still valid copy of the other storage with it.
+   */
+  private readStored(win: Window): SessionData | null {
+    let found: SessionData | null = null;
+    for (const name of ['sessionStorage', 'localStorage'] as const) {
+      try {
+        const storage = win[name];
+        const raw = storage.getItem(KEY);
+        if (!raw) continue;
+        const saved = parseSession(raw);
+        if (saved) found ??= saved;
+        else storage.removeItem(KEY);
+      } catch { /* Storage may be disabled. */ }
+    }
+    return found;
   }
 
   token(): string | null {
@@ -42,7 +75,7 @@ export class Session {
   }
 
   login(email: string, password: string, remember: boolean) {
-    return this.http.post<AuthResponse>(`${this.url}/auth/login`, { email, password }, { timeout: 15000 }).pipe(
+    return this.http.post<AuthResponse>(`${this.url}/auth/login`, { email, password }, { timeout: COLD_START_TIMEOUT }).pipe(
       tap((response) => {
         if (!response.token || !response.expiresIn || !['PRACTICANTE', 'COACH'].includes(response.role)) {
           throw new Error('Respuesta de autenticación incompleta');

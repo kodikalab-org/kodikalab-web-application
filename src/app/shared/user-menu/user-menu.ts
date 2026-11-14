@@ -5,6 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { NavLink, HEADER_LINK_COUNT, navigationFor, profileMenuFor } from '../../core/navigation';
 import { ProfileApi } from '../../core/profile-api';
+import { profileIdentity } from '../../core/profile-identity';
 import { Session } from '../../core/session';
 
 export interface UserMenuLink extends NavLink {
@@ -43,15 +44,20 @@ export class UserMenu {
   protected get onboardingPath(): string {
     return this.coach ? '/onboarding/coach/experiencia' : '/onboarding/practicante/datos-academicos';
   }
+  private get identity() {
+    const profile = this.profiles.profile();
+    const email = this.session.account()?.email ?? '';
+    return profileIdentity(profile?.fullName, email, email || 'Usuario');
+  }
   protected get displayName(): string {
     if (this.nombre) return this.nombre;
     if (this.session.demo()) return this.coach ? 'Marco' : 'Camila';
-    return this.session.account()?.email ?? 'Usuario';
+    return this.identity.name;
   }
   protected get displayInitials(): string {
     if (this.iniciales) return this.iniciales;
     if (this.session.demo()) return this.coach ? 'MP' : 'CR';
-    return 'KL';
+    return this.identity.initials;
   }
 
   protected salir(): void {

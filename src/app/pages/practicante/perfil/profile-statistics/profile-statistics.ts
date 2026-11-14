@@ -34,12 +34,8 @@ export class ProfileStatistics {
       ? 'https://codeforces.com/problemset'
       : `https://codeforces.com/submissions/${encodeURIComponent(this.stats()?.handle ?? '')}`,
   );
-  protected readonly pendingName = computed(() =>
-    this.platform() === 'atcoder' ? 'AtCoder' : 'LeetCode',
-  );
-  protected readonly pendingUrl = computed(() =>
-    this.platform() === 'atcoder' ? 'https://atcoder.jp/' : 'https://leetcode.com/',
-  );
+  protected readonly pendingName = computed(() => 'AtCoder');
+  protected readonly pendingUrl = computed(() => 'https://atcoder.jp/');
 
   protected selectPlatform(event: Event): void {
     const value = (event.target as HTMLSelectElement).value;

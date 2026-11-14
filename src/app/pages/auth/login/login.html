@@ -202,6 +202,12 @@
             <img src="images/login/arrow-right-18.svg" alt="" width="18" height="18" />
           </button>
 
+          @if (slow) {
+            <p role="status" class="m-0 text-center text-xs text-kl-body">
+              El servidor está despertando; el primer ingreso puede tardar hasta un minuto.
+            </p>
+          }
+
           <div
             class="separator h-px bg-linear-to-r from-transparent via-[#34304a] to-transparent"
             aria-hidden="true"

@@ -1,12 +1,11 @@
 import { activityCalendar, CodeforcesStats } from '../../../../core/codeforces-stats-api';
 
-export type StatisticsPlatform = 'all' | 'codeforces' | 'leetcode' | 'atcoder';
+export type StatisticsPlatform = 'all' | 'codeforces' | 'atcoder';
 export type ActivityPeriod = 'month' | 'quarter' | 'year';
 
 export const STATISTICS_PLATFORMS = [
   { id: 'all', name: 'Todas las plataformas' },
   { id: 'codeforces', name: 'Codeforces' },
-  { id: 'leetcode', name: 'LeetCode' },
   { id: 'atcoder', name: 'AtCoder' },
 ] as const;
 

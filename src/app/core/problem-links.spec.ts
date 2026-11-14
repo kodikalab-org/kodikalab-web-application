@@ -20,8 +20,8 @@ describe('problem links', () => {
   });
 
   it('falls back to the statement URL for other platforms and to null without data', () => {
-    expect(submitUrl({ url: 'https://leetcode.com/problems/two-sum/', sourcePlatform: 'LEETCODE' }))
-      .toBe('https://leetcode.com/problems/two-sum/');
-    expect(submitUrl({ sourcePlatform: 'LEETCODE', sourceCode: 'two-sum' })).toBeNull();
+    expect(submitUrl({ url: 'https://cses.fi/problemset/task/1068', sourcePlatform: 'CSES' }))
+      .toBe('https://cses.fi/problemset/task/1068');
+    expect(submitUrl({ sourcePlatform: 'CSES', sourceCode: '1068' })).toBeNull();
   });
 });

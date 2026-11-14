@@ -37,20 +37,19 @@ describe('ProfileStatistics', () => {
     return { fixture, root, select };
   }
 
-  it('offers all four requested filters and explains the partial coverage', async () => {
+  it('offers the supported platform filters and explains the partial coverage', async () => {
     const { root } = await setup();
     expect(
       [...root.querySelectorAll('option')].map((option) => option.textContent?.trim()),
-    ).toEqual(['Todas las plataformas', 'Codeforces', 'LeetCode', 'AtCoder']);
+    ).toEqual(['Todas las plataformas', 'Codeforces', 'AtCoder']);
     expect(root.querySelector('.coverage-note')?.textContent).toContain(
-      '1 de 3 fuentes disponibles',
+      '1 de 2 fuentes disponibles',
     );
     expect(root.textContent).toContain('El rating no se suma entre plataformas');
     expect(root.querySelector('.metric-grid')?.textContent).toContain('519');
   });
 
   it.each([
-    ['leetcode', 'LeetCode', 'https://leetcode.com/'],
     ['atcoder', 'AtCoder', 'https://atcoder.jp/'],
   ])(
     'does not relabel Codeforces data or invented zeros as %s statistics',
@@ -67,7 +66,7 @@ describe('ProfileStatistics', () => {
 
   it('returns to the same Codeforces values without another API dependency', async () => {
     const { root, select, fixture } = await setup();
-    await select('leetcode');
+    await select('atcoder');
     const button = root.querySelector('button')!;
     button.click();
     await fixture.whenStable();

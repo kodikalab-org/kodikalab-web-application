@@ -4,7 +4,7 @@ import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, provideRouter } fr
 import { isObservable, of, throwError, firstValueFrom } from 'rxjs';
 import { Session } from './session';
 import { ProfileApi } from './profile-api';
-import { accessGuard } from './access-guard';
+import { accessGuard, setRetryDelay } from './access-guard';
 
 describe('Access guard', () => {
   let session: Session;
@@ -31,7 +31,7 @@ describe('Access guard', () => {
   }
 
   it('requires a real session or explicit demo entry', async () => {
-    expect(await guard('/perfil')).toBe('/login');
+    expect(await guard('/perfil')).toBe('/login?volver=%2Fperfil');
   });
   it('redirects a new user to onboarding when the API reports a missing profile', async () => {
     authenticated();
@@ -42,7 +42,20 @@ describe('Access guard', () => {
   it('does not treat a server error as an absent profile', async () => {
     authenticated();
     vi.spyOn(profiles, 'load').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
-    expect(await guard('/inicio')).toBe('/login?motivo=conexion');
+    setRetryDelay(0);
+    expect(await guard('/inicio')).toBe('/sin-conexion?volver=%2Finicio');
+  });
+  it('sends an expired session to the login', async () => {
+    authenticated();
+    vi.spyOn(profiles, 'load').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401 })));
+    expect(await guard('/inicio')).toBe('/login?motivo=sesion-expirada');
+  });
+  it('does not ask for the profile again once it is loaded', async () => {
+    authenticated();
+    profiles.profile.set({ role: 'PRACTICANTE', email: 'test@example.com' } as never);
+    const load = vi.spyOn(profiles, 'load');
+    expect(await guard('/inicio')).toBe(true);
+    expect(load).not.toHaveBeenCalled();
   });
   it('prevents cross-role navigation', async () => {
     authenticated();

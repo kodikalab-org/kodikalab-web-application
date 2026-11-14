@@ -128,7 +128,7 @@ describe('Integración de rutas de equipo (US11 a US14)', () => {
     'impide entrar sin sesión a %s sin consultar datos del equipo',
     async (path) => {
       await RouterTestingHarness.create(path);
-      expect(TestBed.inject(Router).url).toBe('/login');
+      expect(TestBed.inject(Router).url).toBe(`/login?volver=${encodeURIComponent(path)}`);
       http.expectNone(() => true);
     },
   );

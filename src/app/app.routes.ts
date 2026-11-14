@@ -44,6 +44,10 @@ const appRoutes: Routes = [
   { path: '', component: LandingPage },
   { path: 'login', component: Login },
   { path: 'registro', component: Registro },
+  {
+    path: 'sin-conexion',
+    loadComponent: () => import('./pages/sin-conexion/sin-conexion').then((m) => m.SinConexion),
+  },
   ...COACH_ROUTES,
   ...PRACTICANTE_ROUTES,
   ...CONCURSOS_ROUTES,
@@ -206,7 +210,7 @@ const appRoutes: Routes = [
   },
 ];
 
-const publicPaths = ['', 'login', 'registro', 'recuperar-contrasena', 'recuperar-contrasena/codigo', 'recuperar-contrasena/nueva'];
+const publicPaths = ['', 'login', 'registro', 'sin-conexion', 'recuperar-contrasena', 'recuperar-contrasena/codigo', 'recuperar-contrasena/nueva'];
 export const routes: Routes = [
   ...appRoutes.map(route => publicPaths.includes(route.path ?? '') || route.path?.startsWith('demo/')
     ? route

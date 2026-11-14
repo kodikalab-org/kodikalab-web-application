@@ -117,7 +117,6 @@ export class LandingPage {
   protected readonly platforms = [
     { name: 'Codeforces', icon: 'images/landing/platform-codeforces.svg' },
     { name: 'AtCoder', icon: 'images/landing/platform-atcoder.svg' },
-    { name: 'LeetCode', icon: 'images/landing/platform-leetcode.svg' },
     { name: 'vJudge', icon: 'images/landing/platform-vjudge.svg' },
   ];
 

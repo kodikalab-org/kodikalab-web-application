@@ -30,13 +30,6 @@ export function footerColumns(audience: FooterAudience): FooterColumn[] {
           { label: 'Recuperar contraseña', path: '/recuperar-contrasena' },
         ],
       },
-      {
-        title: 'Pruébala',
-        links: [
-          { label: 'Demo para practicantes', path: '/demo/practicante' },
-          { label: 'Demo para coaches', path: '/demo/coach' },
-        ],
-      },
     ];
   }
   const coach = audience === 'coach';

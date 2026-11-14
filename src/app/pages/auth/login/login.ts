@@ -1,12 +1,11 @@
 import { ChangeDetectorRef, Component, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Session, homeFor, onboardingFor } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
 import { Role, authApiError, isConnectionError } from '../../../core/api';
 import { HttpErrorResponse } from '@angular/common/http';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { safeReturnUrl } from '../../../core/return-url';
 import { emailRule, normalizeEmail, passwordBytesRule } from '../auth-rules';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,7 +23,6 @@ type LoginFailure = 'credentials' | 'connection' | null;
   selector: 'app-login',
   imports: [
     SiteFooter,
-    AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
@@ -44,7 +42,6 @@ export class Login {
   private readonly route = inject(ActivatedRoute);
   // The app runs without zone.js: HTTP results must notify the view explicitly.
   private readonly cdr = inject(ChangeDetectorRef);
-  protected readonly estado$ = this.route.queryParamMap.pipe(map((params) => params.get('estado')));
   protected busy = false;
   /** Set after a few seconds without answer: the backend may be waking up. */
   protected slow = false;

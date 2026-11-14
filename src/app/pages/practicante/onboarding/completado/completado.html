@@ -1,7 +1,5 @@
-@let estado = estado$ | async;
 <div
   class="relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text"
-  [attr.data-estado]="estado"
 >
   <img
     class="pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
@@ -24,10 +22,10 @@
         <span
           class="flex size-[34px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
           aria-hidden="true"
-          >{{ session.demo() ? 'CR' : 'KL' }}</span
+          >KL</span
         >
         <span class="flex flex-col max-[641px]:hidden">
-          <span class="text-sm leading-4 font-normal">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
+          <span class="text-sm leading-4 font-normal">{{ session.account()?.email }}</span>
           <span class="text-xs leading-[14px] font-normal text-kl-muted">Practicante</span>
         </span>
       </div>
@@ -84,14 +82,14 @@
           <img src="images/onboarding/check-38.svg" alt="" width="38" height="38" />
         </span>
         <h1 class="m-0 font-display text-[30px] leading-9 font-bold tracking-[-.8px]">
-          {{ session.demo() ? '¡Tu perfil está listo, Camila!' : '¡Tu perfil está listo!' }}
+          ¡Tu perfil está listo!
         </h1>
         <p class="m-0 text-[15px] leading-[22px] font-light text-kl-body">
           Ya puedes unirte a un equipo y empezar a entrenar.
         </p>
       </div>
 
-      @if (estado === 'aviso-codeforces') {
+      @if (avisoCodeforces) {
         <div
           class="flex items-start gap-2.5 rounded-xl border border-solid px-3.5 py-3 border-[#fbbf24]/40 bg-[#fbbf24]/10 text-[#fde68a]"
           role="status"
@@ -110,13 +108,13 @@
           <img class="shrink-0" src="images/onboarding/check-circle-20.svg" alt="" width="20" height="20" />
           <p class="m-0 text-sm leading-5">
             <strong class="block font-semibold">Perfil actualizado correctamente</strong>
-            {{ session.demo() ? 'Detectamos tu rating de Codeforces: 1432.' : profiles.message() || 'Tu perfil está guardado.' }}
+            {{ profiles.message() || 'Tu perfil está guardado.' }}
           </p>
         </div>
       }
 
       <ul class="m-0 flex list-none flex-wrap justify-center gap-2 p-0">
-        @for (dato of estado === 'aviso-codeforces' && session.demo() ? resumenAviso : resumen; track dato) {
+        @for (dato of resumen; track dato) {
           <li
             class="rounded-full border border-solid border-[#987eff]/40 bg-[#7357f3]/20 px-3 py-1.5 text-[13px] leading-[normal] text-[#e7e3f5]"
           >

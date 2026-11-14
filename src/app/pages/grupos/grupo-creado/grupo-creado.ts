@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { apiError } from '../../../core/api';
 import { CreateGroupResponse, GroupStatus, TeamsApi } from '../../../core/teams-api';
-import { Session } from '../../../core/session';
 
 /**
  * Confirmación de US04. Toma el grupo recién creado desde `TeamsApi` en lugar de
@@ -18,7 +17,6 @@ import { Session } from '../../../core/session';
 })
 export class GrupoCreado {
   private readonly api = inject(TeamsApi);
-  protected readonly session = inject(Session);
 
   /** Estado local: cambia a ACTIVO cuando el coach publica el borrador. */
   private readonly estadoPublicado = signal<GroupStatus | null>(null);
@@ -27,15 +25,7 @@ export class GrupoCreado {
   protected readonly mensaje = signal('');
 
   protected readonly grupo = computed<CreateGroupResponse | null>(() =>
-    this.session.demo()
-      ? {
-          groupId: 1,
-          name: 'Equipo Alfa',
-          status: 'ACTIVO',
-          invitationCode: 'DEMO12345678',
-          message: 'Vista de ejemplo: no se creó ningún grupo.',
-        }
-      : this.api.lastCreated(),
+    this.api.lastCreated(),
   );
 
   protected readonly estadoActual = computed<GroupStatus>(
@@ -54,7 +44,7 @@ export class GrupoCreado {
   /** US04: publica el borrador y lo deja disponible para solicitudes. */
   protected publicar(): void {
     const grupo = this.grupo();
-    if (!grupo || this.publicando() || this.session.demo()) return;
+    if (!grupo || this.publicando()) return;
 
     this.publicando.set(true);
     this.error.set('');

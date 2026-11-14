@@ -1,13 +1,12 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { firstValueFrom, map, tap } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
 import { PractitionerProfile, apiError } from '../../../../core/api';
@@ -23,7 +22,6 @@ const usuarioExterno = () =>
   selector: 'app-onboarding-plataformas',
   imports: [
     SiteFooter,
-    AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
@@ -47,7 +45,6 @@ export class OnboardingPlataformas {
   }
   protected async guardar(omitir = false): Promise<void> {
     if (this.busy || (!omitir && this.form.invalid)) return;
-    if (this.session.demo()) { await this.router.navigateByUrl('/onboarding/practicante/completado'); return; }
     const academic = this.profiles.academic;
     const nivel = this.profiles.competitive.nivel;
     if (!academic.codigo || !nivel) { await this.router.navigateByUrl('/onboarding/practicante/datos-academicos'); return; }
@@ -79,27 +76,4 @@ export class OnboardingPlataformas {
     atcoder: usuarioExterno(),
     vjudge: usuarioExterno(),
   });
-
-  /**
-   * Estados de maqueta (`?estado=`): `error-formato` precarga un usuario de
-   * Codeforces inválido y `guardando` precarga los tres usuarios y muestra el
-   * botón en curso de guardado.
-   */
-  private readonly route = inject(ActivatedRoute);
-  protected readonly estado$ = this.route.queryParamMap.pipe(
-    map((params) => params.get('estado')),
-    tap((estado) => this.aplicarEstado(estado)),
-  );
-
-  private aplicarEstado(estado: string | null): void {
-    if (!this.session.demo()) return;
-    this.form.reset();
-    if (estado === 'error-formato') {
-      this.form.patchValue({ codeforces: 'camila rojas!', atcoder: 'camila_r' });
-      this.form.markAllAsTouched();
-    }
-    if (estado === 'guardando') {
-      this.form.patchValue({ codeforces: 'camila_cf', atcoder: 'camila_r', vjudge: 'camila_vj' });
-    }
-  }
 }

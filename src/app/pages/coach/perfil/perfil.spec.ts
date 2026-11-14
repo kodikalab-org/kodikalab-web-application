@@ -1,58 +1,84 @@
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../core/session';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { CoachPerfil } from './perfil';
+import { API_URL } from '../../../core/api';
 import { ProfileApi } from '../../../core/profile-api';
+import { Session } from '../../../core/session';
+import { signIn } from '../../../testing/sign-in';
+import { CoachPerfil } from './perfil';
+
+const PERFIL = { fullName: 'Ángela Prueba', email: 'coach@example.invalid', especialidadPrincipal: 'Grafos',
+  organizacionClub: 'Club de pruebas', aniosExperiencia: 4, presentacion: null };
+const GRUPOS = [
+  { groupId: 1, name: 'Equipo Uno', description: null, expectedLevel: 'INTERMEDIO', maxCapacity: 20,
+    sessionSchedule: 'Lunes 18:00', status: 'ACTIVO', visibility: 'PUBLICO', invitationCode: 'ABC',
+    activeMembers: 5, pendingRequests: 2 },
+  { groupId: 2, name: 'Equipo Dos', description: null, expectedLevel: 'AVANZADO', maxCapacity: 10,
+    sessionSchedule: null, status: 'ACTIVO', visibility: 'PUBLICO', invitationCode: 'DEF',
+    activeMembers: 3, pendingRequests: 0 },
+];
 
 describe('CoachPerfil', () => {
-  it('shows the account name above a smaller email and uses real initials', async () => {
-    await TestBed.configureTestingModule({ providers: [
-      provideRouter([{ path: 'coach/perfil', component: CoachPerfil }]),
-    ] }).compileComponents();
-    TestBed.inject(Session).demo.set(null);
-    TestBed.inject(ProfileApi).profile.set({ fullName: 'Ángela Prueba', email: 'coach@example.invalid',
-      role: 'COACH', especialidadPrincipal: 'Grafos', organizacionClub: null,
-      aniosExperiencia: 4, presentacion: null });
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/coach/perfil', CoachPerfil);
-    const root = harness.routeNativeElement as HTMLElement;
-    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Ángela Prueba');
-    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('coach@example.invalid');
-    expect(root.querySelector('.profile-avatar')?.textContent?.trim()).toBe('ÁP');
-  });
-
-  async function abrir(url: string) {
+  async function abrir(url = '/coach/perfil', grupos: unknown[] = GRUPOS, profile: Record<string, unknown> = PERFIL) {
     await TestBed.configureTestingModule({
-      providers: [provideRouter([{ path: 'coach/perfil', component: CoachPerfil }])],
+      providers: [
+        provideRouter([{ path: 'coach/perfil', component: CoachPerfil }]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('COACH');
+    signIn('COACH', profile);
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl(url, CoachPerfil);
+    TestBed.inject(HttpTestingController).expectOne(`${TestBed.inject(API_URL)}/teams/me`).flush(grupos);
     const root = harness.routeNativeElement as HTMLElement;
     const settle = async () => {
       harness.detectChanges();
       await harness.fixture.whenStable();
     };
     await settle();
-    const botones = (texto: string) =>
-      Array.from(root.querySelectorAll<HTMLElement>('button')).filter((b) =>
-        b.textContent?.includes(texto),
-      );
-    return { root, settle, botones };
+    return { root, settle };
   }
+  afterEach(() => {
+    TestBed.inject(HttpTestingController).verify();
+    TestBed.inject(Session).logout();
+  });
 
-  it('shows the personal information tab by default', async () => {
-    const { root } = await abrir('/coach/perfil');
+  it('shows the account name above a smaller email and uses real initials', async () => {
+    const { root } = await abrir();
+    expect(root.querySelector('.profile-name')?.textContent?.trim()).toBe('Ángela Prueba');
+    expect(root.querySelector('.profile-email')?.textContent?.trim()).toBe('coach@example.invalid');
+    expect(root.querySelector('.profile-avatar')?.textContent?.trim()).toBe('ÁP');
+  });
+
+  it('shows the profile and the real groups of the coach on the default tab', async () => {
+    const { root } = await abrir();
     expect(root.querySelector('h1')?.textContent).toContain('Perfil');
-    expect(root.textContent).toContain('Marco Paredes');
-    expect(root.textContent).toContain('@marcoparedes');
-    expect(root.textContent).toContain('Especialidad: Grafos y Programación Dinámica');
+    expect(root.textContent).toContain('Especialidad: Grafos');
+    expect(root.textContent).toContain('Club de pruebas');
     expect(root.textContent).toContain('Mis equipos');
-    expect(root.textContent).toContain('Equipo Alfa');
-    expect(root.textContent).toContain('14/20 integrantes · Martes y jueves, 7:00 p. m.');
-    expect(root.textContent).toContain('Crear equipo');
+    expect(root.textContent).toContain('Equipo Uno');
+    expect(root.textContent).toContain('5/20 integrantes · Lunes 18:00');
+    expect(root.textContent).toContain('3/10 integrantes · horario por definir');
+    expect(root.querySelector('a[href="/coach/grupos/crear"]')).not.toBeNull();
     expect(root.querySelector('[role="status"]')).toBeNull();
+    expect(root.textContent).not.toMatch(/Marco|Paredes|Equipo Alfa|Equipo Beta/);
+  });
+
+  it('totals the real members and pending requests', async () => {
+    const { root } = await abrir();
+    const valores = Array.from(root.querySelectorAll('ul.flex.list-none.gap-3 li')).map((li) =>
+      li.textContent?.replace(/\s+/g, ' ').trim(),
+    );
+    expect(valores).toEqual(['2Equipos a cargo', '8Integrantes activos', '2Solicitudes pendientes']);
+  });
+
+  it('shows an honest empty state when the coach has no groups', async () => {
+    const { root } = await abrir('/coach/perfil', []);
+    expect(root.textContent).toContain('Aún no tienes equipos');
+    expect(root.querySelector('a[href="/coach/grupos/crear"]')).not.toBeNull();
   });
 
   it('falls back to the personal information tab for an unknown tab', async () => {
@@ -74,84 +100,45 @@ describe('CoachPerfil', () => {
   });
 
   it('links Editar perfil to the edit screen', async () => {
-    const { root } = await abrir('/coach/perfil');
-    const enlaces = root.querySelectorAll('a[href="/coach/perfil/editar"]');
-    expect(enlaces.length).toBe(2);
+    const { root } = await abrir();
+    expect(root.querySelectorAll('a[href="/coach/perfil/editar"]').length).toBe(2);
   });
 
-  it('shows the success notice for ?estado=actualizado', async () => {
+  it('shows the success notice only when the API confirmed the save', async () => {
     const { root } = await abrir('/coach/perfil?estado=actualizado');
-    expect(root.querySelector('[role="status"]')?.textContent).toContain(
-      'Perfil actualizado correctamente',
-    );
-    expect(root.textContent).toContain('Tus cambios ya están visibles en tu perfil.');
+    expect(root.querySelector('[role="status"]')).toBeNull();
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      providers: [provideRouter([{ path: 'coach/perfil', component: CoachPerfil }]), provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
+    signIn('COACH', PERFIL);
+    TestBed.inject(ProfileApi).message.set('Perfil actualizado.');
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/coach/perfil?estado=actualizado', CoachPerfil);
+    TestBed.inject(HttpTestingController).expectOne(`${TestBed.inject(API_URL)}/teams/me`).flush([]);
+    harness.detectChanges();
+    const aviso = (harness.routeNativeElement as HTMLElement).querySelector('[role="status"]');
+    expect(aviso?.textContent).toContain('Perfil actualizado correctamente');
+    expect(aviso?.textContent).toContain('Tus cambios ya están visibles en tu perfil.');
   });
 
-  it('lists the pending requests with Rechazar and Aceptar actions', async () => {
+  it('points to the group management page instead of listing invented requests', async () => {
     const { root } = await abrir('/coach/perfil?tab=solicitudes');
     expect(root.textContent).toContain('Solicitudes de ingreso');
-    expect(root.textContent).toContain('Pendiente → Aceptada o Rechazada');
-    expect(root.textContent).toContain('Pendientes 3');
-    expect(root.textContent).toContain('Valeria Núñez');
-    expect(root.textContent).toContain('Solicita unirse a Equipo Alfa · Nivel Intermedio');
-    expect(root.textContent).toContain('12 oct. 2024');
-    expect(root.querySelectorAll('li button[aria-label^="Aceptar a"]').length).toBe(3);
-    expect(root.querySelectorAll('li button[aria-label^="Rechazar a"]').length).toBe(3);
-    expect(root.textContent).not.toContain('No tienes solicitudes pendientes');
-  });
-
-  it('marks a request as Aceptada or Rechazada and updates the pending counter', async () => {
-    const { root, settle } = await abrir('/coach/perfil?tab=solicitudes');
-    root.querySelector<HTMLButtonElement>('button[aria-label="Aceptar a Valeria Núñez"]')!.click();
-    await settle();
-    root
-      .querySelector<HTMLButtonElement>('button[aria-label="Rechazar a Sebastián Cruz"]')!
-      .click();
-    await settle();
-    const estados = Array.from(root.querySelectorAll('li [role="status"]')).map((e) =>
-      e.textContent?.trim(),
-    );
-    expect(estados).toEqual(['Aceptada', 'Rechazada']);
-    expect(root.textContent).toContain('Pendientes 1');
-    expect(root.querySelectorAll('li button[aria-label^="Aceptar a"]').length).toBe(1);
-  });
-
-  it('shows the empty state for ?tab=solicitudes&estado=vacio', async () => {
-    const { root } = await abrir('/coach/perfil?tab=solicitudes&estado=vacio');
-    expect(root.textContent).toContain('No tienes solicitudes pendientes');
-    expect(root.textContent).toContain(
-      'Cuando un practicante solicite unirse a tus equipos, aparecerá aquí para que lo aceptes o lo rechaces.',
-    );
+    expect(root.textContent).toContain('Revisa tus solicitudes desde la gestión de grupos');
+    expect(root.querySelector('a[href="/coach/grupos/solicitudes"]')).not.toBeNull();
     expect(root.querySelectorAll('li button').length).toBe(0);
+    expect(root.textContent).not.toMatch(/Valeria|Sebastián|Ítalo/);
   });
 
-  it('shows the general settings with toggles, language and logout, without a recovery code row', async () => {
-    const { root, botones } = await abrir('/coach/perfil?tab=ajustes');
-    const titulos = [
-      'Privacidad del perfil',
-      'Idioma',
-      'Cerrar sesión',
-    ];
-    for (const titulo of titulos) {
+  it('shows the general settings with the language and logout rows, without a recovery code row', async () => {
+    const { root } = await abrir('/coach/perfil?tab=ajustes');
+    for (const titulo of ['Privacidad del perfil', 'Idioma', 'Cerrar sesión']) {
       expect(root.textContent).toContain(titulo);
     }
-    const toggles = Array.from(root.querySelectorAll<HTMLButtonElement>('button[role="switch"]'));
-    expect(toggles.map((t) => t.getAttribute('aria-checked'))).toEqual(['false']);
     expect(root.textContent).not.toContain('Notificaciones');
     expect(root.textContent).not.toContain('Tema oscuro');
-    expect(root.querySelector('mat-select')?.textContent).toContain('Español');
     expect(root.textContent).not.toContain('Código de recuperación');
-    expect(botones('Código no disponible en demo').length).toBe(0);
     expect(root.querySelector('a[href="/login"]')?.textContent).toContain('Cerrar sesión');
-  });
-
-  it('flips a settings toggle', async () => {
-    const { root, settle } = await abrir('/coach/perfil?tab=ajustes');
-    const privacidad = root.querySelector<HTMLButtonElement>(
-      'button[aria-label="Privacidad del perfil"]',
-    )!;
-    privacidad.click();
-    await settle();
-    expect(privacidad.getAttribute('aria-checked')).toBe('true');
   });
 });

@@ -14,7 +14,7 @@ describe('CodeforcesStatsApi', () => {
     http.verify();
   });
 
-  it('fills missing UTC days and preserves actual counts without demo data', () => {
+  it('fills missing UTC days and preserves actual counts without sample data', () => {
     const calendar = activityCalendar([{ date: '2026-11-06', count: 8 }], new Date('2026-11-06T23:00:00Z'));
     const days = calendar.filter(day => !day.padding);
     expect(days).toHaveLength(365);

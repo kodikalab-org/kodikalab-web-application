@@ -24,10 +24,6 @@
     </label>
   </div>
 
-  @if (demo()) {
-    <p class="demo-notice" role="note">Datos de ejemplo · No se consultó ninguna plataforma.</p>
-  }
-
   @if (!supported()) {
     <div class="stats-empty pending-platform" role="status">
       <span class="pending-mark" aria-hidden="true">{{
@@ -88,14 +84,12 @@
           <div>
             <strong>Codeforces</strong
             ><a [href]="profileUrl()" target="_blank" rel="noopener noreferrer"
-              >{{ demo() ? 'Cuenta de ejemplo' : '@' + current.handle }}
+              >@{{ current.handle }}
               <span aria-hidden="true">↗</span></a
             >
           </div>
         </div>
-        <span class="status-badge" [class.muted]="demo()"
-          ><span aria-hidden="true">●</span> {{ demo() ? 'Demo' : 'Datos del backend' }}</span
-        >
+        <span class="status-badge"><span aria-hidden="true">●</span> Datos del backend</span>
       </div>
       @if (platform() === 'all') {
         <p class="coverage-note">
@@ -112,15 +106,11 @@
       <app-statistics-charts [data]="current" />
       <footer class="stats-footer">
         <p>
-          {{
-            demo()
-              ? 'Vista de demostración.'
-              : 'Fuente: API pública de Codeforces. Caché del servidor de hasta 15 minutos.'
-          }}
+          Fuente: API pública de Codeforces. Caché del servidor de hasta 15 minutos.
           El rating no se suma entre plataformas.
         </p>
         <a class="text-link" [href]="submissionsUrl()" target="_blank" rel="noopener noreferrer"
-          >{{ demo() ? 'Explorar Codeforces' : 'Ver envíos en Codeforces' }}
+          >Ver envíos en Codeforces
           <span aria-hidden="true">↗</span></a
         >
       </footer>

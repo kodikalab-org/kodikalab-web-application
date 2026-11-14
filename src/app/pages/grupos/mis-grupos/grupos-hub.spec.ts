@@ -5,6 +5,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { BehaviorSubject, of } from 'rxjs';
 import { signal } from '@angular/core';
 import { Session } from '../../../core/session';
+import { signIn } from '../../../testing/sign-in';
 import { TeamsApi } from '../../../core/teams-api';
 import { GruposHub } from './grupos-hub';
 
@@ -68,7 +69,7 @@ function setup(role: 'COACH' | 'PRACTICANTE', tab: string | null = null) {
       { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: params.value }, queryParamMap: params } },
     ],
   });
-  TestBed.inject(Session).startDemo(role);
+  signIn(role);
   return { stub, params, fixture: TestBed.createComponent(GruposHub) };
 }
 

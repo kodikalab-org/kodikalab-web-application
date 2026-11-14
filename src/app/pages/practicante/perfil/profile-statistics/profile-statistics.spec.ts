@@ -115,7 +115,7 @@ describe('ProfileStatistics', () => {
     expect(root.querySelectorAll('.activity-cell:not(.padding)')).toHaveLength(30);
   });
 
-  it('preserves loading and retry without replacing real data with demo values', async () => {
+  it('preserves loading and retry without replacing real data with sample values', async () => {
     const { fixture, root } = await setup();
     fixture.componentRef.setInput('loading', true);
     await fixture.whenStable();
@@ -138,15 +138,5 @@ describe('ProfileStatistics', () => {
     expect(root.querySelector('.pending-platform')).not.toBeNull();
     expect(root.querySelector('.stats-panel')?.getAttribute('aria-busy')).toBe('false');
     expect(root.querySelector('.stats-skeleton')).toBeNull();
-  });
-
-  it('labels synthetic data and never points the demo to a fabricated user profile', async () => {
-    const { fixture, root } = await setup();
-    fixture.componentRef.setInput('demo', true);
-    await fixture.whenStable();
-    expect(root.querySelector('.demo-notice')?.textContent).toContain('Datos de ejemplo');
-    expect(root.querySelector('.metric-grid')?.textContent).toContain('569');
-    expect(root.querySelector('a[href*="/profile/"]')).toBeNull();
-    expect(root.querySelector('a[href*="/submissions/"]')).toBeNull();
   });
 });

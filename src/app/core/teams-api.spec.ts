@@ -19,48 +19,7 @@ describe('Teams API session boundaries', () => {
   });
   afterEach(() => { http.verify(); session.logout(); });
 
-  it('shows static groups, memberships and requests in a demo without HTTP', async () => {
-    session.startDemo('PRACTICANTE');
-    TestBed.tick();
-    expect((await firstValueFrom(teams.loadGroups())).length).toBeGreaterThan(0);
-    expect(await firstValueFrom(teams.loadMine())).toEqual(expect.arrayContaining([
-      expect.objectContaining({ membership: expect.objectContaining({ status: 'ACTIVO' }) }),
-    ]));
-    session.startDemo('COACH');
-    TestBed.tick();
-    expect(await firstValueFrom(teams.loadMine())).toEqual(expect.arrayContaining([
-      expect.objectContaining({ activeMembers: 3 }),
-    ]));
-    expect((await firstValueFrom(teams.loadRequests(1, 'PENDIENTE')))[0].practitioner?.fullName).toBe('Valeria Núñez');
-    expect(await firstValueFrom(teams.loadRequests(1, 'ACLARACION_SOLICITADA'))).toEqual([]);
-    http.expectNone(() => true);
-  });
-
-  it('rejects all demo writes without reporting success or contacting the API', async () => {
-    session.startDemo('COACH');
-    const writes = [
-      teams.create({ name: 'Grupo demo' }), teams.updateDraft(1, { name: 'Cambio' }),
-      teams.publish(1), teams.join(1), teams.decide(1, 101, 'ACEPTAR'),
-      teams.respondClarification(1, 101, 'Respuesta'),
-    ];
-    for (const write of writes) {
-      await expect(firstValueFrom<unknown>(write)).rejects.toMatchObject({ error: {
-        message: expect.stringContaining('Demostración: los cambios no se guardan.'),
-      } });
-    }
-    expect(teams.lastCreated()).toBeNull();
-    http.expectNone(() => true);
-  });
-
-  it('keeps demo groups loaded immediately after switching roles', async () => {
-    TestBed.tick();
-    session.startDemo('COACH');
-    await firstValueFrom(teams.loadMine());
-    TestBed.tick();
-    expect(teams.mine().length).toBeGreaterThan(0);
-  });
-
-  it('preserves the live teams contract outside a demo', async () => {
+  it('preserves the live teams contract', async () => {
     const base = TestBed.inject(API_URL);
     const loaded = firstValueFrom(teams.loadGroups());
     const get = http.expectOne(`${base}/teams`);
@@ -97,24 +56,13 @@ describe('Teams API session boundaries', () => {
     await joined;
   });
 
-  it('rejects join by code in a demo without contacting the API', async () => {
-    session.startDemo('PRACTICANTE');
-    await expect(firstValueFrom<unknown>(teams.joinByCode('A1B2C3D4E5F6'))).rejects.toMatchObject({ error: {
-      message: expect.stringContaining('Demostración: los cambios no se guardan.'),
-    } });
-    http.expectNone(() => true);
-  });
-
-  it('clears group data and invitation codes when changing session or demo role', async () => {
+  it('clears group data and invitation codes when the session changes', async () => {
     TestBed.tick();
     teams.lastCreated.set({ groupId: 9, name: 'Privado', status: 'BORRADOR', invitationCode: 'EXAMPLE12345', message: 'OK' });
-    session.startDemo('COACH');
+    teams.mine.set([{ groupId: 9, name: 'Privado' } as never]);
+    session.account.set({ token: 'otro-token', email: 'otro@example.com', role: 'COACH', expiresAt: Date.now() + 60000 });
     TestBed.tick();
     expect(teams.lastCreated()).toBeNull();
-    await firstValueFrom(teams.loadMine());
-    expect(teams.mine().length).toBeGreaterThan(0);
-    session.logout();
-    TestBed.tick();
     expect(teams.mine()).toEqual([]);
     expect(teams.requests()).toEqual([]);
   });

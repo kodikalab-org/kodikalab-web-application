@@ -1,6 +1,7 @@
+import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../../core/session';
-import { RouterTestingHarness } from '@angular/router/testing';
+import { Subject } from 'rxjs';
+import { ProfileApi } from '../../../../core/profile-api';
 import { provideRouter } from '@angular/router';
 import { OnboardingPlataformas } from './plataformas';
 
@@ -10,7 +11,6 @@ describe('OnboardingPlataformas', () => {
       imports: [OnboardingPlataformas],
       providers: [provideRouter([])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('PRACTICANTE');
     const fixture = TestBed.createComponent(OnboardingPlataformas);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -56,41 +56,38 @@ describe('OnboardingPlataformas', () => {
   });
 });
 
-describe('OnboardingPlataformas (estados con ?estado=)', () => {
-  async function abrir(consulta: string) {
+describe('OnboardingPlataformas (guardado real)', () => {
+  it('shows the saving state while the API request is in flight', async () => {
     await TestBed.configureTestingModule({
-      providers: [provideRouter([{ path: 'pantalla', component: OnboardingPlataformas }])],
+      imports: [OnboardingPlataformas],
+      providers: [provideRouter([])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('PRACTICANTE');
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/pantalla' + consulta, OnboardingPlataformas);
-    await harness.fixture.whenStable();
-    harness.detectChanges();
-    const root = harness.routeNativeElement as HTMLElement;
-    const settle = async () => {
-      harness.detectChanges();
-      await harness.fixture.whenStable();
-    };
-    return { root, settle };
-  }
-
-  it('shows the format error for ?estado=error-formato', async () => {
-    const { root } = await abrir('?estado=error-formato');
-    expect(root.querySelector<HTMLInputElement>('#codeforces')!.value).toBe('camila rojas!');
-    expect(root.querySelector<HTMLInputElement>('#atcoder')!.value).toBe('camila_r');
-    expect(root.querySelector('[role="alert"]')?.textContent).toContain(
-      'Usa solo letras, números, punto, guion y guion bajo (máx. 50)',
-    );
-    expect(root.querySelectorAll('[role="alert"]').length).toBe(1);
-  });
-
-  it('shows the saving state for ?estado=guardando', async () => {
-    const { root } = await abrir('?estado=guardando');
+    const profiles = TestBed.inject(ProfileApi);
+    profiles.academic = { codigo: '123', carrera: 'Ingeniería de Software', ciclo: '5.º ciclo', distrito: '' };
+    profiles.competitive = { nivel: 'INTERMEDIO' };
+    const request = new Subject<never>();
+    vi.spyOn(profiles, 'save').mockReturnValue(request as never);
+    const fixture = TestBed.createComponent(OnboardingPlataformas);
+    await fixture.whenStable();
+    void (fixture.componentInstance as unknown as { guardar(): Promise<void> }).guardar();
+    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
     const busy = root.querySelector<HTMLButtonElement>('button[aria-busy="true"]')!;
     expect(busy.textContent).toContain('Guardando perfil…');
     expect(busy.disabled).toBe(true);
     expect(root.textContent).not.toContain('Omitir por ahora');
-    expect(root.querySelector<HTMLInputElement>('#vjudge')!.value).toBe('camila_vj');
-    expect(root.querySelector<HTMLInputElement>('#vjudge')!.readOnly).toBe(true);
+  });
+
+  it('starts with empty usernames', async () => {
+    await TestBed.configureTestingModule({
+      imports: [OnboardingPlataformas],
+      providers: [provideRouter([])],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(OnboardingPlataformas);
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector<HTMLInputElement>('#codeforces')!.value).toBe('');
+    expect(root.querySelector('[role="alert"]')).toBeNull();
   });
 });

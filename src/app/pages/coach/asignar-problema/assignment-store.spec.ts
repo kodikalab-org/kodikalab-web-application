@@ -229,7 +229,7 @@ describe('AssignmentStore', () => {
     TestBed.tick();
     store.toggle(catalogProblem(7));
     store.teamId.set(12);
-    session.startDemo('COACH');
+    session.account.set({ token: 'otro-token', email: 'otro@example.com', role: 'COACH', expiresAt: Date.now() + 60000 });
     TestBed.tick();
     expect(store.selected()).toEqual([]);
     expect(store.teamId()).toBeNull();

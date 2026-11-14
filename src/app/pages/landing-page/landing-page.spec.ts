@@ -80,7 +80,7 @@ describe('LandingPage', () => {
     expect(scroll).toHaveBeenCalledTimes(1);
   });
 
-  it('does not present unfinished demo controls as working actions', async () => {
+  it('does not present unfinished controls as working actions', async () => {
     const { root } = await setup();
     expect(
       root.querySelector<HTMLButtonElement>('button[title="Video próximamente disponible"]')

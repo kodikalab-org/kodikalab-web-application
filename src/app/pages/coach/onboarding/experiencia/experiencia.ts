@@ -1,14 +1,12 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
 import { SiteFooter } from '../../../../shared/site-footer/site-footer';
@@ -19,7 +17,6 @@ const MAX_ANIOS = 60;
   selector: 'app-onboarding-experiencia',
   imports: [
     SiteFooter,
-    AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
@@ -35,7 +32,7 @@ const MAX_ANIOS = 60;
 export class OnboardingExperiencia {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
-  constructor() { if (!this.session.demo()) this.form.patchValue(this.profiles.coach); }
+  constructor() { this.form.patchValue(this.profiles.coach); }
   protected continuar(): void {
     const { especialidad, organizacion, anios } = this.form.getRawValue();
     this.profiles.coach = { especialidad, organizacion, anios };
@@ -75,31 +72,5 @@ export class OnboardingExperiencia {
     const anios = this.form.controls.anios;
     anios.setValue(Math.min(MAX_ANIOS, Math.max(0, (anios.value ?? 0) + paso)));
     anios.markAsTouched();
-  }
-
-  /**
-   * Estados de maqueta (`?estado=`): `errores` marca los campos como tocados y
-   * `completa` precarga los valores del Figma.
-   */
-  private readonly route = inject(ActivatedRoute);
-  protected readonly estado$ = this.route.queryParamMap.pipe(
-    map((params) => params.get('estado')),
-    tap((estado) => this.aplicarEstado(estado)),
-  );
-
-  private aplicarEstado(estado: string | null): void {
-    if (!this.session.demo()) return;
-    this.form.reset();
-    if (estado === 'completa') {
-      this.form.patchValue({
-        especialidad: 'Grafos y Programación Dinámica',
-        sugerencias: ['Grafos', 'Programación dinámica'],
-        organizacion: 'Club de Programación Competitiva',
-        anios: 4,
-      });
-    }
-    if (estado === 'errores') {
-      this.form.markAllAsTouched();
-    }
   }
 }

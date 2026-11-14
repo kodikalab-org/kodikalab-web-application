@@ -91,7 +91,6 @@ export class AssignmentStore {
     let first = true;
     effect(() => {
       this.session.account();
-      this.session.demo();
       untracked(() => {
         if (first) first = false;
         else this.resetAll();

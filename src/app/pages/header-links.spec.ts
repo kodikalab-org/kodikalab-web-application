@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../app.routes';
 import { Session } from '../core/session';
+import { signIn } from '../testing/sign-in';
 
 const PRACTITIONER_HEADER = ['/inicio', '/practicante/problemas-asignados', '/concursos', '/grupos', '/recursos'];
 const COACH_HEADER = ['/coach/inicio', '/coach/problemas-asignados', '/coach/concursos', '/grupos', '/recursos'];
@@ -20,7 +21,7 @@ const PAGES = [
 describe('Header links of the progress, ranking and results pages', () => {
   afterEach(() => {
     const http = TestBed.inject(HttpTestingController);
-    http.match(() => true).forEach((request) => request.flush(null, { status: 503, statusText: 'Service Unavailable' }));
+    http.match(() => true).filter((request) => !request.cancelled).forEach((request) => request.flush(null, { status: 503, statusText: 'Service Unavailable' }));
     TestBed.inject(Session).logout();
   });
 
@@ -29,16 +30,16 @@ describe('Header links of the progress, ranking and results pages', () => {
       TestBed.configureTestingModule({
         providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()],
       });
-      TestBed.inject(Session).startDemo(page.role);
+      signIn(page.role);
       const harness = await RouterTestingHarness.create(page.url);
       await harness.fixture.whenStable();
       harness.detectChanges();
       const root = harness.routeNativeElement!;
 
-      expect(root.querySelectorAll('app-header')).toHaveLength(1);
+      expect(root.querySelectorAll('header')).toHaveLength(1);
       expect(root.querySelector('span[aria-disabled]')).toBeNull();
-      expect(root.querySelector('app-header [title="Pendiente de integración"], app-header [title="Próximamente"]')).toBeNull();
-      const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('app-header nav[aria-label="Navegación principal"] a'));
+      expect(root.querySelector('header [title="Pendiente de integración"], header [title="Próximamente"]')).toBeNull();
+      const links = Array.from(root.querySelectorAll<HTMLAnchorElement>('header nav[aria-label="Navegación principal"] a'));
       expect(links.map((link) => link.getAttribute('href'))).toEqual([...page.header]);
       expect(links.map((link) => link.textContent?.trim())).toEqual(['Inicio', 'Problemas', 'Concursos', 'Grupos', 'Recursos']);
       expect(root.querySelector('a[href*="#problemas"], a[href*="#competencias"], a[href*="#grupos"]')).toBeNull();

@@ -1,7 +1,6 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
@@ -10,7 +9,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
 import { SiteFooter } from '../../../../shared/site-footer/site-footer';
@@ -19,7 +17,6 @@ import { SiteFooter } from '../../../../shared/site-footer/site-footer';
   selector: 'app-onboarding-perfil-competitivo',
   imports: [
     SiteFooter,
-    AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
@@ -38,10 +35,8 @@ export class OnboardingPerfilCompetitivo {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
   constructor() {
-    if (!this.session.demo()) {
-      this.form.patchValue(this.profiles.competitive);
-      for (const control of ['experiencia', 'franja', 'dias', 'objetivo'] as const) this.form.controls[control].disable();
-    }
+    this.form.patchValue(this.profiles.competitive);
+    for (const control of ['experiencia', 'franja', 'dias', 'objetivo'] as const) this.form.controls[control].disable();
   }
   protected continuar(): void { this.profiles.competitive = { nivel: this.form.controls.nivel.value }; }
   protected readonly niveles = [
@@ -80,31 +75,4 @@ export class OnboardingPerfilCompetitivo {
     dias: new FormControl<string[]>([], { nonNullable: true }),
     objetivo: new FormControl<string | null>(null),
   });
-
-  /**
-   * Estados de maqueta (`?estado=`): `completo` precarga todos los valores del
-   * Figma y `nivel-sin-seleccionar` los precarga sin nivel y lo marca como tocado.
-   */
-  private readonly route = inject(ActivatedRoute);
-  protected readonly estado$ = this.route.queryParamMap.pipe(
-    map((params) => params.get('estado')),
-    tap((estado) => this.aplicarEstado(estado)),
-  );
-
-  private aplicarEstado(estado: string | null): void {
-    if (!this.session.demo()) return;
-    this.form.reset();
-    if (estado === 'completo' || estado === 'nivel-sin-seleccionar') {
-      this.form.patchValue({
-        nivel: estado === 'completo' ? 'INTERMEDIO' : null,
-        experiencia: 12,
-        franja: 'Noche',
-        dias: ['Mié', 'Vie'],
-        objetivo: 'Clasificar a competencias',
-      });
-    }
-    if (estado === 'nivel-sin-seleccionar') {
-      this.form.controls.nivel.markAsTouched();
-    }
-  }
 }

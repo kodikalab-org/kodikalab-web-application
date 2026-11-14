@@ -4,7 +4,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { routes } from '../app.routes';
 import { HEADER_LINK_COUNT, navigationFor, profileMenuFor } from './navigation';
 import { Session } from './session';
-import { ProfileApi } from './profile-api';
+import { signIn } from '../testing/sign-in';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -15,26 +15,26 @@ describe('Application navigation', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()] }));
   afterEach(() => {
     const http = TestBed.inject(HttpTestingController);
-    // /progreso reads the real topic progress (US-10) even in the demo; every other page must stay offline.
-    http.match((request) => request.url.includes('/analytics/teams/'))
+    // The pages load their data from the API: answer whatever is pending so nothing stays open.
+    http.match(() => true)
+      .filter((request) => !request.cancelled)
       .forEach((request) => request.flush(null, { status: 503, statusText: 'Service Unavailable' }));
     http.verify();
     TestBed.inject(Session).logout();
   });
 
   for (const role of ['PRACTICANTE', 'COACH'] as const) {
-    it(`opens every header and dropdown destination for ${role} without backend requests`, async () => {
-      const session = TestBed.inject(Session);
-      session.startDemo(role);
-      const load = vi.spyOn(TestBed.inject(ProfileApi), 'load');
+    it(`opens every header and dropdown destination for ${role}`, async () => {
+      signIn(role);
       const harness = await RouterTestingHarness.create();
       for (const link of navigationFor(role === 'COACH').filter((item) => !NOT_OPENED_HERE.includes(item.path))) {
         const url = link.path + (link.fragment ? `#${link.fragment}` : '');
         await harness.navigateByUrl(url);
-        expect(TestBed.inject(Router).url, link.label).toBe(url);
+        // The guard sends the old platforms page to the platforms section of the profile editor.
+        const expected = link.path === '/practicante/plataformas' ? '/perfil/editar#plataformas' : url;
+        expect(TestBed.inject(Router).url, link.label).toBe(expected);
         expect(harness.routeNativeElement?.querySelector('h1'), link.label).not.toBeNull();
       }
-      expect(load).not.toHaveBeenCalled();
     }, 15000);
   }
 
@@ -73,7 +73,7 @@ describe('Application navigation', () => {
   });
 
   it('redirects the old coach group entry point to /grupos', async () => {
-    TestBed.inject(Session).startDemo('COACH');
+    signIn('COACH');
     const harness = await RouterTestingHarness.create('/coach/grupos');
     expect(TestBed.inject(Router).url).toBe('/grupos');
     expect(harness.routeNativeElement?.querySelector('h1')).not.toBeNull();

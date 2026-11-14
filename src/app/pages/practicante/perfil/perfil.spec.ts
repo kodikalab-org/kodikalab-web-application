@@ -1,25 +1,37 @@
 import { TestBed } from '@angular/core/testing';
 import { Session } from '../../../core/session';
+import { signIn } from '../../../testing/sign-in';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { Perfil } from './perfil';
 import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
 import { ProfileApi } from '../../../core/profile-api';
 
+const emptyStats: CodeforcesStats = { linked: true, handle: 'new_handle', problemsSolved: 0,
+  maxStreakDays: 0, currentRating: 0, acceptedSubmissions: 0, acceptanceRate: 0,
+  activity: [], solvedByRating: [] };
+
+const PERFIL = { fullName: 'Ana María Núñez', email: 'usuario@example.com', codigoEstudiante: 'TEST001',
+  carrera: 'Ingeniería de Software', cicloAcademico: 5, nivelCompetitivo: 'INTERMEDIO', district: 'San Miguel',
+  goal: 'Clasificar a competencias', codeforcesHandle: 'ana_cf', codeforcesRating: 1432,
+  atcoderHandle: null, vjudgeHandle: null };
+
 describe('Perfil', () => {
-  async function setup(params: Record<string, string> = {}) {
+  async function setup(params: Record<string, string> = {}, profile: Record<string, unknown> = PERFIL) {
+    const load = vi.fn().mockReturnValue(of(emptyStats));
     await TestBed.configureTestingModule({
       imports: [Perfil],
       providers: [
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap(params)) } },
+        { provide: CodeforcesStatsApi, useValue: { load } },
       ],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('PRACTICANTE');
+    signIn('PRACTICANTE', profile);
     const fixture = TestBed.createComponent(Perfil);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
-    return { fixture, root };
+    return { fixture, root, load };
   }
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
@@ -44,14 +56,11 @@ describe('Perfil', () => {
       { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
       { provide: CodeforcesStatsApi, useValue: { load } },
     ] }).compileComponents();
-    TestBed.inject(Session).demo.set(null);
+    signIn('PRACTICANTE', PERFIL);
     const fixture = TestBed.createComponent(Perfil);
     await fixture.whenStable();
     return { fixture, root: fixture.nativeElement as HTMLElement, response, load };
   }
-  const emptyStats: CodeforcesStats = { linked: true, handle: 'new_handle', problemsSolved: 0,
-    maxStreakDays: 0, currentRating: 0, acceptedSubmissions: 0, acceptanceRate: 0,
-    activity: [], solvedByRating: [] };
 
   it('shows the real account name prominently, email separately and matching initials', async () => {
     const { fixture, root } = await setupLive();
@@ -132,7 +141,7 @@ describe('Perfil', () => {
     expect(texto(root)).toContain('Aún no hay envíos aceptados');
   });
 
-  it('opens the "Información personal" tab by default with profile, stats and platforms', async () => {
+  it('opens the "Información personal" tab by default with the profile from the API', async () => {
     const { root } = await setup();
     const tabs = [...root.querySelectorAll('[role="tab"]')];
     expect(tabs.map((tab) => tab.textContent?.trim())).toEqual([
@@ -145,38 +154,22 @@ describe('Perfil', () => {
     expect(tabs[1].getAttribute('aria-selected')).toBe('false');
     expect(root.querySelector('[role="tablist"]')).not.toBeNull();
     const contenido = texto(root);
-    expect(contenido).toContain('Camila Rojas Vargas');
-    expect(contenido).toContain('@camilarojas');
+    expect(contenido).toContain('Ana María Núñez');
     expect(contenido).toContain('Ingeniería de Software · 5.º ciclo');
-    expect(contenido).toContain('Nivel competitivo: Intermedio · Código 20240001');
+    expect(contenido).toContain('INTERMEDIO · TEST001');
+    expect(contenido).toContain('Clasificar a competencias');
     expect(contenido).toContain('Estadísticas');
-    expect(contenido).toContain('569');
-    expect(contenido).toContain('Problemas resueltos');
-    expect(contenido).toContain('Actividad de resolución de problemas');
-    expect(contenido).toContain('Problemas por rating');
-    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(1);
+    expect(contenido).toContain('ana_cf');
+    expect(root.querySelectorAll('a[href="/perfil/editar#plataformas"]').length).toBeGreaterThan(0);
+    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(0);
     expect(root.querySelectorAll('li[aria-disabled="true"]').length).toBe(2);
     expect(contenido.match(/En mantenimiento/g)?.length).toBe(2);
     expect(contenido).not.toContain('Aún no vinculas plataformas');
-  });
-
-  it('draws one dated cell per day in the annual calendar and labels demo data', async () => {
-    const { root } = await setup();
-    const days = root.querySelectorAll('.activity-cell:not(.padding)');
-    expect([365, 366]).toContain(days.length);
-    expect(texto(root)).toContain('Datos de ejemplo');
-  });
-
-  it('shows skeletons instead of content while loading (?estado=cargando)', async () => {
-    const { root } = await setup({ estado: 'cargando' });
-    expect(root.querySelector('#panel-perfil')?.getAttribute('aria-busy')).toBe('true');
-    expect(root.querySelectorAll('.animate-pulse').length).toBe(2);
-    expect(texto(root)).not.toContain('Camila Rojas Vargas');
-    expect(texto(root)).not.toContain('Problemas resueltos');
+    expect(contenido).not.toMatch(/Camila|569|Datos de ejemplo|Demostración/);
   });
 
   it('shows the empty platforms state with a link to the platforms section of the editor', async () => {
-    const { root } = await setup({ estado: 'sin-plataformas' });
+    const { root } = await setup({}, { ...PERFIL, codeforcesHandle: null });
     const contenido = texto(root);
     expect(contenido).toContain('Aún no vinculas plataformas');
     expect(contenido).toContain('Vincular plataformas');
@@ -184,85 +177,65 @@ describe('Perfil', () => {
       a.textContent?.includes('Vincular plataformas'),
     );
     expect(enlace?.getAttribute('href')).toBe('/perfil/editar#plataformas');
-    expect(root.querySelectorAll('a[href="/practicante/plataformas"]').length).toBe(0);
+  });
+
+  it('keeps empty fields instead of sample values when there is no profile yet', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Perfil],
+      providers: [provideRouter([]),
+        { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
+        { provide: CodeforcesStatsApi, useValue: { load: vi.fn().mockReturnValue(of(emptyStats)) } }],
+    }).compileComponents();
+    TestBed.inject(Session).restore();
+    const fixture = TestBed.createComponent(Perfil);
+    await fixture.whenStable();
+    expect(texto(fixture.nativeElement)).not.toMatch(/Camila|Rojas|Ingeniería|San Miguel|20240001/);
   });
 
   it('shows the success notice after saving (?estado=actualizado)', async () => {
-    const { root } = await setup({ estado: 'actualizado' });
-    const aviso = root.querySelector('[role="status"]');
+    const { fixture, root } = await setup({ estado: 'actualizado' });
+    expect(root.querySelector('[role="status"].profile-notice')).toBeNull();
+    fixture.destroy();
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [Perfil],
+      providers: [provideRouter([]),
+        { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({ estado: 'actualizado' })) } },
+        { provide: CodeforcesStatsApi, useValue: { load: vi.fn().mockReturnValue(of(emptyStats)) } }],
+    }).compileComponents();
+    signIn('PRACTICANTE', PERFIL);
+    TestBed.inject(ProfileApi).message.set('Perfil guardado.');
+    const guardado = TestBed.createComponent(Perfil);
+    await guardado.whenStable();
+    const aviso = (guardado.nativeElement as HTMLElement).querySelector('[role="status"].profile-notice');
     expect(aviso?.textContent).toContain('Perfil actualizado correctamente');
-    expect(aviso?.textContent).toContain('Tus cambios ya están visibles en tu perfil.');
+    expect(aviso?.textContent).toContain('Perfil guardado.');
     expect(aviso?.closest('main')).not.toBeNull();
-    expect(aviso?.classList.contains('profile-notice')).toBe(true);
     expect(aviso?.classList.contains('absolute')).toBe(false);
   });
 
-  it('uses a full-bleed background and the same fluid layout in the saved state', async () => {
-    const { fixture, root } = await setup();
+  it('uses a full-bleed background', async () => {
+    const { root } = await setup();
     const fondo = root.querySelector('img[aria-hidden="true"]')!;
     expect(fondo.classList.contains('profile-background')).toBe(true);
     expect(fondo.classList.contains('w-[1440px]')).toBe(false);
-    const columnas = root.querySelector('#panel-perfil > div')!.className;
-    fixture.destroy();
-    TestBed.resetTestingModule();
-    const actualizado = await setup({ estado: 'actualizado' });
-    expect(actualizado.root.querySelector('#panel-perfil > div')!.className).toBe(columnas);
   });
 
-  it('lists the group requests with their status and filters (?tab=solicitudes)', async () => {
+  it('shows an honest empty state for the requests tab with a link to the groups', async () => {
     const { root } = await setup({ tab: 'solicitudes' });
-    const contenido = texto(root);
-    expect(root.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toContain(
-      'Solicitudes',
-    );
-    expect(contenido).toContain('Solicitudes recientes');
-    expect(contenido).toContain('Estados: Pendiente · Aceptada · Rechazada · Retirada');
-    for (const filtro of ['Todas 6', 'Pendientes 1', 'Aceptadas 3', 'Rechazadas 2']) {
-      expect(contenido).toContain(filtro);
-    }
-    expect(root.querySelector('input[placeholder="Buscar grupo…"]')).not.toBeNull();
-    expect(root.querySelectorAll('li.border-b').length).toBe(6);
-    expect(contenido).toContain('Algorithms Club (UPC)');
-    expect(contenido).toContain('Pendiente');
-    expect(contenido).toContain('Mostrando 1–6 de 6 solicitudes');
-  });
-
-  it('shows the empty requests state with "Explorar grupos" (?tab=solicitudes&estado=vacio)', async () => {
-    const { root } = await setup({ tab: 'solicitudes', estado: 'vacio' });
-    const contenido = texto(root);
-    expect(contenido).toContain('Aún no has enviado solicitudes');
-    expect(contenido).toContain('Explorar grupos');
-    expect(root.querySelector('input[placeholder="Buscar grupo…"]')).toBeNull();
+    expect(root.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toContain('Solicitudes');
+    expect(texto(root)).toContain('Tus solicitudes aún no están disponibles aquí');
+    expect(root.querySelector('main a[href="/grupos?tab=mis-grupos"]')).not.toBeNull();
     expect(root.querySelectorAll('li.border-b').length).toBe(0);
+    expect(root.querySelector('input[placeholder="Buscar grupo…"]')).toBeNull();
+    expect(texto(root)).not.toMatch(/Algorithms Club|Latin Coders/);
   });
 
-  it('shows the submissions table with verdicts and filters (?tab=submissions)', async () => {
+  it('shows an honest empty state for the submissions tab without a fake table', async () => {
     const { root } = await setup({ tab: 'submissions' });
-    const encabezados = [...root.querySelectorAll('thead th')].map((th) => th.textContent?.trim());
-    expect(encabezados).toEqual([
-      'Problema',
-      'Lenguaje',
-      'Veredicto',
-      'Tiempo',
-      'Memoria',
-      'Fecha',
-    ]);
-    expect(root.querySelectorAll('tbody tr').length).toBe(8);
-    const contenido = texto(root);
-    for (const veredicto of ['Aceptado', 'Wrong Answer', 'Time Limit']) {
-      expect(contenido).toContain(veredicto);
-    }
-    expect(contenido).toContain('Two Sum');
-    expect(contenido).toContain('Mostrando 1–8 de 248 submissions');
-    expect(root.querySelectorAll('mat-select').length).toBe(4);
-    expect(root.querySelector('input[placeholder="Buscar problema…"]')).not.toBeNull();
-  });
-
-  it('shows the empty submissions state with the catalogue button (?tab=submissions&estado=vacio)', async () => {
-    const { root } = await setup({ tab: 'submissions', estado: 'vacio' });
-    expect(texto(root)).toContain('Aún no tienes submissions');
-    expect(texto(root)).toContain('Ir al catálogo de problemas');
+    expect(texto(root)).toContain('Tus submissions aún no están disponibles aquí');
     expect(root.querySelector('table')).toBeNull();
+    expect(texto(root)).not.toMatch(/Two Sum|248 submissions/);
   });
 
   it('shows the general settings with one switch and no recovery code row (?tab=ajustes)', async () => {
@@ -275,22 +248,13 @@ describe('Perfil', () => {
     expect(root.querySelectorAll('mat-slide-toggle').length).toBe(1);
     expect(contenido).not.toContain('Notificaciones');
     expect(contenido).not.toContain('Tema oscuro');
-    expect(root.querySelectorAll('button[role="switch"][aria-checked="true"]').length).toBe(1);
     expect(root.querySelector('[role="dialog"]')).toBeNull();
   });
 
-  for (const estado of ['ver-codigo', 'codigo-recuperacion']) {
-    it(`ignores the removed recovery code state ?estado=${estado} in the settings tab`, async () => {
-      const { root } = await setup({ tab: 'ajustes', estado });
-      expect(root.querySelector('[role="dialog"]')).toBeNull();
-      expect(texto(root)).not.toContain('Código de recuperación');
-    });
-  }
-
   it('ignores states that do not belong to the active tab', async () => {
-    const { root } = await setup({ tab: 'solicitudes', estado: 'cargando' });
-    expect(root.querySelector('#panel-perfil')?.getAttribute('aria-busy')).toBe('false');
-    expect(texto(root)).toContain('Solicitudes recientes');
+    const { root } = await setup({ tab: 'solicitudes', estado: 'actualizado' });
+    expect(root.querySelector('.profile-notice')).toBeNull();
+    expect(texto(root)).toContain('Tus solicitudes aún no están disponibles aquí');
   });
 
   it('falls back to the first tab when the tab is unknown', async () => {

@@ -19,8 +19,7 @@ export const accessGuard: CanActivateFn = (route, state) => {
   // Private pages are rendered only in the browser: no token or personal data in SSR HTML.
   if (!isPlatformBrowser(inject(PLATFORM_ID))) return router.parseUrl('/login');
   session.restore();
-  const role: Role = route.data['role'] ?? session.demo() ?? session.account()?.role ?? 'PRACTICANTE';
-  if (session.demo()) return session.demo() === role ? true : router.parseUrl(homeFor(session.demo()!));
+  const role: Role = route.data['role'] ?? session.account()?.role ?? 'PRACTICANTE';
   if (!session.token()) {
     const volver = safeReturnUrl(state.url);
     return router.createUrlTree(['/login'], volver ? { queryParams: { volver } } : {});
@@ -60,20 +59,9 @@ export const accessGuard: CanActivateFn = (route, state) => {
 export const coachGroupDetailGuard: CanActivateFn = (route) => {
   const session = inject(Session);
   session.restore();
-  const role = session.demo() ?? session.account()?.role;
+  const role = session.account()?.role;
   if (role !== 'COACH') return true;
   return inject(Router).createUrlTree(['/coach/grupos/solicitudes'], {
     queryParams: { grupo: route.paramMap.get('id') },
   });
-};
-
-export const demoGuard: CanActivateFn = (route) => {
-  const session = inject(Session);
-  const profiles = inject(ProfileApi);
-  const router = inject(Router);
-  if (!isPlatformBrowser(inject(PLATFORM_ID))) return router.parseUrl('/login');
-  const role: Role = route.data['role'];
-  profiles.reset();
-  session.startDemo(role);
-  return router.parseUrl(homeFor(role));
 };

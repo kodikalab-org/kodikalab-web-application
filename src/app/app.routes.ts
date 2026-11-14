@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { LandingPage } from './pages/landing-page/landing-page';
 import { Login } from './pages/auth/login/login';
 import { Registro } from './pages/auth/registro/registro';
-import { accessGuard, coachGroupDetailGuard, demoGuard } from './core/access-guard';
+import { accessGuard, coachGroupDetailGuard } from './core/access-guard';
 import { passwordResetStepGuard } from './core/password-reset-flow';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { COACH_ROUTES } from './pages/coach/coach.routes';
@@ -69,8 +69,6 @@ const appRoutes: Routes = [
     canActivate: [passwordResetStepGuard],
     loadComponent: () => import('./pages/auth/recuperar-contrasena/recuperar-contrasena').then((m) => m.RecuperarContrasena),
   },
-  { path: 'demo/practicante', component: Login, canActivate: [demoGuard], data: { role: 'PRACTICANTE' } },
-  { path: 'demo/coach', component: Login, canActivate: [demoGuard], data: { role: 'COACH' } },
   {
     path: 'grupos',
     loadComponent: () =>
@@ -212,7 +210,7 @@ const appRoutes: Routes = [
 
 const publicPaths = ['', 'login', 'registro', 'sin-conexion', 'recuperar-contrasena', 'recuperar-contrasena/codigo', 'recuperar-contrasena/nueva'];
 export const routes: Routes = [
-  ...appRoutes.map(route => publicPaths.includes(route.path ?? '') || route.path?.startsWith('demo/')
+  ...appRoutes.map(route => publicPaths.includes(route.path ?? '')
     ? route
     : { ...route, canActivate: [accessGuard], data: { ...route.data,
       role: route.data?.['shared'] ? null : route.path?.startsWith('coach/') || route.path?.startsWith('onboarding/coach/') ? 'COACH' : 'PRACTICANTE',

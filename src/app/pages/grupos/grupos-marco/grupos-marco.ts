@@ -19,7 +19,7 @@ export class GruposMarco {
 
   /** The role comes from the session, so this page serves both coaches and practitioners. */
   protected get coach(): boolean {
-    const role = this.session.demo() ?? this.session.account()?.role;
+    const role = this.session.account()?.role;
     return role === 'COACH';
   }
 }

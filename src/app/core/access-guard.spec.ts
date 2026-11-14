@@ -30,7 +30,7 @@ describe('Access guard', () => {
     session.account.set({ token: 'test-token', email: 'test@example.com', role: 'PRACTICANTE', expiresAt: Date.now() + 60000 });
   }
 
-  it('requires a real session or explicit demo entry', async () => {
+  it('requires a real session', async () => {
     expect(await guard('/perfil')).toBe('/login?volver=%2Fperfil');
   });
   it('redirects a new user to onboarding when the API reports a missing profile', async () => {
@@ -61,23 +61,14 @@ describe('Access guard', () => {
     authenticated();
     expect(await guard('/coach/perfil', 'COACH')).toBe('/inicio');
   });
-  it('lets a demo browse its own role without calling the backend', async () => {
-    session.demo.set('COACH');
-    const load = vi.spyOn(profiles, 'load');
-    expect(await guard('/coach/perfil', 'COACH')).toBe(true);
-    expect(await guard('/perfil')).toBe('/coach/inicio');
-    expect(load).not.toHaveBeenCalled();
-  });
   it('loads a real profile before entering its page', async () => {
     authenticated();
     vi.spyOn(profiles, 'load').mockReturnValue(of({ message: 'OK', profile: {} as never }));
     expect(await guard('/perfil')).toBe(true);
   });
-  it('allows shared resources for either demo role without relaxing private role checks', async () => {
-    session.demo.set('COACH');
-    expect(await guard('/recursos', null)).toBe(true);
-    expect(await guard('/perfil')).toBe('/coach/inicio');
-    session.demo.set('PRACTICANTE');
+  it('lets a signed-in user enter shared resources without relaxing private role checks', async () => {
+    authenticated();
+    vi.spyOn(profiles, 'load').mockReturnValue(of({ message: 'OK', profile: {} as never }));
     expect(await guard('/recursos', null)).toBe(true);
     expect(await guard('/coach/perfil', 'COACH')).toBe('/inicio');
   });

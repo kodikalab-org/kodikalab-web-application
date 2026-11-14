@@ -119,8 +119,7 @@ select:focus-visible {
   background: #8f68331c;
   color: #e7c089;
 }
-.coverage-note,
-.demo-notice {
+.coverage-note {
   margin: 14px 0;
   color: #b6accd;
   font-size: 11px;
@@ -129,12 +128,6 @@ select:focus-visible {
 .coverage-note strong {
   color: #d8ccec;
   font-weight: 500;
-}
-.demo-notice {
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #54458e29;
-  color: #cabcf1;
 }
 .stats-footer {
   flex-wrap: wrap;

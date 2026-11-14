@@ -1,18 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../../core/session';
+import { ProfileApi } from '../../../../core/profile-api';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { OnboardingPresentacion } from './presentacion';
-
-const TEXTO =
-  'Entrenador de maratones ICPC. Trabajo con grafos, programación dinámica y simulacros semanales.';
 
 describe('OnboardingPresentacion', () => {
   async function abrir(consulta: string) {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingPresentacion }])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('COACH');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/pantalla' + consulta, OnboardingPresentacion);
     await harness.fixture.whenStable();
@@ -44,19 +40,25 @@ describe('OnboardingPresentacion', () => {
     expect(root.querySelector('section')?.textContent).toContain('Hola');
   });
 
-  it('preloads the text for ?estado=con-texto', async () => {
-    const { root } = await abrir('?estado=con-texto');
-    expect(root.querySelector<HTMLTextAreaElement>('#presentacion')!.value).toBe(TEXTO);
-    expect(root.textContent).toContain('95/500');
-    expect(root.querySelector('section')?.textContent).toContain(TEXTO);
+  it('ignores ?estado= and never preloads a sample presentation', async () => {
+    for (const estado of ['con-texto', 'guardando']) {
+      const { root } = await abrir(`?estado=${estado}`);
+      expect(root.querySelector<HTMLTextAreaElement>('#presentacion')!.value).toBe('');
+      expect(root.querySelector<HTMLTextAreaElement>('#presentacion')!.readOnly).toBe(false);
+      expect(root.querySelector('button[aria-busy="true"]')).toBeNull();
+      expect(root.textContent).not.toMatch(/ICPC|Marco|Club de Programación/);
+      TestBed.resetTestingModule();
+    }
   });
 
-  it('shows the saving state for ?estado=guardando', async () => {
-    const { root } = await abrir('?estado=guardando');
-    const busy = root.querySelector<HTMLButtonElement>('button[aria-busy="true"]')!;
-    expect(busy.textContent).toContain('Guardando perfil…');
-    expect(busy.disabled).toBe(true);
-    expect(root.textContent).not.toContain('Omitir por ahora');
-    expect(root.querySelector<HTMLTextAreaElement>('#presentacion')!.readOnly).toBe(true);
+  it('builds the preview summary from the draft of the previous step', async () => {
+    await TestBed.configureTestingModule({
+      providers: [provideRouter([{ path: 'pantalla', component: OnboardingPresentacion }])],
+    }).compileComponents();
+    TestBed.inject(ProfileApi).coach = { especialidad: 'Grafos', organizacion: 'Club de pruebas', anios: 3 };
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/pantalla', OnboardingPresentacion);
+    await harness.fixture.whenStable();
+    expect((harness.routeNativeElement as HTMLElement).textContent).toContain('Coach · Grafos · Club de pruebas · 3 años');
   });
 });

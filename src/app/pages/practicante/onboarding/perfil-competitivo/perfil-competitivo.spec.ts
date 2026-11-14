@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../../core/session';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideRouter } from '@angular/router';
 import { OnboardingPerfilCompetitivo } from './perfil-competitivo';
@@ -10,7 +9,6 @@ describe('OnboardingPerfilCompetitivo', () => {
       imports: [OnboardingPerfilCompetitivo],
       providers: [provideRouter([])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('PRACTICANTE');
     const fixture = TestBed.createComponent(OnboardingPerfilCompetitivo);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -49,12 +47,11 @@ describe('OnboardingPerfilCompetitivo', () => {
   });
 });
 
-describe('OnboardingPerfilCompetitivo (estados con ?estado=)', () => {
+describe('OnboardingPerfilCompetitivo (en el asistente)', () => {
   async function abrir(consulta: string) {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingPerfilCompetitivo }])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('PRACTICANTE');
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/pantalla' + consulta, OnboardingPerfilCompetitivo);
     await harness.fixture.whenStable();
@@ -78,28 +75,13 @@ describe('OnboardingPerfilCompetitivo (estados con ?estado=)', () => {
     );
   });
 
-  it('preloads every value of the Figma frame for ?estado=completo', async () => {
-    const { root } = await abrir('?estado=completo');
-    expect(root.querySelector('.onb-level .mat-button-toggle-checked')?.textContent).toContain(
-      'Intermedio',
-    );
-    expect(root.querySelector<HTMLInputElement>('#experiencia')!.value).toBe('12');
-    const selected = Array.from(root.querySelectorAll('mat-chip-option.mat-mdc-chip-selected')).map(
-      (chip) => chip.textContent?.trim(),
-    );
-    expect(selected).toEqual(['Noche', 'Mié', 'Vie']);
-    expect(root.querySelector('mat-radio-button.mat-mdc-radio-checked')?.textContent).toContain(
-      'Clasificar a competencias',
-    );
-    expect(root.querySelector('[role="alert"]')).toBeNull();
-  });
-
-  it('shows the level error with the rest filled for ?estado=nivel-sin-seleccionar', async () => {
-    const { root } = await abrir('?estado=nivel-sin-seleccionar');
-    expect(root.querySelector('.onb-level .mat-button-toggle-checked')).toBeNull();
-    expect(root.querySelector('[role="alert"]')?.textContent).toContain(
-      'Selecciona tu nivel competitivo',
-    );
-    expect(root.querySelector<HTMLInputElement>('#experiencia')!.value).toBe('12');
+  it('ignores ?estado= and starts empty, without a level or sample values', async () => {
+    for (const estado of ['completo', 'nivel-sin-seleccionar']) {
+      const { root } = await abrir(`?estado=${estado}`);
+      expect(root.querySelector('.onb-level .mat-button-toggle-checked')).toBeNull();
+      expect(root.querySelector('[role="alert"]')).toBeNull();
+      expect(root.querySelector<HTMLInputElement>('#experiencia')!.value).toBe('');
+      TestBed.resetTestingModule();
+    }
   });
 });

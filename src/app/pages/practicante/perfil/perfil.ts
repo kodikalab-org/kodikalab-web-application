@@ -18,42 +18,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
-import {
-  FILTROS_SOLICITUD_DEMO,
-  IDIOMAS_AJUSTES,
-  INFO_PERSONAL_DEMO,
-  LENGUAJES_FILTRO,
-  PAGINAS_SUBMISSIONS_DEMO,
-  PERIODOS_FILTRO,
-  PLATAFORMAS_FILTRO,
-  PLATAFORMAS_PERFIL_DEMO,
-  SOLICITUDES_DEMO,
-  SUBMISSIONS_DEMO,
-  VEREDICTOS_FILTRO,
-} from '../../../data/perfil-practicante-demo';
-import {
-  EstadoPerfil,
-  EstadoSolicitud,
-  PestanaPerfil,
-  VeredictoSubmission,
-} from '../../../models/perfil-practicante';
-
-/**
- * Demo states reachable on the same route through the `estado` query param
- * (`/perfil?tab=<tab>&estado=<estado>`). Each state only applies to the tab that owns it.
- */
-const ESTADOS_POR_PESTANA: Record<PestanaPerfil, readonly EstadoPerfil[]> = {
-  info: ['cargando', 'sin-plataformas', 'actualizado'],
-  solicitudes: ['vacio'],
-  submissions: ['vacio'],
-  ajustes: [],
-};
+import { IDIOMAS_AJUSTES, ICONO_CODEFORCES } from '../../../models/perfil-catalogos';
+import { EstadoPerfil, InfoPersonalPracticante, PestanaPerfil, PlataformaPerfil } from '../../../models/perfil-practicante';
 
 const PESTANAS: readonly PestanaPerfil[] = ['info', 'solicitudes', 'submissions', 'ajustes'];
 
 function resolverVista(tab: string | null, estado: string | null) {
   const pestana = PESTANAS.find((id) => id === tab) ?? 'info';
-  const valido = ESTADOS_POR_PESTANA[pestana].find((id) => id === estado) ?? null;
+  const valido: EstadoPerfil | null = pestana === 'info' && estado === 'actualizado' ? estado : null;
   return { pestana, estado: valido };
 }
 
@@ -87,13 +59,11 @@ export class Perfil {
   protected readonly statsLoading = signal(false);
   protected readonly statsError = signal(false);
   constructor() {
-    if (!this.session.demo()) {
-      this.formAjustes.disable();
-      this.loadStats();
-    }
+    this.formAjustes.disable();
+    this.loadStats();
   }
   protected loadStats(): void {
-    if (this.session.demo() || this.statsLoading()) return;
+    if (this.statsLoading()) return;
     this.statsLoading.set(true);
     this.statsError.set(false);
     this.stats.set(null);
@@ -105,9 +75,9 @@ export class Perfil {
   protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly route = inject(ActivatedRoute);
 
-  /** Active tab and demo state, read from `?tab=` and `?estado=`. */
+  /** Active tab and update notice, read from `?tab=` and `?estado=`. */
   protected readonly vista$ = this.route.queryParamMap.pipe(
-    map((params) => resolverVista(params.get('tab'), this.session.demo() ? params.get('estado') :
+    map((params) => resolverVista(params.get('tab'),
       params.get('estado') === 'actualizado' && this.profiles.message() ? 'actualizado' : null)),
   );
 
@@ -144,8 +114,7 @@ export class Perfil {
   ];
 
   // ---- Información personal ----
-  protected get info() {
-    if (this.session.demo()) return { ...INFO_PERSONAL_DEMO, email: 'practicante@example.invalid' };
+  protected get info(): InfoPersonalPracticante {
     const p = this.profiles.profile();
     const identity = profileIdentity(p?.fullName, p?.email ?? '', 'Practicante');
     return { iniciales: identity.initials, nombreCompleto: identity.name, email: identity.email, usuario: '', rol: 'Practicante',
@@ -154,54 +123,11 @@ export class Perfil {
       nivelCodigo: p?.role === 'PRACTICANTE' ? `${p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
       objetivo: p?.role === 'PRACTICANTE' ? p.goal || 'Objetivo no indicado' : '' };
   }
-  protected get plataformas() {
-    if (this.session.demo()) return PLATAFORMAS_PERFIL_DEMO.filter(platform => platform.nombre === 'Codeforces');
+  protected get plataformas(): PlataformaPerfil[] {
     const p = this.profiles.profile();
-    if (p?.role !== 'PRACTICANTE') return [];
-    return PLATAFORMAS_PERFIL_DEMO.filter(platform => platform.nombre === 'Codeforces').map((platform) => ({ ...platform,
-      usuario: p.codeforcesHandle ?? '',
-    })).filter(platform => platform.usuario);
+    if (p?.role !== 'PRACTICANTE' || !p.codeforcesHandle) return [];
+    return [{ nombre: 'Codeforces', usuario: p.codeforcesHandle, icono: ICONO_CODEFORCES }];
   }
-  // ---- Solicitudes ----
-  protected readonly filtrosSolicitud = FILTROS_SOLICITUD_DEMO;
-  protected get solicitudes() { return this.session.demo() ? SOLICITUDES_DEMO : []; }
-  protected readonly clasesEstadoSolicitud: Record<EstadoSolicitud, string> = {
-    Pendiente: 'border-[#fbbf24]/60 bg-[#fbbf24]/10 text-[#fbbf24]',
-    Aceptada: 'border-[#4ade80]/60 bg-[#4ade80]/10 text-[#4ade80]',
-    Rechazada: 'border-[#f87171]/60 bg-[#f87171]/10 text-[#f87171]',
-  };
-  protected readonly formSolicitudes = new FormGroup({
-    filtro: new FormControl('todas', { nonNullable: true }),
-    busqueda: new FormControl('', { nonNullable: true }),
-  });
-
-  // ---- Submissions ----
-  protected get submissions() { return this.session.demo() ? SUBMISSIONS_DEMO : []; }
-  protected readonly paginasSubmissions = PAGINAS_SUBMISSIONS_DEMO;
-  protected readonly clasesVeredicto: Record<VeredictoSubmission, string> = {
-    Aceptado: 'border-[#4ade80]/60 bg-[#4ade80]/10 text-[#4ade80]',
-    'Wrong Answer': 'border-[#f87171]/60 bg-[#f87171]/10 text-[#f87171]',
-    'Time Limit': 'border-[#fbbf24]/50 bg-[#fbbf24]/8 text-[#fbbf24]',
-  };
-  protected readonly filtrosSubmissions = [
-    { control: 'veredicto', etiqueta: 'Veredicto', ancho: 'w-[178px]', opciones: VEREDICTOS_FILTRO },
-    { control: 'lenguaje', etiqueta: 'Lenguaje', ancho: 'w-[173px]', opciones: LENGUAJES_FILTRO },
-    {
-      control: 'plataforma',
-      etiqueta: 'Plataforma',
-      ancho: 'w-[192px]',
-      opciones: PLATAFORMAS_FILTRO,
-    },
-    { control: 'periodo', etiqueta: 'Periodo', ancho: 'w-[122px]', opciones: PERIODOS_FILTRO },
-  ] as const;
-  protected readonly formSubmissions = new FormGroup({
-    busqueda: new FormControl('', { nonNullable: true }),
-    veredicto: new FormControl('todos', { nonNullable: true }),
-    lenguaje: new FormControl('todos', { nonNullable: true }),
-    plataforma: new FormControl('todas', { nonNullable: true }),
-    periodo: new FormControl('ultimo-anio', { nonNullable: true }),
-  });
-
   // ---- Ajustes generales ----
   protected readonly idiomas = IDIOMAS_AJUSTES;
   protected readonly filasAjustes = [

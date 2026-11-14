@@ -8,10 +8,6 @@ import { ProfileApi } from '../../core/profile-api';
 import { profileIdentity } from '../../core/profile-identity';
 import { Session } from '../../core/session';
 
-export interface UserMenuLink extends NavLink {
-  queryParams?: Record<string, string>;
-}
-
 /**
  * Avatar button with the account dropdown. It replaces the old sidebar: below the `xl`
  * breakpoint it also lists the header links, and it always lists progress, ranking,
@@ -31,8 +27,6 @@ export class UserMenu {
   @Input() coach = false;
   @Input() iniciales = '';
   @Input() nombre = '';
-  /** Extra links shown only in the demo (for example the "with activity" toggle). */
-  @Input() extras: UserMenuLink[] = [];
 
   // Material renders menus in the CDK overlay, outside this component's host.
   protected readonly clasesMenu =
@@ -41,9 +35,6 @@ export class UserMenu {
   protected get headerLinks(): NavLink[] { return navigationFor(this.coach).slice(0, HEADER_LINK_COUNT); }
   protected get accountLinks(): NavLink[] { return profileMenuFor(this.coach); }
   protected get settingsPath(): string { return this.coach ? '/coach/perfil' : '/perfil'; }
-  protected get onboardingPath(): string {
-    return this.coach ? '/onboarding/coach/experiencia' : '/onboarding/practicante/datos-academicos';
-  }
   private get identity() {
     const profile = this.profiles.profile();
     const email = this.session.account()?.email ?? '';
@@ -51,12 +42,10 @@ export class UserMenu {
   }
   protected get displayName(): string {
     if (this.nombre) return this.nombre;
-    if (this.session.demo()) return this.coach ? 'Marco' : 'Camila';
     return this.identity.name;
   }
   protected get displayInitials(): string {
     if (this.iniciales) return this.iniciales;
-    if (this.session.demo()) return this.coach ? 'MP' : 'CR';
     return this.identity.initials;
   }
 

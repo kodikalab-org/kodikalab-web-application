@@ -1,13 +1,9 @@
-@let nuevo = (nuevo$ | async) === true;
 <div
-  class="relative isolate flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text lg:min-h-[1260px]"
-  [class.lg:min-h-[1420px]]="nuevo"
+  class="relative isolate flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text lg:min-h-[1420px]"
 >
   <img
     class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover object-top"
-    [src]="
-      '/images/dashboard/' + (coach ? (nuevo ? '3' : '2') : nuevo ? '1' : '0') + '-imgIcon.svg'
-    "
+    [src]="'/images/dashboard/' + (coach ? '3' : '1') + '-imgIcon.svg'"
     alt=""
   />
   <a
@@ -47,13 +43,6 @@
           [coach]="coach"
           [nombre]="nombre"
           [iniciales]="iniciales"
-          [extras]="[
-            {
-              label: nuevo ? 'Ver demo con actividad' : 'Ver demo sin actividad',
-              path: ruta,
-              queryParams: nuevo ? {} : { estado: 'nuevo' },
-            },
-          ]"
         />
       </div>
     </mat-toolbar>
@@ -85,13 +74,9 @@
         </h1>
         <p class="mb-0 mt-1.5 text-[15px] text-kl-soft">
           {{
-            nuevo
-              ? coach
-                ? 'Bienvenido a Kodikalab. Armemos tu primer grupo.'
-                : 'Bienvenida a Kodikalab. Empecemos a entrenar.'
-              : coach
-                ? 'Esto es lo que necesita tu atención hoy en tus equipos.'
-                : 'Continúa practicando y sigue mejorando. Aquí tienes un resumen de tu actividad.'
+            coach
+              ? 'Bienvenido a Kodikalab. Armemos tu primer grupo.'
+              : 'Bienvenida a Kodikalab. Empecemos a entrenar.'
           }}
         </p>
       </div>
@@ -123,45 +108,43 @@
         </button>
       }
     </div>
-    @if (nuevo) {
-      <mat-card
-        class="mb-6 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6 shadow-[0_0_24px_#643cff2e]"
-      >
-        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <h2 class="m-0 flex items-center gap-3 font-display text-lg">
-            <img src="/images/dashboard/1-imgIcon6.svg" width="20" height="20" alt="" />Empieza aquí
-          </h2>
-          <span class="text-xs text-kl-muted">{{ pasosCompletados() }} de 4 pasos completados</span>
-        </div>
-        <ol class="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 xl:grid-cols-4">
-          @for (paso of pasos; track paso.nombre; let i = $index) {
-            <li
-              class="rounded-xl border border-solid border-kl-border-strong bg-white/3 p-4"
-              [class.border-kl-accent]="i === pasosCompletados()"
-              [class.bg-kl-accent/15]="i === pasosCompletados()"
-            >
-              <div class="flex items-center gap-3 text-sm font-semibold">
-                <span
-                  class="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-kl-accent/30"
-                >
-                  @if (i < pasosCompletados()) {
-                    <img
-                      src="/images/dashboard/1-imgIconCheck.svg"
-                      width="15"
-                      height="15"
-                      alt="Completado"
-                    />
-                  } @else {
-                    {{ i + 1 }}
-                  }</span
-                >{{ paso.nombre }}
-              </div>
-              <p class="mb-0 mt-2.5 text-[13px] text-kl-muted">{{ paso.detalle }}</p>
-            </li>
-          }
-        </ol>
-      </mat-card>
-    }
+    <mat-card
+      class="mb-6 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6 shadow-[0_0_24px_#643cff2e]"
+    >
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <h2 class="m-0 flex items-center gap-3 font-display text-lg">
+          <img src="/images/dashboard/1-imgIcon6.svg" width="20" height="20" alt="" />Empieza aquí
+        </h2>
+        <span class="text-xs text-kl-muted">{{ pasosCompletados() }} de 4 pasos completados</span>
+      </div>
+      <ol class="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 xl:grid-cols-4">
+        @for (paso of pasos; track paso.nombre; let i = $index) {
+          <li
+            class="rounded-xl border border-solid border-kl-border-strong bg-white/3 p-4"
+            [class.border-kl-accent]="i === pasosCompletados()"
+            [class.bg-kl-accent/15]="i === pasosCompletados()"
+          >
+            <div class="flex items-center gap-3 text-sm font-semibold">
+              <span
+                class="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-kl-accent/30"
+              >
+                @if (i < pasosCompletados()) {
+                  <img
+                    src="/images/dashboard/1-imgIconCheck.svg"
+                    width="15"
+                    height="15"
+                    alt="Completado"
+                  />
+                } @else {
+                  {{ i + 1 }}
+                }</span
+              >{{ paso.nombre }}
+            </div>
+            <p class="mb-0 mt-2.5 text-[13px] text-kl-muted">{{ paso.detalle }}</p>
+          </li>
+        }
+      </ol>
+    </mat-card>
     <section
       aria-label="Resumen de actividad"
       class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -202,66 +185,21 @@
                 }
               "
             />
-            @if (nuevo) {
-              <ng-container
-                *ngTemplateOutlet="
-                  vacio;
-                  context: {
-                    icono: coach ? '3-imgIcon13' : '1-imgIcon12',
-                    nombre: coach
-                      ? 'No tienes solicitudes pendientes'
-                      : 'Aún no tienes problemas asignados',
-                    descripcion: coach
-                      ? 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.'
-                      : 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.',
-                    accion: coach ? '' : 'Explorar grupos',
-                  }
-                "
-              />
-            } @else if (coach) {
-              @for (solicitud of solicitudes; track solicitud.nombre) {
-                <div
-                  class="flex flex-wrap items-center gap-4 border-b border-[#1f1c44] py-5 last:border-0"
-                >
-                  <span
-                    class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-kl-accent/25 text-sm"
-                    >{{ solicitud.iniciales }}</span
-                  >
-                  <div class="min-w-0 flex-1">
-                    <strong class="text-[15px]">{{ solicitud.nombre }}</strong
-                    ><span class="mt-1 block text-[13px] text-kl-muted">{{
-                      solicitud.detalle
-                    }}</span>
-                  </div>
-                  <span class="text-xs text-kl-muted">{{ solicitud.fecha }}</span>
-                  <div class="ml-auto flex gap-3">
-                    <a mat-flat-button routerLink="/coach/grupos/solicitudes">Revisar solicitud</a>
-                  </div>
-                </div>
-              }
-            } @else {
-              @for (problema of problemas; track problema.nombre) {
-                <div
-                  class="grid grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#1f1c44] py-5 last:border-0 sm:flex sm:gap-4"
-                >
-                  <span
-                    class="flex size-[42px] shrink-0 items-center justify-center rounded-xl bg-kl-accent/25"
-                    ><img src="/images/dashboard/0-imgIcon10.svg" width="20" height="20" alt=""
-                  /></span>
-                  <div class="col-span-2 min-w-0 flex-1">
-                    <strong class="text-[15px]">{{ problema.nombre }}</strong
-                    ><span class="mt-1 block text-[13px] text-kl-muted">{{
-                      problema.detalle
-                    }}</span>
-                  </div>
-                  <span
-                    class="col-start-2 w-fit rounded-full border border-solid px-3 py-1 text-xs"
-                    [class]="problema.tono"
-                    >{{ problema.estado }}</span
-                  ><button mat-stroked-button [matMenuTriggerFor]="pendiente">Abrir</button>
-                </div>
-              }
-            }
+            <ng-container
+              *ngTemplateOutlet="
+                vacio;
+                context: {
+                  icono: coach ? '3-imgIcon13' : '1-imgIcon12',
+                  nombre: coach
+                    ? 'No tienes solicitudes pendientes'
+                    : 'Aún no tienes problemas asignados',
+                  descripcion: coach
+                    ? 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.'
+                    : 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.',
+                  accion: coach ? '' : 'Explorar grupos',
+                }
+              "
+            />
           </mat-card>
         </section>
         <section #progresoSeccion id="progreso" class="scroll-mt-24" aria-label="Progreso por tema">
@@ -278,61 +216,18 @@
                 }
               "
             />
-            @if (nuevo) {
-              <ng-container
-                *ngTemplateOutlet="
-                  vacio;
-                  context: {
-                    icono: coach ? '3-imgIcon15' : '1-imgIcon14',
-                    nombre: coach ? 'Aún no hay datos para analizar' : 'Tu progreso aparecerá aquí',
-                    descripcion: coach
-                      ? 'Cuando tu equipo resuelva problemas en competencias finalizadas, verás aquí los temas que necesitan refuerzo.'
-                      : 'Resuelve tu primer problema y verás tu avance por tema.',
-                  }
-                "
-              />
-            } @else {
-              @if (coach) {
-                <p class="mb-4 mt-0 text-[13px] text-kl-muted">
-                  Cobertura de Equipo Alfa en competencias finalizadas
-                </p>
-              }
-              @for (tema of temas; track tema.nombre) {
-                <div
-                  class="my-2 grid grid-cols-[1fr_40px] items-center gap-x-4 gap-y-2 text-sm sm:grid-cols-[190px_1fr_44px]"
-                >
-                  <span>{{ tema.nombre }}</span>
-                  <div
-                    role="progressbar"
-                    [attr.aria-label]="tema.nombre"
-                    [attr.aria-valuenow]="tema.valor"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    class="col-start-1 row-start-2 h-2.5 overflow-hidden rounded-full bg-[#2a2750] sm:col-start-2 sm:row-start-1"
-                  >
-                    <div
-                      class="h-full rounded-full bg-linear-to-r from-[#6419ff] to-[#a881fe]"
-                      [class.bg-amber-400]="tema.valor < 35"
-                      [class.bg-none]="tema.valor < 35"
-                      [style.width.%]="tema.valor"
-                    ></div>
-                  </div>
-                  <span
-                    class="col-start-2 row-start-1 text-right font-mono text-xs text-kl-body sm:col-start-3"
-                    >{{ tema.valor }}%</span
-                  >
-                </div>
-              }
-              <p
-                class="mb-0 mt-5 flex items-center gap-2.5 rounded-xl border border-solid border-amber-300/35 bg-amber-300/7 p-3 text-[13px] text-amber-200"
-              >
-                <img src="/images/dashboard/0-imgIcon12.svg" width="18" height="18" alt="" />{{
-                  coach
-                    ? 'Teoría de números es el tema con menor resolución del equipo.'
-                    : 'Teoría de números es tu tema a reforzar. Prueba con un problema de ese tema.'
-                }}
-              </p>
-            }
+            <ng-container
+              *ngTemplateOutlet="
+                vacio;
+                context: {
+                  icono: coach ? '3-imgIcon15' : '1-imgIcon14',
+                  nombre: coach ? 'Aún no hay datos para analizar' : 'Tu progreso aparecerá aquí',
+                  descripcion: coach
+                    ? 'Cuando tu equipo resuelva problemas en competencias finalizadas, verás aquí los temas que necesitan refuerzo.'
+                    : 'Resuelve tu primer problema y verás tu avance por tema.',
+                }
+              "
+            />
           </mat-card>
         </section>
       </div>
@@ -356,7 +251,9 @@
                 }
               "
             />
-            @if ((nuevo && session.demo()) || grupos().length === 0) {
+            @if (gruposCargando()) {
+              <p role="status" class="m-0 py-6 text-center text-sm text-kl-muted">Cargando…</p>
+            } @else if (grupos().length === 0) {
               <ng-container
                 *ngTemplateOutlet="
                   vacio;
@@ -419,36 +316,15 @@
             @if (coach) {
               <a mat-stroked-button routerLink="/coach/competencias" class="mb-4 w-full">Registrar participación y resultados</a>
             }
-            @if (nuevo) {
-              <ng-container
-                *ngTemplateOutlet="
-                  vacio;
-                  context: {
-                    nombre: 'No hay competencias programadas',
-                    descripcion: 'Cuando tu equipo programe una, la verás aquí con su fecha.',
-                  }
-                "
-              />
-            } @else {
-              @for (competencia of competencias; track competencia.nombre) {
-                <div
-                  class="flex flex-wrap items-center gap-3 border-b border-[#1f1c44] py-5 last:border-0"
-                >
-                  <span
-                    class="flex size-[42px] items-center justify-center rounded-xl bg-kl-accent/25"
-                    ><img src="/images/dashboard/0-imgIcon16.svg" width="20" height="20" alt=""
-                  /></span>
-                  <div class="min-w-0 flex-1">
-                    <strong class="text-[15px]">{{ competencia.nombre }}</strong
-                    ><span class="mt-1 block text-xs text-kl-muted">{{ competencia.grupo }}</span>
-                  </div>
-                  <div class="ml-auto text-right text-xs text-kl-body">
-                    {{ competencia.fecha
-                    }}<span class="mt-1 block text-indigo-300">Programada</span>
-                  </div>
-                </div>
-              }
-            }
+            <ng-container
+              *ngTemplateOutlet="
+                vacio;
+                context: {
+                  nombre: 'No hay competencias programadas',
+                  descripcion: 'Cuando tu equipo programe una, la verás aquí con su fecha.',
+                }
+              "
+            />
           </mat-card>
         </section>
       </div>

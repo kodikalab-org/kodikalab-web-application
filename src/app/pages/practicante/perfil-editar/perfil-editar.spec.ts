@@ -1,13 +1,21 @@
+import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../core/session';
+import { signIn } from '../../../testing/sign-in';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { PerfilEditar } from './perfil-editar';
 import { ProfileApi } from '../../../core/profile-api';
 import { Router } from '@angular/router';
 
+const PERFIL = { email: 'usuario@example.com', codigoEstudiante: '20240001',
+  carrera: 'Ingeniería de Software', cicloAcademico: 5, nivelCompetitivo: 'INTERMEDIO',
+  codeforcesHandle: '_matjavi_', codeforcesRating: null, atcoderHandle: 'matjavi', vjudgeHandle: 'matjavi',
+  district: 'San Miguel', experienceMonths: 12, preferredTime: 'NOCHE', availableDays: ['MIE', 'VIE'],
+  goal: 'Clasificar a competencias' };
+
 describe('PerfilEditar', () => {
-  async function setup(params: Record<string, string> = {}) {
+  async function setup(params: Record<string, string> = {}, profile: Record<string, unknown> | null = PERFIL) {
     await TestBed.configureTestingModule({
       imports: [PerfilEditar],
       providers: [
@@ -15,7 +23,7 @@ describe('PerfilEditar', () => {
         { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap(params)) } },
       ],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('PRACTICANTE');
+    if (profile) signIn('PRACTICANTE', profile);
     const fixture = TestBed.createComponent(PerfilEditar);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -36,7 +44,7 @@ describe('PerfilEditar', () => {
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
 
-  it('loads and persists every optional practitioner field outside demo mode', async () => {
+  it('loads and persists every optional practitioner field', async () => {
     const profile = { role: 'PRACTICANTE' as const, email: 'test@example.com', codigoEstudiante: '123',
       carrera: 'Ingeniería de Software', cicloAcademico: 5, nivelCompetitivo: 'INTERMEDIO' as const,
       codeforcesHandle: '_matjavi_', codeforcesRating: null, atcoderHandle: null, vjudgeHandle: null,
@@ -47,7 +55,6 @@ describe('PerfilEditar', () => {
       { provide: ProfileApi, useValue: { profile: () => profile, save } },
       { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
     ] }).compileComponents();
-    TestBed.inject(Session).demo.set(null);
     vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const fixture = TestBed.createComponent(PerfilEditar);
     const component = fixture.componentInstance as any;
@@ -131,25 +138,30 @@ describe('PerfilEditar', () => {
     expect(guardar().disabled).toBe(true);
   });
 
-  it('shows the 409 conflict and keeps what was typed (?estado=errores)', async () => {
-    const { root, guardar } = await setup({ estado: 'errores' });
-    expect(root.querySelector('[role="alert"]')?.textContent).toContain(
-      'No pudimos guardar tus cambios',
-    );
-    expect(texto(root)).toContain('Revisa los campos marcados e inténtalo de nuevo.');
-    expect(texto(root)).toContain('Este código de estudiante ya está vinculado a otro practicante');
-    expect(texto(root)).toContain('Usa solo letras, números, punto, guion y guion bajo (máx. 50)');
-    expect(root.querySelector<HTMLInputElement>('#codigo')!.value).toBe('20240001');
-    expect(root.querySelector<HTMLInputElement>('#handle-codeforces')!.value).toBe('_matjavi_');
+  it('starts with empty controls when the API has no profile yet', async () => {
+    const { root, guardar } = await setup({}, null);
+    expect(root.querySelector<HTMLInputElement>('#codigo')!.value).toBe('');
+    expect(root.querySelector<HTMLInputElement>('#experiencia')!.value).toBe('');
+    expect(root.querySelector<HTMLInputElement>('#handle-codeforces')!.value).toBe('');
+    expect(root.querySelector('mat-button-toggle.mat-button-toggle-checked')).toBeNull();
+    expect(root.querySelector('mat-chip-option.mat-mdc-chip-selected')).toBeNull();
+    expect(texto(root)).not.toMatch(/Camila|20240001|_matjavi_|San Miguel/);
     expect(guardar().disabled).toBe(true);
   });
 
-  it('clears the errors once the rejected values change', async () => {
-    const { root, guardar, type } = await setup({ estado: 'errores' });
-    await type('codigo', '20240002');
-    expect(texto(root)).not.toContain('ya está vinculado a otro practicante');
-    await type('handle-codeforces', 'matjavi');
-    expect(guardar().disabled).toBe(false);
+  it('shows the API error when saving fails and keeps what was typed', async () => {
+    const save = vi.fn().mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409,
+      error: { message: 'Este código de estudiante ya está vinculado a otro practicante' } })));
+    await TestBed.configureTestingModule({ imports: [PerfilEditar], providers: [provideRouter([]),
+      { provide: ProfileApi, useValue: { profile: () => ({ role: 'PRACTICANTE', ...PERFIL }), save } },
+    ] }).compileComponents();
+    const fixture = TestBed.createComponent(PerfilEditar);
+    await (fixture.componentInstance as any).guardar();
+    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain('ya está vinculado');
+    expect(root.querySelector<HTMLInputElement>('#codigo')!.value).toBe('20240001');
   });
 
   it('links Cancel to the profile and the plain editor shows no error banner', async () => {

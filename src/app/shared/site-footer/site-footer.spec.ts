@@ -24,12 +24,13 @@ describe('SiteFooter', () => {
     expect(root.textContent).toContain('Política de privacidad');
   });
 
-  it('offers the sign-in, registration and demos to visitors', async () => {
+  it('offers the sign-in and registration to visitors', async () => {
     const root = await render('public');
-    expect(titles(root)).toEqual(['Plataforma', 'Tu cuenta', 'Pruébala']);
+    expect(titles(root)).toEqual(['Plataforma', 'Tu cuenta']);
     expect(hrefs(root)).toEqual(
-      expect.arrayContaining(['/login', '/registro', '/recuperar-contrasena', '/demo/practicante', '/demo/coach']),
+      expect.arrayContaining(['/login', '/registro', '/recuperar-contrasena']),
     );
+    expect(hrefs(root).some((href) => href?.includes('/demo'))).toBe(false);
   });
 
   it.each([

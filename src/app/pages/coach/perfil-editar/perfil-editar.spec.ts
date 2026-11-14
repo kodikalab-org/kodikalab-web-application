@@ -1,15 +1,22 @@
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../core/session';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { throwError } from 'rxjs';
+import { ProfileApi } from '../../../core/profile-api';
+import { Session } from '../../../core/session';
+import { signIn } from '../../../testing/sign-in';
 import { CoachPerfilEditar } from './perfil-editar';
 
+const PERFIL = { especialidadPrincipal: 'Grafos y Programación Dinámica', organizacionClub: 'Club de pruebas',
+  aniosExperiencia: 4, presentacion: 'Entrenador de maratones ICPC. Trabajo con grafos.' };
+
 describe('CoachPerfilEditar', () => {
-  async function abrir(url: string) {
+  async function abrir(url = '/coach/perfil/editar', profile: Record<string, unknown> | null = PERFIL) {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'coach/perfil/editar', component: CoachPerfilEditar }])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('COACH');
+    if (profile) signIn('COACH', profile);
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl(url, CoachPerfilEditar);
     const root = harness.routeNativeElement as HTMLElement;
@@ -31,49 +38,53 @@ describe('CoachPerfilEditar', () => {
       )!;
     const step = (label: string) =>
       root.querySelector<HTMLButtonElement>(`button[aria-label="${label} años de experiencia"]`)!;
-    return { root, settle, input, type, guardar, step };
+    return { root, settle, input, type, guardar, step, harness };
   }
+  afterEach(() => TestBed.inject(Session).logout());
 
-  it('shows the form prefilled with the coach data and no errors', async () => {
-    const { root, input } = await abrir('/coach/perfil/editar');
+  it('fills the form from the profile loaded from the API, with no errors', async () => {
+    const { root, input } = await abrir();
     expect(input('especialidad').value).toBe('Grafos y Programación Dinámica');
-    expect(input('organizacion').value).toBe('Club de Programación Competitiva');
+    expect(input('organizacion').value).toBe('Club de pruebas');
     expect(input('anios').value).toBe('4');
     expect(input('presentacion').value).toContain('Entrenador de maratones ICPC');
     expect(root.textContent).toContain('Los campos con * son obligatorios');
     expect(root.textContent).toContain('Texto libre, máximo 120 caracteres.');
-    expect(root.textContent).toContain('95/500');
-    expect(root.textContent).toContain(
-      'Cuéntales a los practicantes quién eres y cómo entrenas. Opcional.',
-    );
     expect(root.querySelectorAll('mat-error').length).toBe(0);
     expect(root.textContent).not.toContain('No pudimos guardar tus cambios');
   });
 
+  it('starts with empty controls when there is no profile yet', async () => {
+    const { input } = await abrir('/coach/perfil/editar', null);
+    expect(input('especialidad').value).toBe('');
+    expect(input('organizacion').value).toBe('');
+    expect(input('anios').value).toBe('');
+    expect(input('presentacion').value).toBe('');
+  });
+
   it('links Cancelar and keeps saving as an explicit action, not an unverified success link', async () => {
-    const { root, guardar } = await abrir('/coach/perfil/editar');
+    const { root, guardar } = await abrir();
     expect(root.querySelector('a[href="/coach/perfil"]')).not.toBeNull();
     expect(guardar().tagName).toBe('BUTTON');
     expect(guardar().getAttribute('href')).toBeNull();
   });
 
   it('shows "Ingresa tu especialidad principal" when the specialty is empty', async () => {
-    const { root, type, guardar } = await abrir('/coach/perfil/editar');
+    const { root, type } = await abrir();
     await type('especialidad', '');
     expect(root.querySelector('mat-error')?.textContent).toContain(
       'Ingresa tu especialidad principal',
     );
-    expect(guardar().tagName).toBe('BUTTON');
   });
 
   it('shows "Ingresa un valor entre 0 y 60" for 75 years', async () => {
-    const { root, type } = await abrir('/coach/perfil/editar');
+    const { root, type } = await abrir();
     await type('anios', '75');
     expect(root.textContent).toContain('Ingresa un valor entre 0 y 60');
   });
 
   it('steps the years between 0 and 60', async () => {
-    const { input, step, settle, type } = await abrir('/coach/perfil/editar');
+    const { input, step, settle, type } = await abrir();
     step('Aumentar').click();
     await settle();
     expect(input('anios').value).toBe('5');
@@ -88,13 +99,13 @@ describe('CoachPerfilEditar', () => {
   });
 
   it('updates the presentation counter', async () => {
-    const { root, type } = await abrir('/coach/perfil/editar');
+    const { root, type } = await abrir();
     await type('presentacion', 'Hola');
     expect(root.textContent).toContain('4/500');
   });
 
   it('shows the notice and the errors when saving an invalid form', async () => {
-    const { root, type, guardar, settle } = await abrir('/coach/perfil/editar');
+    const { root, type, guardar, settle } = await abrir();
     await type('especialidad', '');
     expect(root.textContent).not.toContain('No pudimos guardar tus cambios');
     guardar().click();
@@ -105,12 +116,13 @@ describe('CoachPerfilEditar', () => {
     expect(root.textContent).toContain('Revisa los campos marcados e inténtalo de nuevo.');
   });
 
-  it('opens with every error visible for ?estado=errores', async () => {
-    const { root, input } = await abrir('/coach/perfil/editar?estado=errores');
-    expect(input('especialidad').value).toBe('');
-    expect(input('anios').value).toBe('75');
-    expect(root.textContent).toContain('No pudimos guardar tus cambios');
-    expect(root.textContent).toContain('Ingresa tu especialidad principal');
-    expect(root.textContent).toContain('Ingresa un valor entre 0 y 60');
+  it('shows the API error when saving fails', async () => {
+    const { harness } = await abrir();
+    vi.spyOn(TestBed.inject(ProfileApi), 'save').mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 400, error: { message: 'Especialidad inválida' } })),
+    );
+    const pantalla = harness.routeDebugElement!.componentInstance as { guardar(): Promise<void>; error: string };
+    await pantalla.guardar();
+    expect(pantalla.error).toContain('Especialidad inválida');
   });
 });

@@ -250,45 +250,49 @@
                 }
               </ul>
 
-              <ul class="m-0 flex list-none flex-col p-0">
-                @for (equipo of equipos; track equipo.nombre; let ultimo = $last) {
-                  <li
-                    class="flex items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
-                    [class]="ultimo ? '' : 'border-b'"
-                  >
-                    <span
-                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-sm font-semibold"
-                      aria-hidden="true"
-                      >{{ equipo.iniciales }}</span
+              @if (equipos().length === 0) {
+                <div class="flex flex-col items-center gap-2 px-2 py-6 text-center">
+                  <p class="m-0 text-base font-semibold">Aún no tienes equipos</p>
+                  <p class="m-0 max-w-[360px] text-[13px] text-kl-muted">
+                    Crea un grupo de entrenamiento para recibir practicantes.
+                  </p>
+                </div>
+              } @else {
+                <ul class="m-0 flex list-none flex-col p-0">
+                  @for (equipo of equipos(); track equipo.id; let ultimo = $last) {
+                    <li
+                      class="flex items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
+                      [class]="ultimo ? '' : 'border-b'"
                     >
-                    <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
-                      <span class="text-base font-semibold">{{ equipo.nombre }}</span>
-                      <span class="text-[13px] text-kl-muted"
-                        >{{ equipo.integrantes }}/{{ equipo.capacidad }} integrantes ·
-                        {{ equipo.horario }}</span
+                      <span
+                        class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-sm font-semibold"
+                        aria-hidden="true"
+                        >{{ equipo.iniciales }}</span
                       >
-                    </span>
-                    <img
-                      src="images/perfil-coach/chevron-right-18.svg"
-                      alt=""
-                      width="18"
-                      height="18"
-                    />
-                  </li>
-                }
-              </ul>
+                      <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
+                        <span class="text-base font-semibold">{{ equipo.nombre }}</span>
+                        <span class="text-[13px] text-kl-muted">{{ equipo.detalle }}</span>
+                      </span>
+                      <img
+                        src="images/perfil-coach/chevron-right-18.svg"
+                        alt=""
+                        width="18"
+                        height="18"
+                      />
+                    </li>
+                  }
+                </ul>
+              }
 
               <div>
-                <button
+                <a
                   mat-flat-button
                   class="h-[46px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] max-[641px]:w-full"
-                  type="button"
-                  disabled
-                  title="La pantalla de creación de equipos todavía no está integrada"
+                  routerLink="/coach/grupos/crear"
                 >
-                  Crear equipo · Próximamente
+                  Crear grupo
                   <img src="images/perfil-coach/plus-white-18.svg" alt="" width="18" height="18" />
-                </button>
+                </a>
               </div>
             </section>
           </div>
@@ -321,100 +325,21 @@
               <p class="m-0 text-[13px] text-kl-muted">Pendiente → Aceptada o Rechazada</p>
             </div>
 
-            @if (vista.estado === 'vacio' || solicitudes.length === 0) {
-              <div class="flex flex-col items-center gap-3 px-2 py-[70px] text-center">
-                <span
-                  class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
-                >
-                  <img src="images/perfil-coach/inbox-34.svg" alt="" width="34" height="34" />
-                </span>
-                <p class="m-0 font-display text-xl font-semibold">
-                  No tienes solicitudes pendientes
-                </p>
-                <p class="m-0 max-w-[420px] text-sm text-kl-muted">
-                  Cuando un practicante solicite unirse a tus equipos, aparecerá aquí para que lo
-                  aceptes o lo rechaces.
-                </p>
-              </div>
-            } @else {
-              <form [formGroup]="formFiltros" novalidate>
-                <mat-chip-listbox
-                  class="onb-chips"
-                  formControlName="filtro"
-                  aria-label="Filtrar solicitudes"
-                  [hideSingleSelectionIndicator]="true"
-                >
-                  @for (filtro of filtros; track filtro) {
-                    <mat-chip-option [value]="filtro">
-                      {{ filtro }}{{ filtro === 'Pendientes' ? ' ' + pendientes() : '' }}
-                    </mat-chip-option>
-                  }
-                </mat-chip-listbox>
-              </form>
-
-              <ul class="m-0 flex list-none flex-col p-0">
-                @for (solicitud of solicitudes; track solicitud.nombre; let ultima = $last) {
-                  <li
-                    class="flex flex-wrap items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
-                    [class]="ultima ? '' : 'border-b'"
-                  >
-                    <span
-                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-sm font-semibold"
-                      aria-hidden="true"
-                      >{{ solicitud.iniciales }}</span
-                    >
-                    <span class="flex min-w-[200px] flex-1 flex-col gap-[3px]">
-                      <span class="text-base font-semibold">{{ solicitud.nombre }}</span>
-                      <span class="text-[13px] text-kl-muted"
-                        >Solicita unirse a {{ solicitud.equipo }} · Nivel
-                        {{ solicitud.nivel }}</span
-                      >
-                    </span>
-                    <span class="w-[120px] shrink-0 text-sm text-kl-body">{{
-                      solicitud.fecha
-                    }}</span>
-                    @switch (solicitud.estado) {
-                      @case ('pendiente') {
-                        <div class="flex items-center gap-4">
-                          <button
-                            mat-stroked-button
-                            class="h-[42px] rounded-xl border border-solid border-[#f87171]/50 px-5 text-[15px] text-[#fca5a5]"
-                            type="button"
-                            [attr.aria-label]="'Rechazar a ' + solicitud.nombre"
-                            (click)="resolver(solicitud, 'rechazada')"
-                          >
-                            Rechazar
-                          </button>
-                          <button
-                            mat-flat-button
-                            class="h-[42px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-[22px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
-                            type="button"
-                            [attr.aria-label]="'Aceptar a ' + solicitud.nombre"
-                            (click)="resolver(solicitud, 'aceptada')"
-                          >
-                            Aceptar
-                          </button>
-                        </div>
-                      }
-                      @case ('aceptada') {
-                        <span
-                          class="inline-flex h-[42px] w-[176px] items-center justify-center rounded-xl border border-solid border-[#4ade80]/50 bg-[#4ade80]/12 text-[15px] text-[#bbf7d0]"
-                          role="status"
-                          >Aceptada</span
-                        >
-                      }
-                      @case ('rechazada') {
-                        <span
-                          class="inline-flex h-[42px] w-[176px] items-center justify-center rounded-xl border border-solid border-[#f87171]/50 bg-[#f87171]/10 text-[15px] text-[#fca5a5]"
-                          role="status"
-                          >Rechazada</span
-                        >
-                      }
-                    }
-                  </li>
-                }
-              </ul>
-            }
+            <div class="flex flex-col items-center gap-3 px-2 py-[70px] text-center">
+              <span
+                class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
+              >
+                <img src="images/perfil-coach/inbox-34.svg" alt="" width="34" height="34" />
+              </span>
+              <p class="m-0 font-display text-xl font-semibold">
+                Revisa tus solicitudes desde la gestión de grupos
+              </p>
+              <p class="m-0 max-w-[420px] text-sm text-kl-muted">
+                Cuando un practicante solicite unirse a tus equipos, podrás aceptarlo, rechazarlo o
+                pedirle una aclaración allí.
+              </p>
+              <a mat-stroked-button routerLink="/coach/grupos/solicitudes">Ver solicitudes</a>
+            </div>
           </section>
         }
 

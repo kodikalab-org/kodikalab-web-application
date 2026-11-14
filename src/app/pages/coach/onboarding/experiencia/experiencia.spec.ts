@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../../core/session';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideRouter } from '@angular/router';
 import { OnboardingExperiencia } from './experiencia';
@@ -10,7 +9,6 @@ describe('OnboardingExperiencia', () => {
       imports: [OnboardingExperiencia],
       providers: [provideRouter([])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('COACH');
     const fixture = TestBed.createComponent(OnboardingExperiencia);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -70,48 +68,23 @@ describe('OnboardingExperiencia', () => {
   });
 });
 
-describe('OnboardingExperiencia (estados con ?estado=)', () => {
-  async function abrir(consulta: string) {
-    await TestBed.configureTestingModule({
-      providers: [provideRouter([{ path: 'pantalla', component: OnboardingExperiencia }])],
-    }).compileComponents();
-    TestBed.inject(Session).demo.set('COACH');
-    const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/pantalla' + consulta, OnboardingExperiencia);
-    await harness.fixture.whenStable();
-    harness.detectChanges();
-    const root = harness.routeNativeElement as HTMLElement;
-    const settle = async () => {
-      harness.detectChanges();
+describe('OnboardingExperiencia (sin estados de maqueta)', () => {
+  it('ignores ?estado= and starts empty, with no errors', async () => {
+    for (const estado of ['errores', 'completa']) {
+      await TestBed.configureTestingModule({
+        providers: [provideRouter([{ path: 'pantalla', component: OnboardingExperiencia }])],
+      }).compileComponents();
+      const harness = await RouterTestingHarness.create();
+      await harness.navigateByUrl('/pantalla?estado=' + estado, OnboardingExperiencia);
       await harness.fixture.whenStable();
-    };
-    return { root, settle };
-  }
-
-  it('shows both required errors without typing for ?estado=errores', async () => {
-    const { root } = await abrir('?estado=errores');
-    expect(root.querySelector('mat-error')?.textContent).toContain(
-      'Ingresa tu especialidad principal',
-    );
-    expect(root.querySelector('[role="alert"]')?.textContent).toContain(
-      'Ingresa un valor entre 0 y 60',
-    );
-  });
-
-  it('preloads the Figma values for ?estado=completa and enables Continuar', async () => {
-    const { root } = await abrir('?estado=completa');
-    expect(root.querySelector<HTMLInputElement>('#especialidad')!.value).toBe(
-      'Grafos y Programación Dinámica',
-    );
-    expect(root.querySelector<HTMLInputElement>('#organizacion')!.value).toBe(
-      'Club de Programación Competitiva',
-    );
-    expect(root.querySelector<HTMLInputElement>('#anios')!.value).toBe('4');
-    const selected = Array.from(root.querySelectorAll('mat-chip-option.mat-mdc-chip-selected')).map(
-      (chip) => chip.textContent?.trim(),
-    );
-    expect(selected).toEqual(['Grafos', 'Programación dinámica']);
-    expect(root.querySelector<HTMLButtonElement>('button[mat-flat-button]')!.disabled).toBe(false);
-    expect(root.querySelectorAll('mat-error').length).toBe(0);
+      harness.detectChanges();
+      const root = harness.routeNativeElement as HTMLElement;
+      expect(root.querySelector<HTMLInputElement>('#especialidad')!.value).toBe('');
+      expect(root.querySelector<HTMLInputElement>('#anios')!.value).toBe('');
+      expect(root.querySelectorAll('mat-error').length).toBe(0);
+      expect(root.querySelector('[role="alert"]')).toBeNull();
+      expect(root.querySelector<HTMLButtonElement>('button[mat-flat-button]')!.disabled).toBe(true);
+      TestBed.resetTestingModule();
+    }
   });
 });

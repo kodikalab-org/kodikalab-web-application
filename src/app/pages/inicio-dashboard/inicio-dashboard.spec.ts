@@ -1,12 +1,23 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Session } from '../../core/session';
+import { API_URL } from '../../core/api';
+import { signIn } from '../../testing/sign-in';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Router, provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { InicioDashboard } from './inicio-dashboard';
 
+const GRUPO_COACH = { groupId: 4, name: 'Grupo Real', description: null, expectedLevel: 'INTERMEDIO', maxCapacity: 12,
+  sessionSchedule: 'Viernes 17:00', status: 'ACTIVO', visibility: 'PUBLICO', invitationCode: 'XYZ',
+  activeMembers: 3, pendingRequests: 1 };
+const MEMBRESIA = { groupId: 9, name: 'Club Real', description: null, expectedLevel: 'AVANZADO', maxCapacity: 10,
+  sessionSchedule: null, status: 'ACTIVO', visibility: 'PUBLICO',
+  membership: { membershipId: 1, status: 'ACTIVO', teamRole: 'MIEMBRO', joinedAt: '2026-10-01T18:00:00Z', leftAt: null } };
+
 describe('InicioDashboard', () => {
-  async function setup(url = '/inicio') {
+  async function setup(url = '/inicio', mine: unknown[] = []) {
     await TestBed.configureTestingModule({
       providers: [
         provideRouter([
@@ -15,53 +26,54 @@ describe('InicioDashboard', () => {
           { path: 'login', component: InicioDashboard },
           { path: 'grupos', component: InicioDashboard },
         ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
     }).compileComponents();
-    TestBed.inject(Session).demo.set(url.includes('coach') ? 'COACH' : 'PRACTICANTE');
+    signIn(url.includes('coach') ? 'COACH' : 'PRACTICANTE');
     const harness = await RouterTestingHarness.create(url);
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne(`${TestBed.inject(API_URL)}/teams/me`).flush(mine);
     await harness.fixture.whenStable();
-    return { harness, root: harness.routeNativeElement! };
+    harness.detectChanges();
+    return { harness, root: harness.routeNativeElement!, http };
   }
+  afterEach(() => {
+    TestBed.inject(HttpTestingController).match(() => true);
+    TestBed.inject(Session).logout();
+  });
 
-  it('shows the practitioner activity and fixed progress data', async () => {
+  it('greets the signed-in account and shows honest empty states for a new practitioner', async () => {
     const { root } = await setup();
-    expect(root.querySelector('h1')?.textContent).toContain('Hola, Camila');
-    expect(root.textContent).toContain('569');
-    expect(root.textContent).toContain('Suma de intervalos');
-    expect(root.querySelectorAll('[role="progressbar"]').length).toBe(4);
-  });
-
-  it('shows coach requests and teams without changing demo data', async () => {
-    const { root } = await setup('/coach/inicio');
-    expect(root.querySelector('h1')?.textContent).toContain('Hola, Marco');
-    expect(root.textContent).toContain('Valeria Núñez');
-    expect(root.textContent).toContain('Equipo Beta');
-    expect(root.textContent).not.toContain('Suma de intervalos');
-  });
-
-  it('shows both empty variants on the same routes', async () => {
-    const { harness, root } = await setup('/inicio?estado=nuevo');
+    expect(root.querySelector('h1')?.textContent).toContain('Hola, usuario@example.com');
     expect(root.textContent).toContain('Aún no tienes problemas asignados');
+    expect(root.textContent).toContain('Aún no estás en ningún grupo');
     expect(root.textContent).toContain('2 de 4 pasos completados');
     expect(root.querySelectorAll('[role="progressbar"]').length).toBe(0);
-    await harness.navigateByUrl('/coach/inicio?estado=nuevo');
-    expect(harness.routeNativeElement?.textContent).toContain('Aún no has creado grupos');
-    expect(harness.routeNativeElement?.textContent).toContain('No tienes solicitudes pendientes');
+    expect(root.textContent).not.toMatch(/569|Suma de intervalos|Camila|Equipo Alfa|Demostración|demo/i);
   });
 
-  it('updates the demo through the user menu without recreating the route', async () => {
-    const { harness, root } = await setup();
-    root.querySelector<HTMLButtonElement>('[aria-label="Abrir menú de usuario"]')!.click();
-    harness.detectChanges();
-    await harness.fixture.whenStable();
-    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
-    const demo = overlay.querySelector<HTMLAnchorElement>('a[href="/inicio?estado=nuevo"]')!;
-    expect(demo).not.toBeNull();
-    demo.click();
-    await harness.fixture.whenStable();
-    harness.detectChanges();
-    expect(TestBed.inject(Router).url).toBe('/inicio?estado=nuevo');
-    expect(root.textContent).toContain('Aún no tienes problemas asignados');
+  it('shows the real memberships of the practitioner instead of sample teams', async () => {
+    const { root } = await setup('/inicio', [MEMBRESIA]);
+    expect(root.textContent).toContain('Club Real');
+    expect(root.textContent).toContain('Miembro');
+    expect(root.textContent).not.toContain('Aún no estás en ningún grupo');
+    expect(root.textContent).not.toContain('Grafos y DP');
+  });
+
+  it('shows empty requests and real teams for the coach', async () => {
+    const { root } = await setup('/coach/inicio', [GRUPO_COACH]);
+    expect(root.querySelector('h1')?.textContent).toContain('Hola, usuario@example.com');
+    expect(root.textContent).toContain('Grupo Real');
+    expect(root.textContent).toContain('3/12 integrantes · Viernes 17:00');
+    expect(root.textContent).toContain('No tienes solicitudes pendientes');
+    expect(root.textContent).not.toMatch(/Valeria|Equipo Beta|Marco|Suma de intervalos/);
+  });
+
+  it('offers to create the first group to a coach without groups', async () => {
+    const { root } = await setup('/coach/inicio', []);
+    expect(root.textContent).toContain('Aún no has creado grupos');
+    expect(root.querySelector('a[href="/coach/grupos/crear"]')).not.toBeNull();
   });
 
   it('has no sidebar and keeps the Figma header links', async () => {
@@ -79,28 +91,27 @@ describe('InicioDashboard', () => {
     expect(root.querySelector('header')?.classList.contains('top-0')).toBe(true);
   });
 
-  it('styles the user menu on the overlay panel instead of relying on host inheritance', async () => {
+  it('styles the user menu on the overlay panel without demo entries', async () => {
     const { harness, root } = await setup();
     root.querySelector<HTMLButtonElement>('[aria-label="Abrir menú de usuario"]')!.click();
     harness.detectChanges();
     await harness.fixture.whenStable();
-    const panel = TestBed.inject(OverlayContainer)
-      .getContainerElement()
-      .querySelector('.mat-mdc-menu-panel')!;
+    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
+    const panel = overlay.querySelector('.mat-mdc-menu-panel')!;
     expect(panel.classList.contains('bg-kl-surface')).toBe(true);
     expect(panel.classList.contains('border-kl-border-strong')).toBe(true);
     expect(panel.classList.contains('rounded-2xl')).toBe(true);
     expect(panel.querySelector('[role="note"]')?.textContent).toContain('Practicante');
+    expect(overlay.querySelector('a[href*="estado=nuevo"], a[href^="/demo"]')).toBeNull();
   });
 
   it('opens the existing groups interface instead of a dashboard fragment', async () => {
-    const { harness, root } = await setup('/inicio?estado=nuevo');
+    const { harness, root } = await setup();
     root.querySelector<HTMLButtonElement>('[aria-label="Abrir accesos rápidos"]')!.click();
     harness.detectChanges();
     await harness.fixture.whenStable();
     TestBed.inject(OverlayContainer).getContainerElement().querySelector<HTMLAnchorElement>('a[href="/grupos"]')!.click();
     await harness.fixture.whenStable();
     expect(TestBed.inject(Router).url).toBe('/grupos');
-    expect(TestBed.inject(Session).demo()).toBe('PRACTICANTE');
   });
 });

@@ -21,7 +21,7 @@
     <div>
       <strong class="block text-sm font-medium text-kl-heading">{{ displayName }}</strong
       ><span class="mt-1 block text-xs text-kl-muted"
-        >{{ coach ? 'Coach' : 'Practicante' }} · {{ session.demo() ? 'Vista de demostración' : 'Sesión iniciada' }}</span
+        >{{ coach ? 'Coach' : 'Practicante' }} · Sesión iniciada</span
       >
     </div>
   </div>
@@ -32,16 +32,7 @@
     <a mat-menu-item [routerLink]="enlace.path">{{ enlace.label }}</a>
   }
   <a mat-menu-item [routerLink]="settingsPath" [queryParams]="{ tab: 'ajustes' }">Ajustes generales</a>
-  @if (session.demo()) {
-    @for (extra of extras; track extra.label) {
-      <a mat-menu-item [routerLink]="extra.path" [queryParams]="extra.queryParams">{{ extra.label }}</a>
-    }
-    <a mat-menu-item [routerLink]="onboardingPath">Ver onboarding</a>
-    <a mat-menu-item [routerLink]="coach ? '/demo/practicante' : '/demo/coach'">{{
-      coach ? 'Ver demo de practicante' : 'Ver demo de coach'
-    }}</a>
-  }
   <button mat-menu-item type="button" (click)="salir()" class="mt-1 border-t border-kl-border-strong">
-    {{ session.demo() ? 'Salir de la demo' : 'Cerrar sesión' }}
+    Cerrar sesión
   </button>
 </mat-menu>

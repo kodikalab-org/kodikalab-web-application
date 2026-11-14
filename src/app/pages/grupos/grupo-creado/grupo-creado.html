@@ -10,12 +10,10 @@
 
     @if (grupo(); as creado) {
       <h1 class="mt-5 mb-3 font-display text-[28px] font-bold">
-        {{ session.demo() ? 'Vista previa: grupo creado' : esBorrador() ? 'Borrador guardado' : '¡Grupo creado!' }}
+        {{ esBorrador() ? 'Borrador guardado' : '¡Grupo creado!' }}
       </h1>
       <p class="mt-0 text-sm text-kl-body">
-        @if (session.demo()) {
-          Confirmación y código de invitación de ejemplo. No se guardaron cambios.
-        } @else if (esBorrador()) {
+        @if (esBorrador()) {
           {{ creado.name }} quedó guardado como borrador. Puedes publicarlo ahora o más tarde.
         } @else {
           {{ creado.name }} ya aparece en el listado de grupos disponibles.
@@ -26,11 +24,11 @@
       >
         <strong>{{ mensajePrincipal() }}</strong>
         <p class="mt-1 mb-0 text-kl-body">
-          {{ session.demo() ? 'Datos de demostración' : 'Quedaste como responsable del grupo' }} · estado: {{ estadoTexto() }}.
+          Quedaste como responsable del grupo · estado: {{ estadoTexto() }}.
         </p>
       </div>
 
-      @if (esBorrador() && !session.demo()) {
+      @if (esBorrador()) {
         <div class="my-4 rounded-xl border border-solid border-amber-400/50 bg-amber-400/10 p-4 text-left text-sm">
           <strong class="text-amber-300">Todavía no es visible para los practicantes</strong>
           <p class="mt-1 mb-0 text-kl-body">
@@ -54,7 +52,7 @@
           <code class="text-base tracking-widest">{{ creado.invitationCode }}</code>
         </div>
         <p class="mt-2 text-xs leading-5 text-kl-muted">
-          {{ session.demo() ? 'Código de ejemplo: no permite ingresar a un grupo real.' : 'Compártelo con quienes quieras que ingresen directamente. Podrás consultarlo en «Mis grupos».' }}
+          Compártelo con quienes quieras que ingresen directamente. Podrás consultarlo en «Mis grupos».
         </p>
       </div>
     } @else {
@@ -72,7 +70,7 @@
       }
     </div>
     <div class="flex flex-wrap justify-center gap-3">
-      @if (esBorrador() && !session.demo()) {
+      @if (esBorrador()) {
         <button mat-flat-button type="button" [disabled]="publicando()" (click)="publicar()">
           {{ publicando() ? 'Publicando…' : 'Publicar ahora' }}
         </button>

@@ -1,4 +1,4 @@
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Session } from '../../core/session';
 import { CoachGroup, PractitionerGroup, TeamsApi } from '../../core/teams-api';
@@ -11,7 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { forkJoin, map } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
@@ -20,7 +20,6 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
     SiteFooter,
     HeaderNavigation,
     UserMenu,
-    AsyncPipe,
     NgTemplateOutlet,
     RouterLink,
     MatButtonModule,
@@ -35,10 +34,9 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
 export class InicioDashboard {
   protected readonly session = inject(Session);
   private readonly api = inject(TeamsApi);
-  protected get nombre(): string { return this.session.demo() ? (this.coach ? 'Marco' : 'Camila') : this.session.account()?.email ?? 'Usuario'; }
-  protected get iniciales(): string { return this.session.demo() ? (this.coach ? 'MP' : 'CR') : 'KL'; }
+  protected get nombre(): string { return this.session.account()?.email ?? 'Usuario'; }
+  protected get iniciales(): string { return 'KL'; }
   protected readonly coach: boolean;
-  protected readonly nuevo$;
   protected readonly ruta: string;
   // Material renders menus in the CDK overlay, outside this component's host.
   protected readonly clasesMenu =
@@ -63,58 +61,6 @@ export class InicioDashboard {
   protected irASeccion(seccion: HTMLElement): void {
     seccion.scrollIntoView({ block: 'start' });
   }
-  protected readonly problemas = [
-    {
-      nombre: 'Suma de intervalos',
-      detalle: 'Estructuras de datos · Codeforces',
-      estado: 'Resuelto',
-      tono: 'text-green-400 border-green-400/50 bg-green-400/10',
-    },
-    {
-      nombre: 'Camino mínimo en grilla',
-      detalle: 'Grafos · AtCoder',
-      estado: 'En curso',
-      tono: 'text-indigo-300 border-indigo-300/50 bg-indigo-300/10',
-    },
-    {
-      nombre: 'Mochila con repeticiones',
-      detalle: 'Programación dinámica · VJudge',
-      estado: 'Vence mañana',
-      tono: 'text-amber-300 border-amber-300/50 bg-amber-300/10',
-    },
-    {
-      nombre: 'Divisores y primos',
-      detalle: 'Teoría de números · Codeforces',
-      estado: 'Sin iniciar',
-      tono: 'text-kl-body border-kl-border-strong bg-white/5',
-    },
-  ];
-  protected readonly solicitudes = [
-    {
-      iniciales: 'VN',
-      nombre: 'Valeria Núñez',
-      detalle: 'Solicita unirse a Equipo Alfa · Nivel Intermedio',
-      fecha: '12 oct.',
-    },
-    {
-      iniciales: 'SC',
-      nombre: 'Sebastián Cruz',
-      detalle: 'Solicita unirse a Equipo Alfa · Nivel Principiante',
-      fecha: '11 oct.',
-    },
-    {
-      iniciales: 'IM',
-      nombre: 'Ítalo Mendoza',
-      detalle: 'Solicita unirse a Equipo Beta · Nivel Avanzado',
-      fecha: '9 oct.',
-    },
-  ];
-  protected readonly competencias = [
-    { nombre: 'Simulacro semanal', grupo: 'Equipo Alfa', fecha: 'Sáb 1 nov · 7:00 p. m.' },
-    { nombre: 'Maratón interna UPC', grupo: 'Grafos y DP', fecha: 'Dom 9 nov · 9:00 a. m.' },
-    { nombre: 'Contest de práctica', grupo: 'Equipo Alfa', fecha: 'Sáb 15 nov · 7:00 p. m.' },
-  ];
-  protected readonly temas;
   /** Grupos reales del coach; `null` mientras la petición está en curso. */
   protected readonly misGrupos = signal<CoachGroup[] | null>(null);
   /** Membresías reales del practicante. */
@@ -176,67 +122,58 @@ export class InicioDashboard {
           tono: pendientes ? 'text-amber-300' : 'text-kl-muted',
         },
         {
-          valor: '0',
+          valor: '—',
           etiqueta: 'Competencias',
-          detalle: 'Sin competencias registradas',
-          vacio: 'Ninguna programada',
+          detalle: 'Pendiente de integración',
+          vacio: '',
           icono: '2-imgIcon10',
           tono: 'text-kl-muted',
         },
       ];
     }
 
-    if (!this.session.demo()) {
-      const membresias = this.misMembresias();
-      const activos = (membresias ?? []).filter(
-        (item) => item.membership.status === 'ACTIVO',
-      ).length;
-      const resueltos = this.resueltos();
-      const pendientes = this.pendientesProblemas();
-      return [
-        {
-          valor: resueltos === null ? '—' : String(resueltos),
-          etiqueta: 'Problemas resueltos',
-          detalle: resueltos === null ? 'Cargando…' : 'En tus grupos',
-          vacio: '',
-          icono: '0-imgIcon6',
-          tono: resueltos ? 'text-green-400' : 'text-kl-muted',
-        },
-        {
-          valor: '—',
-          etiqueta: 'Rating Codeforces',
-          detalle: 'Pendiente de integración',
-          vacio: '',
-          icono: '0-imgIcon7',
-          tono: 'text-kl-muted',
-        },
-        {
-          valor: membresias === null ? '—' : String(membresias.length),
-          etiqueta: 'Mis grupos',
-          detalle:
-            membresias === null
-              ? 'Cargando…'
-              : `${activos} activo${activos === 1 ? '' : 's'} · ${membresias.length - activos} pendiente${membresias.length - activos === 1 ? '' : 's'}`,
-          vacio: '',
-          icono: '0-imgIcon8',
-          tono: 'text-kl-muted',
-        },
-        {
-          valor: pendientes === null ? '—' : String(pendientes),
-          etiqueta: 'Problemas pendientes',
-          detalle: pendientes === null ? 'Cargando…' : 'Sin resolver',
-          vacio: '',
-          icono: '0-imgIcon9',
-          tono: pendientes ? 'text-amber-300' : 'text-kl-muted',
-        },
-      ];
-    }
-
+    const membresias = this.misMembresias();
+    const activos = (membresias ?? []).filter(
+      (item) => item.membership.status === 'ACTIVO',
+    ).length;
+    const resueltos = this.resueltos();
+    const pendientes = this.pendientesProblemas();
     return [
-      { valor: '569', etiqueta: 'Problemas resueltos', detalle: '+12 este mes', vacio: 'Empieza con tu primer problema', icono: '0-imgIcon6', tono: 'text-green-400' },
-      { valor: '1984', etiqueta: 'Rating Codeforces', detalle: '+35 este mes', vacio: 'Vincula tu cuenta en el perfil', icono: '0-imgIcon7', tono: 'text-green-400' },
-      { valor: '3', etiqueta: 'Mis grupos', detalle: '2 activos · 1 pendiente', vacio: 'Únete a uno para entrenar', icono: '0-imgIcon8', tono: 'text-kl-muted' },
-      { valor: '6', etiqueta: 'Problemas pendientes', detalle: '1 vence mañana', vacio: 'Aún no tienes asignaciones', icono: '0-imgIcon9', tono: 'text-amber-300' },
+      {
+        valor: resueltos === null ? '—' : String(resueltos),
+        etiqueta: 'Problemas resueltos',
+        detalle: resueltos === null ? 'Cargando…' : 'En tus grupos',
+        vacio: '',
+        icono: '0-imgIcon6',
+        tono: resueltos ? 'text-green-400' : 'text-kl-muted',
+      },
+      {
+        valor: '—',
+        etiqueta: 'Rating Codeforces',
+        detalle: 'Pendiente de integración',
+        vacio: '',
+        icono: '0-imgIcon7',
+        tono: 'text-kl-muted',
+      },
+      {
+        valor: membresias === null ? '—' : String(membresias.length),
+        etiqueta: 'Mis grupos',
+        detalle:
+          membresias === null
+            ? 'Cargando…'
+            : `${activos} activo${activos === 1 ? '' : 's'} · ${membresias.length - activos} pendiente${membresias.length - activos === 1 ? '' : 's'}`,
+        vacio: '',
+        icono: '0-imgIcon8',
+        tono: 'text-kl-muted',
+      },
+      {
+        valor: pendientes === null ? '—' : String(pendientes),
+        etiqueta: 'Problemas pendientes',
+        detalle: pendientes === null ? 'Cargando…' : 'Sin resolver',
+        vacio: '',
+        icono: '0-imgIcon9',
+        tono: pendientes ? 'text-amber-300' : 'text-kl-muted',
+      },
     ];
   });
 
@@ -257,22 +194,7 @@ export class InicioDashboard {
                 : 'Sin pendientes',
         }));
       }
-      return [
-        {
-          id: null,
-          iniciales: 'EA',
-          nombre: 'Equipo Alfa',
-          detalle: '14/20 integrantes · Mar y jue 7:00 p. m.',
-          estado: '2 pendientes',
-        },
-        {
-          id: null,
-          iniciales: 'EB',
-          nombre: 'Equipo Beta',
-          detalle: '10/20 integrantes · Mié 6:00 p. m.',
-          estado: '1 pendiente',
-        },
-      ];
+      return [];
     }
 
     const membresias = this.misMembresias();
@@ -286,25 +208,25 @@ export class InicioDashboard {
       }));
     }
 
-    return [
-      { id: null, iniciales: 'EA', nombre: 'Equipo Alfa', detalle: 'Intermedio', estado: 'Miembro' },
-      { id: null, iniciales: 'GD', nombre: 'Grafos y DP', detalle: 'Avanzado', estado: 'Miembro' },
-      { id: null, iniciales: 'SC', nombre: 'Sprint Coders', detalle: 'Todos los niveles', estado: 'Pendiente' },
-    ];
+    return [];
   });
+
+  /** Verdadero mientras la lista de grupos todavía no llegó de la API. */
+  protected readonly gruposCargando = computed(() =>
+    (this.coach ? this.misGrupos() : this.misMembresias()) === null,
+  );
 
   protected readonly pasos;
 
   constructor(route: ActivatedRoute) {
     this.coach = route.snapshot.data['coach'] === true;
     this.ruta = this.coach ? '/coach/inicio' : '/inicio';
-    this.nuevo$ = route.queryParamMap.pipe(map((params) => !this.session.demo() || params.get('estado') === 'nuevo'));
-    if (this.coach && !this.session.demo()) {
+    if (this.coach) {
       this.api.loadMine().subscribe({
         next: (mine) => this.misGrupos.set(mine.filter((g): g is CoachGroup => 'activeMembers' in g)),
         error: () => this.misGrupos.set([]),
       });
-    } else if (!this.coach && !this.session.demo()) {
+    } else {
       this.api.loadMine().subscribe({
         next: (mine) => {
           const membresias = mine.filter((m): m is PractitionerGroup => 'membership' in m);
@@ -314,19 +236,6 @@ export class InicioDashboard {
         error: () => this.misMembresias.set([]),
       });
     }
-    this.temas = this.coach
-      ? [
-          { nombre: 'Teoría de números', valor: 22 },
-          { nombre: 'Grafos', valor: 41 },
-          { nombre: 'Programación dinámica', valor: 58 },
-          { nombre: 'Búsqueda binaria', valor: 83 },
-        ]
-      : [
-          { nombre: 'Búsqueda binaria', valor: 90 },
-          { nombre: 'Programación dinámica', valor: 72 },
-          { nombre: 'Grafos', valor: 58 },
-          { nombre: 'Teoría de números', valor: 33 },
-        ];
     this.pasos = [
       { nombre: 'Crea tu cuenta', detalle: 'Listo, ya estás dentro.' },
       {

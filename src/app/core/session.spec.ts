@@ -122,20 +122,6 @@ describe('Real API session', () => {
     expect(navigation).toHaveBeenCalledWith(['/login'], { queryParams: { motivo: 'sesion-expirada' } });
   });
 
-  it('keeps demo navigation separate from real authentication', () => {
-    session.startDemo('PRACTICANTE');
-    expect(session.demo()).toBe('PRACTICANTE');
-    expect(session.token()).toBeNull();
-    expect(session.account()).toBeNull();
-    http.expectNone(() => true);
-  });
-
-  it('blocks protected API calls in demo, even if another screen accidentally makes one', async () => {
-    session.startDemo('COACH');
-    await expect(firstValueFrom(TestBed.inject(ProfileApi).load())).rejects.toThrow('La demostración');
-    http.expectNone(() => true);
-  });
-
   it('never sends the JWT to an unrelated host', async () => {
     await login();
     const result = firstValueFrom(TestBed.inject(HttpClient).get('https://example.com/data'));

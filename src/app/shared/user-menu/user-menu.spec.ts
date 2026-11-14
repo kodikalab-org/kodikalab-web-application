@@ -5,6 +5,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Router, provideRouter } from '@angular/router';
 import { Session } from '../../core/session';
+import { signIn } from '../../testing/sign-in';
 import { UserMenu } from './user-menu';
 
 @Component({ template: '' })
@@ -15,7 +16,7 @@ describe('UserMenu', () => {
     TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'login', component: LoginStub }]), provideHttpClient(), provideHttpClientTesting()],
     });
-    TestBed.inject(Session).demo.set(role);
+    signIn(role);
     const fixture = TestBed.createComponent(UserMenu);
     fixture.componentRef.setInput('coach', role === 'COACH');
     await fixture.whenStable();
@@ -33,7 +34,7 @@ describe('UserMenu', () => {
     const { overlay, items } = await open('PRACTICANTE');
     expect(items).toEqual(expect.arrayContaining([
       'Progreso por tema', 'Progreso por equipo', 'Ranking', 'Plataformas competitivas',
-      'Mi perfil', 'Editar perfil', 'Ajustes generales', 'Salir de la demo',
+      'Mi perfil', 'Editar perfil', 'Ajustes generales', 'Cerrar sesión',
     ]));
     expect(overlay.querySelector('a[href="/ranking"]')).not.toBeNull();
     expect(overlay.querySelector('a[href="/progreso"]')).not.toBeNull();
@@ -59,13 +60,20 @@ describe('UserMenu', () => {
     expect(overlay.querySelector('[role="note"]')?.textContent).toContain('Practicante');
   });
 
+  it('has no demo links or fixed sample names', async () => {
+    const { overlay, items } = await open('COACH');
+    expect(overlay.querySelector('a[href^="/demo"]')).toBeNull();
+    expect(items.join(' ')).not.toMatch(/demo|onboarding/i);
+    expect(overlay.textContent).not.toMatch(/Marco|Camila/);
+  });
+
   it('closes the session and goes to the login page', async () => {
     const { fixture, overlay } = await open('PRACTICANTE');
     const logout = Array.from(overlay.querySelectorAll<HTMLButtonElement>('button.mat-mdc-menu-item'))
-      .find((button) => button.textContent?.includes('Salir de la demo'))!;
+      .find((button) => button.textContent?.includes('Cerrar sesión'))!;
     logout.click();
     await fixture.whenStable();
-    expect(TestBed.inject(Session).demo()).toBeNull();
+    expect(TestBed.inject(Session).account()).toBeNull();
     expect(TestBed.inject(Router).url).toBe('/login');
   });
 });

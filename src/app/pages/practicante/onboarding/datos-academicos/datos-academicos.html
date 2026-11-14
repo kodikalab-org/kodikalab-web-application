@@ -1,7 +1,5 @@
-@let estado = estado$ | async;
 <div
   class="relative flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text"
-  [attr.data-estado]="estado"
 >
   <img
     class="pointer-events-none absolute inset-0 z-0 size-full object-cover object-top"
@@ -24,10 +22,10 @@
         <span
           class="flex size-[34px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
           aria-hidden="true"
-          >{{ session.demo() ? 'CR' : 'KL' }}</span
+          >KL</span
         >
         <span class="flex flex-col max-[641px]:hidden">
-          <span class="text-sm leading-4 font-normal">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
+          <span class="text-sm leading-4 font-normal">{{ session.account()?.email }}</span>
           <span class="text-xs leading-[14px] font-normal text-kl-muted">Practicante</span>
         </span>
       </div>
@@ -78,19 +76,6 @@
       </div>
 
       <form class="flex flex-col gap-6" [formGroup]="form" novalidate>
-        @if (form.controls.codigo.hasError('duplicado')) {
-          <div
-            class="flex items-start gap-2.5 rounded-xl border border-solid border-[#f87171]/45 bg-[#f87171]/10 px-3.5 py-3"
-            role="alert"
-          >
-            <img class="shrink-0" src="images/onboarding/alert-circle-20.svg" alt="" width="20" height="20" />
-            <p class="m-0 text-sm leading-5 text-[#fecaca]">
-              <strong class="block font-semibold">No pudimos guardar tus datos</strong>
-              Revisa el código de estudiante e inténtalo de nuevo.
-            </p>
-          </div>
-        }
-
         <div class="grid grid-cols-2 items-start gap-x-4 gap-y-6 max-[641px]:grid-cols-1">
           <div class="flex min-w-0 flex-col gap-1.5">
             <label class="text-[13px] leading-4 font-medium text-kl-body" for="codigo"
@@ -110,11 +95,7 @@
               <mat-hint>Máximo 20 caracteres. Debe ser único.</mat-hint>
               <mat-error class="-ml-1.5">
                 <img src="images/registro/alert-15.svg" alt="" width="15" height="15" />
-                @if (form.controls.codigo.hasError('duplicado')) {
-                  Este código de estudiante ya está vinculado a otro practicante
-                } @else {
-                  Ingresa tu código de estudiante
-                }
+                Ingresa tu código de estudiante
               </mat-error>
             </mat-form-field>
           </div>

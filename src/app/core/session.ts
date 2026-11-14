@@ -6,7 +6,6 @@ import { API_URL, AuthResponse, RegisterRequest, Role } from './api';
 
 interface SessionData { token: string; email: string; role: Role; expiresAt: number; }
 const KEY = 'kodikalab.session';
-const DEMO_KEY = 'kodikalab.demo';
 /** A sleeping backend (free hosting) can take close to a minute to answer its first request. */
 export const COLD_START_TIMEOUT = 60000;
 
@@ -25,7 +24,6 @@ export class Session {
   private readonly document = inject(DOCUMENT);
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   readonly account = signal<SessionData | null>(null);
-  readonly demo = signal<Role | null>(null);
   private restored = false;
 
   restore(): void {
@@ -35,10 +33,6 @@ export class Session {
     if (!win) return;
     const stored = this.readStored(win);
     if (stored) this.account.set(stored);
-    try {
-      const demo = win.sessionStorage.getItem(DEMO_KEY);
-      if (demo === 'PRACTICANTE' || demo === 'COACH') this.demo.set(demo);
-    } catch { /* optional */ }
     // A login or logout in another tab reaches this one, so every tab shows the same account.
     win.addEventListener('storage', (event) => {
       if (event.key !== KEY && event.key !== null) return;
@@ -68,7 +62,6 @@ export class Session {
 
   token(): string | null {
     this.restore();
-    if (this.demo()) return null;
     const session = this.account();
     if (session && session.expiresAt <= Date.now()) { this.logout(); return null; }
     return session?.token ?? null;
@@ -98,18 +91,10 @@ export class Session {
     return this.http.post<AuthResponse>(`${this.url}/auth/register`, request, { timeout: 15000 });
   }
 
-  startDemo(role: Role): void {
-    this.restore();
-    this.demo.set(role);
-    try { this.document.defaultView?.sessionStorage.setItem(DEMO_KEY, role); } catch { /* optional */ }
-  }
-
   logout(): void {
     this.restored = true;
     this.account.set(null);
-    this.demo.set(null);
     this.clearStorage();
-    try { this.document.defaultView?.sessionStorage.removeItem(DEMO_KEY); } catch { /* optional */ }
   }
 
   private clearStorage(): void {

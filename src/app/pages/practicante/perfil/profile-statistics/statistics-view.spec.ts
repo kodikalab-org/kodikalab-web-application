@@ -1,7 +1,6 @@
 import {
   activityView,
   codeforcesRank,
-  exampleStatistics,
   ratingView,
   shortDate,
 } from './statistics-view';
@@ -93,27 +92,5 @@ describe('Statistics view models', () => {
     [3000, 'Legendary Grandmaster'],
   ])('derives the Codeforces rank for %s', (rating, rank) => {
     expect(codeforcesRank(rating as number)).toBe(rank);
-  });
-
-  it('keeps explicitly synthetic demo totals internally consistent', () => {
-    const demo = exampleStatistics(today);
-    expect(demo.handle).toBe('cuenta_demo');
-    expect(demo.acceptedSubmissions).toBeGreaterThanOrEqual(demo.problemsSolved);
-    expect(demo.solvedByRating.reduce((sum, bucket) => sum + bucket.count, 0)).toBe(
-      demo.problemsSolved,
-    );
-    expect(activityView(demo.activity, 'year', today).accepted).toBeLessThanOrEqual(
-      demo.acceptedSubmissions,
-    );
-    let previous = '',
-      streak = 0,
-      longest = 0;
-    for (const day of demo.activity) {
-      streak =
-        previous && Date.parse(day.date) - Date.parse(previous) === 86400000 ? streak + 1 : 1;
-      longest = Math.max(longest, streak);
-      previous = day.date;
-    }
-    expect(longest).toBe(demo.maxStreakDays);
   });
 });

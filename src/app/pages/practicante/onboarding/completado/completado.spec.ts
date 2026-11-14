@@ -1,36 +1,43 @@
 import { TestBed } from '@angular/core/testing';
-import { Session } from '../../../../core/session';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { ProfileApi } from '../../../../core/profile-api';
+import { Session } from '../../../../core/session';
+import { signIn } from '../../../../testing/sign-in';
 import { OnboardingCompletado } from './completado';
 
+const PERFIL = { codigoEstudiante: '20240001', carrera: 'Ingeniería de Software', cicloAcademico: 5,
+  nivelCompetitivo: 'INTERMEDIO', codeforcesHandle: 'usuario_cf', codeforcesRating: 1432,
+  atcoderHandle: null, vjudgeHandle: null };
+
 describe('OnboardingCompletado', () => {
-  async function abrir(consulta: string) {
+  async function abrir(message = 'Perfil guardado correctamente.', profile: Record<string, unknown> = PERFIL) {
     await TestBed.configureTestingModule({
       providers: [provideRouter([{ path: 'pantalla', component: OnboardingCompletado }])],
     }).compileComponents();
-    TestBed.inject(Session).demo.set('PRACTICANTE');
+    signIn('PRACTICANTE', profile);
+    TestBed.inject(ProfileApi).message.set(message);
     const harness = await RouterTestingHarness.create();
-    await harness.navigateByUrl('/pantalla' + consulta, OnboardingCompletado);
+    await harness.navigateByUrl('/pantalla', OnboardingCompletado);
     await harness.fixture.whenStable();
     harness.detectChanges();
     return harness.routeNativeElement as HTMLElement;
   }
+  afterEach(() => TestBed.inject(Session).logout());
 
-  it('shows the success message with the Codeforces rating by default', async () => {
-    const root = await abrir('');
-    expect(root.querySelector('h1')?.textContent).toContain('¡Tu perfil está listo, Camila!');
-    expect(root.querySelector('[role="status"]')?.textContent).toContain(
-      'Perfil actualizado correctamente',
-    );
-    expect(root.querySelector('[role="status"]')?.textContent).toContain(
-      'Detectamos tu rating de Codeforces: 1432.',
-    );
-    expect(root.textContent).toContain('Codeforces: camila_cf · rating 1432');
+  it('shows the success message and the summary that comes from the saved profile', async () => {
+    const root = await abrir();
+    expect(root.querySelector('h1')?.textContent).toContain('¡Tu perfil está listo!');
+    expect(root.querySelector('[role="status"]')?.textContent).toContain('Perfil actualizado correctamente');
+    expect(root.querySelector('[role="status"]')?.textContent).toContain('Perfil guardado correctamente.');
+    expect(root.textContent).toContain('Código 20240001');
+    expect(root.textContent).toContain('Codeforces: usuario_cf · rating 1432');
+    expect(root.textContent).toContain('usuario@example.com');
+    expect(root.textContent).not.toMatch(/Camila|camila_/);
   });
 
   it('keeps the "(completado)" suffix of the three steps for screen readers only', async () => {
-    const root = await abrir('');
+    const root = await abrir();
     const hidden = Array.from(root.querySelectorAll('ol .sr-only'));
     expect(hidden.length).toBe(3);
     for (const sr of hidden) {
@@ -38,14 +45,11 @@ describe('OnboardingCompletado', () => {
     }
   });
 
-  it('shows the Codeforces warning for ?estado=aviso-codeforces', async () => {
-    const root = await abrir('?estado=aviso-codeforces');
+  it('shows the Codeforces warning when the API says it could not confirm the handle', async () => {
+    const root = await abrir('Codeforces no confirmó el identificador', { ...PERFIL, codeforcesHandle: null, codeforcesRating: null });
     const status = root.querySelector('[role="status"]')!.textContent!;
     expect(status).toContain('Perfil actualizado, pero Codeforces no confirmó el identificador');
-    expect(status).toContain(
-      'Se conservaron los datos previos de Codeforces. Puedes corregirlo después desde tu perfil.',
-    );
     expect(root.textContent).toContain('Codeforces sin vincular');
-    expect(root.textContent).not.toContain('rating 1432');
+    expect(root.textContent).not.toContain('rating');
   });
 });

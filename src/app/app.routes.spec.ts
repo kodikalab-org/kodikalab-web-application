@@ -5,13 +5,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { routes } from './app.routes';
 import { Session } from './core/session';
+import { signIn } from './testing/sign-in';
 import { API_URL } from './core/api';
 import { AssignmentStore } from './pages/coach/asignar-problema/assignment-store';
 
 describe('Group routes', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()] }));
   afterEach(() => {
-    TestBed.inject(HttpTestingController).verify();
+    const http = TestBed.inject(HttpTestingController);
+    http.match(() => true).filter((request) => !request.cancelled)
+      .forEach((request) => request.flush(null, { status: 503, statusText: 'Service Unavailable' }));
+    http.verify();
     TestBed.inject(Session).logout();
   });
 
@@ -26,14 +30,14 @@ describe('Group routes', () => {
   });
 
   it('sends a coach who opens a group detail to that group management page', async () => {
-    TestBed.inject(Session).startDemo('COACH');
+    signIn('COACH');
     await RouterTestingHarness.create('/grupos/7');
     expect(TestBed.inject(Router).url).toBe('/coach/grupos/solicitudes?grupo=7');
   });
 
   for (const role of ['PRACTICANTE', 'COACH'] as const) {
     it(`opens /grupos and the tab query for ${role}`, async () => {
-      TestBed.inject(Session).startDemo(role);
+      signIn(role);
       const harness = await RouterTestingHarness.create('/grupos?tab=mis-grupos');
       expect(TestBed.inject(Router).url).toBe('/grupos?tab=mis-grupos');
       expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('Grupos');
@@ -77,7 +81,7 @@ describe('rutas con parámetros de problemas asignados', () => {
   });
 
   it('el detalle del practicante lleva el id de la asignación en la ruta y pide ese problema', async () => {
-    TestBed.inject(Session).startDemo('PRACTICANTE');
+    signIn('PRACTICANTE');
     await RouterTestingHarness.create('/practicante/problemas-asignados/detalle/51?teamId=12');
     expect(TestBed.inject(Router).url).toBe('/practicante/problemas-asignados/detalle/51?teamId=12');
     const request = TestBed.inject(HttpTestingController).expectOne('/api/problems/assigned/51');
@@ -86,7 +90,7 @@ describe('rutas con parámetros de problemas asignados', () => {
   });
 
   it('el detalle sin id de asignación ya no existe', async () => {
-    TestBed.inject(Session).startDemo('PRACTICANTE');
+    signIn('PRACTICANTE');
     await RouterTestingHarness.create('/practicante/problemas-asignados/detalle');
     expect(TestBed.inject(Router).url).toBe('/');
   });

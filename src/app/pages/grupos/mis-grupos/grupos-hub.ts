@@ -24,7 +24,7 @@ export class GruposHub {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly coach = computed(
-    () => (this.session.demo() ?? this.session.account()?.role) === 'COACH',
+    () => this.session.account()?.role === 'COACH',
   );
   protected readonly tab = toSignal(
     this.route.queryParamMap.pipe(map((params) => tabDesdeParametro(params.get('tab')))),

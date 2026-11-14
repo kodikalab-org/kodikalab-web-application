@@ -1,11 +1,10 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
 import { profileIdentity } from '../../../core/profile-identity';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -14,14 +13,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
 import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { map } from 'rxjs';
-import {
-  AJUSTES_COACH_DEMO,
-  EQUIPOS_COACH_DEMO,
-  ESTADISTICAS_COACH_DEMO,
-  PERFIL_COACH_DEMO,
-  crearSolicitudesDemo,
-} from '../../../data/perfil-coach-demo';
-import { EstadoSolicitud, SolicitudIngreso } from '../../../models/perfil-coach';
+import { CoachGroup, TeamsApi } from '../../../core/teams-api';
 
 type Pestania = 'info' | 'solicitudes' | 'ajustes';
 
@@ -56,7 +48,6 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
-    MatChipsModule,
     MatFormFieldModule,
     MatSelectModule,
     MatSlideToggleModule,
@@ -68,18 +59,21 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
 export class CoachPerfil {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
-  constructor() { if (!this.session.demo()) this.formAjustes.disable(); }
+  private readonly teams = inject(TeamsApi);
+  constructor() {
+    this.formAjustes.disable();
+    this.teams.loadMine().subscribe({ error: () => undefined });
+  }
   protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly ruta = inject(ActivatedRoute);
 
-  /** `?tab=info|solicitudes|ajustes` elige la pestaña; `?estado=vacio|actualizado` elige la variante. */
+  /** `?tab=info|solicitudes|ajustes` elige la pestaña; `?estado=actualizado` avisa tras guardar el perfil. */
   protected readonly vista$ = this.ruta.queryParamMap.pipe(
     map((params): Vista => {
       const tab = params.get('tab');
       return {
         pestania: PESTANIAS.find((p) => p === tab) ?? 'info',
-        estado: this.session.demo() ? params.get('estado') :
-          params.get('estado') === 'actualizado' && this.profiles.message() ? 'actualizado' : 'vacio',
+        estado: params.get('estado') === 'actualizado' && this.profiles.message() ? 'actualizado' : null,
       };
     }),
   );
@@ -107,7 +101,6 @@ export class CoachPerfil {
 
 
   protected get perfil() {
-    if (this.session.demo()) return { ...PERFIL_COACH_DEMO, email: 'coach@example.invalid' };
     const p = this.profiles.profile();
     const identity = profileIdentity(p?.fullName, p?.email ?? '', 'Coach');
     return { iniciales: identity.initials, nombre: identity.name, email: identity.email, usuario: '', rol: 'Coach',
@@ -116,9 +109,17 @@ export class CoachPerfil {
       anios: p?.role === 'COACH' ? p.aniosExperiencia : 0,
       presentacion: p?.role === 'COACH' ? p.presentacion ?? '' : '' };
   }
-  protected get equipos() { return this.session.demo() ? EQUIPOS_COACH_DEMO : []; }
-  protected readonly solicitudes: SolicitudIngreso[] = this.session.demo() ? crearSolicitudesDemo() : [];
-  protected readonly filtros = ['Pendientes', 'Todas', 'Equipo Alfa', 'Equipo Beta'];
+  /** Grupos reales del coach, tomados de `GET /teams/me`. */
+  protected readonly equipos = computed(() =>
+    this.teams.mine().filter((g): g is CoachGroup => 'activeMembers' in g).map((g) => ({
+      id: g.groupId,
+      iniciales: g.name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join(''),
+      nombre: g.name,
+      activos: g.activeMembers,
+      pendientes: g.pendingRequests,
+      detalle: `${g.activeMembers}/${g.maxCapacity ?? '—'} integrantes · ${g.sessionSchedule ?? 'horario por definir'}`,
+    })),
+  );
 
   protected get datosPerfil() { return [
     {
@@ -156,45 +157,36 @@ export class CoachPerfil {
     },
   ];
 
-  protected readonly formFiltros = new FormGroup({
-    filtro: new FormControl('Pendientes', { nonNullable: true }),
-  });
-
   protected readonly formAjustes = new FormGroup({
-    notificaciones: new FormControl(AJUSTES_COACH_DEMO.notificaciones, { nonNullable: true }),
-    privacidad: new FormControl(AJUSTES_COACH_DEMO.privacidad, { nonNullable: true }),
-    idioma: new FormControl<'es' | 'en'>(AJUSTES_COACH_DEMO.idioma, { nonNullable: true }),
-    temaOscuro: new FormControl(AJUSTES_COACH_DEMO.temaOscuro, { nonNullable: true }),
+    notificaciones: new FormControl(true, { nonNullable: true }),
+    privacidad: new FormControl(false, { nonNullable: true }),
+    idioma: new FormControl<'es' | 'en'>('es', { nonNullable: true }),
+    temaOscuro: new FormControl(true, { nonNullable: true }),
   });
-
-  protected pendientes(): number {
-    return this.solicitudes.filter((s) => s.estado === 'pendiente').length;
-  }
 
   protected estadisticas() {
+    const equipos = this.equipos();
+    const total = (campo: 'activos' | 'pendientes') =>
+      equipos.reduce((suma, equipo) => suma + equipo[campo], 0);
     return [
       {
-        valor: this.session.demo() ? this.equipos.length : '—',
+        valor: equipos.length,
         etiqueta: 'Equipos a cargo',
         icono: 'images/perfil-coach/stat-teams-24.svg',
         fondo: 'bg-[rgba(167,139,250,0.14)]',
       },
       {
-        valor: this.session.demo() ? ESTADISTICAS_COACH_DEMO.integrantesActivos : '—',
+        valor: total('activos'),
         etiqueta: 'Integrantes activos',
         icono: 'images/perfil-coach/stat-members-24.svg',
         fondo: 'bg-[rgba(74,222,128,0.14)]',
       },
       {
-        valor: this.session.demo() ? this.pendientes() : '—',
+        valor: total('pendientes'),
         etiqueta: 'Solicitudes pendientes',
         icono: 'images/perfil-coach/stat-pending-24.svg',
         fondo: 'bg-[rgba(251,191,36,0.14)]',
       },
     ];
-  }
-
-  protected resolver(solicitud: SolicitudIngreso, estado: Exclude<EstadoSolicitud, 'pendiente'>) {
-    solicitud.estado = estado;
   }
 }

@@ -93,37 +93,3 @@ export function shortDate(date: string | null): string {
       )
     : 'Sin actividad';
 }
-
-/** Coherent, explicitly labelled examples; never used for a signed-in account. */
-export function exampleStatistics(today = new Date()): CodeforcesStats {
-  const end = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  const activity = Array.from({ length: 365 }, (_, offset) => ({
-    date: new Date(end - offset * 86400000).toISOString().slice(0, 10),
-    count: offset < 17 ? 1 + (offset % 4) : offset % 13 < 2 ? 1 + (offset % 5) : 0,
-  }))
-    .filter((day) => day.count > 0)
-    .reverse();
-  return {
-    linked: true,
-    handle: 'cuenta_demo',
-    problemsSolved: 569,
-    maxStreakDays: 17,
-    currentRating: 1984,
-    acceptedSubmissions: 860,
-    acceptanceRate: 65.3,
-    activity,
-    solvedByRating: [
-      [0, 19],
-      [800, 180],
-      [900, 70],
-      [1000, 80],
-      [1100, 50],
-      [1200, 60],
-      [1300, 45],
-      [1400, 30],
-      [1500, 20],
-      [1600, 10],
-      [1800, 5],
-    ].map(([rating, count]) => ({ rating, count })),
-  };
-}

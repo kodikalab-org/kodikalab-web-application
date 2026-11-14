@@ -30,3 +30,8 @@ export function codeforcesId(problem: ProblemLinkSource): { contest: string; ind
   const fromCode = isCodeforces ? CODEFORCES_CODE.exec((problem.sourceCode ?? '').trim()) : null;
   return fromCode ? { contest: fromCode[1], index: fromCode[2].toUpperCase() } : null;
 }
+
+/** True when the problem belongs to Codeforces, the only platform KodikaLab verifies automatically. */
+export function isCodeforces(problem: ProblemLinkSource): boolean {
+  return (problem.sourcePlatform ?? '').toUpperCase() === 'CODEFORCES';
+}

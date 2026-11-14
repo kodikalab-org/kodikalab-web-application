@@ -3,7 +3,7 @@ import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
 import { API_URL } from './api';
-import { problemsError, ProblemsApi } from './problems-api';
+import { problemsError, ProblemsApi, VERDICT_LABEL } from './problems-api';
 
 describe('ProblemsApi', () => {
   let api: ProblemsApi;
@@ -97,6 +97,66 @@ describe('ProblemsApi', () => {
     expect(request.request.body).toEqual(body);
     request.flush({ competitionId: 30, teamId: 12, assigned: [] }, { status: 201, statusText: 'Created' });
     expect((await result).teamId).toBe(12);
+  });
+});
+
+describe('ProblemsApi verification', () => {
+  let api: ProblemsApi;
+  let http: HttpTestingController;
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(), { provide: API_URL, useValue: '/api' }],
+    });
+    api = TestBed.inject(ProblemsApi);
+    http = TestBed.inject(HttpTestingController);
+  });
+  afterEach(() => http.verify());
+
+  const RESULT = { competitionProblemId: 40, found: false, status: 'SIN_INTENTOS', fileStored: false, submissions: [] };
+
+  it('verifies without a file: POST with no body and no parameters', async () => {
+    const result = firstValueFrom(api.verify(40));
+    const request = http.expectOne('/api/problems/assigned/40/verification');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toBeNull();
+    expect(request.request.params.keys()).toEqual([]);
+    request.flush(RESULT);
+    expect((await result).found).toBe(false);
+  });
+
+  it('verifies with a file as multipart in the field "file" and sends count', async () => {
+    const file = new File(['int main(){}'], 'sol.cpp', { type: 'text/plain' });
+    const result = firstValueFrom(api.verify(40, file, 100));
+    const request = http.expectOne((r) => r.url === '/api/problems/assigned/40/verification');
+    expect(request.request.params.get('count')).toBe('100');
+    const body = request.request.body as FormData;
+    expect(body).toBeInstanceOf(FormData);
+    expect((body.get('file') as File).name).toBe('sol.cpp');
+    request.flush(RESULT);
+    await result;
+  });
+
+  it('reads the platform submissions with GET and count defaulting to 10', async () => {
+    const first = firstValueFrom(api.platformSubmissions(40));
+    const a = http.expectOne((r) => r.url === '/api/problems/assigned/40/platform-submissions');
+    expect(a.request.method).toBe('GET');
+    expect(a.request.params.get('count')).toBe('10');
+    a.flush({ competitionProblemId: 40, handle: 'tourist', count: 10, submissions: [] });
+    await first;
+    const second = firstValueFrom(api.platformSubmissions(40, 100));
+    const b = http.expectOne((r) => r.url === '/api/problems/assigned/40/platform-submissions');
+    expect(b.request.params.get('count')).toBe('100');
+    b.flush({ competitionProblemId: 40, handle: 'tourist', count: 100, submissions: [] });
+    await second;
+  });
+
+  it('labels the new verdicts in Spanish', () => {
+    expect([VERDICT_LABEL.COMPILATION_ERROR, VERDICT_LABEL.RUNTIME_ERROR, VERDICT_LABEL.EN_EVALUACION, VERDICT_LABEL.OTRO]).toEqual([
+      'Error de compilación',
+      'Error de ejecución',
+      'En evaluación',
+      'Otro veredicto',
+    ]);
   });
 });
 

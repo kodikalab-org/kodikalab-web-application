@@ -30,9 +30,9 @@
           />
         </a>
       } @else {
-        <button
+        <a
           mat-flat-button
-          [matMenuTriggerFor]="pendiente"
+          routerLink="/practicante/problemas-asignados"
           class="h-[52px] rounded-xl bg-linear-to-br from-[#9a75ff] to-[#643bff] px-7 shadow-[0_0_24px_#7357f380]"
         >
           Resolver problema<img
@@ -41,7 +41,7 @@
             height="18"
             alt=""
           />
-        </button>
+        </a>
       }
     </div>
     <mat-card

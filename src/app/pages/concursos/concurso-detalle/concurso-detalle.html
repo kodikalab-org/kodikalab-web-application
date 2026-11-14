@@ -178,17 +178,27 @@
                               >Enviar en Codeforces</a
                             >
                           }
-                          <button
-                            type="button"
-                            class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-3 py-1.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                            [disabled]="registerBlock(row.status) !== null"
-                            [attr.title]="registerBlock(row.status)"
-                            [attr.aria-description]="registerBlock(row.status)"
-                            [attr.aria-label]="'Registrar envío del problema ' + row.item.letter"
-                            (click)="openRegister(row.item)"
-                          >
-                            Registrar envío
-                          </button>
+                          @if (row.verify) {
+                            <a
+                              class="inline-block rounded-lg bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-3 py-1.5 text-[13px] font-medium text-white no-underline"
+                              [routerLink]="['/practicante/problemas-asignados/detalle', row.item.competitionProblemId]"
+                              [queryParams]="{ teamId: teamId() }"
+                              [attr.aria-label]="'Verificar mi solución del problema ' + row.item.letter"
+                              >Verificar mi solución</a
+                            >
+                          } @else {
+                            <button
+                              type="button"
+                              class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-3 py-1.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                              [disabled]="registerBlock(row.status) !== null"
+                              [attr.title]="registerBlock(row.status)"
+                              [attr.aria-description]="registerBlock(row.status)"
+                              [attr.aria-label]="'Registrar envío del problema ' + row.item.letter"
+                              (click)="openRegister(row.item)"
+                            >
+                              Registrar envío
+                            </button>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -196,7 +206,7 @@
                 </tbody>
               </table>
               <p class="m-0 border-0 border-t border-solid border-kl-divider px-4 py-3 text-xs text-kl-muted">
-                Envía tu código directamente en Codeforces; en KodikaLab solo registras el envío con su enlace de evidencia.
+                Envía tu código directamente en Codeforces y pulsa «Verificar mi solución»: KodikaLab lee tus últimos envíos y registra el veredicto real. El registro manual solo existe para las plataformas sin verificación automática.
               </p>
             } @else {
               <p class="m-0 p-5 text-sm text-kl-muted">Este concurso todavía no tiene problemas asignados.</p>
@@ -288,7 +298,7 @@
               <p class="m-0 text-xs text-kl-muted">
                 <span class="text-green-300">+N</span> resuelto tras N envíos incorrectos ·
                 <span class="text-kl-danger">-N</span> N envíos sin resolver ·
-                <span class="text-amber-200">?</span> pendiente de verificación.
+                <span class="text-amber-200">?</span> en evaluación o pendiente de verificación.
               </p>
             }
           }

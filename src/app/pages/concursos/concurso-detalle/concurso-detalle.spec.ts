@@ -54,9 +54,13 @@ describe('ConcursoDetalle', () => {
   const assignedBody = (competitionStatus: 'PROGRAMADA' | 'EN_CURSO' | 'FINALIZADA' = 'EN_CURSO') => ({
     teamId: 1,
     total: 4,
-    items: statuses.map((status, i) =>
-      assignedItem(101 + i, 10, 'ABCD'[i], status, competitionStatus),
-    ),
+    items: statuses.map((status, i) => {
+      const item = assignedItem(101 + i, 10, 'ABCD'[i], status, competitionStatus);
+      // Problem D is not from Codeforces: it keeps the manual registration.
+      return i === 3
+        ? { ...item, problem: { ...item.problem, url: 'https://cses.fi/problemset/task/1068', sourcePlatform: 'CSES', sourceCode: 'CSES-1068' } }
+        : item;
+    }),
   });
 
   async function open(url: string, status: 'PROGRAMADA' | 'EN_CURSO' | 'FINALIZADA' = 'EN_CURSO') {
@@ -186,24 +190,31 @@ describe('ConcursoDetalle', () => {
     expect(root.textContent).not.toContain('quedó como resuelto');
   });
 
-  it('disables "Registrar envío" for a solved problem with an explanation and keeps the others enabled', async () => {
+  it('sends Codeforces problems to the verification screen instead of the manual registration', async () => {
     const { root } = await open('/concursos/1/10');
-    const buttons = Array.from(root.querySelectorAll('table[aria-label="Problemas del concurso"] tbody tr')).map(
-      (row) => Array.from(row.querySelectorAll('button')).find((b) => b.textContent?.includes('Registrar envío'))!,
-    );
-    expect(buttons.map((b) => b.disabled)).toEqual([true, false, false, false]);
-    expect(buttons[0].getAttribute('aria-description')).toBe('Ya resolviste este problema');
-    expect(buttons[0].getAttribute('title')).toBe('Ya resolviste este problema');
-    expect(buttons[1].hasAttribute('aria-description')).toBe(false);
+    const rows = root.querySelectorAll('table[aria-label="Problemas del concurso"] tbody tr');
+    [0, 1, 2].forEach((i) => {
+      const link = Array.from(rows[i].querySelectorAll('a')).find((a) => a.textContent?.includes('Verificar mi solución'))!;
+      expect(link.getAttribute('href')).toBe(`/practicante/problemas-asignados/detalle/${101 + i}?teamId=1`);
+      expect(Array.from(rows[i].querySelectorAll('button')).some((b) => b.textContent?.includes('Registrar envío'))).toBe(false);
+    });
+    const d = rows[3];
+    expect(Array.from(d.querySelectorAll('a')).some((a) => a.textContent?.includes('Verificar mi solución'))).toBe(false);
+    const manual = Array.from(d.querySelectorAll('button')).find((b) => b.textContent?.includes('Registrar envío'))!;
+    expect(manual.disabled).toBe(false);
   });
 
-  it('disables registering submissions while the contest is PROGRAMADA', async () => {
+  it('keeps the manual registration of a non-Codeforces problem enabled and explains the legend of "?"', async () => {
+    const { root } = await open('/concursos/1/10?tab=clasificacion');
+    expect(root.textContent).toContain('en evaluación o pendiente de verificación');
+  });
+
+  it('the verification link stays available while the contest is PROGRAMADA and the manual one is disabled', async () => {
     const { root } = await open('/concursos/1/10', 'PROGRAMADA');
-    const buttons = Array.from(root.querySelectorAll('table[aria-label="Problemas del concurso"] button')).filter(
-      (b) => b.textContent?.includes('Registrar envío'),
-    ) as HTMLButtonElement[];
-    expect(buttons.length).toBe(4);
-    expect(buttons.every((b) => b.disabled)).toBe(true);
+    const rows = root.querySelectorAll('table[aria-label="Problemas del concurso"] tbody tr');
+    expect(rows[0].textContent).toContain('Verificar mi solución');
+    const manual = Array.from(rows[3].querySelectorAll('button')).find((b) => b.textContent?.includes('Registrar envío'))!;
+    expect(manual.disabled).toBe(true);
     expect(root.querySelector('header')!.textContent).toContain('Empieza en');
   });
 

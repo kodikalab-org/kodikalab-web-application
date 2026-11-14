@@ -52,6 +52,12 @@ describe('InicioDashboard', () => {
     expect(root.textContent).not.toMatch(/569|Suma de intervalos|Camila|Equipo Alfa|Demostración|demo/i);
   });
 
+  it('links "Resolver problema" to the assigned problems of the practitioner', async () => {
+    const { root } = await setup();
+    const enlace = Array.from(root.querySelectorAll('a')).find((a) => a.textContent?.includes('Resolver problema'))!;
+    expect(enlace.getAttribute('href')).toBe('/practicante/problemas-asignados');
+  });
+
   it('shows the real memberships of the practitioner instead of sample teams', async () => {
     const { root } = await setup('/inicio', [MEMBRESIA]);
     expect(root.textContent).toContain('Club Real');

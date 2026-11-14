@@ -12,7 +12,7 @@ import { apiError } from '../../../core/api';
 import { Standings, StandingsApi, StandingsRow } from '../../../core/standings-api';
 import { TeamApi, TeamCompetition, positiveId } from '../../../core/team-api';
 import { AssignedProblem, TeamsApi } from '../../../core/teams-api';
-import { submitUrl } from '../../../core/problem-links';
+import { isCodeforces, submitUrl } from '../../../core/problem-links';
 import {
   ActiveTeam, PROBLEM_BADGE, PROBLEM_LABEL, ProblemStatus, STATUS_BADGE, STATUS_LABEL, activeTeams,
   balloonColor, durationMinutes, formatCountdown, formatDateTime, formatDuration, formatSolveTime,
@@ -95,6 +95,7 @@ export class ConcursoDetalle {
         item,
         status: problemStatus(item),
         submit: submitUrl(item.problem),
+        verify: isCodeforces(item.problem),
       }))
       .sort((a, b) => a.item.letter.localeCompare(b.item.letter, 'es', { numeric: true })),
   );

@@ -151,7 +151,7 @@ export const balloonColor = (index: number) => BALLOONS[index % BALLOONS.length]
 /**
  * Text of one standings cell. `attempts` counts every registered submission, so a solved problem
  * shows `+` plus the wrong ones before the accepted one (`+2`); an unsolved attempted problem shows
- * `-N`; a pending verification shows `?`; no attempts leaves it empty.
+ * `-N`; a pending verification or a submission still being judged shows `?`; no attempts leaves it empty.
  */
 export function standingCellText(cell: Pick<StandingsCell, 'result' | 'attempts'>): string {
   switch (cell.result) {

@@ -7,7 +7,19 @@ import { API_URL, isConnectionError } from './api';
 export type SourcePlatform = 'CODEFORCES' | 'ATCODER' | 'CSES';
 export type CompetitionStatus = 'PROGRAMADA' | 'EN_CURSO' | 'FINALIZADA';
 export type AssignmentStatus = 'SIN_INTENTOS' | 'EN_PROGRESO' | 'PENDIENTE' | 'RESUELTO';
-export type Verdict = 'PENDIENTE' | 'ACCEPTED' | 'WRONG_ANSWER' | 'TLE' | 'MLE' | 'ERROR';
+export type Verdict =
+  | 'PENDIENTE'
+  | 'ACCEPTED'
+  | 'WRONG_ANSWER'
+  | 'TLE'
+  | 'MLE'
+  | 'ERROR'
+  | 'COMPILATION_ERROR'
+  | 'RUNTIME_ERROR'
+  | 'EN_EVALUACION'
+  | 'OTRO';
+export type AttemptOrigin = 'PLATAFORMA' | 'MANUAL';
+export type FileComparison = 'COINCIDE' | 'DIFERENTE' | 'NO_COMPARADO';
 export type AssignedSort = 'letter' | 'title' | 'difficulty' | 'assignedAt' | 'status';
 
 export interface CatalogTopic {
@@ -77,6 +89,59 @@ export interface AttemptInfo {
   language: string | null;
   submittedAt: string;
   evidenceUrl: string | null;
+  /** Fields below come from the platform verification; any of them may be `null` (except `origin`). */
+  executionTimeMs?: number | null;
+  memoryUsedKb?: number | null;
+  passedTests?: number | null;
+  origin?: AttemptOrigin | null;
+  externalSubmissionId?: number | null;
+  fileName?: string | null;
+  fileComparison?: FileComparison | null;
+}
+
+/** One submission of the assigned problem found by `POST .../verification`. */
+export interface VerifiedSubmission {
+  externalId: number;
+  verdict: Verdict;
+  language: string | null;
+  timeMs: number | null;
+  memoryKb: number | null;
+  passedTests: number | null;
+  submittedAt: string;
+  url: string | null;
+  imported: boolean;
+  beforeCompetition: boolean;
+}
+
+export interface VerificationResult {
+  competitionProblemId: number;
+  found: boolean;
+  status: AssignmentStatus;
+  fileStored: boolean;
+  submissions: VerifiedSubmission[];
+}
+
+/** One of the latest submissions of the practitioner's Codeforces account (any problem). */
+export interface PlatformSubmission {
+  externalId: number;
+  contestId: number | null;
+  problemIndex: string | null;
+  verdict: Verdict;
+  platformVerdict: string | null;
+  language: string | null;
+  timeMs: number | null;
+  memoryKb: number | null;
+  passedTests: number | null;
+  submittedAt: string;
+  url: string | null;
+  matchesProblem: boolean;
+}
+
+export interface PlatformSubmissions {
+  competitionProblemId: number;
+  handle: string | null;
+  count: number;
+  submissions: PlatformSubmission[];
 }
 
 export interface AssignedProblemItem {
@@ -168,7 +233,19 @@ export const VERDICT_LABEL: Record<Verdict, string> = {
   TLE: 'Tiempo excedido',
   MLE: 'Memoria excedida',
   ERROR: 'Error',
+  COMPILATION_ERROR: 'Error de compilación',
+  RUNTIME_ERROR: 'Error de ejecución',
+  EN_EVALUACION: 'En evaluación',
+  OTRO: 'Otro veredicto',
 };
+
+/** Badge classes of a verdict: accepted green, still judging amber, anything else red. */
+export function verdictBadge(verdict: Verdict): string {
+  if (verdict === 'ACCEPTED') return 'border-emerald-400/50 bg-emerald-400/10 text-emerald-300';
+  if (verdict === 'PENDIENTE' || verdict === 'EN_EVALUACION') return 'border-amber-400/50 bg-amber-400/10 text-amber-300';
+  if (verdict === 'OTRO') return 'border-kl-border-strong bg-white/4 text-kl-body';
+  return 'border-red-400/50 bg-red-400/10 text-red-300';
+}
 
 const DATE_TIME = new Intl.DateTimeFormat('es-PE', {
   day: 'numeric',
@@ -236,6 +313,32 @@ export class ProblemsApi {
     return this.http.get<AssignedDetail>(`${this.url}/problems/assigned/${competitionProblemId}`, {
       timeout: 15000,
     });
+  }
+
+  /**
+   * Reads the latest Codeforces submissions of the practitioner and records the ones of this problem
+   * (`POST /problems/assigned/{id}/verification`). With a file it goes as multipart (field `file`); without one
+   * the request has no body.
+   */
+  verify(competitionProblemId: number, file?: File, count?: number) {
+    let body: FormData | null = null;
+    if (file) {
+      body = new FormData();
+      body.append('file', file, file.name);
+    }
+    return this.http.post<VerificationResult>(
+      `${this.url}/problems/assigned/${competitionProblemId}/verification`,
+      body,
+      { params: toParams({ count }), timeout: 30000 },
+    );
+  }
+
+  /** Latest submissions of the Codeforces account, read only (`GET /problems/assigned/{id}/platform-submissions`). */
+  platformSubmissions(competitionProblemId: number, count = 10) {
+    return this.http.get<PlatformSubmissions>(
+      `${this.url}/problems/assigned/${competitionProblemId}/platform-submissions`,
+      { params: toParams({ count }), timeout: 30000 },
+    );
   }
 
   /** Assigns catalog problems to the whole team of a competition (`POST /problems/assign`, 201). */

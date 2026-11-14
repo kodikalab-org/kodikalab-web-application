@@ -2,54 +2,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TeamsApi, CoachGroup, PractitionerGroup } from '../core/teams-api';
 import { Session } from '../core/session';
 import { DestroyRef, OnInit, inject, signal, Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { HeaderNavigation } from './header-navigation/header-navigation';
-import { UserMenu } from './user-menu/user-menu';
 import { TeamPage } from './team-page';
 @Component({
   selector: 'app-team-frame',
-  imports: [
-    RouterLink,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatToolbarModule,
-    HeaderNavigation,
-    UserMenu,
-  ],
-  styles: [
-    `:host {
-      --mat-toolbar-container-background-color: transparent;
-      --mat-toolbar-container-text-color: var(--kl-text);
-    }`,
-  ],
-  template: ` <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
-    <div
-      class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat"
-    ></div>
-    <header
-      class="sticky top-0 z-40 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/80 backdrop-blur-xl"
-    >
-      <mat-toolbar class="mx-auto flex h-[68px] max-w-[1600px] gap-4 px-4 lg:px-11">
-        <a
-          [routerLink]="coach() ? '/coach/inicio' : '/inicio'"
-          aria-label="Kodikalab, inicio"
-          class="flex items-center gap-2.5 text-xl sm:text-[25px]"
-        >
-          <img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab
-        </a>
-        <app-header-navigation [coach]="coach()" />
-        <div class="ml-auto flex items-center gap-3">
-          <app-user-menu [coach]="coach()" />
-        </div>
-      </mat-toolbar>
-    </header>
-    <main class="mx-auto flex max-w-[1200px] flex-col gap-6 px-4 py-6 lg:py-8">
+  imports: [ReactiveFormsModule, MatButtonModule],
+  template: `<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6 lg:px-6 lg:py-8">
       <div>
         <p class="font-mono text-xs text-kl-muted">Inicio / Mi espacio</p>
-        <h1 class="m-0 font-display text-2xl font-bold lg:text-[40px]">{{ title() }}</h1>
+        <h1 class="kl-page-title">{{ title() }}</h1>
         <p class="text-kl-muted">{{ description() }}</p>
       </div>
       <form
@@ -125,10 +87,6 @@ import { TeamPage } from './team-page';
         </p>
       }
       <ng-content />
-    </main>
-    <footer class="mt-8 border-t border-kl-border p-6 text-center text-sm text-kl-muted">
-      KodikaLab · Entrenamiento en equipo
-    </footer>
   </div>`,
 })
 export class TeamFrame implements OnInit {

@@ -8,10 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
-import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { map } from 'rxjs';
 import { CoachGroup, TeamsApi } from '../../../core/teams-api';
 
@@ -42,8 +39,6 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
 @Component({
   selector: 'app-coach-perfil',
   imports: [
-    HeaderNavigation,
-    UserMenu,
     AsyncPipe,
     ReactiveFormsModule,
     RouterLink,
@@ -51,7 +46,6 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
     MatFormFieldModule,
     MatSelectModule,
     MatSlideToggleModule,
-    MatToolbarModule,
   ],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',

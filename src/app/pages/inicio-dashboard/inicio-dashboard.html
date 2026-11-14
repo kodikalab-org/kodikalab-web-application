@@ -1,75 +1,11 @@
-<div
-  class="relative isolate flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text lg:min-h-[1420px]"
->
-  <img
-    class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover object-top"
-    [src]="'/images/dashboard/' + (coach ? '3' : '1') + '-imgIcon.svg'"
-    alt=""
-  />
-  <a
-    [routerLink]="ruta"
-    fragment="contenido"
-    queryParamsHandling="preserve"
-    (click)="irASeccion(contenido)"
-    class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-kl-surface focus:p-4"
-    >Saltar al contenido</a
-  >
-  <header
-    class="sticky top-0 z-40 shrink-0 border-b border-[#2b2760] bg-[#060414]/90 shadow-[0_6px_24px_#04030a66] backdrop-blur-xl"
-  >
-    <mat-toolbar class="mx-auto flex h-[68px] max-w-[1600px] gap-2 px-4 sm:gap-5 lg:px-11">
-      <a
-        [routerLink]="ruta"
-        queryParamsHandling="preserve"
-        fragment="contenido"
-        (click)="irASeccion(contenido)"
-        aria-label="Kodikalab, inicio"
-        class="flex shrink-0 items-center gap-2.5 text-xl font-medium tracking-[-0.4px] sm:text-[25px]"
-        ><img src="/images/dashboard/0-imgIcon1.svg" width="40" height="40" alt="" />Kodikalab</a
-      >
-      <app-header-navigation [coach]="coach" class="xl:ml-8" />
-      <div class="ml-auto flex min-w-0 items-center gap-1 sm:gap-3">
-        <button
-          mat-button
-          [matMenuTriggerFor]="busqueda"
-          aria-label="Abrir accesos rápidos"
-          matTooltip="Ir a una sección del dashboard"
-          class="hidden h-10 w-[280px] justify-start rounded-xl border border-solid border-kl-border-strong bg-white/5 text-left text-xs text-kl-muted min-[1400px]:flex"
-        >
-          <img src="/images/dashboard/0-imgIcon2.svg" width="18" height="18" alt="" />Ir a una
-          sección del dashboard…
-        </button>
-        <app-user-menu
-          [coach]="coach"
-          [nombre]="nombre"
-          [iniciales]="iniciales"
-        />
-      </div>
-    </mat-toolbar>
-  </header>
   <mat-menu #pendiente="matMenu" [class]="clasesMenu" [overlapTrigger]="false"
     ><button mat-menu-item disabled>Esta sección estará disponible próximamente</button></mat-menu
   >
-  <mat-menu #busqueda="matMenu" [class]="clasesMenu" [overlapTrigger]="false">
-    @for (enlace of enlaces; track enlace.id) {
-      <a
-        mat-menu-item
-        [routerLink]="enlace.path"
-        [fragment]="enlace.fragment"
-        >{{ enlace.nombre }}</a
-      >
-    }
-    <button mat-menu-item disabled>Búsqueda global · próximamente</button>
-  </mat-menu>
 
-  <main
-    #contenido
-    id="contenido"
-    class="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-[30px] pb-14 sm:px-7 lg:px-14"
-  >
+  <div class="mx-auto w-full max-w-[1440px] px-4 pt-[30px] pb-14 sm:px-7 lg:px-6">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-5">
       <div>
-        <h1 class="m-0 break-all font-display text-[32px] font-bold tracking-[-1px]">
+        <h1 class="kl-page-title break-all">
           Hola, {{ nombre }}
         </h1>
         <p class="mb-0 mt-1.5 text-[15px] text-kl-soft">
@@ -109,7 +45,7 @@
       }
     </div>
     <mat-card
-      class="mb-6 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6 shadow-[0_0_24px_#643cff2e]"
+      class="mb-6 border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6 shadow-[0_0_24px_#643cff2e]"
     >
       <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 class="m-0 flex items-center gap-3 font-display text-lg">
@@ -159,7 +95,11 @@
           <div>
             <strong class="block font-display text-2xl">{{ dato.valor }}</strong
             ><span class="block text-[13px] text-kl-body">{{ dato.etiqueta }}</span
-            ><span class="mt-1 block text-xs" [class]="dato.tono">{{ dato.detalle }}</span>
+            >@if (dato.enlace) {
+              <a [routerLink]="dato.enlace" class="mt-1 block text-xs underline" [class]="dato.tono">{{ dato.detalle }}</a>
+            } @else {
+              <span class="mt-1 block text-xs" [class]="dato.tono">{{ dato.detalle }}</span>
+            }
           </div></mat-card
         >
       }
@@ -173,7 +113,7 @@
           [attr.aria-label]="coach ? 'Solicitudes pendientes' : 'Problemas para ti'"
         >
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -185,26 +125,53 @@
                 }
               "
             />
-            <ng-container
-              *ngTemplateOutlet="
-                vacio;
-                context: {
-                  icono: coach ? '3-imgIcon13' : '1-imgIcon12',
-                  nombre: coach
-                    ? 'No tienes solicitudes pendientes'
-                    : 'Aún no tienes problemas asignados',
-                  descripcion: coach
-                    ? 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.'
-                    : 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.',
-                  accion: coach ? '' : 'Explorar grupos',
+            @if (coach && totalSolicitudes() > 0) {
+              <p class="mt-0 mb-3 text-sm text-kl-body">
+                Tienes {{ totalSolicitudes() }}
+                {{ totalSolicitudes() === 1 ? 'solicitud pendiente' : 'solicitudes pendientes' }}
+                de ingreso.
+              </p>
+              <ul class="m-0 flex list-none flex-col gap-2 p-0">
+                @for (grupo of gruposConSolicitudes(); track grupo.groupId) {
+                  <li>
+                    <a
+                      routerLink="/coach/grupos/solicitudes"
+                      [queryParams]="{ grupo: grupo.groupId }"
+                      class="flex items-center justify-between gap-3 rounded-xl border border-solid border-kl-border-strong bg-white/3 px-4 py-3 text-sm text-kl-text"
+                    >
+                      <span class="min-w-0 truncate">{{ grupo.name }}</span>
+                      <span class="shrink-0 text-amber-300">
+                        {{ grupo.pendingRequests }}
+                        {{ grupo.pendingRequests === 1 ? 'pendiente' : 'pendientes' }}
+                      </span>
+                    </a>
+                  </li>
                 }
-              "
-            />
+              </ul>
+            } @else {
+              <ng-container
+                *ngTemplateOutlet="
+                  vacio;
+                  context: {
+                    icono: coach ? '3-imgIcon13' : '1-imgIcon12',
+                    nombre: coach
+                      ? gruposCargando()
+                        ? 'Cargando solicitudes…'
+                        : 'No tienes solicitudes pendientes'
+                      : 'Aún no tienes problemas asignados',
+                    descripcion: coach
+                      ? 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.'
+                      : 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.',
+                    accion: coach ? '' : 'Explorar grupos',
+                  }
+                "
+              />
+            }
           </mat-card>
         </section>
         <section #progresoSeccion id="progreso" class="scroll-mt-24" aria-label="Progreso por tema">
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -239,7 +206,7 @@
           [attr.aria-label]="coach ? 'Mis equipos' : 'Mis grupos'"
         >
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -301,7 +268,7 @@
           aria-label="Próximas competencias"
         >
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -329,9 +296,7 @@
         </section>
       </div>
     </div>
-  </main>
-  <app-site-footer [audience]="coach ? 'coach' : 'practicante'" />
-</div>
+  </div>
 <ng-template #titulo let-nombre="nombre" let-icono="icono" let-accion="accion">
   <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
     <h2

@@ -1,10 +1,7 @@
-<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
-  <app-header [coach]="true" />
-  <main class="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-12 md:px-10">
+  <div class="mx-auto w-full max-w-[1440px] px-4 pt-6 pb-12 md:px-10">
     <header class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1
-          class="m-0 font-display text-[32px] leading-[38px] font-bold tracking-[-1px] md:text-[40px] md:leading-[44px]"
+        <h1 class="kl-page-title"
         >
           Concursos
         </h1>
@@ -99,7 +96,7 @@
           <h2 [id]="'titulo-' + $index" class="m-0 mb-3 text-xl font-bold">{{ section.title }}</h2>
           @if (section.rows.length) {
             <div
-              class="overflow-x-auto rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86"
+              class="overflow-x-auto rounded-2xl border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86"
             >
               <table class="w-full min-w-[760px] border-collapse text-left text-sm" [attr.aria-label]="section.label">
                 <thead>
@@ -164,6 +161,5 @@
         </section>
       }
     }
-  </main>
-  <app-site-footer audience="coach" />
-</div>
+  </div>
+

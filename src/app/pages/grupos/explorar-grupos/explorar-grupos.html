@@ -101,7 +101,7 @@
 
   <div class="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
     <aside
-      class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6"
+      class="rounded-[18px] border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6"
     >
       <div class="mb-5 flex items-center justify-between">
         <h2 class="m-0 text-lg font-medium">Filtros</h2>
@@ -153,7 +153,7 @@
           @for (fila of [1, 2, 3, 4, 5]; track fila) {
             <div
               aria-hidden="true"
-              class="flex h-28 items-center gap-5 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface p-5"
+              class="flex h-28 items-center gap-5 rounded-2xl border border-solid border-kl-edge bg-kl-surface p-5"
             >
               <span class="size-16 rounded-xl bg-white/5"></span>
               <div class="flex flex-1 flex-col gap-3">
@@ -172,7 +172,7 @@
       } @else if (visibles().length === 0) {
         <p class="mt-0 text-sm text-kl-muted">Mostrando 0 grupos</p>
         <mat-card
-          class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-16 text-center"
+          class="items-center gap-4 rounded-2xl border border-solid border-kl-edge bg-kl-surface px-6 py-16 text-center"
           >@if (total() === 0) {
             <h2 class="m-0 text-xl">Todavía no hay grupos publicados</h2>
             <p class="m-0 text-sm text-kl-muted">

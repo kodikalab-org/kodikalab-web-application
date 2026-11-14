@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 
-/** Practitioner contests (Codeforces-style list and contest detail). Paths must start with 'concursos'. */
+/** Practitioner contests (Codeforces-style list and contest detail). Children of the AppShell route. */
 export const CONCURSOS_ROUTES: Routes = [
   {
     path: 'concursos',
-    loadComponent: () => import('./concursos-shell').then((m) => m.ConcursosShell),
+    data: { role: 'PRACTICANTE' },
     children: [
       {
         path: '',

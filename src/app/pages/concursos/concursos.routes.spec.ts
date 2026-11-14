@@ -1,4 +1,4 @@
-import { routes } from '../../app.routes';
+import { privateRoutes } from '../../app.routes';
 import { CONCURSOS_ROUTES } from './concursos.routes';
 
 describe('Concursos routes', () => {
@@ -10,8 +10,7 @@ describe('Concursos routes', () => {
   });
 
   it('is guarded as a PRACTICANTE page', () => {
-    const route = routes.find((item) => item.path === 'concursos');
+    const route = privateRoutes.find((item) => item.path === 'concursos');
     expect(route?.data?.['role']).toBe('PRACTICANTE');
-    expect(route?.canActivate?.length).toBe(1);
   });
 });

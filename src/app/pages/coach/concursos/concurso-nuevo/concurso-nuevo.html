@@ -1,6 +1,4 @@
-<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
-  <app-header [coach]="true" />
-  <main class="mx-auto w-full max-w-[860px] px-4 pt-6 pb-12 md:px-10">
+  <div class="mx-auto w-full max-w-[860px] px-4 pt-6 pb-12 md:px-10">
     <a
       routerLink="/coach/concursos"
       [queryParams]="form.controls.teamId.value ? { teamId: form.controls.teamId.value } : null"
@@ -10,8 +8,7 @@
       Volver a concursos
     </a>
     <header class="mt-5 mb-6">
-      <h1
-        class="m-0 font-display text-[32px] leading-[38px] font-bold tracking-[-1px] md:text-[40px] md:leading-[44px]"
+      <h1 class="kl-page-title"
       >
         Crear concurso
       </h1>
@@ -271,6 +268,5 @@
         </div>
       </form>
     </mat-card>
-  </main>
-  <app-site-footer audience="coach" />
-</div>
+  </div>
+

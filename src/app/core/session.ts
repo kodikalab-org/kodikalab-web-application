@@ -4,10 +4,13 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs';
 import { API_URL, AuthResponse, RegisterRequest, Role } from './api';
 
-interface SessionData { token: string; email: string; role: Role; expiresAt: number; }
+/** `lifetime` is the length in ms of the token issued at login or refresh; sessions saved before it existed lack it. */
+interface SessionData { token: string; email: string; role: Role; expiresAt: number; lifetime?: number; }
 const KEY = 'kodikalab.session';
 /** A sleeping backend (free hosting) can take close to a minute to answer its first request. */
 export const COLD_START_TIMEOUT = 60000;
+/** The token is renewed once less than this share of its lifetime is left. */
+export const REFRESH_THRESHOLD = 0.2;
 
 function parseSession(raw: string): SessionData | null {
   try {
@@ -25,6 +28,7 @@ export class Session {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   readonly account = signal<SessionData | null>(null);
   private restored = false;
+  private refreshing = false;
 
   restore(): void {
     if (!this.browser || this.restored) return;
@@ -70,21 +74,69 @@ export class Session {
   login(email: string, password: string, remember: boolean) {
     return this.http.post<AuthResponse>(`${this.url}/auth/login`, { email, password }, { timeout: COLD_START_TIMEOUT }).pipe(
       tap((response) => {
-        if (!response.token || !response.expiresIn || !['PRACTICANTE', 'COACH'].includes(response.role)) {
-          throw new Error('Respuesta de autenticación incompleta');
-        }
+        const data = this.toSessionData(response);
         this.logout();
-        const data: SessionData = {
-          token: response.token, email: response.email, role: response.role,
-          expiresAt: Date.now() + response.expiresIn * 1000,
-        };
         this.account.set(data);
-        try {
-          const win = this.document.defaultView;
-          if (this.browser && win) (remember ? win.localStorage : win.sessionStorage).setItem(KEY, JSON.stringify(data));
-        } catch { /* Storage may be disabled. The in-memory session still works. */ }
+        this.write(data, remember ? ['localStorage'] : ['sessionStorage']);
       }),
     );
+  }
+
+  /**
+   * Asks the backend for a new token and replaces the stored one, in whichever storage already holds the
+   * session. The caller decides what to do on failure: the current session stays valid until it expires.
+   */
+  refresh() {
+    return this.http.post<AuthResponse>(`${this.url}/auth/refresh`, null, { timeout: COLD_START_TIMEOUT }).pipe(
+      tap((response) => {
+        const current = this.account();
+        const data = this.toSessionData(response);
+        // A refresh that arrives after a logout or a login as someone else must not resurrect the old session.
+        if (!current || data.email !== current.email) return;
+        this.account.set(data);
+        this.write(data, 'existing');
+      }),
+    );
+  }
+
+  /** True when the session is valid but has less than 20 % of its lifetime left. */
+  private refreshDue(): boolean {
+    const session = this.account();
+    if (!session?.lifetime) return false;
+    const left = session.expiresAt - Date.now();
+    return left > 0 && left < session.lifetime * REFRESH_THRESHOLD;
+  }
+
+  /** Renews the token in the background when it is close to expiring. A failure is ignored and never ends the session. */
+  refreshIfDue(): void {
+    if (!this.browser || this.refreshing || !this.refreshDue()) return;
+    this.refreshing = true;
+    this.refresh().subscribe({
+      next: () => { this.refreshing = false; },
+      error: () => { this.refreshing = false; },
+    });
+  }
+
+  private toSessionData(response: AuthResponse): SessionData {
+    if (!response.token || !response.expiresIn || !['PRACTICANTE', 'COACH'].includes(response.role)) {
+      throw new Error('Respuesta de autenticación incompleta');
+    }
+    return {
+      token: response.token, email: response.email, role: response.role,
+      expiresAt: Date.now() + response.expiresIn * 1000, lifetime: response.expiresIn * 1000,
+    };
+  }
+
+  /** Saves the session in the given storages, or only in those that already hold one. */
+  private write(data: SessionData, where: ('localStorage' | 'sessionStorage')[] | 'existing'): void {
+    const win = this.document.defaultView;
+    if (!this.browser || !win) return;
+    for (const name of ['sessionStorage', 'localStorage'] as const) {
+      try {
+        const storage = win[name];
+        if (where === 'existing' ? storage.getItem(KEY) !== null : where.includes(name)) storage.setItem(KEY, JSON.stringify(data));
+      } catch { /* Storage may be disabled. The in-memory session still works. */ }
+    }
   }
 
   register(request: RegisterRequest) {

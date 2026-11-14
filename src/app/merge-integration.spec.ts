@@ -32,6 +32,8 @@ describe('Integración de rutas de equipo (US11 a US14)', () => {
   });
 
   afterEach(() => {
+    // The login screen wakes the backend with a silent GET /health.
+    http.match('/api/health').forEach((request) => request.flush({}));
     http.verify();
     session.logout();
   });
@@ -129,7 +131,7 @@ describe('Integración de rutas de equipo (US11 a US14)', () => {
     async (path) => {
       await RouterTestingHarness.create(path);
       expect(TestBed.inject(Router).url).toBe(`/login?volver=${encodeURIComponent(path)}`);
-      http.expectNone(() => true);
+      http.expectNone((request) => !request.url.endsWith('/health'));
     },
   );
 });

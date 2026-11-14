@@ -1,8 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
-import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatChipsModule } from '@angular/material/chips';
@@ -10,7 +8,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { firstValueFrom } from 'rxjs';
 import { ProfileApi } from '../../../core/profile-api';
 import { PractitionerProfile, apiError } from '../../../core/api';
@@ -39,8 +36,6 @@ function cicloValido(control: AbstractControl) {
 @Component({
   selector: 'app-perfil-editar',
   imports: [
-    HeaderNavigation,
-    UserMenu,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
@@ -50,7 +45,6 @@ function cicloValido(control: AbstractControl) {
     MatInputModule,
     MatRadioModule,
     MatSelectModule,
-    MatToolbarModule,
   ],
   templateUrl: './perfil-editar.html',
   styleUrl: './perfil-editar.css',
@@ -90,7 +84,6 @@ export class PerfilEditar {
     } catch (error) { this.error = apiError(error); }
     finally { this.busy = false; }
   }
-  protected readonly iniciales = 'KL';
   protected readonly carreras = CARRERAS_EDICION;
   protected readonly ciclos = CICLOS_EDICION;
   protected readonly distritos = DISTRITOS_EDICION;

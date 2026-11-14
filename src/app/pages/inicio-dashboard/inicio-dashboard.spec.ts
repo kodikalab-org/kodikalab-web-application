@@ -4,8 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Session } from '../../core/session';
 import { API_URL } from '../../core/api';
 import { signIn } from '../../testing/sign-in';
-import { OverlayContainer } from '@angular/cdk/overlay';
-import { Router, provideRouter } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { InicioDashboard } from './inicio-dashboard';
 
@@ -21,8 +20,8 @@ describe('InicioDashboard', () => {
     await TestBed.configureTestingModule({
       providers: [
         provideRouter([
-          { path: 'inicio', component: InicioDashboard, data: { coach: false } },
-          { path: 'coach/inicio', component: InicioDashboard, data: { coach: true } },
+          { path: 'inicio', component: InicioDashboard },
+          { path: 'coach/inicio', component: InicioDashboard },
           { path: 'login', component: InicioDashboard },
           { path: 'grupos', component: InicioDashboard },
         ]),
@@ -61,12 +60,12 @@ describe('InicioDashboard', () => {
     expect(root.textContent).not.toContain('Grafos y DP');
   });
 
-  it('shows empty requests and real teams for the coach', async () => {
+  it('shows real requests and teams for the coach', async () => {
     const { root } = await setup('/coach/inicio', [GRUPO_COACH]);
     expect(root.querySelector('h1')?.textContent).toContain('Hola, usuario@example.com');
     expect(root.textContent).toContain('Grupo Real');
     expect(root.textContent).toContain('3/12 integrantes · Viernes 17:00');
-    expect(root.textContent).toContain('No tienes solicitudes pendientes');
+    expect(root.textContent).toContain('Tienes 1 solicitud pendiente de ingreso.');
     expect(root.textContent).not.toMatch(/Valeria|Equipo Beta|Marco|Suma de intervalos/);
   });
 
@@ -76,42 +75,19 @@ describe('InicioDashboard', () => {
     expect(root.querySelector('a[href="/coach/grupos/crear"]')).not.toBeNull();
   });
 
-  it('has no sidebar and keeps the Figma header links', async () => {
+  it('has no header of its own: the application shell provides it', async () => {
     const { root } = await setup('/coach/inicio');
-    expect(root.querySelector('[aria-label="Abrir sidebar de la aplicación"]')).toBeNull();
-    expect(root.querySelector('[aria-controls="app-sidebar"]')).toBeNull();
-    expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/grupos"]')).not.toBeNull();
-    expect(root.querySelector('nav[aria-label="Navegación principal"] a[href="/recursos"]')).not.toBeNull();
-    expect(root.querySelector('[aria-label="Estado de la aplicación"]')).toBeNull();
+    expect(root.querySelector('header')).toBeNull();
+    expect(root.querySelector('app-header, app-site-footer, mat-toolbar')).toBeNull();
   });
 
-  it('keeps the header sticky above the content', async () => {
-    const { root } = await setup();
-    expect(root.querySelector('header')?.classList.contains('sticky')).toBe(true);
-    expect(root.querySelector('header')?.classList.contains('top-0')).toBe(true);
-  });
-
-  it('styles the user menu on the overlay panel without demo entries', async () => {
-    const { harness, root } = await setup();
-    root.querySelector<HTMLButtonElement>('[aria-label="Abrir menú de usuario"]')!.click();
-    harness.detectChanges();
-    await harness.fixture.whenStable();
-    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
-    const panel = overlay.querySelector('.mat-mdc-menu-panel')!;
-    expect(panel.classList.contains('bg-kl-surface')).toBe(true);
-    expect(panel.classList.contains('border-kl-border-strong')).toBe(true);
-    expect(panel.classList.contains('rounded-2xl')).toBe(true);
-    expect(panel.querySelector('[role="note"]')?.textContent).toContain('Practicante');
-    expect(overlay.querySelector('a[href*="estado=nuevo"], a[href^="/demo"]')).toBeNull();
-  });
-
-  it('opens the existing groups interface instead of a dashboard fragment', async () => {
-    const { harness, root } = await setup();
-    root.querySelector<HTMLButtonElement>('[aria-label="Abrir accesos rápidos"]')!.click();
-    harness.detectChanges();
-    await harness.fixture.whenStable();
-    TestBed.inject(OverlayContainer).getContainerElement().querySelector<HTMLAnchorElement>('a[href="/grupos"]')!.click();
-    await harness.fixture.whenStable();
-    expect(TestBed.inject(Router).url).toBe('/grupos');
+  it('shows the real pending requests of /teams/me in the card and links to the requests page', async () => {
+    const { root } = await setup('/coach/inicio', [GRUPO_COACH, { ...GRUPO_COACH, groupId: 5, name: 'Otro Grupo', pendingRequests: 2 }]);
+    expect(root.textContent).toContain('Tienes 3 solicitudes pendientes de ingreso.');
+    expect(root.textContent).not.toContain('No tienes solicitudes pendientes');
+    const enlaces = Array.from(root.querySelectorAll<HTMLAnchorElement>('a[href^="/coach/grupos/solicitudes"]')).map((a) => a.getAttribute('href'));
+    expect(enlaces).toEqual(expect.arrayContaining([
+      '/coach/grupos/solicitudes', '/coach/grupos/solicitudes?grupo=4', '/coach/grupos/solicitudes?grupo=5',
+    ]));
   });
 });

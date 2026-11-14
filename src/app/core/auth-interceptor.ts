@@ -17,7 +17,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const token = publicAuth ? null : session.token();
   return next(token ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : request).pipe(
     catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse && error.status === 401 && token) {
+      // A failed background refresh leaves the current session alone: it is still valid until it expires.
+      if (error instanceof HttpErrorResponse && error.status === 401 && token && !request.url.endsWith('/auth/refresh')) {
         session.logout();
         profiles.reset();
         const volver = safeReturnUrl(router.url);

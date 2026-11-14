@@ -1,8 +1,8 @@
 @let paso = (paso$ | async) ?? 1;
 @let estado = (estado$ | async) ?? '';
-<main
+<div
   [attr.aria-busy]="estado === 'creando' ? 'true' : null"
-  class="mx-auto flex min-h-[calc(100dvh-148px)] w-full max-w-[1600px] flex-col px-4 pt-6 lg:min-h-[916px] lg:px-14"
+  class="mx-auto flex w-full max-w-[1200px] flex-col px-4 pt-6 lg:min-h-[916px] lg:px-14"
 >
   <div class="mb-5 flex items-center gap-4">
     <a
@@ -13,7 +13,7 @@
       ><img src="/images/login/arrow-left-18.svg" width="20" height="20" alt=""
     /></a>
     <div>
-      <h1 class="m-0 font-display text-2xl font-bold tracking-[-0.8px] sm:text-[30px]">
+      <h1 class="kl-page-title">
         Crear grupo de entrenamiento
       </h1>
       <p class="mt-1 mb-0 text-sm text-kl-body sm:text-[15px]">
@@ -69,7 +69,7 @@
       <div class="min-w-0">
         <ol
           aria-label="Pasos para crear un grupo"
-          class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-[#2b2760] bg-[#0e0a28]/70 p-0 xl:grid-cols-4"
+          class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-kl-edge bg-[#0e0a28]/70 p-0 xl:grid-cols-4"
         >
           @for (titulo of pasos; track titulo; let i = $index) {
             <li
@@ -492,7 +492,7 @@
         </mat-card>
       </div>
       <aside
-        class="rounded-[18px] border border-solid border-[#2b2760] bg-[#0e0a28]/80 p-5 text-[13px]"
+        class="rounded-[18px] border border-solid border-kl-edge bg-[#0e0a28]/80 p-5 text-[13px]"
       >
         <div class="mb-4 flex items-center gap-3">
           <img src="/images/grupos/resumen.svg" width="20" height="20" alt="" />
@@ -555,7 +555,7 @@
       </aside>
     </div>
     <div
-      class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[#1f1c44] bg-[#060414]/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
+      class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[#1f1c44] bg-kl-chrome/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
     >
       <p class="mb-0 text-xs text-kl-muted">
         Puedes guardar un borrador con solo el nombre y completarlo después. Se publica cuando tenga
@@ -601,4 +601,4 @@
       </div>
     </div>
   }
-</main>
+</div>

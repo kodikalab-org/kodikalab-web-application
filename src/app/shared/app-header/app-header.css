@@ -1,0 +1,4 @@
+:host {
+  --mat-toolbar-container-background-color: transparent;
+  --mat-toolbar-container-text-color: var(--kl-text);
+}

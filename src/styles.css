@@ -23,6 +23,10 @@
   --color-kl-accent-text: var(--kl-accent-text);
   --color-kl-accent-link: var(--kl-accent-link);
   --color-kl-danger: var(--kl-danger);
+  --color-kl-chrome: var(--kl-chrome);
+  --color-kl-chrome-line: var(--kl-chrome-line);
+  --color-kl-edge: var(--kl-edge);
+  --color-kl-outline: var(--kl-outline);
   --font-body: var(--kl-font-body);
   --font-display: var(--kl-font-display);
   --spacing-gutter: var(--gutter);
@@ -55,6 +59,11 @@
   --kl-accent-text: #a98bff;
   --kl-accent-link: #9b7dff;
   --kl-danger: #f87171;
+  /* Application chrome: header and footer background, header bottom line, panel borders and control outlines. */
+  --kl-chrome: #060414;
+  --kl-chrome-line: #1b1840;
+  --kl-edge: #2b2760;
+  --kl-outline: #34304a;
 
   --kl-font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --kl-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -71,7 +80,7 @@
   --mat-sys-on-surface-variant: var(--kl-text-body);
   --mat-sys-surface-container-low: var(--kl-surface);
   --mat-sys-surface-container-highest: var(--kl-surface-raised);
-  --mat-sys-outline: #34304a;
+  --mat-sys-outline: var(--kl-outline);
   --mat-sys-outline-variant: var(--kl-border);
   --mat-sys-error: var(--kl-danger);
   --mat-sys-on-error: #ffffff;
@@ -186,12 +195,6 @@ img {
   vertical-align: middle;
 }
 
-/* Full-bleed decoration: never expose the fixed-size SVG's side or bottom edges. */
-.profile-background {
-  @apply pointer-events-none absolute inset-0 z-0 size-full object-cover object-top;
-  mask-image: linear-gradient(to bottom, #000 85%, transparent);
-}
-
 .profile-notice {
   @apply flex items-start gap-3 rounded-xl border border-solid border-[#4ade80]/50 bg-[#0a281a]/95 px-[18px] py-3.5;
 }
@@ -230,7 +233,7 @@ a {
   --mat-form-field-container-height: var(--auth-field-height);
   --mat-form-field-container-vertical-padding: var(--auth-field-padding);
   --mat-form-field-outlined-container-shape: 12px;
-  --mat-form-field-outlined-outline-color: #34304a;
+  --mat-form-field-outlined-outline-color: var(--kl-outline);
   --mat-form-field-outlined-hover-outline-color: #4c4670;
   --mat-form-field-outlined-focus-outline-color: var(--auth-focus-color);
   --mat-form-field-outlined-outline-width: 1px;
@@ -374,10 +377,10 @@ input[type='time']::-webkit-calendar-picker-indicator {
   --mat-button-toggle-height: auto;
 }
 .onb-level .mat-button-toggle {
-  @apply rounded-[14px] border border-solid border-[#34304a];
+  @apply rounded-[14px] border border-solid border-kl-outline;
 }
 .onb-level .mat-button-toggle + .mat-button-toggle {
-  @apply border-l border-solid border-[#34304a];
+  @apply border-l border-solid border-kl-outline;
 }
 .onb-level .mat-button-toggle-button {
   @apply h-full w-full text-left;
@@ -397,7 +400,7 @@ input[type='time']::-webkit-calendar-picker-indicator {
   --mat-chip-container-shape-radius: 10px;
   --mat-chip-elevated-container-color: rgba(255, 255, 255, 0.03);
   --mat-chip-elevated-selected-container-color: rgba(115, 87, 243, 0.3);
-  --mat-chip-outline-color: #34304a;
+  --mat-chip-outline-color: var(--kl-outline);
   --mat-chip-outline-width: 1px;
   --mat-chip-label-text-color: var(--kl-text-body);
   --mat-chip-selected-label-text-color: var(--kl-text);
@@ -452,4 +455,10 @@ input[type='time']::-webkit-calendar-picker-indicator {
 
 .mat-mdc-select-panel .mat-mdc-option {
   color: var(--kl-text);
+}
+@layer components {
+  /* One style for the h1 of every page inside the application shell. */
+  .kl-page-title {
+    @apply m-0 font-display text-[28px] leading-9 font-bold tracking-[-0.5px] lg:text-[34px] lg:leading-10;
+  }
 }

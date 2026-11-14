@@ -22,11 +22,11 @@ describe('Recursos académicos · estado vacío', () => {
     expect(root.querySelectorAll('article')).toHaveLength(0);
     expect(root.textContent).toContain('Aún no hay recursos disponibles');
     expect(root.textContent).not.toMatch(/Handbook|Camino mínimo|Equipo Alfa|Sin IA/);
-    expect(root.querySelector('main a[href="/inicio"]')).not.toBeNull();
+    expect(root.querySelector('a[href="/inicio"]')).not.toBeNull();
   });
 
   it('el coach vuelve a su propio inicio', async () => {
     const root = await abrir('COACH');
-    expect(root.querySelector('main a[href="/coach/inicio"]')).not.toBeNull();
+    expect(root.querySelector('a[href="/coach/inicio"]')).not.toBeNull();
   });
 });

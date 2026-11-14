@@ -4,7 +4,7 @@
   --auth-focus-color: var(--kl-accent-text);
   --auth-input-color: var(--kl-text-heading);
   --mat-card-outlined-container-color: transparent;
-  --mat-card-outlined-outline-color: #2b2760;
+  --mat-card-outlined-outline-color: var(--kl-edge);
   --mat-card-outlined-container-shape: 18px;
   --mat-toolbar-container-background-color: transparent;
   --mat-toolbar-container-text-color: var(--kl-text);

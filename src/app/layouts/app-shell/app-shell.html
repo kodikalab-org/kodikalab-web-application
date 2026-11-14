@@ -1,0 +1,15 @@
+<div class="relative isolate flex min-h-dvh flex-col overflow-clip bg-kl-bg font-body text-kl-text">
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
+  ></div>
+  <a
+    href="#contenido"
+    (click)="saltar($event, contenido)"
+    class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-kl-surface focus:p-4"
+    >Saltar al contenido</a
+  >
+  <app-header />
+  <main #contenido id="contenido" tabindex="-1" class="flex-1 outline-none"><router-outlet /></main>
+  <app-site-footer [audience]="audience()" />
+</div>

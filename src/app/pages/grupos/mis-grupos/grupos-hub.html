@@ -1,7 +1,7 @@
-<main class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1600px] px-4 pt-7 pb-16 lg:px-14">
+<div class="mx-auto w-full max-w-[1440px] px-4 pt-7 pb-16 lg:px-14">
   <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
     <div>
-      <h1 class="m-0 font-display text-[32px] font-bold tracking-[-0.8px]">Grupos</h1>
+      <h1 class="kl-page-title">Grupos</h1>
       <p class="mt-1 mb-0 text-[15px] text-kl-body">
         @if (coach()) {
           Gestiona tus grupos de entrenamiento y revisa los que ya existen en la comunidad.
@@ -45,4 +45,4 @@
       <app-explorar-grupos [coach]="coach()" />
     }
   </mat-tab-nav-panel>
-</main>
+</div>

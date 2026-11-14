@@ -30,9 +30,7 @@ describe('Application navigation', () => {
       for (const link of navigationFor(role === 'COACH').filter((item) => !NOT_OPENED_HERE.includes(item.path))) {
         const url = link.path + (link.fragment ? `#${link.fragment}` : '');
         await harness.navigateByUrl(url);
-        // The guard sends the old platforms page to the platforms section of the profile editor.
-        const expected = link.path === '/practicante/plataformas' ? '/perfil/editar#plataformas' : url;
-        expect(TestBed.inject(Router).url, link.label).toBe(expected);
+        expect(TestBed.inject(Router).url, link.label).toBe(url);
         expect(harness.routeNativeElement?.querySelector('h1'), link.label).not.toBeNull();
       }
     }, 15000);
@@ -64,6 +62,11 @@ describe('Application navigation', () => {
     expect(labels(true)).not.toContain('Ranking');
     expect(labels(false)).not.toContain('Solicitudes');
     expect(labels(false)).not.toContain('Resultados oficiales');
+  });
+
+  it('sends Plataformas competitivas to the platforms section of the profile editor', () => {
+    const link = navigationFor(false).find((item) => item.label === 'Plataformas competitivas');
+    expect([link?.path, link?.fragment]).toEqual(['/perfil/editar', 'plataformas']);
   });
 
   it('points the Grupos link to the shared /grupos page for both roles', () => {

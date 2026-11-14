@@ -10,7 +10,7 @@
   --mat-tab-active-indicator-color: var(--kl-accent-text);
   --mat-tab-active-focus-indicator-color: var(--kl-accent-text);
   --mat-tab-active-hover-indicator-color: var(--kl-accent-text);
-  --mat-tab-divider-color: #2b2760;
+  --mat-tab-divider-color: var(--kl-edge);
   --mat-tab-active-ripple-color: var(--kl-accent);
   --mat-tab-inactive-ripple-color: var(--kl-accent);
   --mat-tab-label-text-size: 15px;

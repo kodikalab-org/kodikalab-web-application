@@ -9,6 +9,7 @@ import { routes } from '../../app.routes';
 
 const REGISTER_URL = 'http://localhost:8080/api/auth/register';
 const LOGIN_URL = 'http://localhost:8080/api/auth/login';
+const HEALTH_URL = 'http://localhost:8080/api/health';
 const CONNECTION = 'No pudimos conectar con el servidor. Inténtalo de nuevo.';
 
 describe('API-connected access forms', () => {
@@ -20,7 +21,8 @@ describe('API-connected access forms', () => {
     http = TestBed.inject(HttpTestingController);
     navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
   });
-  afterEach(() => { http.verify(); TestBed.inject(Session).logout(); });
+  // The login screen wakes the backend with a silent GET /health: answer it so nothing stays open.
+  afterEach(() => { http.match(HEALTH_URL).forEach((request) => request.flush({})); http.verify(); TestBed.inject(Session).logout(); });
 
   function type(root: HTMLElement, id: string, value: string) {
     const input = root.querySelector<HTMLInputElement>(`#${id}`)!;
@@ -181,6 +183,17 @@ describe('API-connected access forms', () => {
     http.expectOne(LOGIN_URL).flush({ message: 'OK', email: 'test@example.com', role: 'PRACTICANTE', token: 'test-token', expiresIn: 3600 });
     await fixture.whenStable();
     expect(navigate).toHaveBeenCalledWith('/onboarding/practicante/datos-academicos');
+  });
+
+  it('wakes the backend with a silent GET /health when the login opens, and ignores its failure', async () => {
+    const fixture = TestBed.createComponent(Login);
+    await fixture.whenStable();
+    const request = http.expectOne(HEALTH_URL);
+    expect(request.request.method).toBe('GET');
+    request.flush({}, { status: 503, statusText: 'Service Unavailable' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(alertText(fixture.nativeElement)).toBe('');
   });
 
   it('routes a newly authenticated coach to coach onboarding, independently of the email', async () => {

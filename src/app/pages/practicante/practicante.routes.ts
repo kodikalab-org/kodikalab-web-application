@@ -1,11 +1,10 @@
 import { Routes } from '@angular/router';
 
-/** Rutas del practicante para sus problemas asignados (US08 y US09); sin prefijo `coach/` el rol es PRACTICANTE. */
+/** Practitioner routes for the assigned problems (US08 and US09), children of the AppShell route. */
 export const PRACTICANTE_ROUTES: Routes = [
   {
     path: 'practicante/problemas-asignados',
-    data: { coach: false },
-    loadComponent: () => import('../../layouts/app-layout/app-layout').then((m) => m.AppLayout),
+    data: { role: 'PRACTICANTE' },
     children: [
       {
         path: '',

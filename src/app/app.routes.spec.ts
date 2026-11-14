@@ -3,7 +3,9 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { routes } from './app.routes';
+import { onboardingRoutes, privateRoutes, routes } from './app.routes';
+import { AppShell } from './layouts/app-shell/app-shell';
+import { accessGuard } from './core/access-guard';
 import { Session } from './core/session';
 import { signIn } from './testing/sign-in';
 import { API_URL } from './core/api';
@@ -20,13 +22,12 @@ describe('Group routes', () => {
   });
 
   it('declares /grupos without a fixed role so both coaches and practitioners pass the guard', () => {
-    const route = routes.find((item) => item.path === 'grupos');
+    const route = privateRoutes.find((item) => item.path === 'grupos');
     expect(route?.data?.['role']).toBeNull();
-    expect(route?.canActivate?.length).toBe(1);
   });
 
   it('keeps the coach management pages restricted to coaches', () => {
-    expect(routes.find((item) => item.path === 'coach/grupos')?.data?.['role']).toBe('COACH');
+    expect(privateRoutes.find((item) => item.path === 'coach/grupos')?.data?.['role']).toBe('COACH');
   });
 
   it('sends a coach who opens a group detail to that group management page', async () => {
@@ -46,7 +47,7 @@ describe('Group routes', () => {
 });
 
 describe('rutas de asignación de problemas', () => {
-  const rol = (path: string) => routes.find((r) => r.path === path)?.data?.['role'];
+  const rol = (path: string) => privateRoutes.find((r) => r.path === path)?.data?.['role'];
 
   it('las pantallas del coach exigen el rol COACH', () => {
     expect(rol('coach/asignar-problema')).toBe('COACH');
@@ -58,7 +59,7 @@ describe('rutas de asignación de problemas', () => {
   });
 
   it('el flujo de asignación del coach comparte su estado entre los tres pasos y ya no tiene el paso de destinatarios', () => {
-    const flujo = routes.find((r) => r.path === 'coach/asignar-problema');
+    const flujo = privateRoutes.find((r) => r.path === 'coach/asignar-problema');
     expect(flujo?.providers).toContain(AssignmentStore);
     expect(flujo?.children?.map((paso) => paso.path)).toEqual(['', 'configurar', 'confirmar']);
   });
@@ -89,9 +90,67 @@ describe('rutas con parámetros de problemas asignados', () => {
     request.flush({}, { status: 404, statusText: 'Not Found' });
   });
 
-  it('el detalle sin id de asignación ya no existe', async () => {
+  it('el detalle sin id de asignación ya no existe y muestra la página 404', async () => {
     signIn('PRACTICANTE');
-    await RouterTestingHarness.create('/practicante/problemas-asignados/detalle');
-    expect(TestBed.inject(Router).url).toBe('/');
+    const harness = await RouterTestingHarness.create('/practicante/problemas-asignados/detalle');
+    expect(TestBed.inject(Router).url).toBe('/practicante/problemas-asignados/detalle');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('No encontramos esta página');
+  });
+});
+
+describe('marco único de la aplicación', () => {
+  const shell = routes.find((route) => route.children === privateRoutes);
+
+  it('todas las rutas privadas son hijas de una ruta sin path que usa AppShell y el guard', () => {
+    expect(shell?.path).toBe('');
+    expect(shell?.component).toBe(AppShell);
+    expect(shell?.canActivateChild).toContain(accessGuard);
+  });
+
+  it('cada ruta privada declara su rol en data, sin deducirlo del prefijo', () => {
+    for (const route of privateRoutes) {
+      expect(route.data && 'role' in route.data, route.path).toBe(true);
+      const expected = route.path === 'recursos' || route.path === 'grupos' ? null : route.path!.startsWith('coach/') ? 'COACH' : 'PRACTICANTE';
+      expect(route.data?.['role'], route.path).toBe(expected);
+    }
+  });
+
+  it('las URLs privadas se conservan', () => {
+    expect(privateRoutes.map((route) => route.path).sort()).toEqual([
+      'coach/asignar-problema', 'coach/competencias', 'coach/concursos', 'coach/grupos', 'coach/inicio',
+      'coach/perfil', 'coach/perfil/editar', 'coach/problemas-asignados', 'coach/ranking', 'coach/rendimiento',
+      'concursos', 'grupos', 'inicio', 'perfil', 'perfil/editar', 'practicante/problemas-asignados', 'progreso',
+      'progreso/equipos', 'ranking', 'recursos',
+    ]);
+  });
+
+  it('las pantallas de acceso y los asistentes de onboarding quedan fuera del marco', () => {
+    const fuera = routes.filter((route) => route !== shell).map((route) => route.path);
+    for (const path of ['', 'login', 'registro', 'recuperar-contrasena', 'sin-conexion']) expect(fuera).toContain(path);
+    expect(onboardingRoutes).toHaveLength(7);
+    for (const route of onboardingRoutes) {
+      expect(route.path).toMatch(/^onboarding\/(practicante|coach)\//);
+      expect(route.canActivate).toContain(accessGuard);
+      expect(route.data?.['role']).toBe(route.path!.startsWith('onboarding/coach/') ? 'COACH' : 'PRACTICANTE');
+    }
+  });
+
+  it('una dirección desconocida muestra la página 404 dentro del marco, con enlace al inicio', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()] });
+    signIn('COACH');
+    const harness = await RouterTestingHarness.create('/no-existe');
+    expect(TestBed.inject(Router).url).toBe('/no-existe');
+    const root = harness.routeNativeElement!;
+    expect(root.querySelector('app-header header')).not.toBeNull();
+    expect(root.querySelector('main h1')?.textContent).toContain('No encontramos esta página');
+    expect(root.querySelector('main a[href="/coach/inicio"]')?.textContent).toContain('Ir al inicio');
+    expect(root.querySelector('app-site-footer')).not.toBeNull();
+    TestBed.inject(Session).logout();
+  });
+
+  it('la 404 enlaza a la raíz cuando no hay sesión', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()] });
+    const harness = await RouterTestingHarness.create('/no-existe');
+    expect(harness.routeNativeElement?.querySelector('main a[href="/"]')).not.toBeNull();
   });
 });

@@ -137,4 +137,72 @@ describe('Real API session', () => {
     expect(session.token()).toBeNull();
     expect(session.account()).toBeNull();
   });
+
+  describe('refresh', () => {
+    const URL = 'http://localhost:8080/api/auth/refresh';
+    const stored = (name: 'localStorage' | 'sessionStorage') => JSON.parse(window[name].getItem('kodikalab.session')!);
+
+    it('replaces token and expiry in the storage that holds the session (sessionStorage)', async () => {
+      await login(false);
+      const result = firstValueFrom(session.refresh());
+      const request = http.expectOne(URL);
+      expect(request.request.method).toBe('POST');
+      expect(request.request.headers.get('Authorization')).toBe('Bearer test-token');
+      request.flush({ message: 'OK', email: 'test@example.com', role: 'COACH', token: 'nuevo-token', expiresIn: 7200 });
+      await result;
+      expect(session.token()).toBe('nuevo-token');
+      expect(stored('sessionStorage').token).toBe('nuevo-token');
+      expect(stored('sessionStorage').expiresAt).toBeGreaterThan(Date.now() + 7000 * 1000);
+      expect(localStorage.getItem('kodikalab.session')).toBeNull();
+    });
+
+    it('replaces token and expiry in localStorage for a remembered session', async () => {
+      await login(true);
+      const result = firstValueFrom(session.refresh());
+      http.expectOne(URL).flush({ message: 'OK', email: 'test@example.com', role: 'COACH', token: 'nuevo-token', expiresIn: 7200 });
+      await result;
+      expect(stored('localStorage').token).toBe('nuevo-token');
+      expect(sessionStorage.getItem('kodikalab.session')).toBeNull();
+    });
+
+    it('does not renew while more than 20 % of the lifetime is left', async () => {
+      await login();
+      session.refreshIfDue();
+      http.expectNone(URL);
+    });
+
+    it('renews once less than 20 % of the lifetime is left, and only once at a time', async () => {
+      await login();
+      session.account.update((account) => account && { ...account, expiresAt: Date.now() + 3600_000 * 0.15 });
+      session.refreshIfDue();
+      session.refreshIfDue();
+      const request = http.expectOne(URL);
+      request.flush({ message: 'OK', email: 'test@example.com', role: 'COACH', token: 'nuevo-token', expiresIn: 3600 });
+      expect(session.token()).toBe('nuevo-token');
+      session.refreshIfDue();
+      http.expectNone(URL);
+    });
+
+    it('keeps the session when the renewal fails, even with a 401', async () => {
+      await login(true);
+      const navigation = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      session.account.update((account) => account && { ...account, expiresAt: Date.now() + 3600_000 * 0.1 });
+      session.refreshIfDue();
+      http.expectOne(URL).flush({}, { status: 401, statusText: 'Unauthorized' });
+      expect(session.token()).toBe('test-token');
+      expect(localStorage.getItem('kodikalab.session')).not.toBeNull();
+      expect(navigation).not.toHaveBeenCalled();
+      // A later navigation can try again.
+      session.refreshIfDue();
+      http.expectOne(URL).flush({}, { status: 503, statusText: 'Service Unavailable' });
+      expect(session.token()).toBe('test-token');
+    });
+
+    it('never renews a session that carries no lifetime (saved by an older version)', () => {
+      session.restore();
+      session.account.set({ token: 't', email: 'a@b.c', role: 'COACH', expiresAt: Date.now() + 1000 });
+      session.refreshIfDue();
+      http.expectNone(URL);
+    });
+  });
 });

@@ -26,7 +26,10 @@ describe('Password reset screens', () => {
     }),
   );
   afterEach(() => {
-    TestBed.inject(HttpTestingController).verify();
+    const http = TestBed.inject(HttpTestingController);
+    // Opening the login also sends the silent GET /health that wakes the backend.
+    http.match(`${API}/health`).forEach((request) => request.flush({}));
+    http.verify();
     TestBed.inject(PasswordResetFlow).reset();
   });
 

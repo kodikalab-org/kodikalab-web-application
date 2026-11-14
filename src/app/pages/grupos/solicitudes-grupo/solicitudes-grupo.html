@@ -1,7 +1,7 @@
-<main class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1200px] px-4 pt-7 pb-16 lg:px-14">
+<div class="mx-auto w-full max-w-[1200px] px-4 pt-7 pb-16 lg:px-14">
   <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
     <div>
-      <h1 class="m-0 font-display text-[32px] font-bold tracking-[-0.8px]">Solicitudes de ingreso</h1>
+      <h1 class="kl-page-title">Solicitudes de ingreso</h1>
       <p class="mt-1 mb-0 text-[15px] text-kl-body">
         Acepta, rechaza o pide una aclaración antes de decidir. Mientras la aclaración no se
         responda, la solicitud sigue pendiente.
@@ -39,7 +39,7 @@
 
   @if (groups().length === 0) {
     <mat-card
-      class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+      class="items-center gap-4 rounded-2xl border border-solid border-kl-edge bg-kl-surface px-6 py-14 text-center"
       ><h2 class="m-0 text-xl">Todavía no tienes grupos</h2>
       <p class="m-0 text-sm text-kl-muted">
         Crea un grupo para empezar a recibir solicitudes de ingreso.
@@ -82,7 +82,7 @@
         @for (request of requests(); track request.membershipId) {
           <mat-card
             appearance="outlined"
-            class="grid items-center gap-4 rounded-2xl border-[#2b2760] bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 lg:grid-cols-[minmax(0,1fr)_200px_180px]"
+            class="grid items-center gap-4 rounded-2xl border-kl-edge bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 lg:grid-cols-[minmax(0,1fr)_200px_180px]"
           >
             <div class="flex items-start gap-4">
               <span
@@ -167,7 +167,7 @@
       </div>
     }
   }
-</main>
+</div>
 
 @if (selected(); as request) {
   <div class="fixed inset-0 z-50 overflow-y-auto bg-black/75 px-4 py-[10vh]">

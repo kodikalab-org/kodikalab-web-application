@@ -3,10 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
-import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
-import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { firstValueFrom } from 'rxjs';
 import { ProfileApi } from '../../../core/profile-api';
 import { Session } from '../../../core/session';
@@ -18,14 +15,11 @@ const MAX_PRESENTACION = 500;
 @Component({
   selector: 'app-coach-perfil-editar',
   imports: [
-    HeaderNavigation,
-    UserMenu,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatToolbarModule,
   ],
   templateUrl: './perfil-editar.html',
   styleUrl: './perfil-editar.css',
@@ -42,7 +36,7 @@ export class CoachPerfilEditar {
       organizacion: p.organizacionClub ?? '', anios: p.aniosExperiencia, presentacion: p.presentacion ?? '' });
   }
 
-  protected readonly perfil = { nombre: this.session.account()?.email ?? '', iniciales: 'KL' };
+
   protected readonly maxPresentacion = MAX_PRESENTACION;
 
   protected readonly form = new FormGroup({

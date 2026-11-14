@@ -16,8 +16,6 @@ import {
 } from '../../../../core/competitions-api';
 import { positiveId, TeamApi, TeamCompetition } from '../../../../core/team-api';
 import { CoachGroup, TeamsApi } from '../../../../core/teams-api';
-import { AppHeader } from '../../../../shared/app-header/app-header';
-import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 import { ConfirmarEstadoDialog } from '../confirmar-estado-dialog/confirmar-estado-dialog';
 
 const STATUS_LABEL: Record<CompetitionStatus, string> = {
@@ -49,8 +47,6 @@ export function formatDuration(startsAt: string, endsAt: string): string {
 @Component({
   selector: 'app-concursos-lista',
   imports: [
-    AppHeader,
-    SiteFooter,
     RouterLink,
     ReactiveFormsModule,
     MatButtonModule,

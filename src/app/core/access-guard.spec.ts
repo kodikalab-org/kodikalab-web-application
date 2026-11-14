@@ -30,6 +30,13 @@ describe('Access guard', () => {
     session.account.set({ token: 'test-token', email: 'test@example.com', role: 'PRACTICANTE', expiresAt: Date.now() + 60000 });
   }
 
+  it('asks the session to renew itself when the user navigates', async () => {
+    authenticated();
+    profiles.profile.set({ role: 'PRACTICANTE', email: 'test@example.com' } as never);
+    const refresh = vi.spyOn(session, 'refreshIfDue').mockImplementation(() => undefined);
+    expect(await guard('/inicio')).toBe(true);
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
   it('requires a real session', async () => {
     expect(await guard('/perfil')).toBe('/login?volver=%2Fperfil');
   });

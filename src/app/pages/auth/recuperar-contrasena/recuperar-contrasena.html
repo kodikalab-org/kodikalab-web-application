@@ -49,8 +49,8 @@
       <div class="mt-5 flex w-full flex-col items-center gap-2" role="group" aria-label="Progreso de recuperación">
         <div class="flex w-full max-w-[220px] gap-2" aria-hidden="true">
           <span class="h-1 flex-1 rounded-full bg-kl-accent"></span>
-          <span class="h-1 flex-1 rounded-full" [class]="paso === 'correo' ? 'bg-[#34304a]' : 'bg-kl-accent'"></span>
-          <span class="h-1 flex-1 rounded-full" [class]="paso === 'nueva' ? 'bg-kl-accent' : 'bg-[#34304a]'"></span>
+          <span class="h-1 flex-1 rounded-full" [class]="paso === 'correo' ? 'bg-kl-outline' : 'bg-kl-accent'"></span>
+          <span class="h-1 flex-1 rounded-full" [class]="paso === 'nueva' ? 'bg-kl-accent' : 'bg-kl-outline'"></span>
         </div>
         <p class="m-0 text-xs text-kl-muted">
           Paso {{ paso === 'correo' ? 1 : paso === 'codigo' ? 2 : 3 }} de 3
@@ -69,7 +69,7 @@
           </p>
 
           <section
-            class="mt-5 w-full rounded-xl border border-solid border-[#34304a] bg-white/3 p-4 text-sm text-kl-body"
+            class="mt-5 w-full rounded-xl border border-solid border-kl-outline bg-white/3 p-4 text-sm text-kl-body"
             aria-label="Cómo recuperar tu contraseña"
           >
             <p class="m-0 mb-3 font-medium text-kl-text">Así recuperas tu contraseña</p>

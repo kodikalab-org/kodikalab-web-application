@@ -36,17 +36,10 @@ describe('Perfil', () => {
 
   const texto = (root: HTMLElement) => root.textContent?.replace(/\s+/g, ' ') ?? '';
 
-  it('pins the outer toolbar with important utilities and no scroll-container ancestor', async () => {
+  it('has no header, toolbar or footer of its own: the application shell provides them', async () => {
     const { root } = await setup();
-    const toolbar = root.querySelector('mat-toolbar')!;
-    for (const utility of ['sticky', 'top-0', 'z-40', 'backdrop-blur-xl']) {
-      expect(toolbar.classList.contains(utility)).toBe(true);
-    }
-    expect(toolbar.classList.contains('relative')).toBe(false);
-    expect(toolbar.classList.contains('z-10')).toBe(false);
-    expect(toolbar.parentElement!.classList.contains('overflow-clip')).toBe(true);
-    expect(toolbar.closest('.overflow-hidden')).toBeNull();
-    expect(root.querySelector('app-header-navigation')?.classList.contains('sticky')).toBe(false);
+    expect(root.querySelector('mat-toolbar, app-header, app-header-navigation, app-user-menu, app-site-footer')).toBeNull();
+    expect(root.querySelector('input[aria-label*="Buscar"], button[aria-label*="Buscar problemas"]')).toBeNull();
   });
 
   async function setupLive() {
@@ -210,22 +203,15 @@ describe('Perfil', () => {
     const aviso = (guardado.nativeElement as HTMLElement).querySelector('[role="status"].profile-notice');
     expect(aviso?.textContent).toContain('Perfil actualizado correctamente');
     expect(aviso?.textContent).toContain('Perfil guardado.');
-    expect(aviso?.closest('main')).not.toBeNull();
+    expect(aviso?.closest('.max-w-\\[1200px\\]')).not.toBeNull();
     expect(aviso?.classList.contains('absolute')).toBe(false);
-  });
-
-  it('uses a full-bleed background', async () => {
-    const { root } = await setup();
-    const fondo = root.querySelector('img[aria-hidden="true"]')!;
-    expect(fondo.classList.contains('profile-background')).toBe(true);
-    expect(fondo.classList.contains('w-[1440px]')).toBe(false);
   });
 
   it('shows an honest empty state for the requests tab with a link to the groups', async () => {
     const { root } = await setup({ tab: 'solicitudes' });
     expect(root.querySelector('[role="tab"][aria-selected="true"]')?.textContent).toContain('Solicitudes');
     expect(texto(root)).toContain('Tus solicitudes aún no están disponibles aquí');
-    expect(root.querySelector('main a[href="/grupos?tab=mis-grupos"]')).not.toBeNull();
+    expect(root.querySelector('a[href="/grupos?tab=mis-grupos"]')).not.toBeNull();
     expect(root.querySelectorAll('li.border-b').length).toBe(0);
     expect(root.querySelector('input[placeholder="Buscar grupo…"]')).toBeNull();
     expect(texto(root)).not.toMatch(/Algorithms Club|Latin Coders/);

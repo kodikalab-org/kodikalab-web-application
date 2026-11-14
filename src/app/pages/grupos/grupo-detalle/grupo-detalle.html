@@ -1,4 +1,4 @@
-<main class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1200px] px-4 pt-7 pb-16 lg:px-14">
+<div class="mx-auto w-full max-w-[1200px] px-4 pt-7 pb-16 lg:px-14">
   <a mat-stroked-button routerLink="/grupos" class="mb-6">
     <img src="/images/login/arrow-left-18.svg" width="16" height="16" alt="" /> Volver a grupos
   </a>
@@ -11,11 +11,11 @@
     <p role="status" class="text-sm text-kl-muted">Cargando grupo…</p>
   } @else if (grupo(); as grupo) {
     <mat-card
-      class="mb-6 gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6"
+      class="mb-6 gap-4 rounded-2xl border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6"
     >
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 class="m-0 font-display text-[30px] font-bold tracking-[-0.6px]">{{ grupo.name }}</h1>
+          <h1 class="kl-page-title">{{ grupo.name }}</h1>
           <p class="mt-2 mb-0 max-w-[720px] text-sm text-kl-body">
             {{ grupo.description || 'Sin descripción.' }}
           </p>
@@ -61,7 +61,7 @@
           @for (item of problemas(); track item.competitionProblemId) {
             <mat-card
               appearance="outlined"
-              class="flex flex-wrap items-center gap-4 rounded-2xl border-[#2b2760] bg-white/3 p-4"
+              class="flex flex-wrap items-center gap-4 rounded-2xl border-kl-edge bg-white/3 p-4"
             >
               <span
                 class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-kl-accent/25 font-mono text-sm"
@@ -93,4 +93,4 @@
       }
     </section>
   }
-</main>
+</div>

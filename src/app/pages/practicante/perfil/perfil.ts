@@ -1,6 +1,4 @@
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
-import { UserMenu } from '../../../shared/user-menu/user-menu';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
@@ -16,7 +14,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import { IDIOMAS_AJUSTES, ICONO_CODEFORCES } from '../../../models/perfil-catalogos';
 import { EstadoPerfil, InfoPersonalPracticante, PestanaPerfil, PlataformaPerfil } from '../../../models/perfil-practicante';
@@ -33,8 +30,6 @@ function resolverVista(tab: string | null, estado: string | null) {
   selector: 'app-perfil',
   imports: [
     ProfileStatistics,
-    HeaderNavigation,
-    UserMenu,
     AsyncPipe,
     NgTemplateOutlet,
     ReactiveFormsModule,
@@ -45,7 +40,6 @@ function resolverVista(tab: string | null, estado: string | null) {
     MatInputModule,
     MatSelectModule,
     MatSlideToggleModule,
-    MatToolbarModule,
   ],
   templateUrl: './perfil.html',
   styleUrl: './perfil.css',

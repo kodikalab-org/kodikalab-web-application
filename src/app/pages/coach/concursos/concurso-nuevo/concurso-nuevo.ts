@@ -17,7 +17,6 @@ import {
 import { ProblemsApi, problemsError } from '../../../../core/problems-api';
 import { CoachGroup, TeamsApi } from '../../../../core/teams-api';
 import { positiveId } from '../../../../core/team-api';
-import { AppHeader } from '../../../../shared/app-header/app-header';
 import {
   ICPC_SCORE,
   IOI_SCORE,
@@ -25,7 +24,6 @@ import {
   toAssignItems,
 } from '../../../../shared/problem-picker/picked-problems';
 import { ProblemPicker } from '../../../../shared/problem-picker/problem-picker';
-import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 import {
   ACCESS_KEY_MAX_BYTES,
   accessKeyValidator,
@@ -72,8 +70,6 @@ const MESSAGES: Record<string, Record<string, string>> = {
 @Component({
   selector: 'app-concurso-nuevo',
   imports: [
-    AppHeader,
-    SiteFooter,
     RouterLink,
     ReactiveFormsModule,
     MatButtonModule,

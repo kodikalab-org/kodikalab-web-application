@@ -28,10 +28,10 @@
   --mat-slide-toggle-handle-height: 16px;
   --mat-slide-toggle-pressed-handle-size: 20px;
   --mat-slide-toggle-state-layer-size: 26px;
-  --mat-slide-toggle-unselected-track-color: #34304a;
-  --mat-slide-toggle-unselected-hover-track-color: #34304a;
-  --mat-slide-toggle-unselected-focus-track-color: #34304a;
-  --mat-slide-toggle-unselected-pressed-track-color: #34304a;
+  --mat-slide-toggle-unselected-track-color: var(--kl-outline);
+  --mat-slide-toggle-unselected-hover-track-color: var(--kl-outline);
+  --mat-slide-toggle-unselected-focus-track-color: var(--kl-outline);
+  --mat-slide-toggle-unselected-pressed-track-color: var(--kl-outline);
   --mat-slide-toggle-track-outline-color: transparent;
   --mat-slide-toggle-unselected-handle-color: #cfcbe0;
   --mat-slide-toggle-unselected-hover-handle-color: #cfcbe0;

@@ -12,7 +12,7 @@
   --mat-button-filled-label-text-weight: 500;
   --mat-button-outlined-container-height: 50px;
   --mat-button-outlined-container-shape: 12px;
-  --mat-button-outlined-outline-color: #34304a;
+  --mat-button-outlined-outline-color: var(--kl-outline);
   --mat-button-outlined-label-text-color: #e7e3f5;
   --mat-button-outlined-label-text-size: 15px;
   --mat-button-outlined-label-text-weight: 400;

@@ -34,7 +34,7 @@ export function navigationFor(coach: boolean): NavLink[] {
       { label: 'Progreso por tema', path: '/progreso' },
       { label: 'Progreso por equipo', path: '/progreso/equipos' },
       { label: 'Ranking', path: '/ranking' },
-      { label: 'Plataformas competitivas', path: '/practicante/plataformas' },
+      { label: 'Plataformas competitivas', path: '/perfil/editar', fragment: 'plataformas' },
     ]),
     { label: 'Mi perfil', path: coach ? '/coach/perfil' : '/perfil' },
     { label: 'Editar perfil', path: coach ? '/coach/perfil/editar' : '/perfil/editar' },

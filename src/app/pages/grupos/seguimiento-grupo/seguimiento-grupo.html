@@ -1,9 +1,9 @@
 @let guardado = (guardado$ | async) === true;
-<main class="mx-auto min-h-[calc(100dvh-148px)] w-full max-w-[1440px] px-4 py-8 lg:px-[120px]">
+<div class="mx-auto w-full max-w-[1440px] px-4 py-8 lg:px-[120px]">
   <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
     <a routerLink="/coach/inicio">Inicio</a> / Mi equipo
   </p>
-  <h1 class="m-0 font-display text-2xl font-bold tracking-[-1px] sm:text-[40px] sm:leading-[48px]">
+  <h1 class="kl-page-title">
     Revisar postulación
   </h1>
   <p class="mt-2 mb-6 text-base leading-6 text-kl-muted">
@@ -24,7 +24,7 @@
       <strong class="text-kl-danger">{{ error.titulo }}</strong>
       <p class="mb-0">{{ error.detalle }}</p>
     </section>
-    <mat-card class="gap-3 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface p-6"
+    <mat-card class="gap-3 rounded-2xl border border-solid border-kl-edge bg-kl-surface p-6"
       ><article class="rounded-xl bg-[#1e1536] p-4">
         <h2 class="mt-0 text-sm font-bold">Camila Rojas</h2>
         <p class="text-sm text-kl-muted">Información de la postulación sin decisión aplicada.</p>
@@ -103,7 +103,7 @@
         </form>
       </mat-card>
       <aside
-        class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
+        class="rounded-2xl border border-solid border-kl-edge bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
       >
         <h2 class="mt-0 mb-4 text-xl font-bold">Estado actual</h2>
         <p class="m-0 text-sm leading-5 text-kl-muted">
@@ -126,4 +126,4 @@
     Maqueta con datos de ejemplo. Guardar y notificar están pendientes de integración; no se envía
     ninguna notificación.
   </p>
-</main>
+</div>

@@ -85,8 +85,7 @@ describe('PerfilEditar', () => {
     expect(root.querySelector<HTMLInputElement>('#handle-vjudge')!.disabled).toBe(true);
     expect(texto(root).match(/En mantenimiento/g)?.length).toBe(2);
     expect(root.querySelector('section#plataformas')).not.toBeNull();
-    expect(root.querySelector('mat-toolbar.sticky.top-0.z-40.backdrop-blur-xl')).not.toBeNull();
-    expect(root.querySelector('mat-toolbar')!.closest('.overflow-hidden')).toBeNull();
+    expect(root.querySelector('mat-toolbar, app-header, app-site-footer')).toBeNull();
     expect(guardar().disabled).toBe(false);
     expect(root.querySelector('[role="alert"]')).toBeNull();
   });

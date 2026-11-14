@@ -13,7 +13,6 @@ import {
   TopicProgressErrorKind,
   TopicStatus,
 } from '../../core/topic-progress-api';
-import { AppHeader } from '../../shared/app-header/app-header';
 
 interface ErrorView {
   chip: string;
@@ -40,7 +39,6 @@ const STATUS_LABELS: Record<TopicStatus, string> = {
 @Component({
   selector: 'app-progreso-tema',
   imports: [
-    AppHeader,
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,

@@ -1,32 +1,22 @@
+import { ProfileApi } from '../../core/profile-api';
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Session } from '../../core/session';
 import { CoachGroup, PractitionerGroup, TeamsApi } from '../../core/teams-api';
-import { navigationFor } from '../../core/navigation';
-import { HeaderNavigation } from '../../shared/header-navigation/header-navigation';
-import { UserMenu } from '../../shared/user-menu/user-menu';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
-import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-inicio-dashboard',
   imports: [
-    SiteFooter,
-    HeaderNavigation,
-    UserMenu,
     NgTemplateOutlet,
     RouterLink,
     MatButtonModule,
     MatCardModule,
     MatMenuModule,
-    MatToolbarModule,
-    MatTooltipModule,
   ],
   templateUrl: './inicio-dashboard.html',
   styleUrl: './inicio-dashboard.css',
@@ -34,22 +24,16 @@ import { SiteFooter } from '../../shared/site-footer/site-footer';
 export class InicioDashboard {
   protected readonly session = inject(Session);
   private readonly api = inject(TeamsApi);
-  protected get nombre(): string { return this.session.account()?.email ?? 'Usuario'; }
-  protected get iniciales(): string { return 'KL'; }
+  private readonly profiles = inject(ProfileApi);
+  /** First name of the account; the email only when the profile has no name. */
+  protected get nombre(): string {
+    const full = this.profiles.profile()?.fullName?.trim();
+    return full ? full.split(/\s+/)[0] : this.session.account()?.email ?? 'Usuario';
+  }
   protected readonly coach: boolean;
-  protected readonly ruta: string;
   // Material renders menus in the CDK overlay, outside this component's host.
   protected readonly clasesMenu =
     'bg-kl-surface text-kl-text rounded-2xl border border-solid border-kl-border-strong shadow-[0_16px_48px_#00000099] max-w-[calc(100vw-24px)] [--mat-menu-container-color:var(--kl-surface)] [--mat-menu-item-label-text-size:14px] [--mat-menu-item-label-text-weight:400] [--mat-menu-item-hover-state-layer-color:var(--kl-accent)] [--mat-menu-item-focus-state-layer-color:var(--kl-accent)] [&_.mat-mdc-menu-item]:min-h-11 [&_.mat-mdc-menu-item]:text-kl-text [&_.mat-mdc-menu-item:hover]:bg-kl-accent/15 [&_.mat-mdc-menu-item:focus-visible]:bg-kl-accent/20';
-  protected get enlaces() {
-    return [
-      ...navigationFor(this.coach).slice(1, 5).map((link, index) => ({
-        ...link, id: ['problemas', 'competencias', 'grupos', 'recursos'][index], nombre: link.label,
-      })),
-      { id: 'progreso', nombre: 'Progreso', path: this.coach ? '/coach/rendimiento' : '/progreso', fragment: undefined },
-    ];
-  }
-
   protected destino(nombre: string): string | null {
     if (nombre.includes('grupo') || nombre.includes('equipo')) return nombre === 'Crear grupo' ? '/coach/grupos/crear' : this.coach ? '/coach/grupos/solicitudes' : '/grupos';
     if (nombre.includes('Solicitudes')) return '/coach/grupos/solicitudes';
@@ -58,9 +42,6 @@ export class InicioDashboard {
     return null;
   }
 
-  protected irASeccion(seccion: HTMLElement): void {
-    seccion.scrollIntoView({ block: 'start' });
-  }
   /** Grupos reales del coach; `null` mientras la petición está en curso. */
   protected readonly misGrupos = signal<CoachGroup[] | null>(null);
   /** Membresías reales del practicante. */
@@ -116,6 +97,7 @@ export class InicioDashboard {
         {
           valor: String(pendientes),
           etiqueta: 'Solicitudes pendientes',
+          enlace: '/coach/grupos/solicitudes',
           detalle: pendientes ? 'Requieren tu respuesta' : 'Todo al día',
           vacio: 'Todo al día',
           icono: '2-imgIcon9',
@@ -177,6 +159,14 @@ export class InicioDashboard {
     ];
   });
 
+  /** Groups of the coach with requests waiting, from the `pendingRequests` of `/teams/me`. */
+  protected readonly gruposConSolicitudes = computed(() =>
+    (this.misGrupos() ?? []).filter((grupo) => grupo.pendingRequests > 0),
+  );
+  protected readonly totalSolicitudes = computed(() =>
+    (this.misGrupos() ?? []).reduce((total, grupo) => total + grupo.pendingRequests, 0),
+  );
+
   protected readonly grupos = computed(() => {
     if (this.coach) {
       const reales = this.misGrupos();
@@ -218,9 +208,9 @@ export class InicioDashboard {
 
   protected readonly pasos;
 
-  constructor(route: ActivatedRoute) {
-    this.coach = route.snapshot.data['coach'] === true;
-    this.ruta = this.coach ? '/coach/inicio' : '/inicio';
+  constructor() {
+    // The role comes from the session: /inicio and /coach/inicio are guarded for their own role.
+    this.coach = this.session.account()?.role === 'COACH';
     if (this.coach) {
       this.api.loadMine().subscribe({
         next: (mine) => this.misGrupos.set(mine.filter((g): g is CoachGroup => 'activeMembers' in g)),

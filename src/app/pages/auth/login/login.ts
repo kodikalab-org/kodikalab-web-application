@@ -1,10 +1,11 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectorRef, Component, PLATFORM_ID, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Session, homeFor, onboardingFor } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
-import { Role, authApiError, isConnectionError } from '../../../core/api';
-import { HttpErrorResponse } from '@angular/common/http';
+import { API_URL, Role, authApiError, isConnectionError } from '../../../core/api';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { safeReturnUrl } from '../../../core/return-url';
 import { emailRule, normalizeEmail, passwordBytesRule } from '../auth-rules';
@@ -48,6 +49,10 @@ export class Login {
   private readonly volver = safeReturnUrl(this.route.snapshot.queryParamMap.get('volver'));
 
   constructor() {
+    // The free hosting puts the backend to sleep: a silent request wakes it while the person types.
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      inject(HttpClient).get(`${inject(API_URL)}/health`).subscribe({ error: () => undefined });
+    }
     // An open session does not need the form again.
     const role = this.session.token() ? this.session.account()?.role : null;
     if (role && !this.route.snapshot.queryParamMap.has('motivo')) {

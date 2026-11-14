@@ -1,4 +1,4 @@
-<main class="flex min-h-[calc(100dvh-148px)] items-center justify-center px-4 py-14">
+<div class="flex items-center justify-center px-4 py-14">
   <mat-card
     appearance="outlined"
     class="w-full max-w-[600px] rounded-[26px] border-kl-accent bg-linear-to-b from-[#1a1446]/90 to-[#09071a]/90 p-6 text-center shadow-[0_0_28px_#643cff44] sm:p-10"
@@ -9,7 +9,7 @@
     /></span>
 
     @if (grupo(); as creado) {
-      <h1 class="mt-5 mb-3 font-display text-[28px] font-bold">
+      <h1 class="kl-page-title mt-5 mb-3">
         {{ esBorrador() ? 'Borrador guardado' : '¡Grupo creado!' }}
       </h1>
       <p class="mt-0 text-sm text-kl-body">
@@ -56,7 +56,7 @@
         </p>
       </div>
     } @else {
-      <h1 class="mt-5 mb-3 font-display text-[28px] font-bold">No hay un grupo recién creado</h1>
+      <h1 class="kl-page-title mt-5 mb-3">No hay un grupo recién creado</h1>
       <p class="mt-0 text-sm text-kl-body">
         Abre el formulario para crear un grupo nuevo.
       </p>
@@ -82,4 +82,4 @@
       /></a>
     </div>
   </mat-card>
-</main>
+</div>

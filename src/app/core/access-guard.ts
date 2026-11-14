@@ -26,15 +26,15 @@ export const accessGuard: CanActivateFn = (route, state) => {
   }
   const actualRole = session.account()!.role;
   if (actualRole !== role) return router.parseUrl(homeFor(actualRole));
-  const plataformas = () => route.routeConfig?.path === 'practicante/plataformas'
-    ? router.createUrlTree(['/perfil/editar'], { fragment: 'plataformas' }) : true;
+  // Someone who is browsing keeps the session alive: it is renewed in the background near its expiry.
+  session.refreshIfDue();
   // The profile is loaded once per session: later navigations must not depend on the network.
   const loaded = profiles.profile();
-  if (loaded && loaded.role === actualRole && loaded.email === session.account()!.email) return plataformas();
+  if (loaded && loaded.role === actualRole && loaded.email === session.account()!.email) return true;
   return profiles.load().pipe(
     // A sleeping or restarting backend is retried before giving up; 401 and 404 are real answers.
     retry({ count: 2, delay: (error) => isConnectionError(error) ? timer(RETRY_DELAY) : throwError(() => error) }),
-    map(plataformas),
+    map(() => true),
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         profiles.profile.set(null);

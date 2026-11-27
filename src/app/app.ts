@@ -2,9 +2,10 @@ import { Component, afterNextRender, inject, signal } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { Session } from './core/session';
+import { AgentPanel } from './shared/agent-panel/agent-panel';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [AgentPanel, RouterOutlet],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',

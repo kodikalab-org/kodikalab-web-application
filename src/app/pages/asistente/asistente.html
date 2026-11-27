@@ -1,0 +1,17 @@
+@if (session.demo()) {
+  <p role="note" class="m-0 bg-kl-accent p-3 text-center text-white">
+    Demostración: el asistente necesita una sesión real.
+  </p>
+}
+<div class="flex min-h-dvh flex-col bg-kl-bg font-body text-kl-text">
+  <app-header [coach]="coach" />
+  <main class="mx-auto flex h-[calc(100dvh-96px)] min-h-[520px] w-full max-w-4xl flex-col gap-4 px-4 py-4">
+    <div>
+      <h1 class="m-0 font-display text-2xl leading-tight font-bold">Asistente</h1>
+      <p class="mt-1 mb-0 text-sm text-kl-muted">
+        {{ coach ? 'Consulta el rendimiento de tus equipos y recibe problemas para practicar.' : 'Resuelve dudas sobre tu práctica en KodikaLab.' }}
+      </p>
+    </div>
+    <app-agent-chat />
+  </main>
+</div>

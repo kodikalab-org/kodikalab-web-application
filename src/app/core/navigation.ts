@@ -25,6 +25,7 @@ export function navigationFor(coach: boolean): NavLink[] {
     { label: 'Concursos', path: coach ? '/coach/concursos' : '/concursos' },
     { label: 'Grupos', path: '/grupos' },
     { label: 'Recursos', path: '/recursos' },
+    { label: 'Asistente', path: coach ? '/coach/asistente' : '/asistente' },
     ...(coach ? [
       { label: 'Solicitudes', path: '/coach/grupos/solicitudes' },
       { label: 'Seguimiento de grupos', path: '/coach/grupos/seguimiento' },

@@ -104,4 +104,17 @@ describe('Agent chat', () => {
     expect(log).not.toContain('\u00b7');
     expect(log).toContain('Lunes');
   });
+
+  it('says that the team list failed and lets the coach retry it', async () => {
+    const fixture = await render('COACH');
+    const root = fixture.nativeElement as HTMLElement;
+    http.expectOne(`${url}/teams/me`).flush('', { status: 503, statusText: 'Unavailable' });
+    await fixture.whenStable();
+    expect(root.textContent).toContain('No pudimos cargar tus equipos');
+    [...root.querySelectorAll('button')].find((b) => b.textContent!.includes('Reintentar'))!.click();
+    http.expectOne(`${url}/teams/me`).flush([{ groupId: 10, name: 'Equipo Demo', activeMembers: 1 }]);
+    await fixture.whenStable();
+    expect(root.textContent).not.toContain('No pudimos cargar tus equipos');
+    expect(TestBed.inject(AgentChatStore).teamId()).toBe(10);
+  });
 });

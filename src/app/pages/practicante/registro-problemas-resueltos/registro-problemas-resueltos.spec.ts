@@ -82,6 +82,23 @@ describe('RegistroProblemasResueltos', () => {
 
   afterEach(() => http.verify());
 
+  it('cannot be dismissed while the registration is being saved', async () => {
+    const { root, settle, type, registrar } = await setup();
+    const dismiss = () => [
+      root.querySelector<HTMLButtonElement>('button[aria-label="Cerrar"]')!,
+      Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Cancelar')!,
+    ];
+    type('select[formcontrolname="lenguaje"]', 'C++17');
+    await settle();
+    registrar().click();
+    await settle();
+    const request = http.expectOne((r) => r.method === 'POST');
+    expect(dismiss().map((b) => b.disabled)).toEqual([true, true]);
+    request.flush(REGISTRATION);
+    await settle();
+    expect(dismiss().map((b) => b.disabled)).toEqual([false, false]);
+  });
+
   it('never asks for the source code: only the language and the evidence link remain', async () => {
     const { root } = await setup();
     expect(root.textContent).toContain('Registrar solución');

@@ -5,6 +5,7 @@
       type="button"
       class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 hover:bg-white/8"
       aria-label="Cerrar"
+      [disabled]="guardando()"
       (click)="cancelar.emit()"
     >
       <img src="images/app/x-body.svg" alt="" width="20" height="20" />
@@ -117,7 +118,7 @@
     }
 
     <div class="flex flex-wrap justify-end gap-3">
-      <button mat-stroked-button type="button" class="h-12 px-6" (click)="cancelar.emit()">
+      <button mat-stroked-button type="button" class="h-12 px-6" [disabled]="guardando()" (click)="cancelar.emit()">
         Cancelar
       </button>
       <button

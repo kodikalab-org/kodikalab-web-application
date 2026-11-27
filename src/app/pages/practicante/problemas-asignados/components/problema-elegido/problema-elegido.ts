@@ -1,5 +1,5 @@
 import { Loader } from '../../../../../shared/loader/loader';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -86,6 +86,8 @@ export class ProblemaElegido {
   protected reintentar(): void {
     this.cargar();
   }
+
+  protected readonly formulario = viewChild<RegistroProblemasResueltos>('registroFormulario');
 
   protected abrirRegistro(dialogo: HTMLDialogElement): void {
     this.registroAbierto.set(true);

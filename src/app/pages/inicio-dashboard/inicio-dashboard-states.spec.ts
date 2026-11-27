@@ -134,4 +134,12 @@ describe('InicioDashboard states', () => {
     expect(requests).not.toContain('No tienes solicitudes pendientes');
     expect(requests).toContain('Tienes 1 solicitud pendiente');
   });
+
+  it('opens the requests of the chosen team from the coach team list', async () => {
+    const { harness, section, http } = await setup('/coach/inicio', false);
+    http.expectOne(`${BASE}/teams/me`).flush([coachGroup(7), coachGroup(8)]);
+    harness.detectChanges();
+    const links = [...section('Mis equipos').querySelectorAll('a')].map((a) => a.getAttribute('href'));
+    expect(links).toContain('/coach/grupos/solicitudes?grupo=8');
+  });
 });

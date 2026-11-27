@@ -1,4 +1,4 @@
-import { Component, ElementRef, afterRenderEffect, computed, inject, viewChild } from '@angular/core';
+import { Component, ElementRef, afterRenderEffect, computed, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -38,19 +38,24 @@ export class AgentChat {
     ? ['¿En qué temas está más débil mi equipo?', 'Recomiéndame problemas para que practique mi equipo']
     : ['¿Cómo uso KodikaLab?', 'Busco un grupo de entrenamiento']);
 
+  protected readonly teamsFailed = signal(false);
+
+  /** The assistant still works without the list: the coach can name the team in the message. */
+  protected loadTeams(): void {
+    this.teamsFailed.set(false);
+    this.teams.loadMine().subscribe({
+      next: () => {
+        const options = this.coachTeams();
+        if (this.store.teamId() === null && options.length) {
+          this.store.teamId.set((options.find((team) => team.activeMembers > 0) ?? options[0]).groupId);
+        }
+      },
+      error: () => this.teamsFailed.set(true),
+    });
+  }
+
   constructor() {
-    if (this.coach() && !this.session.demo()) {
-      this.teams.loadMine().subscribe({
-        next: () => {
-          const options = this.coachTeams();
-          if (this.store.teamId() === null && options.length) {
-            this.store.teamId.set((options.find((team) => team.activeMembers > 0) ?? options[0]).groupId);
-          }
-        },
-        // The assistant still works without the list: the coach can name the team in the message.
-        error: () => undefined,
-      });
-    }
+    if (this.coach() && !this.session.demo()) this.loadTeams();
     afterRenderEffect(() => {
       const last = this.store.messages().at(-1);
       this.store.sending();

@@ -41,7 +41,8 @@ export class RegistroProblemasResueltos {
 
   protected readonly lenguajes = ['C++17', 'Python 3.11', 'Java 17', 'JavaScript (Node 20)', 'Kotlin'];
   protected readonly maxEvidencia = MAX_EVIDENCE;
-  protected readonly guardando = signal(false);
+  /** Read by the container, which must not close the dialog during a save. */
+  readonly guardando = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly erroresCampo = signal<Record<string, string>>({});
 

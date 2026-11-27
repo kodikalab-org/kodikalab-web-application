@@ -219,8 +219,10 @@ export class ProblemPicker {
   }
 
   protected setScore(index: number, event: Event) {
-    const value = Number((event.target as HTMLInputElement).value);
-    if (!Number.isFinite(value) || value < 0) return;
+    const typed = (event.target as HTMLInputElement).value.trim();
+    const value = Number(typed);
+    // An empty field is an edit in progress, not a score of zero.
+    if (!typed || !Number.isFinite(value) || value < 0) return;
     this.patch(index, { score: Math.trunc(value) });
   }
 

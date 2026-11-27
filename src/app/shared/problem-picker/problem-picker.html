@@ -172,6 +172,7 @@
                     [attr.aria-label]="'Puntos de ' + row.problem.title"
                     [value]="row.score"
                     (input)="setScore(i, $event)"
+                    (blur)="$any($event.target).value = row.score"
                   />
                 </td>
                 <td class="py-2 pr-3">

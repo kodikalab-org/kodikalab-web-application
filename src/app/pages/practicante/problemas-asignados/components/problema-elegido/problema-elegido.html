@@ -316,9 +316,11 @@
       class="m-auto max-h-[calc(100dvh-2rem)] w-[min(640px,calc(100%-2rem))] overflow-y-auto rounded-2xl border border-solid border-[var(--kl-cta-from)] bg-[var(--kl-card-via)] p-0 text-kl-text shadow-[0_0_40px_rgba(100,60,255,.45)] backdrop:bg-black/70"
       aria-labelledby="registro-titulo"
       (close)="registroAbierto.set(false)"
+      (cancel)="formulario()?.guardando() && $event.preventDefault()"
     >
       @if (registroAbierto()) {
         <app-registro-problemas-resueltos
+          #registroFormulario
           [teamId]="teamId()"
           [asignacion]="item"
           (cancelar)="cerrarRegistro(registro)"

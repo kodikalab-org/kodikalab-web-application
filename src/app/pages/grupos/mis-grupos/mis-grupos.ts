@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { apiError } from '../../../core/api';
+import { Loader } from '../../../shared/loader/loader';
 import { CoachGroup, PractitionerGroup, TeamsApi } from '../../../core/teams-api';
 import {
   SegmentoCoach,
@@ -32,7 +33,7 @@ interface Aviso {
  */
 @Component({
   selector: 'app-mis-grupos',
-  imports: [RouterLink, MatButtonModule, MatButtonToggleModule, MatCardModule],
+  imports: [Loader, RouterLink, MatButtonModule, MatButtonToggleModule, MatCardModule],
   templateUrl: './mis-grupos.html',
   styleUrl: './mis-grupos.css',
 })

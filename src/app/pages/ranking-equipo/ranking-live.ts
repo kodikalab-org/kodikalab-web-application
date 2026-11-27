@@ -28,14 +28,14 @@ import { Ranking, LastRanking } from '../../core/team-api';
     }
     @if (ranking(); as ranking) {
       @if (ranking.status === 'NO_ACTIVITY') {
-        <p role="status">El equipo no tiene actividad registrada. Todavía no hay posiciones.</p>
+        <p role="status" class="rounded-xl border border-dashed border-kl-border-strong bg-white/2 p-5 text-center text-sm text-kl-muted">El equipo no tiene actividad registrada. Todavía no hay posiciones.</p>
       } @else {
         <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div class="rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
+          <div class="kl-card min-w-0 wrap-anywhere rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
             <p class="text-kl-muted">Integrantes incluidos</p>
             <strong class="font-display text-3xl">{{ ranking.members.length }}</strong>
           </div>
-          <div class="rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
+          <div class="kl-card min-w-0 wrap-anywhere rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
             <p class="text-kl-muted">Criterio</p>
             @if (ranking.orderingCriterion) {
               <strong>{{ ranking.orderingCriterion }}</strong>
@@ -45,7 +45,7 @@ import { Ranking, LastRanking } from '../../core/team-api';
             }
           </div>
         </section>
-        <section class="overflow-x-auto rounded-2xl border border-kl-border bg-kl-surface">
+        <section class="kl-card overflow-x-auto rounded-2xl border border-kl-border bg-kl-surface">
           <table class="w-full text-left text-sm">
             <caption class="p-4 text-left font-bold">
               Ranking del equipo
@@ -64,7 +64,7 @@ import { Ranking, LastRanking } from '../../core/team-api';
               @for (member of ranking.members; track member.membershipId) {
                 <tr class="border-b border-kl-border">
                   <td class="p-4 font-bold">{{ member.position }}</td>
-                  <td class="p-4">{{ member.fullName }}</td>
+                  <td class="p-4 wrap-break-word">{{ member.fullName }}</td>
                   <td class="p-4">{{ member.acceptedProblems }}</td>
                 </tr>
               } @empty {

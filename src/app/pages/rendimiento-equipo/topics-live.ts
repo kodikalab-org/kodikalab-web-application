@@ -18,11 +18,11 @@ import { TopicReport } from '../../core/team-api';
   >
     @if (report(); as report) {
       <section class="grid gap-4 sm:grid-cols-2">
-        <div class="rounded-2xl border border-kl-border bg-kl-surface p-5">
+        <div class="kl-card rounded-2xl border border-kl-border bg-kl-surface p-5">
           <span>Integrantes activos</span
           ><strong class="block text-3xl">{{ report.activeMembers }}</strong>
         </div>
-        <div class="rounded-2xl border border-kl-border bg-kl-surface p-5">
+        <div class="kl-card rounded-2xl border border-kl-border bg-kl-surface p-5">
           <span>Resoluciones pendientes</span
           ><strong class="block text-3xl">{{ report.pendingResolutions }}</strong>
           <p>No cuentan como aceptaciones.</p>
@@ -38,7 +38,7 @@ import { TopicReport } from '../../core/team-api';
       </section>
       <div class="grid gap-4 md:grid-cols-2">
         @for (topic of report.topics; track topic.topicId) {
-          <article class="rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
+          <article class="kl-card min-w-0 wrap-anywhere rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
             <h2 class="font-display text-xl">{{ topic.topicName }}</h2>
             @if (topic.lowestCoverage) {
               <p class="font-bold text-kl-accent-text">
@@ -67,7 +67,7 @@ import { TopicReport } from '../../core/team-api';
             <p>Pendientes de veredicto: {{ topic.pendingResolutions }}</p>
           </article>
         } @empty {
-          <p role="status">El servicio no devolvió temas.</p>
+          <p role="status" class="rounded-xl border border-dashed border-kl-border-strong bg-white/2 p-5 text-center text-sm text-kl-muted">El servicio no devolvió temas.</p>
         }
       </div>
     }

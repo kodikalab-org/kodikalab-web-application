@@ -76,7 +76,7 @@
         @if (codigoError()) {
           <p
             role="alert"
-            class="mt-3 mb-0 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm"
+            class="mt-3 mb-0 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-3 text-sm"
           >
             {{ codigoError() }}
           </p>
@@ -147,24 +147,16 @@
     </aside>
 
     <section aria-label="Grupos disponibles" class="min-w-0">
-      @if (cargando()) {
-        <p role="status" class="mt-0 text-sm text-kl-muted">Cargando grupos…</p>
-        <div aria-busy="true" aria-label="Cargando grupos" class="flex flex-col gap-3">
-          @for (fila of [1, 2, 3, 4, 5]; track fila) {
-            <div
-              aria-hidden="true"
-              class="flex h-28 items-center gap-5 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface p-5"
-            >
-              <span class="size-16 rounded-xl bg-white/5"></span>
-              <div class="flex flex-1 flex-col gap-3">
-                <span class="h-4 w-1/2 rounded bg-white/5"></span
-                ><span class="h-3 w-3/4 rounded bg-white/5"></span>
-              </div>
-            </div>
-          }
+      @if (errorMembresias() && !cargando()) {
+        <div role="alert" class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-amber-300/50 bg-amber-300/10 p-3 text-sm">
+          <span>No pudimos comprobar tu participación en estos grupos.</span>
+          <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
         </div>
+      }
+      @if (cargando()) {
+        <app-loader label="Cargando grupos…" [rows]="5" />
       } @else if (errorCarga()) {
-        <section role="alert" class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
+        <section role="alert" class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
           <strong class="text-kl-danger">No pudimos cargar los grupos</strong>
           <p class="mb-3">{{ errorCarga() }}</p>
           <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
@@ -187,7 +179,7 @@
           }
         </mat-card>
       } @else {
-        <p class="mt-0 mb-3 text-sm text-kl-body">Mostrando {{ visibles().length }} grupos</p>
+        <p class="mt-0 mb-3 text-sm text-kl-body">Mostrando {{ plural(visibles().length, 'grupo') }}</p>
         <div class="flex flex-col gap-3">
           @for (item of visibles(); track item.id) {
             <mat-card
@@ -199,7 +191,7 @@
                   class="mt-2 flex size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-xl font-semibold {{ item.tono }}"
                   >{{ item.iniciales }}</span
                 >
-                <div class="min-w-0">
+                <div class="min-w-0 wrap-anywhere">
                   <h2 class="mt-0 mb-2 text-base font-medium">{{ item.nombre }}</h2>
                   <div class="mb-2 flex flex-wrap gap-2 text-[11px]">
                     <span
@@ -313,7 +305,7 @@
         type="button"
         (click)="cerrar()"
         aria-label="Cerrar diálogo"
-        class="absolute top-5 right-5 flex size-8 items-center justify-center rounded-lg text-xl text-kl-body"
+        class="absolute top-5 right-5 flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-white/8 text-xl text-kl-body"
       >
         <img src="/images/grupos/415-19572-imgIcon11.svg" width="22" height="22" alt="" />
       </button>
@@ -331,7 +323,7 @@
               class="flex size-[52px] shrink-0 items-center justify-center rounded-xl bg-linear-to-br font-semibold {{ grupo.tono }}"
               >{{ grupo.iniciales }}</span
             >
-            <div>
+            <div class="min-w-0 wrap-anywhere">
               <strong class="text-sm">{{ grupo.nombre }}</strong>
               <p class="my-1 text-xs text-kl-body">
                 Nivel: {{ grupo.nivel }} · {{ grupo.publico ? 'Público' : 'Protegido' }}
@@ -344,7 +336,7 @@
         }
 
         @if (vistaActual === 'duplicada' || vistaActual === 'sin-cupos' || vistaActual === 'error') {
-          <section role="alert" class="mb-4 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm">
+          <section role="alert" class="mb-4 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-3 text-sm">
             <strong>{{
               vistaActual === 'duplicada'
                 ? 'Ya tienes una solicitud activa'

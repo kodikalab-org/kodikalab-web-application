@@ -12,7 +12,7 @@
       <h1 class="mt-5 mb-3 font-display text-[28px] font-bold">
         {{ session.demo() ? 'Vista previa: grupo creado' : esBorrador() ? 'Borrador guardado' : '¡Grupo creado!' }}
       </h1>
-      <p class="mt-0 text-sm text-kl-body">
+      <p class="mt-0 wrap-anywhere text-sm text-kl-body">
         @if (session.demo()) {
           Confirmación y código de invitación de ejemplo. No se guardaron cambios.
         } @else if (esBorrador()) {
@@ -41,7 +41,7 @@
       }
 
       @if (error()) {
-        <p class="my-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-3 text-sm text-kl-danger">
+        <p class="my-3 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-3 text-sm text-kl-danger">
           {{ error() }}
         </p>
       }

@@ -11,7 +11,7 @@
   </p>
   <div class="mb-6">
     <span class="mb-2 block text-sm font-medium">Equipo</span>
-    <div class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm">
+    <div class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset p-3 text-sm">
       Equipo Alfa
     </div>
     <p class="mt-2 mb-0 text-xs text-kl-muted">Gestión de postulaciones</p>
@@ -19,7 +19,7 @@
   @if (error$ | async; as error) {
     <section
       role="alert"
-      class="mb-6 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+      class="mb-6 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
     >
       <strong class="text-kl-danger">{{ error.titulo }}</strong>
       <p class="mb-0">{{ error.detalle }}</p>
@@ -47,9 +47,9 @@
         <div
           role="status"
           class="mb-4 rounded-xl border border-solid p-4 text-sm leading-5"
-          [class]="guardado ? 'border-green-400 bg-[#102a19]' : 'border-[#60b0ff] bg-[#0e2238]'"
+          [class]="guardado ? 'border-green-400 bg-green-400/10' : 'border-kl-blue bg-kl-blue/15'"
         >
-          <strong class="block" [class]="guardado ? 'text-green-400' : 'text-[#60b0ff]'">{{
+          <strong class="block" [class]="guardado ? 'text-green-400' : 'text-kl-cyan'">{{
             guardado ? 'Aclaración solicitada' : 'La postulación seguirá pendiente'
           }}</strong>
           <p class="mt-2 mb-0">

@@ -15,6 +15,7 @@ import {
   TopicStatus,
 } from '../../core/topic-progress-api';
 import { AppHeader } from '../../shared/app-header/app-header';
+import { plural } from '../../shared/plural';
 
 interface ErrorView {
   chip: string;
@@ -96,7 +97,7 @@ export class ProgresoTema implements OnInit {
       { label: 'Problemas asignados', value: String(progress.assignedProblems), help: 'de tu equipo' },
       { label: 'Resueltos', value: String(progress.solvedProblems), help: `de ${progress.assignedProblems}` },
       { label: 'Cobertura global', value: `${this.percent(this.globalCoverage())}%`, help: 'problemas distintos' },
-      { label: 'Por reforzar', value: String(this.reinforceTopics().length), help: 'temas' },
+      { label: 'Por reforzar', value: String(this.reinforceTopics().length), help: this.reinforceTopics().length === 1 ? 'tema' : 'temas' },
     ];
   });
 
@@ -144,13 +145,18 @@ export class ProgresoTema implements OnInit {
   }
 
   protected detail(topic: TopicProgress): string {
-    const parts = [`${topic.assignedProblems} asignados`, `${topic.solvedProblems} resueltos`];
+    const parts = [plural(topic.assignedProblems, 'asignado'), plural(topic.solvedProblems, 'resuelto')];
     if (topic.pendingProblems > 0) parts.push(`${topic.pendingProblems} por verificar`);
     return parts.join(' · ');
   }
 
-  protected barColor(topic: TopicProgress): string {
-    if (topic.status === 'COMPLETADO') return '#4ade80';
-    return topic.needsReinforcement ? '#fbbf24' : 'var(--kl-accent)';
+  /** A class, not an inline color: the shared `.kl-bar` gradient only spares status color classes. */
+  protected barClass(topic: TopicProgress): string {
+    if (topic.status === 'COMPLETADO') return 'bg-green-400';
+    return topic.needsReinforcement ? 'bg-amber-400' : 'bg-kl-accent';
+  }
+
+  protected assignedText(topic: TopicProgress): string {
+    return plural(topic.assignedProblems, 'asignado');
   }
 }

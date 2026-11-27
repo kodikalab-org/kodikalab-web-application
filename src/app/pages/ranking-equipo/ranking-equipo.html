@@ -17,7 +17,7 @@
     </div>
     <div class="flex flex-col gap-2">
       <span class="text-sm font-bold">Equipo</span>
-      <div class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm">
+      <div class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset p-3 text-sm">
         Equipo Alfa
       </div>
       <span class="text-xs text-kl-muted"
@@ -27,7 +27,7 @@
     @if (estado === 'inconsistentes') {
       <section
         role="alert"
-        class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+        class="rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm"
       >
         <strong class="text-amber-400">No pudimos actualizar el ranking</strong>
         <p class="mb-0">
@@ -43,9 +43,9 @@
     @if (estado === 'compartidas') {
       <section
         role="status"
-        class="rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
+        class="rounded-xl border border-solid border-kl-blue bg-kl-blue/15 p-4 text-sm"
       >
-        <strong class="text-[#60b0ff]">Dos integrantes comparten el segundo puesto</strong>
+        <strong class="text-kl-cyan">Dos integrantes comparten el segundo puesto</strong>
         <p class="mb-0">
           Camila y Valeria tienen 16 problemas distintos resueltos. Se utiliza posición compartida;
           el siguiente puesto es el cuarto.
@@ -137,7 +137,7 @@
               class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm"
             >
               <strong>{{ integrante.posicion }}</strong
-              ><span class="font-mono text-xs text-[#ccb2ff]">{{ integrante.estado }}</span
+              ><span class="font-mono text-xs text-kl-accent-text">{{ integrante.estado }}</span
               ><span class="text-kl-muted">Integrante: {{ integrante.nombre }}</span
               ><span class="text-kl-muted">Resueltos: {{ integrante.resueltos }}</span>
             </li>

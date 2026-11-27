@@ -79,7 +79,7 @@
     class="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-[30px] pb-14 sm:px-7 lg:px-14"
   >
     <div class="mb-6 flex flex-wrap items-center justify-between gap-5">
-      <div>
+      <div class="min-w-0">
         <h1 class="m-0 break-all font-display text-[32px] font-bold tracking-[-1px]">
           Hola, {{ nombre }}
         </h1>
@@ -162,6 +162,15 @@
         </ol>
       </mat-card>
     }
+    @if (errorGrupos() || errorProblemas()) {
+      <section
+        role="alert"
+        class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
+      >
+        <span><strong class="text-kl-danger">No pudimos cargar tu actividad.</strong> Revisa tu conexión e inténtalo de nuevo.</span>
+        <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
+      </section>
+    }
     <section
       aria-label="Resumen de actividad"
       class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -213,12 +222,20 @@
                   vacio;
                   context: {
                     icono: coach ? '3-imgIcon13' : '1-imgIcon12',
-                    nombre: coach
-                      ? 'No tienes solicitudes pendientes'
-                      : 'Aún no tienes problemas asignados',
-                    descripcion: coach
-                      ? 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.'
-                      : 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.',
+                    nombre: !coach
+                      ? 'Aún no tienes problemas asignados'
+                      : cargandoGrupos || errorGrupos()
+                        ? 'Solicitudes no disponibles'
+                        : solicitudesPendientes() > 0
+                          ? 'Tienes ' + plural(solicitudesPendientes(), 'solicitud pendiente', 'solicitudes pendientes')
+                          : 'No tienes solicitudes pendientes',
+                    descripcion: !coach
+                      ? 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.'
+                      : cargandoGrupos || errorGrupos()
+                        ? 'Aparecerán cuando se carguen tus equipos.'
+                        : solicitudesPendientes() > 0
+                          ? 'Usa «Ver todas» para aceptarlas o rechazarlas.'
+                          : 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.',
                     accion: coach ? '' : 'Explorar grupos',
                   }
                 "
@@ -353,7 +370,13 @@
                 }
               "
             />
-            @if ((nuevo && session.demo()) || grupos().length === 0) {
+            @if (cargandoGrupos) {
+              <app-loader [label]="coach ? 'Cargando tus equipos…' : 'Cargando tus grupos…'" [rows]="2" />
+            } @else if (!session.demo() && errorGrupos()) {
+              <p class="m-0 text-[13px] text-kl-muted">
+                {{ coach ? 'No pudimos cargar tus equipos.' : 'No pudimos cargar tus grupos.' }}
+              </p>
+            } @else if ((nuevo && session.demo()) || grupos().length === 0) {
               <ng-container
                 *ngTemplateOutlet="
                   vacio;
@@ -368,13 +391,13 @@
                 "
               />
             } @else {
-              @for (grupo of grupos(); track grupo.nombre) {
+              @for (grupo of grupos(); track grupo.id ?? grupo.nombre) {
                 <div class="flex items-center gap-4 border-b border-[var(--kl-line-soft)] py-3.5 last:border-0">
                   <span
                     class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[var(--kl-line-strong)] bg-kl-accent/25 text-sm"
                     >{{ grupo.iniciales }}</span
                   >
-                  <div class="min-w-0 flex-1">
+                  <div class="min-w-0 flex-1 wrap-anywhere">
                     <strong class="text-[15px]">{{ grupo.nombre }}</strong>
                     <p class="mb-0 mt-1 text-xs text-kl-muted">{{ grupo.detalle }}</p>
                     <span

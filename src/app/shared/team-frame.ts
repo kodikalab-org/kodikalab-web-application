@@ -48,18 +48,18 @@ import { TeamPage } from './team-page';
       <div>
         <p class="font-mono text-xs text-kl-muted">Inicio / Mi espacio</p>
         <h1 class="m-0 font-display text-2xl font-bold lg:text-[40px]">{{ title() }}</h1>
-        <p class="text-kl-muted">{{ description() }}</p>
+        <p class="wrap-anywhere text-kl-muted">{{ description() }}</p>
       </div>
       <form
         [formGroup]="page().context"
         (ngSubmit)="page().selectTeam()"
         class="flex flex-wrap items-start gap-3"
       >
-        <label class="flex min-w-0 flex-col gap-2"
+        <label class="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:min-w-[260px] sm:max-w-md"
           >Equipo
           <select
             aria-label="Equipo"
-            class="team-select"
+            class="team-select w-full max-w-full min-w-0 rounded-full border border-solid border-kl-border-strong bg-kl-inset px-4 py-2.5 text-sm text-kl-text"
             formControlName="teamId"
             [attr.disabled]="page().saving() || loadingTeams() || !teams().length ? '' : null"
           >
@@ -95,7 +95,7 @@ import { TeamPage } from './team-page';
         </button>
       }
       @if (!loadingTeams() && !teamsError() && !teams().length) {
-        <p role="status">
+        <p role="status" class="rounded-xl border border-dashed border-kl-border-strong bg-white/2 p-5 text-center text-sm text-kl-muted">
           No tienes equipos disponibles. Verifica tu membresía o consulta con tu coach.
         </p>
       }
@@ -108,7 +108,7 @@ import { TeamPage } from './team-page';
         <app-loader label="Consultando información del equipo…" [rows]="2" />
       }
       @if (page().error()) {
-        <section role="alert" class="rounded-xl border border-amber-400 bg-kl-surface p-4">
+        <section role="alert" class="wrap-anywhere rounded-xl border border-solid border-amber-400 bg-kl-surface p-4">
           <strong>{{ page().error() }}</strong>
           <ul>
             @for (field of page().fields(); track field[0]) {

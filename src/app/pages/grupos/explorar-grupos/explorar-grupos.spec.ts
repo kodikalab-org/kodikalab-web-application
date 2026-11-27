@@ -87,7 +87,7 @@ describe('Explorar grupos', () => {
 
     escribir(root.querySelector('#buscar-grupos') as HTMLInputElement, 'grafos');
     await settle(fixture);
-    expect(root.textContent).toContain('Mostrando 1 grupos');
+    expect(root.textContent).toContain('Mostrando 1 grupo');
     expect(root.textContent).toContain('Entrenamiento de Grafos');
     expect(root.textContent).not.toContain('Training ICPC');
 
@@ -95,7 +95,7 @@ describe('Explorar grupos', () => {
     const avanzado = [...root.querySelectorAll('mat-checkbox')].find((c) => c.textContent?.includes('Avanzado'));
     (avanzado!.querySelector('input') as HTMLInputElement).click();
     await settle(fixture);
-    expect(root.textContent).toContain('Mostrando 1 grupos');
+    expect(root.textContent).toContain('Mostrando 1 grupo');
     expect(root.textContent).toContain('Training ICPC');
 
     const visibilidad = [...root.querySelectorAll('mat-checkbox')].find((c) => c.textContent?.includes('Público'));

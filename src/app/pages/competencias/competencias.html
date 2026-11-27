@@ -35,7 +35,7 @@
     <div class="flex flex-col gap-2">
       <span class="text-sm font-bold">Equipo</span>
       <div
-        class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] px-3 py-3 text-sm"
+        class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset px-3 py-3 text-sm"
       >
         Equipo Alfa
       </div>
@@ -48,7 +48,7 @@
     @if (estado === 'registrado') {
       <section
         role="status"
-        class="rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+        class="rounded-xl border border-solid border-green-400 bg-green-400/10 p-4 text-sm"
       >
         <strong class="text-green-400">Resultado registrado</strong>
         <p class="mb-0">
@@ -89,7 +89,7 @@
     } @else if (estado === 'incompletos') {
       <section
         role="alert"
-        class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+        class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
       >
         <strong class="text-kl-danger">Revisa los datos antes de publicar</strong>
         <p class="mb-0">
@@ -113,7 +113,7 @@
           ) {
             <div>
               <dt class="mb-2 font-bold">{{ dato[0] }}</dt>
-              <dd class="m-0 rounded-xl bg-[#212121] p-3">{{ dato[1] }}</dd>
+              <dd class="m-0 rounded-xl bg-kl-inset p-3">{{ dato[1] }}</dd>
               <dd class="mx-0 mt-2 text-xs text-kl-muted">{{ dato[2] }}</dd>
             </div>
           }
@@ -127,7 +127,7 @@
       @if (estado === 'duplicado') {
         <section
           role="alert"
-          class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+          class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
         >
           <strong class="text-kl-danger">Ya existe una participación equivalente</strong>
           <p class="mb-0">
@@ -139,7 +139,7 @@
       @if (estado === 'validacion-pendiente') {
         <section
           role="status"
-          class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+          class="rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm"
         >
           <strong class="text-amber-400">Participación guardada como pendiente</strong>
           <p class="mb-0">

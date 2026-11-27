@@ -19,7 +19,7 @@
       @if (estado === 'contexto-invalido') {
         <section
           role="alert"
-          class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+          class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
         >
           <strong class="text-kl-danger">Selecciona un equipo al que pertenezcas</strong>
           <p class="mb-0">
@@ -29,7 +29,7 @@
         </section>
         <dl class="m-0 text-sm">
           <dt class="mb-2 font-bold">Equipo activo</dt>
-          <dd class="m-0 rounded-xl bg-[#212121] p-3">Sin equipo válido</dd>
+          <dd class="m-0 rounded-xl bg-kl-inset p-3">Sin equipo válido</dd>
         </dl>
         <p class="m-0 text-xs text-kl-muted">Elige uno de tus grupos activos.</p>
         <div class="flex flex-col gap-3 sm:flex-row">
@@ -52,7 +52,7 @@
       } @else if (estado === 'actividad-registrada') {
         <section
           role="status"
-          class="rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+          class="rounded-xl border border-solid border-green-400 bg-green-400/10 p-4 text-sm"
         >
           <strong class="text-green-400">Resolución registrada solo en Equipo Alfa</strong>
           <p class="mb-0">
@@ -62,7 +62,7 @@
         </section>
         <dl class="m-0 text-sm">
           <dt class="mb-2 font-bold">Equipo activo</dt>
-          <dd class="m-0 rounded-xl bg-[#212121] p-3">Equipo Alfa</dd>
+          <dd class="m-0 rounded-xl bg-kl-inset p-3">Equipo Alfa</dd>
         </dl>
         <section aria-label="Comparación entre equipos" class="grid grid-cols-2 gap-3">
           <mat-card class="gap-3 border border-solid border-[var(--kl-line)] bg-kl-surface p-5"
@@ -105,7 +105,7 @@
         <div class="flex flex-col gap-2">
           <span class="text-sm font-bold">Equipo activo</span>
           <div
-            class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm"
+            class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset p-3 text-sm"
           >
             {{ contexto.nombre }}
           </div>
@@ -122,9 +122,9 @@
         >
         <aside
           aria-live="polite"
-          class="flex flex-col gap-2 rounded-xl border border-solid border-[#ccb2ff] bg-[var(--kl-card-from)] p-4 text-sm"
+          class="flex flex-col gap-2 rounded-xl border border-solid border-kl-accent-text bg-[var(--kl-card-from)] p-4 text-sm"
         >
-          <strong class="text-[#ccb2ff]">Estás consultando {{ contexto.nombre }}</strong
+          <strong class="text-kl-accent-text">Estás consultando {{ contexto.nombre }}</strong
           ><span>Las cifras y estados de esta pantalla pertenecen únicamente a este grupo.</span>
         </aside>
         <section
@@ -191,7 +191,7 @@
                   class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm"
                 >
                   <strong>{{ fila.problema }}</strong
-                  ><span class="font-mono text-xs text-[#ccb2ff]">{{ contexto.nombre }}</span
+                  ><span class="font-mono text-xs text-kl-accent-text">{{ contexto.nombre }}</span
                   ><span class="text-kl-muted">Plataforma: {{ fila.plataforma }}</span
                   ><span class="text-kl-muted">Estado: {{ fila.estado }}</span>
                 </li>

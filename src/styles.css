@@ -611,3 +611,31 @@ img[src$='dashboard/0-imgIcon1.svg'] {
     animation: none;
   }
 }
+
+/* Charts. Layered and important so one rule replaces the per-template fill colors; status colors are left alone. */
+@layer base {
+  .kl-bar:not([class*='amber']):not([class*='red']):not([class*='green']) {
+    background-image: linear-gradient(90deg, var(--kl-violet), var(--kl-blue), var(--kl-cyan)) !important;
+  }
+}
+
+.kl-column {
+  min-height: 8px;
+  background: linear-gradient(to top, var(--kl-blue), var(--kl-violet) 60%, var(--kl-pink));
+  transform-origin: bottom;
+  animation: kl-grow 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.kl-column--low {
+  background: linear-gradient(to top, #e08a1e, var(--kl-amber));
+}
+
+@keyframes kl-grow {
+  from { transform: scaleY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-column {
+    animation: none;
+  }
+}

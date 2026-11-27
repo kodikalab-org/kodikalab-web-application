@@ -168,15 +168,20 @@
     >
       @for (dato of estadisticas(); track dato.etiqueta; let i = $index) {
         <mat-card
-          class="flex flex-row items-center gap-3.5 border border-solid border-[#25203b] bg-white/3 px-4 py-3.5"
-          ><span
-            class="flex size-[46px] shrink-0 items-center justify-center rounded-xl bg-kl-accent/15"
-            ><img [src]="'/images/dashboard/' + dato.icono + '.svg'" width="24" height="24" alt=""
-          /></span>
+          class="flex flex-col gap-3 rounded-2xl border border-solid border-kl-line bg-white/3 p-4"
+          ><div class="flex items-center justify-between gap-3">
+            <span class="text-xs font-semibold tracking-wide text-kl-muted uppercase">{{ dato.etiqueta }}</span>
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-kl-accent/20"
+              ><img [src]="'/images/dashboard/' + dato.icono + '.svg'" width="22" height="22" alt=""
+            /></span>
+          </div>
           <div>
-            <strong class="block font-display text-2xl">{{ dato.valor }}</strong
-            ><span class="block text-[13px] text-kl-body">{{ dato.etiqueta }}</span
-            ><span class="mt-1 block text-xs" [class]="dato.tono">{{ dato.detalle }}</span>
+            @if (dato.detalle === 'Cargando…') {
+              <span class="kl-skeleton block h-10 w-24" aria-hidden="true"></span>
+            } @else {
+              <strong class="block font-display text-4xl leading-10" [class.text-kl-muted]="dato.valor === '0' || dato.valor === '—'">{{ dato.valor }}</strong>
+            }
+            <span class="mt-2 block text-xs" [class]="dato.tono">{{ dato.detalle }}</span>
           </div></mat-card
         >
       }
@@ -297,32 +302,24 @@
                   Cobertura de Equipo Alfa en competencias finalizadas
                 </p>
               }
-              @for (tema of temas; track tema.nombre) {
-                <div
-                  class="my-2 grid grid-cols-[1fr_40px] items-center gap-x-4 gap-y-2 text-sm sm:grid-cols-[190px_1fr_44px]"
-                >
-                  <span>{{ tema.nombre }}</span>
-                  <div
-                    role="progressbar"
-                    [attr.aria-label]="tema.nombre"
-                    [attr.aria-valuenow]="tema.valor"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    class="col-start-1 row-start-2 h-2.5 overflow-hidden rounded-full bg-[#2a2750] sm:col-start-2 sm:row-start-1"
-                  >
+              <ul class="m-0 grid list-none grid-flow-col auto-cols-fr items-end gap-2 p-0 sm:gap-4">
+                @for (tema of temas; track tema.nombre) {
+                  <li class="flex min-w-0 flex-col items-center gap-2 text-center">
+                    <span class="font-display text-lg font-bold sm:text-2xl">{{ tema.valor }}%</span>
                     <div
-                      class="h-full rounded-full bg-linear-to-r from-[#6419ff] to-[#a881fe]"
-                      [class.bg-amber-400]="tema.valor < 35"
-                      [class.bg-none]="tema.valor < 35"
-                      [style.width.%]="tema.valor"
-                    ></div>
-                  </div>
-                  <span
-                    class="col-start-2 row-start-1 text-right font-mono text-xs text-kl-body sm:col-start-3"
-                    >{{ tema.valor }}%</span
-                  >
-                </div>
-              }
+                      role="progressbar"
+                      [attr.aria-label]="tema.nombre"
+                      [attr.aria-valuenow]="tema.valor"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      class="flex h-44 w-full max-w-16 items-end overflow-hidden rounded-2xl bg-white/5"
+                    >
+                      <div class="kl-column w-full rounded-2xl" [class.kl-column--low]="tema.valor < 35" [style.height.%]="tema.valor"></div>
+                    </div>
+                    <span class="text-[11px] leading-4 break-words text-kl-body sm:text-xs">{{ tema.nombre }}</span>
+                  </li>
+                }
+              </ul>
               <p
                 class="mb-0 mt-5 flex items-center gap-2.5 rounded-xl border border-solid border-amber-300/35 bg-amber-300/7 p-3 text-[13px] text-amber-200"
               >

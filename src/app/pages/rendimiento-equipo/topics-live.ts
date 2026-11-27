@@ -58,7 +58,7 @@ import { TopicReport } from '../../core/team-api';
               aria-valuemax="100"
               class="my-3 h-2 overflow-hidden rounded-full bg-kl-raised"
             >
-              <div class="h-full bg-kl-accent" [style.width.%]="topic.coveragePercentage"></div>
+              <div class="kl-bar h-full bg-kl-accent" [style.width.%]="topic.coveragePercentage"></div>
             </div>
             <p>
               Sin resolver: {{ topic.unsolvedProblems }} · Integrantes que resolvieron:

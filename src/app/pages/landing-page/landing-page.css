@@ -20,3 +20,73 @@
 .pricing-card__divider {
   --mat-divider-color: var(--kl-border);
 }
+
+/* Soft aurora behind the hero that fades into the page, so no section starts with a hard edge. */
+.hero {
+  isolation: isolate;
+}
+
+.hero__bg {
+  z-index: -1;
+  mask-image: linear-gradient(to bottom, #000 70%, transparent);
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(60% 55% at 18% 30%, rgb(79 125 255 / 0.34), transparent 70%),
+    radial-gradient(55% 55% at 52% 18%, rgb(139 108 255 / 0.42), transparent 70%),
+    radial-gradient(50% 50% at 82% 55%, rgb(236 111 214 / 0.24), transparent 70%),
+    radial-gradient(45% 35% at 45% 82%, rgb(56 212 245 / 0.16), transparent 70%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent);
+}
+
+.hero__title-accent {
+  background: linear-gradient(90deg, #b29cff, #7fa3ff 35%, var(--kl-cyan) 65%, #f39ae0);
+  background-clip: text;
+  color: transparent;
+}
+
+/* White pill as the main call to action. */
+.hero__actions a {
+  --mat-button-filled-container-color: #ffffff;
+  --mat-button-filled-label-text-color: #1d1650;
+}
+
+.hero__actions a img {
+  filter: brightness(0) opacity(0.8);
+}
+
+.hero__content > * {
+  animation: hero-enter 600ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.hero__content > :nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.hero__content > :nth-child(3) {
+  animation-delay: 160ms;
+}
+
+@keyframes hero-enter {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+
+.stats {
+  background: radial-gradient(70% 100% at 50% 50%, rgb(139 108 255 / 0.14), transparent 75%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__content > * {
+    animation: none;
+  }
+}

@@ -32,7 +32,7 @@
     @default {
       @let c = competition()!;
       <header
-        class="rounded-[18px] border border-solid border-kl-accent/40 bg-linear-to-r from-[var(--kl-card-from)]/80 to-[var(--kl-card-to)]/90 p-5 shadow-[0_0_24px_#643cff22] sm:p-6"
+        class="kl-card rounded-[18px] border border-solid border-kl-accent/40 bg-linear-to-r from-[var(--kl-card-from)]/80 to-[var(--kl-card-to)]/90 p-5 shadow-[0_0_24px_#643cff22] sm:p-6"
       >
         <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
           <a routerLink="/inicio">Inicio</a> / <a routerLink="/concursos">Concursos</a> / {{ c.eventName }}
@@ -105,7 +105,7 @@
 
       @switch (tab()) {
         @case ('problemas') {
-          <section aria-label="Problemas" class="overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80">
+          <section aria-label="Problemas" class="kl-card overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80">
             @if (problems().length) {
               <table class="w-full min-w-[900px] border-collapse text-left text-sm" aria-label="Problemas del concurso">
                 <thead>
@@ -228,7 +228,7 @@
             }
             @default {
               @let tabla = standings()!;
-              <section class="overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80">
+              <section class="kl-card overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80">
                 @if (tabla.rows.length) {
                   <table class="w-full min-w-[640px] border-collapse text-center text-sm" aria-label="Clasificación del concurso">
                     <thead>
@@ -365,7 +365,7 @@
       aria-labelledby="registrar-titulo"
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
-      class="w-full max-w-[460px] rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)] to-[var(--kl-card-to)] p-6"
+      class="kl-card w-full max-w-[460px] rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)] to-[var(--kl-card-to)] p-6"
       [formGroup]="form"
       novalidate
       (click)="$event.stopPropagation()"

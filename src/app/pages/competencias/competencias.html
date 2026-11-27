@@ -167,7 +167,7 @@
       }
       <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,816fr)_minmax(0,360fr)]">
         <mat-card
-          class="min-w-0 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 p-6"
+          class="kl-card min-w-0 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 p-6"
         >
           <form [formGroup]="form" class="flex flex-col gap-4" aria-labelledby="titulo-formulario">
             <h2 id="titulo-formulario" class="m-0 text-xl leading-[26px] font-bold">
@@ -333,7 +333,7 @@
         </mat-card>
         <aside class="flex min-w-0 flex-col gap-6" aria-label="Contexto del historial">
           <mat-card
-            class="flex flex-col gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
+            class="kl-card flex flex-col gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 class="m-0 text-xl leading-[26px] font-bold">Antes de publicar</h2>
             <p class="m-0 text-sm leading-5 text-kl-muted">
@@ -342,7 +342,7 @@
             </p>
           </mat-card>
           <mat-card
-            class="flex flex-col gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
+            class="kl-card flex flex-col gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 id="historial" class="m-0 text-xl leading-[26px] font-bold">Últimos resultados</h2>
             @for (resultado of resultados; track resultado.nombre) {

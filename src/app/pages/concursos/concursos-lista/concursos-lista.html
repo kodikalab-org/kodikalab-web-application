@@ -52,15 +52,15 @@
     @default {
       @let resumen = summary();
       <section aria-label="Resumen de progreso" class="grid gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
+        <div class="kl-card rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Concursos activos</p>
           <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.active }}</p>
         </div>
-        <div class="rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
+        <div class="kl-card rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Problemas resueltos</p>
           <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.solved }} / {{ resumen.assigned }}</p>
         </div>
-        <div class="rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
+        <div class="kl-card rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Pendientes de verificación</p>
           <p class="mt-1 mb-0 font-display text-3xl font-bold text-amber-200">{{ resumen.pending }}</p>
         </div>
@@ -84,7 +84,7 @@
           <section [attr.aria-labelledby]="tabla.id + '-titulo'">
             <h2 [id]="tabla.id + '-titulo'" class="mt-0 mb-3 text-xl font-medium">{{ tabla.title }}</h2>
             <div
-              class="overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80"
+              class="kl-card overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80"
             >
               @if (tabla.rows.length) {
                 <table class="w-full min-w-[860px] border-collapse text-left text-sm" [attr.aria-label]="tabla.title">

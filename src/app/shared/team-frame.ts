@@ -25,10 +25,7 @@ import { TeamPage } from './team-page';
       --mat-toolbar-container-text-color: var(--kl-text);
     }`,
   ],
-  template: ` <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
-    <div
-      class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat"
-    ></div>
+  template: ` <div class="kl-page-bg relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
     <header
       class="sticky top-0 z-40 border-0 border-b border-solid border-[var(--kl-line-soft)] bg-[var(--kl-chrome)]/80 backdrop-blur-xl"
     >

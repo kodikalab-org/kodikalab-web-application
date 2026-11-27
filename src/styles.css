@@ -550,3 +550,12 @@ img[src$='dashboard/0-imgIcon1.svg'] {
     translate: 0 0 !important;
   }
 }
+
+/* The brand wave background, pinned to the viewport so long or short screens never end in a flat color. */
+.kl-page-bg {
+  background-image: url('/images/dashboard/0-imgIcon.svg');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}

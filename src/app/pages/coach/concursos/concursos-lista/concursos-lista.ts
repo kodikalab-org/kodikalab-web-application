@@ -78,6 +78,8 @@ export class ConcursosLista implements OnInit {
   protected readonly teamId = signal<number | null>(null);
   protected readonly loading = signal(false);
   protected readonly error = signal('');
+  /** The contests could not be read: an empty list must not be shown as "no contests". */
+  protected readonly loadFailed = signal(false);
   /** Contest whose status change is in flight. */
   protected readonly changing = signal<number | null>(null);
   protected readonly notice = signal('');
@@ -124,6 +126,7 @@ export class ConcursosLista implements OnInit {
       .pipe(
         tap(() => {
           this.error.set('');
+          this.loadFailed.set(false);
         }),
         switchMap((id) => {
           if (!id) {
@@ -140,6 +143,7 @@ export class ConcursosLista implements OnInit {
             catchError((e: unknown) => {
               this.items.set([]);
               this.loading.set(false);
+              this.loadFailed.set(true);
               this.error.set(apiError(e));
               return of(null);
             }),

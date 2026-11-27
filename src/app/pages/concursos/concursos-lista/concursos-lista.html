@@ -12,11 +12,11 @@
       </p>
     </div>
     @if (teams().length > 1) {
-      <label class="flex flex-col gap-1.5 text-sm text-kl-body">
+      <label class="flex max-w-full min-w-0 flex-col gap-1.5 text-sm text-kl-body">
         Grupo
         <select
           aria-label="Grupo"
-          class="h-[44px] min-w-[220px] rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-to)] px-3 text-sm text-kl-heading outline-none focus:border-kl-accent-text"
+          class="h-[44px] w-full max-w-full min-w-[min(220px,100%)] rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-to)] px-3 text-sm text-kl-heading outline-none focus:border-kl-accent-text"
           (change)="selectTeam($any($event.target).value)"
         >
           <option value="">Todos mis grupos</option>
@@ -35,12 +35,12 @@
     @case ('error') {
       <section
         role="alert"
-        class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+        class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
       >
         <span>No se pudieron cargar tus concursos. Revisa tu conexión e inténtalo de nuevo.</span>
         <button
           type="button"
-          class="cursor-pointer rounded-lg border border-solid border-kl-danger bg-transparent px-4 py-2 text-sm text-kl-heading"
+          class="cursor-pointer rounded-full border border-solid border-kl-danger bg-transparent px-4 py-2 text-sm text-kl-heading"
           (click)="retry()"
         >
           Reintentar
@@ -56,7 +56,7 @@
         </div>
         <div class="kl-card rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Problemas resueltos</p>
-          <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.solved }} / {{ resumen.assigned }}</p>
+          <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.solved }}</p>
         </div>
         <div class="kl-card rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Pendientes de verificación</p>
@@ -101,7 +101,7 @@
                     @for (row of tabla.rows; track row.competition.teamId + '-' + row.competition.competitionId) {
                       @let c = row.competition;
                       <tr class="border-0 border-t border-solid border-kl-divider">
-                        <td class="px-4 py-3.5">
+                        <td class="min-w-[220px] px-4 py-3.5 wrap-anywhere">
                           <a
                             class="font-semibold text-kl-heading hover:text-kl-accent-text"
                             [routerLink]="['/concursos', c.teamId, c.competitionId]"
@@ -144,7 +144,7 @@
                         </td>
                         <td class="px-4 py-3.5 text-right">
                           <a
-                            class="inline-block rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-[13px] font-medium text-white"
+                            class="inline-block rounded-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-[13px] font-medium text-white"
                             [routerLink]="['/concursos', c.teamId, c.competitionId]"
                             [attr.aria-label]="'Entrar al concurso ' + c.eventName"
                             >Entrar</a

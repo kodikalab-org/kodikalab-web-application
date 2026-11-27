@@ -39,7 +39,7 @@
   <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
     <div class="flex min-w-0 flex-col gap-6">
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
         appearance="outlined"
       >
         <div class="p-4 md:p-6">
@@ -52,11 +52,11 @@
           <dl class="m-0 mt-3 text-sm">
             <div class="flex justify-between gap-4 border-0 border-b border-solid border-kl-divider py-3">
               <dt class="text-kl-muted">Equipo</dt>
-              <dd class="m-0 font-medium">{{ store.team()?.name ?? '—' }}</dd>
+              <dd class="m-0 min-w-0 font-medium wrap-anywhere">{{ store.team()?.name ?? '—' }}</dd>
             </div>
             <div class="flex items-center justify-between gap-4 border-0 border-b border-solid border-kl-divider py-3">
               <dt class="text-kl-muted">Competencia</dt>
-              <dd class="m-0 flex items-center gap-2 font-medium">
+              <dd class="m-0 flex min-w-0 flex-wrap items-center justify-end gap-2 font-medium wrap-anywhere">
                 @if (store.competition(); as competencia) {
                   {{ competencia.eventName }}
                   <span
@@ -82,7 +82,7 @@
       </mat-card>
 
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
         appearance="outlined"
       >
         <div class="p-4 md:p-6">
@@ -102,7 +102,7 @@
                 class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1 border-0 border-t border-solid border-kl-divider py-3 text-sm sm:grid-cols-[minmax(0,1fr)_110px_70px_130px]"
               >
                 <div class="min-w-0">
-                  <p class="m-0 font-semibold text-kl-heading">{{ fila.problem.title }}</p>
+                  <p class="m-0 font-semibold wrap-anywhere text-kl-heading">{{ fila.problem.title }}</p>
                   <p class="m-0 font-mono text-xs text-kl-muted">
                     {{ fila.problem.sourceCode || '—' }}
                     @if (fila.problem.sourcePlatform; as plataforma) {
@@ -130,7 +130,7 @@
 
     <aside class="flex flex-col gap-6" aria-label="Antes de confirmar">
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
         appearance="outlined"
       >
         <div class="p-5">

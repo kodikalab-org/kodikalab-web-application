@@ -212,4 +212,47 @@ describe('ConcursosLista', () => {
     )!;
     expect(link.getAttribute('href')).toBe('/coach/asignar-problema?competitionId=12&teamId=7');
   });
+
+  async function pending(url: string) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([{ path: 'coach/concursos', component: ConcursosLista }]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: API_URL, useValue: '/api' },
+      ],
+    });
+    http = TestBed.inject(HttpTestingController);
+    const harness = await RouterTestingHarness.create();
+    await TestBed.inject(Router).navigateByUrl(url);
+    harness.detectChanges();
+    return { harness, root: harness.routeNativeElement as HTMLElement };
+  }
+
+  it('shows a loader while the groups of the coach are on their way', async () => {
+    const { harness, root } = await pending('/coach/concursos');
+    expect(root.textContent).toContain('Cargando tus grupos\u2026');
+    expect(root.textContent).not.toContain('Selecciona un grupo para ver sus concursos');
+
+    http.expectOne('/api/teams/me').flush(GROUPS);
+    harness.detectChanges();
+    expect(root.textContent).not.toContain('Cargando tus grupos\u2026');
+  });
+
+  it('offers a retry, not an empty state, when the contests cannot be read', async () => {
+    const { harness, root } = await pending('/coach/concursos?teamId=7');
+    http.expectOne('/api/teams/me').flush(GROUPS);
+    http.expectOne((r) => r.url === '/api/competitions').flush({}, { status: 503, statusText: 'Unavailable' });
+    harness.detectChanges();
+    expect(root.textContent).not.toContain('no tiene concursos');
+    expect(root.textContent).not.toContain('no tiene concursos finalizados');
+
+    const retry = button(root.querySelector('[role="alert"]')!, 'Reintentar');
+    expect(retry).toBeDefined();
+    retry!.click();
+    http.expectOne((r) => r.url === '/api/competitions').flush(COMPETITIONS);
+    harness.detectChanges();
+    expect(rows(root, 'Concursos pasados').length).toBe(2);
+    expect(root.querySelector('[role="alert"]')).toBeNull();
+  });
 });

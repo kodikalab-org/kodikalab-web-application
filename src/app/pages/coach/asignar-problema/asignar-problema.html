@@ -24,7 +24,7 @@
     (ngSubmit)="aplicar()"
   >
     <mat-card
-      class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+      class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
       appearance="outlined"
     >
       <div class="p-4 md:p-6">
@@ -120,7 +120,7 @@
                           [aria-label]="'Seleccionar ' + problema.title"
                         />
                       </td>
-                      <td class="py-2.5 pr-4">
+                      <td class="py-2.5 pr-4 wrap-anywhere">
                         @if (problema.url) {
                           <a
                             class="font-semibold text-kl-heading hover:text-kl-accent-text"
@@ -180,7 +180,7 @@
 
     <aside aria-label="Problemas seleccionados">
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
         appearance="outlined"
       >
         <div class="p-5">
@@ -210,7 +210,7 @@
                 class="flex items-center justify-between gap-3 border-0 border-t border-solid border-kl-divider py-3 first:border-t-0"
               >
                 <div class="min-w-0">
-                  <p class="m-0 truncate text-sm font-semibold text-kl-heading">{{ item.title }}</p>
+                  <p class="m-0 truncate text-sm font-semibold text-kl-heading" [title]="item.title">{{ item.title }}</p>
                   <p class="m-0 font-mono text-xs text-kl-muted">
                     {{ item.sourceCode || '—' }}
                     @if (item.sourcePlatform) {

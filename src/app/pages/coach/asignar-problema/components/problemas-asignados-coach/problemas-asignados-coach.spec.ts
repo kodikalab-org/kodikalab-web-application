@@ -227,4 +227,15 @@ describe('ProblemasAsignadosCoach', () => {
     expect(root.textContent).toContain('No administras ningún equipo publicado');
     expect(Array.from(root.querySelectorAll('a')).map((a) => a.getAttribute('href'))).toContain('/coach/grupos/crear');
   });
+
+  it('does not claim zero assignments in the summary when the list cannot be read', async () => {
+    const { root, loadTeams, list, settle } = await setup();
+    await loadTeams();
+    list().flush({}, { status: 503, statusText: 'Unavailable' });
+    await settle();
+
+    const figures = Array.from(root.querySelectorAll('aside dd')).map((node) => node.textContent!.trim());
+    expect(figures).toEqual(['\u2014', '\u2014', '14', '\u2014']);
+    expect(root.querySelector('aside')!.textContent).not.toContain('Sin competencias con problemas asignados.');
+  });
 });

@@ -3,7 +3,7 @@
     <h2 id="registro-titulo" class="m-0 font-display text-[22px] font-bold">Registrar solución</h2>
     <button
       type="button"
-      class="flex size-9 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 hover:bg-white/8"
+      class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 hover:bg-white/8"
       aria-label="Cerrar"
       (click)="cancelar.emit()"
     >
@@ -18,7 +18,7 @@
       class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-accent)] text-lg font-bold text-white"
       ><span class="sr-only">Letra </span>{{ asignacion().letter }}</span
     >
-    <div>
+    <div class="min-w-0 wrap-anywhere">
       <p class="m-0 text-sm font-semibold">{{ asignacion().problem.title }}</p>
       <p class="m-0 text-xs text-kl-muted">
         @if (plataforma(); as nombre) {

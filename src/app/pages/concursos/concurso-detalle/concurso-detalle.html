@@ -6,12 +6,12 @@
     @case ('error') {
       <section
         role="alert"
-        class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+        class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
       >
         <span>No se pudo cargar el concurso. Revisa tu conexión e inténtalo de nuevo.</span>
         <button
           type="button"
-          class="cursor-pointer rounded-lg border border-solid border-kl-danger bg-transparent px-4 py-2 text-sm text-kl-heading"
+          class="cursor-pointer rounded-full border border-solid border-kl-danger bg-transparent px-4 py-2 text-sm text-kl-heading"
           (click)="retry()"
         >
           Reintentar
@@ -30,13 +30,13 @@
     @default {
       @let c = competition()!;
       <header
-        class="kl-card rounded-[18px] border border-solid border-kl-accent/40 bg-linear-to-r from-[var(--kl-card-from)]/80 to-[var(--kl-card-to)]/90 p-5 shadow-[0_0_24px_#643cff22] sm:p-6"
+        class="kl-card rounded-[18px] border border-solid border-kl-accent/40 bg-linear-to-r from-[var(--kl-card-from)]/80 to-[var(--kl-card-to)]/90 p-5 sm:p-6"
       >
-        <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
+        <p class="mt-0 mb-2 font-mono text-xs wrap-anywhere text-kl-muted">
           <a routerLink="/inicio">Inicio</a> / <a routerLink="/concursos">Concursos</a> / {{ c.eventName }}
         </p>
         <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
+          <div class="min-w-0 wrap-anywhere">
             <h1 class="m-0 font-display text-[28px] leading-9 font-bold tracking-[-1px] md:text-[36px]">
               {{ c.eventName }}
             </h1>
@@ -130,7 +130,7 @@
                           >{{ row.item.letter }}
                         </span>
                       </td>
-                      <td class="px-4 py-3.5">
+                      <td class="min-w-[220px] px-4 py-3.5 wrap-anywhere">
                         @if (row.item.problem.url) {
                           <a
                             class="font-semibold text-kl-heading hover:text-kl-accent-text"
@@ -168,7 +168,7 @@
                         <div class="flex flex-wrap justify-end gap-2">
                           @if (row.submit) {
                             <a
-                              class="inline-block rounded-lg border border-solid border-kl-border-strong px-3 py-1.5 text-[13px] text-kl-heading hover:border-kl-accent-text"
+                              class="inline-block rounded-full border border-solid border-kl-border-strong px-3 py-1.5 text-[13px] text-kl-heading hover:border-kl-accent-text"
                               [href]="row.submit"
                               target="_blank"
                               rel="noopener noreferrer"
@@ -178,7 +178,7 @@
                           }
                           <button
                             type="button"
-                            class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-3 py-1.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                            class="cursor-pointer rounded-full border-0 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-3 py-1.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
                             [disabled]="registerBlock(row.status) !== null"
                             [attr.title]="registerBlock(row.status)"
                             [attr.aria-description]="registerBlock(row.status)"
@@ -210,12 +210,12 @@
             @case ('error') {
               <section
                 role="alert"
-                class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+                class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
               >
                 <span>No se pudo cargar la clasificación.</span>
                 <button
                   type="button"
-                  class="cursor-pointer rounded-lg border border-solid border-kl-danger bg-transparent px-4 py-2 text-sm text-kl-heading"
+                  class="cursor-pointer rounded-full border border-solid border-kl-danger bg-transparent px-4 py-2 text-sm text-kl-heading"
                   (click)="loadStandings()"
                 >
                   Reintentar
@@ -292,12 +292,12 @@
 
         @case ('grupo') {
           <section class="rounded-2xl border border-solid border-[var(--kl-line)] bg-[var(--kl-card-to)]/70 p-6">
-            <h2 class="m-0 text-lg font-medium">Ranking de {{ team()?.name }}</h2>
+            <h2 class="m-0 text-lg font-medium wrap-anywhere">Ranking de {{ team()?.name }}</h2>
             <p class="mt-2 mb-4 text-sm text-kl-body">
               Mira cómo va tu grupo en el ranking acumulado de problemas resueltos.
             </p>
             <a
-              class="inline-block rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-sm font-medium text-white"
+              class="inline-block rounded-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-sm font-medium text-white"
               routerLink="/ranking"
               [queryParams]="{ teamId: teamId() }"
               >Ver ranking del grupo</a
@@ -361,14 +361,14 @@
       aria-labelledby="registrar-titulo"
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
-      class="kl-card w-full max-w-[460px] rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)] to-[var(--kl-card-to)] p-6"
+      class="kl-card max-h-full w-full max-w-[460px] overflow-y-auto rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)] to-[var(--kl-card-to)] p-6"
       [formGroup]="form"
       novalidate
       (click)="$event.stopPropagation()"
       (submit)="$event.preventDefault(); register()"
     >
       <h2 id="registrar-titulo" class="m-0 text-lg font-medium">Registrar envío · Problema {{ item.letter }}</h2>
-      <p class="mt-1 mb-4 text-sm text-kl-body">{{ item.problem.title }}</p>
+      <p class="mt-1 mb-4 text-sm wrap-anywhere text-kl-body">{{ item.problem.title }}</p>
       <label class="mb-4 block text-sm">
         Lenguaje
         <select
@@ -399,12 +399,12 @@
         Pega el enlace de tu envío en Codeforces: tu coach lo usará para verificarlo. No pegues tu código aquí.
       </p>
       @if (registerError()) {
-        <p role="alert" class="mt-0 mb-4 rounded-lg border border-solid border-kl-danger bg-[#34161a] p-3 text-sm">{{ registerError() }}</p>
+        <p role="alert" class="mt-0 mb-4 rounded-lg border border-solid border-kl-danger bg-kl-danger/10 p-3 text-sm">{{ registerError() }}</p>
       }
       <div class="flex justify-end gap-3">
         <button
           type="button"
-          class="cursor-pointer rounded-lg border border-solid border-kl-border-strong bg-transparent px-4 py-2 text-sm text-kl-heading"
+          class="cursor-pointer rounded-full border border-solid border-kl-border-strong bg-transparent px-4 py-2 text-sm text-kl-heading"
           [disabled]="saving()"
           (click)="closeRegister()"
         >
@@ -412,7 +412,7 @@
         </button>
         <button
           type="submit"
-          class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+          class="cursor-pointer rounded-full border-0 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           [disabled]="saving() || form.invalid"
         >
           {{ saving() ? 'Guardando…' : 'Guardar envío' }}

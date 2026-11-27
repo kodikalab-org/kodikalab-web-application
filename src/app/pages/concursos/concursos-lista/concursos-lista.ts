@@ -72,12 +72,15 @@ export class ConcursosLista {
   ]);
 
   protected readonly summary = computed(() => {
-    const assigned = this.visible().flatMap((entry) => entry.assigned ?? []);
+    const entries = this.visible();
+    // A total that leaves out an unreadable group would be a made-up figure.
+    const known = entries.every((entry) => entry.assigned !== null);
+    const assigned = entries.flatMap((entry) => entry.assigned ?? []);
+    const count = (status: string) => assigned.filter((item) => problemStatus(item) === status).length;
     return {
       active: this.rows().filter((row) => row.competition.status === 'EN_CURSO').length,
-      solved: assigned.filter((item) => problemStatus(item) === 'RESUELTO').length,
-      assigned: assigned.length,
-      pending: assigned.filter((item) => problemStatus(item) === 'PENDIENTE').length,
+      solved: known ? `${count('RESUELTO')} / ${assigned.length}` : '—',
+      pending: known ? count('PENDIENTE') : '—',
     };
   });
 

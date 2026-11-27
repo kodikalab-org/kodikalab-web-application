@@ -46,7 +46,7 @@
                   [class]="colorEquipo(i)"
                   >{{ iniciales(equipo.name) }}</span
                 >
-                <span class="block text-sm font-semibold text-kl-text">{{ equipo.name }}</span>
+                <span class="block min-w-0 text-sm font-semibold wrap-anywhere text-kl-text">{{ equipo.name }}</span>
               </span>
             </mat-radio-button>
           </div>
@@ -130,7 +130,7 @@
           </div>
 
           <mat-card
-            class="auth-card mt-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card mt-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
             appearance="outlined"
           >
             <div class="p-4 md:p-5" [attr.aria-busy]="cargando()">
@@ -169,7 +169,7 @@
                   <ul class="problemas m-0 list-none p-0">
                     @for (problema of datos.items; track problema.competitionProblemId) {
                       <li
-                        class="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 border-0 border-t border-solid border-kl-divider px-2 py-3.5 text-sm xl:grid-cols-[40px_minmax(0,1.3fr)_minmax(0,1.1fr)_80px_minmax(0,1fr)_48px_110px]"
+                        class="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 wrap-anywhere border-0 border-t border-solid border-kl-divider px-2 py-3.5 text-sm xl:grid-cols-[40px_minmax(0,1.3fr)_minmax(0,1.1fr)_80px_minmax(0,1fr)_48px_110px]"
                       >
                         <span
                           class="flex size-9 items-center justify-center rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-accent)] font-bold text-white"
@@ -231,7 +231,7 @@
 
         <aside class="flex flex-col gap-6" aria-label="Avance y competencias del equipo">
           <mat-card
-            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
             appearance="outlined"
           >
             <div class="p-5">
@@ -243,9 +243,9 @@
               </h2>
               <p class="mt-4 mb-0 flex items-baseline gap-2">
                 <span class="font-display text-[32px] leading-none font-bold"
-                  >{{ resumen().resueltos }}/{{ resumen().total }}</span
+                  >{{ resumenListo() ? resumen().resueltos + '/' + resumen().total : '—' }}</span
                 >
-                <span class="text-[13px] text-kl-muted">resueltos en {{ nombreEquipo() }}</span>
+                <span class="min-w-0 text-[13px] wrap-anywhere text-kl-muted">resueltos en {{ nombreEquipo() }}</span>
               </p>
               <div class="mt-3 flex h-2 gap-0.5 overflow-hidden rounded-full" aria-hidden="true">
                 @for (item of resumen().porEstado; track item.estado) {
@@ -261,7 +261,7 @@
                       <span class="size-2 rounded-full" [class]="puntoEstado(item.estado)"></span>
                       {{ estadoAsignacion[item.estado].label }}
                     </span>
-                    <span class="font-mono text-[13px]">{{ item.cantidad }}</span>
+                    <span class="font-mono text-[13px]">{{ resumenListo() ? item.cantidad : '—' }}</span>
                   </li>
                 }
               </ul>
@@ -269,7 +269,7 @@
           </mat-card>
 
           <mat-card
-            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
             appearance="outlined"
           >
             <div class="p-5">
@@ -279,7 +279,9 @@
                 </span>
                 Competencias del equipo
               </h2>
-              @if (competenciasEquipo().length === 0) {
+              @if (!resumenListo()) {
+                <p class="mt-3 mb-0 text-sm text-kl-muted">—</p>
+              } @else if (competenciasEquipo().length === 0) {
                 <p class="mt-3 mb-0 text-sm text-kl-muted">Sin competencias con problemas asignados.</p>
               }
               <ul class="m-0 mt-3 list-none p-0">
@@ -287,7 +289,7 @@
                   <li
                     class="flex items-center justify-between gap-3 border-0 border-t border-solid border-kl-divider py-3 first:border-t-0"
                   >
-                    <div>
+                    <div class="min-w-0 wrap-anywhere">
                       <p class="m-0 text-sm font-semibold text-kl-heading">{{ competencia.name }}</p>
                       <p class="m-0 text-xs text-kl-muted">
                         {{ competencia.status === 'PROGRAMADA' ? 'Empieza' : 'Termina' }}
@@ -295,7 +297,7 @@
                       </p>
                     </div>
                     <span
-                      class="rounded-full border border-solid px-2 py-0.5 text-[11px]"
+                      class="shrink-0 rounded-full border border-solid px-2 py-0.5 text-[11px]"
                       [class]="estadoCompetencia[competencia.status].badge"
                       >{{ estadoCompetencia[competencia.status].label }}</span
                     >

@@ -2,7 +2,7 @@
   @if (store.panelOpen()) {
     <section
       id="agent-panel"
-      class="fixed inset-x-2 bottom-2 z-40 flex h-[min(640px,calc(100dvh-16px))] flex-col gap-3 rounded-2xl border border-solid border-kl-border-strong bg-kl-surface p-3 font-body text-kl-text shadow-2xl sm:right-4 sm:bottom-4 sm:left-auto sm:w-[420px]"
+      class="fixed inset-x-2 bottom-2 z-40 flex h-[min(640px,calc(100dvh-16px))] flex-col gap-3 overflow-y-auto rounded-3xl border border-solid border-kl-border-strong bg-linear-to-b from-[var(--kl-card-from)] via-[var(--kl-card-via)] to-[var(--kl-card-to)] p-3 font-body text-kl-text sm:right-4 sm:bottom-4 sm:left-auto sm:w-[420px] kl-card"
       role="dialog"
       aria-labelledby="agent-panel-title"
       (keydown.escape)="store.panelOpen.set(false)"
@@ -19,6 +19,10 @@
         <app-agent-chat />
       } @placeholder {
         <app-loader label="Cargando…" [rows]="1" class="m-0" />
+      } @error {
+        <p class="m-0 text-sm text-kl-danger" role="alert">
+          No se pudo cargar el asistente. Recarga la página e inténtalo de nuevo.
+        </p>
       }
     </section>
   } @else {

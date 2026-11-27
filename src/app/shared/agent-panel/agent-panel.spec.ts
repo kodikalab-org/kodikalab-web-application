@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, DeferBlockBehavior, DeferBlockState, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
@@ -79,5 +79,23 @@ describe('Floating agent panel', () => {
 
     expect(dialog()).toBeNull();
     expect(toggle()).not.toBeNull();
+  });
+
+  it('explains how to recover when the assistant chunk fails to load', async () => {
+    // Rebuild the module: the manual defer behavior cannot be set once the outer setup has injected.
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ deferBlockBehavior: DeferBlockBehavior.Manual, providers: [
+      provideHttpClient(), provideHttpClientTesting(), provideRouter([{ path: 'grupos', component: Blank }]),
+    ] });
+    session = TestBed.inject(Session);
+    http = TestBed.inject(HttpTestingController);
+    await open('/grupos');
+    toggle()!.click();
+    await fixture.whenStable();
+    const [block] = await fixture.getDeferBlocks();
+
+    await block.render(DeferBlockState.Error);
+
+    expect(dialog()?.querySelector('[role="alert"]')?.textContent).toContain('No se pudo cargar el asistente');
   });
 });

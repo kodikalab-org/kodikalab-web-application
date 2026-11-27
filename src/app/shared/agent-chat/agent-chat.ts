@@ -3,19 +3,26 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { AGENT_MESSAGE_LIMIT, AgentChart } from '../../core/agent-api';
+import { AGENT_MESSAGE_LIMIT, AgentChart, AgentTeam } from '../../core/agent-api';
 import { AgentChatStore } from '../../core/agent-chat-store';
 import { Session } from '../../core/session';
 import { CoachGroup, TeamsApi } from '../../core/teams-api';
+import { Loader } from '../loader/loader';
 
-interface Bar { label: string; value: number; width: number; }
+interface Bar { label: string; value: number | null; width: number; }
 
 /** Conversation with the assistant. It only draws what the server sends: no figure is computed here. */
 @Component({
   selector: 'app-agent-chat',
-  imports: [MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [Loader, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './agent-chat.html',
-  host: { class: 'flex min-h-0 flex-1 flex-col gap-3' },
+  // The message and team boxes are rounded and translucent instead of Material's flat opaque fill.
+  host: {
+    class:
+      'flex min-h-0 flex-1 flex-col gap-3 [--mat-form-field-outlined-container-shape:16px] ' +
+      '[--mat-form-field-outlined-outline-color:var(--kl-border-strong)] ' +
+      '[--mat-form-field-outlined-focus-outline-color:var(--kl-accent-text)]',
+  },
 })
 export class AgentChat {
   protected readonly store = inject(AgentChatStore);
@@ -59,10 +66,19 @@ export class AgentChat {
   }
 
   protected bars(chart: AgentChart): Bar[] {
-    const top = chart.unit === '%' ? 100 : Math.max(...chart.values, 1);
+    const values = chart.labels.map((_, index) => {
+      const value = chart.values?.[index];
+      return typeof value === 'number' && Number.isFinite(value) ? value : null;
+    });
+    const top = chart.unit === '%' ? 100 : Math.max(...values.map((value) => value ?? 0), 1);
+    // The figure is printed as sent; only the bar is clamped, since an invalid CSS width would fill the track.
     return chart.labels.map((label, index) => ({
-      label, value: chart.values[index], width: Math.min(100, (chart.values[index] / top) * 100),
+      label, value: values[index], width: Math.min(100, Math.max(0, ((values[index] ?? 0) / top) * 100)),
     }));
+  }
+
+  protected teamSummary(team: AgentTeam): string {
+    return [team.expectedLevel, team.sessionSchedule].filter(Boolean).join(' · ');
   }
 
   protected webUrl(url: string | null): string | null {

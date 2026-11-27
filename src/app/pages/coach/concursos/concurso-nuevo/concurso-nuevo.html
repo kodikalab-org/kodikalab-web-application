@@ -21,10 +21,13 @@
     </header>
 
     @if (teamsError()) {
-      <p role="alert" class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4">
+      <p role="alert" class="rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4">
         {{ teamsError() }}
         <button mat-stroked-button type="button" (click)="loadTeams()">Reintentar</button>
       </p>
+    }
+    @if (loadingTeams()) {
+      <app-loader label="Cargando tus grupos…" [rows]="1" class="mb-4" />
     }
     @if (!loadingTeams() && !teamsError() && !teams().length) {
       <p role="status" class="rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
@@ -34,7 +37,7 @@
     @if (error()) {
       <section
         role="alert"
-        class="mb-4 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+        class="mb-4 rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm"
       >
         <strong class="text-amber-400">{{ error() }}</strong>
         @if (otherErrors().length) {
@@ -49,7 +52,7 @@
 
     <mat-card
       appearance="outlined"
-      class="rounded-[18px] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
+      class="rounded-[18px] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/85 p-5 sm:p-6"
     >
       <form
         [formGroup]="form"

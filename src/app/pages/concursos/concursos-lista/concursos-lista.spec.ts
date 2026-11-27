@@ -147,4 +147,21 @@ describe('ConcursosLista', () => {
     fixture.detectChanges();
     expect(root.querySelector('[role="alert"]')).toBeNull();
   });
+
+  it('does not report solved totals when the assigned problems of a group cannot be read', async () => {
+    const fixture = TestBed.createComponent(ConcursosLista);
+    fixture.detectChanges();
+    teamRequest(http).flush(TEAMS);
+    competitionsRequest(http, 1).flush({ teamId: 1, total: 0, items: [] });
+    competitionsRequest(http, 2).flush({ teamId: 2, total: 0, items: [] });
+    assignedRequest(http, 1).flush({ teamId: 1, total: 0, items: [] });
+    assignedRequest(http, 2).flush({}, { status: 500, statusText: 'Error' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const figures = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('[aria-label="Resumen de progreso"] p:last-child'),
+    ).map((node) => node.textContent!.trim());
+    expect(figures.slice(1)).toEqual(['\u2014', '\u2014']);
+  });
 });

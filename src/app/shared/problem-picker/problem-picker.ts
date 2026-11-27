@@ -151,6 +151,11 @@ export class ProblemPicker {
     this.trigger.next({ term: value.trim(), source: this.source() });
   }
 
+  protected retrySearch() {
+    this.searchError.set('');
+    this.trigger.next({ term: this.query().trim(), source: this.source() });
+  }
+
   /** Enter inside a field of the picker must not submit the contest form around it. */
   protected stopEnter(event: Event) {
     if ((event.target as HTMLElement).tagName === 'INPUT') event.preventDefault();

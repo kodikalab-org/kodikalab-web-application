@@ -46,7 +46,7 @@
       (ngSubmit)="continuar()"
     >
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
         appearance="outlined"
       >
         <div class="p-4 md:p-6">
@@ -90,7 +90,10 @@
 
             @if (store.teamId() !== null) {
               @if (store.competitionsError(); as mensaje) {
-                <p class="mt-4 mb-0 text-sm text-red-300" role="alert">{{ mensaje }}</p>
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-red-300" role="alert">
+                  <span>{{ mensaje }}</span>
+                  <button mat-stroked-button type="button" (click)="store.refreshCompetitions()">Reintentar</button>
+                </div>
               } @else if (store.competitionsLoading()) {
                 <app-loader label="Cargando competencias…" [rows]="2" class="mt-4 mb-0" />
               } @else if (store.assignableCompetitions().length === 0) {
@@ -118,7 +121,7 @@
                         [value]="competencia.competitionId"
                       >
                         <span class="flex flex-wrap items-center gap-2">
-                          <span class="text-sm font-semibold text-kl-text">{{ competencia.eventName }}</span>
+                          <span class="min-w-0 text-sm font-semibold wrap-anywhere text-kl-text">{{ competencia.eventName }}</span>
                           <span
                             class="rounded-full border border-solid px-2 py-0.5 text-[11px]"
                             [class]="estado[competencia.status].badge"
@@ -143,7 +146,7 @@
       </mat-card>
 
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
         appearance="outlined"
       >
         <div class="p-4 md:p-6">
@@ -170,7 +173,7 @@
                 class="grid gap-3 border-0 border-t border-solid border-kl-divider py-4 sm:grid-cols-3 md:items-start lg:grid-cols-[minmax(0,1fr)_96px_112px_176px]"
                 [formGroupName]="i"
               >
-                <div class="sm:col-span-3 lg:col-span-1 lg:pt-2.5">
+                <div class="min-w-0 wrap-anywhere sm:col-span-3 lg:col-span-1 lg:pt-2.5">
                   <p class="m-0 text-sm font-semibold text-kl-heading">
                     {{ store.selected()[i].title }}
                   </p>
@@ -215,7 +218,7 @@
 
     <aside class="flex flex-col gap-6" aria-label="Resumen de la asignación">
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
         appearance="outlined"
       >
         <div class="p-5">
@@ -232,11 +235,11 @@
             </div>
             <div class="flex justify-between gap-4 border-0 border-b border-solid border-kl-divider py-2.5">
               <dt class="text-kl-muted">Equipo</dt>
-              <dd class="m-0 text-right font-medium">{{ store.team()?.name ?? '—' }}</dd>
+              <dd class="m-0 min-w-0 text-right font-medium wrap-anywhere">{{ store.team()?.name ?? '—' }}</dd>
             </div>
             <div class="flex justify-between gap-4 border-0 border-b border-solid border-kl-divider py-2.5">
               <dt class="text-kl-muted">Competencia</dt>
-              <dd class="m-0 text-right font-medium">{{ store.competition()?.eventName ?? '—' }}</dd>
+              <dd class="m-0 min-w-0 text-right font-medium wrap-anywhere">{{ store.competition()?.eventName ?? '—' }}</dd>
             </div>
             <div class="flex justify-between gap-4 border-0 border-b border-solid border-kl-divider py-2.5">
               <dt class="text-kl-muted">Alcance</dt>

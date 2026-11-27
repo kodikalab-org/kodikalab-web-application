@@ -171,14 +171,14 @@ export class AssignmentStore {
 
   private loadCompetitions(teamId: number | null): void {
     this.competitionsError.set(null);
+    this.competitionsLoading.set(teamId !== null);
     if (teamId === null) return;
-    this.competitionsLoading.set(true);
     this.teamApi
       .competitions(teamId)
-      .pipe(finalize(() => this.competitionsLoading.set(false)))
       .subscribe({
         next: (competitions) => {
           if (this.teamId() !== teamId) return;
+          this.competitionsLoading.set(false);
           this.competitions.set(competitions);
           const pending = this.pendingCompetitionId;
           this.pendingCompetitionId = null;
@@ -187,7 +187,9 @@ export class AssignmentStore {
           }
         },
         error: (error) => {
-          if (this.teamId() === teamId) this.competitionsError.set(problemsError(error));
+          if (this.teamId() !== teamId) return;
+          this.competitionsLoading.set(false);
+          this.competitionsError.set(problemsError(error));
         },
       });
   }

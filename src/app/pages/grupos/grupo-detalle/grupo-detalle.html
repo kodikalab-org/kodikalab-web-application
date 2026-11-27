@@ -8,7 +8,7 @@
       {{ error() }}
     </section>
   } @else if (cargando()) {
-    <p role="status" class="text-sm text-kl-muted">Cargando grupo…</p>
+    <app-loader label="Cargando grupo…" [rows]="2" />
   } @else if (grupo(); as grupo) {
     <mat-card
       class="kl-card mb-6 gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-6"

@@ -1,3 +1,4 @@
+import { Loader } from '../loader/loader';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -58,7 +59,7 @@ const DEBOUNCE_MS = 300;
  */
 @Component({
   selector: 'app-problem-picker',
-  imports: [CodeforcesCodeAdd, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [Loader, CodeforcesCodeAdd, MatFormFieldModule, MatInputModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './problem-picker.html',
   styleUrl: './problem-picker.css',

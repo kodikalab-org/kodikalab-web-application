@@ -1,9 +1,7 @@
 <div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 pt-8 pb-12 md:px-10">
   @switch (state()) {
     @case ('loading') {
-      <p role="status" class="m-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
-        Cargando el concurso…
-      </p>
+      <app-loader label="Cargando el concurso…" [rows]="2" class="m-0 p-4" />
     }
     @case ('error') {
       <section
@@ -207,9 +205,7 @@
         @case ('clasificacion') {
           @switch (standingsState()) {
             @case ('loading') {
-              <p role="status" class="m-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
-                Cargando la clasificación…
-              </p>
+              <app-loader label="Cargando la clasificación…" [rows]="2" class="m-0 p-4" />
             }
             @case ('error') {
               <section

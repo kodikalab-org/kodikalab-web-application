@@ -1,3 +1,4 @@
+import { Loader } from './loader/loader';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TeamsApi, CoachGroup, PractitionerGroup } from '../core/teams-api';
 import { Session } from '../core/session';
@@ -11,7 +12,7 @@ import { UserMenu } from './user-menu/user-menu';
 import { TeamPage } from './team-page';
 @Component({
   selector: 'app-team-frame',
-  imports: [
+  imports: [Loader, 
     RouterLink,
     ReactiveFormsModule,
     MatButtonModule,
@@ -85,7 +86,7 @@ import { TeamPage } from './team-page';
         </button>
       </form>
       @if (loadingTeams()) {
-        <p role="status">Consultando tus equipos…</p>
+        <app-loader label="Consultando tus equipos…" [rows]="2" />
       }
       @if (teamsError()) {
         <p role="alert">{{ teamsError() }}</p>
@@ -104,7 +105,7 @@ import { TeamPage } from './team-page';
         </p>
       }
       @if (page().busy()) {
-        <p role="status" aria-live="polite">Consultando información del equipo…</p>
+        <app-loader label="Consultando información del equipo…" [rows]="2" />
       }
       @if (page().error()) {
         <section role="alert" class="rounded-xl border border-amber-400 bg-kl-surface p-4">

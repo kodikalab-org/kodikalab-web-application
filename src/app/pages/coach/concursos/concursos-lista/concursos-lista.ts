@@ -1,3 +1,4 @@
+import { Loader } from '../../../../shared/loader/loader';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -48,7 +49,7 @@ export function formatDuration(startsAt: string, endsAt: string): string {
 
 @Component({
   selector: 'app-concursos-lista',
-  imports: [
+  imports: [Loader, 
     AppHeader,
     SiteFooter,
     RouterLink,

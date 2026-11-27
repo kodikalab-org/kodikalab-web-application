@@ -1,3 +1,4 @@
+import { Loader } from '../../shared/loader/loader';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -39,7 +40,7 @@ const STATUS_LABELS: Record<TopicStatus, string> = {
 
 @Component({
   selector: 'app-progreso-tema',
-  imports: [
+  imports: [Loader, 
     AppHeader,
     ReactiveFormsModule,
     RouterLink,

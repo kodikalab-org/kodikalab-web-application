@@ -29,7 +29,7 @@
     </div>
 
     @if (teamsState() === 'loading') {
-      <p role="status" class="m-0 text-sm text-kl-muted">Cargando tus equipos…</p>
+      <app-loader label="Cargando tus equipos…" [rows]="2" class="m-0" />
     } @else if (teamsState() === 'error') {
       <mat-card
         class="items-center gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6 text-center lg:py-12"

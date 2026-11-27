@@ -1,3 +1,4 @@
+import { Loader } from '../loader/loader';
 import { Component, ElementRef, computed, effect, inject, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,7 +17,7 @@ const HIDDEN = /^\/($|login|registro|recuperar-contrasena|demo\/|onboarding\/|(c
  */
 @Component({
   selector: 'app-agent-panel',
-  imports: [AgentChat, MatButtonModule, RouterLink],
+  imports: [Loader, AgentChat, MatButtonModule, RouterLink],
   templateUrl: './agent-panel.html',
 })
 export class AgentPanel {

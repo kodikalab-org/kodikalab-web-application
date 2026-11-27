@@ -17,7 +17,7 @@
       <button mat-stroked-button type="button" (click)="reintentar()">Reintentar</button>
     </div>
   } @else if (cargando() && !asignacion()) {
-    <p class="mt-5 mb-0 text-sm text-kl-muted" role="status">Cargando el problema…</p>
+    <app-loader label="Cargando el problema…" [rows]="2" class="mt-5 mb-0" />
   }
 
   @if (asignacion(); as item) {

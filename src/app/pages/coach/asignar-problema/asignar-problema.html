@@ -89,7 +89,7 @@
             <button mat-stroked-button type="button" (click)="reintentar()">Reintentar</button>
           </div>
         } @else if (cargando() && !pagina()) {
-          <p class="mt-4 mb-0 text-sm text-kl-muted" role="status">Cargando el catálogo…</p>
+          <app-loader label="Cargando el catálogo…" [rows]="2" class="mt-4 mb-0" />
         } @else if (pagina(); as datos) {
           @if (datos.items.length === 0) {
             <p class="mt-4 mb-0 text-sm text-kl-muted" role="status">

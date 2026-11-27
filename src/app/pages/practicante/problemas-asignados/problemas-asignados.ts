@@ -1,3 +1,4 @@
+import { Loader } from '../../../shared/loader/loader';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -49,7 +50,7 @@ interface CompetenciaFiltro {
 /** US-08 (practitioner): problems assigned to the teams the practitioner belongs to, with their own state. */
 @Component({
   selector: 'app-problemas-asignados',
-  imports: [
+  imports: [Loader, 
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,

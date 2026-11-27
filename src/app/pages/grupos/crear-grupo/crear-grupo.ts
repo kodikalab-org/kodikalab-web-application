@@ -1,3 +1,4 @@
+import { Loader } from '../../../shared/loader/loader';
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -21,7 +22,7 @@ const NIVELES: Record<string, string> = {
 
 @Component({
   selector: 'app-crear-grupo',
-  imports: [
+  imports: [Loader, 
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,

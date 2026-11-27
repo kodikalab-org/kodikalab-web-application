@@ -1,4 +1,4 @@
-import { Component, afterNextRender, inject, signal } from '@angular/core';
+import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { Session } from './core/session';
@@ -14,6 +14,8 @@ export class App {
   private readonly session = inject(Session);
   protected readonly router = inject(Router);
   private readonly viewportScroller = inject(ViewportScroller);
+  /** True while the router is resolving a screen, including its lazy chunk. */
+  protected readonly navigating = computed(() => this.router.currentNavigation() !== null);
   constructor() {
     this.viewportScroller.setOffset([0, 96]);
     afterNextRender(() => this.session.restore());

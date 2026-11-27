@@ -1,3 +1,4 @@
+import { Loader } from '../../../shared/loader/loader';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -44,7 +45,7 @@ const PUNTO_PLATAFORMA: Record<SourcePlatform, string> = {
 /** Step 1 of US-07: search the catalog and pick the problems to assign. */
 @Component({
   selector: 'app-asignar-problema',
-  imports: [
+  imports: [Loader, 
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,

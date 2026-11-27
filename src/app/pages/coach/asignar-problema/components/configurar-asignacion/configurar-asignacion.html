@@ -69,7 +69,7 @@
               <button mat-stroked-button type="button" (click)="reintentarEquipos()">Reintentar</button>
             </div>
           } @else if (store.teamsLoading()) {
-            <p class="mt-4 mb-0 text-sm text-kl-muted" role="status">Cargando tus equipos…</p>
+            <app-loader label="Cargando tus equipos…" [rows]="2" class="mt-4 mb-0" />
           } @else if (store.teams().length === 0) {
             <p class="mt-4 mb-0 text-sm text-kl-body">
               No administras ningún equipo publicado.
@@ -92,7 +92,7 @@
               @if (store.competitionsError(); as mensaje) {
                 <p class="mt-4 mb-0 text-sm text-red-300" role="alert">{{ mensaje }}</p>
               } @else if (store.competitionsLoading()) {
-                <p class="mt-4 mb-0 text-sm text-kl-muted" role="status">Cargando competencias…</p>
+                <app-loader label="Cargando competencias…" [rows]="2" class="mt-4 mb-0" />
               } @else if (store.assignableCompetitions().length === 0) {
                 <p class="mt-4 mb-0 text-sm text-kl-body">
                   Este equipo no tiene concursos programados ni en curso.

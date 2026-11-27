@@ -92,7 +92,7 @@
       </p>
     } @else {
       @if (loading()) {
-        <p class="mt-5 mb-0 text-kl-muted" aria-live="polite">Consultando concursos…</p>
+        <app-loader label="Consultando concursos…" [rows]="2" class="mt-5 mb-0" />
       }
       @for (section of sections(); track section.title) {
         <section class="mt-8" [attr.aria-labelledby]="'titulo-' + $index">

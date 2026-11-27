@@ -55,7 +55,7 @@
     @if (searchError(); as message) {
       <p role="alert" class="m-0 text-sm text-red-300">{{ message }}</p>
     } @else if (searching()) {
-      <p role="status" class="m-0 text-sm text-kl-muted">Buscando…</p>
+      <app-loader label="Buscando…" [rows]="1" class="m-0" />
     } @else if (searched() && hits().length === 0) {
       <p role="status" class="m-0 text-sm text-kl-muted">
         No encontramos problemas con esa búsqueda.

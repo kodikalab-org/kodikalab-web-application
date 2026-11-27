@@ -1,3 +1,4 @@
+import { Loader } from '../../../shared/loader/loader';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,7 +20,7 @@ import {
  */
 @Component({
   selector: 'app-grupo-detalle',
-  imports: [RouterLink, MatButtonModule, MatCardModule],
+  imports: [Loader, RouterLink, MatButtonModule, MatCardModule],
   templateUrl: './grupo-detalle.html',
   styleUrl: './grupo-detalle.css',
 })

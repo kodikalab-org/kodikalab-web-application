@@ -1,3 +1,4 @@
+import { Loader } from '../../../../../shared/loader/loader';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -41,7 +42,7 @@ interface CompetenciaFiltro {
 /** US-08 (coach): problems assigned to one of the coach's teams, by competition. */
 @Component({
   selector: 'app-problemas-asignados-coach',
-  imports: [
+  imports: [Loader, 
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,

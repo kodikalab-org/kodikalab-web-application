@@ -9,8 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Inter:wght@300..800&display=swap" rel="stylesheet">
+  <style>
+    .kl-boot { display: grid; place-content: center; justify-items: center; gap: 18px; min-height: 100vh; background: #0e0c24 url('/images/dashboard/0-imgIcon.svg') center top / cover; color: #f4f2ff; font: 700 22px 'Bricolage Grotesque', sans-serif; }
+    .kl-boot img { width: 64px; height: 64px; filter: drop-shadow(0 0 18px #8b6cff); }
+    .kl-boot i { width: 120px; height: 4px; border-radius: 99px; background: linear-gradient(90deg, #8b6cff, #4f7dff, #38d4f5, #ec6fd6, #8b6cff) 0 0 / 200% 100%; animation: kl-boot 1.1s linear infinite; }
+    @keyframes kl-boot { to { background-position: -200% 0; } }
+    @media (prefers-reduced-motion: reduce) { .kl-boot i { animation: none; } }
+  </style>
 </head>
 <body>
-  <app-root></app-root>
+  <app-root>
+    <div class="kl-boot" role="status">
+      <img src="/images/dashboard/0-imgIcon1.svg" alt="">
+      <span>Kodikalab</span>
+      <i aria-hidden="true"></i>
+    </div>
+  </app-root>
 </body>
 </html>

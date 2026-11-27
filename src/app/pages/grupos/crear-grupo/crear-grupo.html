@@ -22,7 +22,7 @@
     </div>
   </div>
   @if (cargandoBorrador()) {
-    <p role="status" class="mt-0 mb-4 text-sm text-kl-muted">Cargando tu borrador…</p>
+    <app-loader label="Cargando tu borrador…" [rows]="2" class="mt-0 mb-4" />
   } @else if (borradorId() !== null) {
     <p
       role="status"

@@ -30,9 +30,7 @@
 
   @switch (state()) {
     @case ('loading') {
-      <p role="status" class="m-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
-        Cargando tus concursos…
-      </p>
+      <app-loader label="Cargando tus concursos…" [rows]="2" class="m-0 p-4" />
     }
     @case ('error') {
       <section

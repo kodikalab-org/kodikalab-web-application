@@ -34,7 +34,7 @@
       >
         @for (equipo of equipos(); track equipo.groupId; let i = $index) {
           <div
-            class="rounded-xl border border-solid border-kl-border bg-white/3 px-3 py-3 has-[.mat-mdc-radio-checked]:border-[#8a6cff] has-[.mat-mdc-radio-checked]:bg-[#241a5c]/60"
+            class="rounded-xl border border-solid border-kl-border bg-white/3 px-3 py-3 has-[.mat-mdc-radio-checked]:border-[var(--kl-cta-from)] has-[.mat-mdc-radio-checked]:bg-[var(--kl-card-hi)]/60"
           >
             <mat-radio-button
               class="block w-full [&_.mdc-form-field]:w-full [&_.mdc-label]:flex-1"
@@ -130,7 +130,7 @@
           </div>
 
           <mat-card
-            class="auth-card mt-4 rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card mt-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
             appearance="outlined"
           >
             <div class="p-4 md:p-5" [attr.aria-busy]="cargando()">
@@ -172,7 +172,7 @@
                         class="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 border-0 border-t border-solid border-kl-divider px-2 py-3.5 text-sm xl:grid-cols-[40px_minmax(0,1.3fr)_minmax(0,1.1fr)_80px_minmax(0,1fr)_48px_110px]"
                       >
                         <span
-                          class="flex size-9 items-center justify-center rounded-lg bg-linear-to-b from-[#8a6cff] to-[#6e52f2] font-bold text-white"
+                          class="flex size-9 items-center justify-center rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-accent)] font-bold text-white"
                           ><span class="sr-only">Letra </span>{{ problema.letter }}</span
                         >
                         <div class="min-w-0">
@@ -231,12 +231,12 @@
 
         <aside class="flex flex-col gap-6" aria-label="Avance y competencias del equipo">
           <mat-card
-            class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
             appearance="outlined"
           >
             <div class="p-5">
               <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-                <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+                <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
                   <img src="images/app/chart-accent.svg" alt="" width="20" height="20" />
                 </span>
                 Tu avance en el equipo
@@ -269,12 +269,12 @@
           </mat-card>
 
           <mat-card
-            class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
             appearance="outlined"
           >
             <div class="p-5">
               <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-                <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+                <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
                   <img src="images/app/trophy-accent.svg" alt="" width="20" height="20" />
                 </span>
                 Competencias del equipo

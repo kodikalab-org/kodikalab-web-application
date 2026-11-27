@@ -45,7 +45,7 @@
             >Seleccionar Grafos y DP</a
           >
         </div>
-        <mat-card class="gap-4 border border-solid border-[#2b2760] bg-kl-surface p-6"
+        <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-kl-surface p-6"
           ><h2 class="m-0 text-xl font-bold">Tus datos están protegidos</h2>
           <p class="m-0 text-sm text-kl-muted">
             El cambio de contexto no copia resoluciones entre equipos. Solo se puede registrar
@@ -68,17 +68,17 @@
           <dd class="m-0 rounded-xl bg-[#212121] p-3">Equipo Alfa</dd>
         </dl>
         <section aria-label="Comparación entre equipos" class="grid grid-cols-2 gap-3">
-          <mat-card class="gap-3 border border-solid border-[#2b2760] bg-kl-surface p-5"
+          <mat-card class="gap-3 border border-solid border-[var(--kl-line)] bg-kl-surface p-5"
             ><span class="text-sm text-kl-muted">Resueltos en Alfa</span
             ><strong class="text-2xl">7 / 14</strong
             ><span class="text-xs text-kl-muted">Después del registro</span></mat-card
-          ><mat-card class="gap-3 border border-solid border-[#2b2760] bg-kl-surface p-5"
+          ><mat-card class="gap-3 border border-solid border-[var(--kl-line)] bg-kl-surface p-5"
             ><span class="text-sm text-kl-muted">Resueltos en Grafos y DP</span
             ><strong class="text-2xl">3 / 10</strong
             ><span class="text-xs text-kl-muted">Sin cambios</span></mat-card
           >
         </section>
-        <mat-card class="gap-4 border border-solid border-[#2b2760] bg-kl-surface p-6">
+        <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-kl-surface p-6">
           @for (
             fila of [
               ['Equipo Alfa', 'Resuelto', 'Actualizado'],
@@ -87,7 +87,7 @@
             track fila[0]
           ) {
             <article
-              class="grid gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm lg:grid-cols-4"
+              class="grid gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm lg:grid-cols-4"
             >
               <strong>Theatre Square · CF-1A</strong><span>{{ fila[0] }}</span
               ><span>{{ fila[1] }}</span
@@ -125,7 +125,7 @@
         >
         <aside
           aria-live="polite"
-          class="flex flex-col gap-2 rounded-xl border border-solid border-[#ccb2ff] bg-[#1e1536] p-4 text-sm"
+          class="flex flex-col gap-2 rounded-xl border border-solid border-[#ccb2ff] bg-[var(--kl-card-from)] p-4 text-sm"
         >
           <strong class="text-[#ccb2ff]">Estás consultando {{ contexto.nombre }}</strong
           ><span>Las cifras y estados de esta pantalla pertenecen únicamente a este grupo.</span>
@@ -136,7 +136,7 @@
         >
           @for (indicador of contexto.indicadores; track indicador.etiqueta) {
             <mat-card
-              class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+              class="gap-2 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-5"
               ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
               ><strong class="font-display text-2xl">{{ indicador.valor }}</strong
               ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span></mat-card
@@ -145,7 +145,7 @@
         </section>
         <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <mat-card
-            class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="min-w-0 gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 class="m-0 text-xl font-bold">Actividad en {{ contexto.nombre }}</h2>
             <table
@@ -157,7 +157,7 @@
                   contexto.nombre
                 }}
               </caption>
-              <thead class="bg-[#1e1536] text-kl-muted">
+              <thead class="bg-[var(--kl-card-from)] text-kl-muted">
                 <tr>
                   @for (titulo of ['Problema', 'Plataforma', 'Estado', 'Equipo']; track titulo) {
                     <th scope="col" class="p-3">{{ titulo }}</th>
@@ -191,7 +191,7 @@
             <ul class="m-0 flex list-none flex-col gap-4 p-0 lg:hidden">
               @for (fila of contexto.actividad; track fila.problema) {
                 <li
-                  class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm"
+                  class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm"
                 >
                   <strong>{{ fila.problema }}</strong
                   ><span class="font-mono text-xs text-[#ccb2ff]">{{ contexto.nombre }}</span
@@ -203,7 +203,7 @@
           </mat-card>
           <aside class="flex min-w-0 flex-col gap-6">
             <mat-card
-              class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+              class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
               ><h2 class="m-0 text-xl font-bold">Un problema, dos registros</h2>
               <p class="m-0 text-sm leading-5 text-kl-muted">
                 Theatre Square está asignado en ambos grupos. En Equipo Alfa figura resuelto; en
@@ -211,7 +211,7 @@
               </p></mat-card
             >
             <mat-card
-              class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+              class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
               ><h2 class="m-0 text-xl font-bold">Qué cambia al seleccionar</h2>
               <p class="m-0 text-sm leading-5 text-kl-muted">
                 Se actualizan únicamente las asignaciones, el progreso y las métricas del grupo

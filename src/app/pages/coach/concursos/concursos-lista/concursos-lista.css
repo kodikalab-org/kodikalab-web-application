@@ -17,6 +17,6 @@ select {
 }
 
 select option {
-  background: #110d2e;
+  background: var(--kl-card-via);
   color: var(--kl-text);
 }

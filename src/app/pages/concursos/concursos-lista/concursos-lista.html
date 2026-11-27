@@ -16,7 +16,7 @@
         Grupo
         <select
           aria-label="Grupo"
-          class="h-[44px] min-w-[220px] rounded-xl border border-solid border-kl-border-strong bg-[#0b0824] px-3 text-sm text-kl-heading outline-none focus:border-kl-accent-text"
+          class="h-[44px] min-w-[220px] rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-to)] px-3 text-sm text-kl-heading outline-none focus:border-kl-accent-text"
           (change)="selectTeam($any($event.target).value)"
         >
           <option value="">Todos mis grupos</option>
@@ -52,28 +52,28 @@
     @default {
       @let resumen = summary();
       <section aria-label="Resumen de progreso" class="grid gap-3 sm:grid-cols-3">
-        <div class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-5">
+        <div class="rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Concursos activos</p>
           <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.active }}</p>
         </div>
-        <div class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-5">
+        <div class="rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Problemas resueltos</p>
           <p class="mt-1 mb-0 font-display text-3xl font-bold">{{ resumen.solved }} / {{ resumen.assigned }}</p>
         </div>
-        <div class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-5">
+        <div class="rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-5">
           <p class="m-0 text-xs text-kl-muted">Pendientes de verificación</p>
           <p class="mt-1 mb-0 font-display text-3xl font-bold text-amber-200">{{ resumen.pending }}</p>
         </div>
       </section>
 
       @if (!teams().length) {
-        <section class="rounded-2xl border border-solid border-[#2b2760] bg-[#0b0824]/70 p-8 text-center">
+        <section class="rounded-2xl border border-solid border-[var(--kl-line)] bg-[var(--kl-card-to)]/70 p-8 text-center">
           <h2 class="m-0 text-lg font-medium">Todavía no perteneces a ningún grupo activo</h2>
           <p class="mt-2 mb-4 text-sm text-kl-muted">Únete a un grupo para ver sus concursos.</p>
           <a routerLink="/grupos" class="text-kl-accent-link underline">Explorar grupos</a>
         </section>
       } @else if (!contests().current.length && !contests().past.length) {
-        <section class="rounded-2xl border border-solid border-[#2b2760] bg-[#0b0824]/70 p-8 text-center">
+        <section class="rounded-2xl border border-solid border-[var(--kl-line)] bg-[var(--kl-card-to)]/70 p-8 text-center">
           <h2 class="m-0 text-lg font-medium">Tu grupo todavía no tiene concursos</h2>
           <p class="mt-2 mb-0 text-sm text-kl-muted">
             Cuando tu coach programe uno, aparecerá aquí con su fecha y tus problemas.
@@ -84,7 +84,7 @@
           <section [attr.aria-labelledby]="tabla.id + '-titulo'">
             <h2 [id]="tabla.id + '-titulo'" class="mt-0 mb-3 text-xl font-medium">{{ tabla.title }}</h2>
             <div
-              class="overflow-x-auto rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/60 via-[#140d34]/70 to-[#0a071a]/80"
+              class="overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80"
             >
               @if (tabla.rows.length) {
                 <table class="w-full min-w-[860px] border-collapse text-left text-sm" [attr.aria-label]="tabla.title">
@@ -136,7 +136,7 @@
                               class="mt-1.5 h-1.5 w-28 overflow-hidden rounded-full bg-white/10"
                             >
                               <div
-                                class="h-full rounded-full bg-linear-to-r from-[#8a6cff] to-[#6e52f2]"
+                                class="h-full rounded-full bg-linear-to-r from-[var(--kl-cta-from)] to-[var(--kl-accent)]"
                                 [style.width.%]="percent(row)"
                               ></div>
                             </div>
@@ -146,7 +146,7 @@
                         </td>
                         <td class="px-4 py-3.5 text-right">
                           <a
-                            class="inline-block rounded-lg bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-4 py-2 text-[13px] font-medium text-white"
+                            class="inline-block rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-[13px] font-medium text-white"
                             [routerLink]="['/concursos', c.teamId, c.competitionId]"
                             [attr.aria-label]="'Entrar al concurso ' + c.eventName"
                             >Entrar</a

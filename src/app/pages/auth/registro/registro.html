@@ -37,7 +37,7 @@
 
   <main class="main relative z-10 flex flex-1 items-center justify-center px-4 py-8">
     <mat-card
-      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[#201454]/75 via-[#140d34]/82 to-[#0a071a]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7"
+      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[var(--kl-card-hi)]/75 via-[var(--kl-card-via)]/82 to-[var(--kl-card-to)]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7"
       appearance="outlined"
     >
       <div class="card__brand inline-flex items-center gap-2.5">
@@ -265,7 +265,7 @@
             >Mi rol en el GPC UPC</span
           >
           <mat-button-toggle-group
-            class="role auth-role w-full rounded-xl border border-solid border-[#34304a] bg-white/3 p-[3px]"
+            class="role auth-role w-full rounded-xl border border-solid border-[var(--kl-line-strong)] bg-white/3 p-[3px]"
             formControlName="role"
             aria-labelledby="role-label"
             hideSingleSelectionIndicator
@@ -307,7 +307,7 @@
 
         <button
           mat-flat-button
-          class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+          class="submit auth-submit w-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
           type="submit"
           [disabled]="form.invalid || busy"
         >
@@ -316,11 +316,11 @@
         </button>
 
         <div
-          class="separator h-px bg-linear-to-r from-transparent via-[#34304a] to-transparent"
+          class="separator h-px bg-linear-to-r from-transparent via-[var(--kl-line-strong)] to-transparent"
           aria-hidden="true"
         ></div>
 
-        <p class="login m-0 flex flex-wrap justify-center gap-2 text-[15px] text-[#e7e3f5]">
+        <p class="login m-0 flex flex-wrap justify-center gap-2 text-[15px] text-[var(--kl-text-strong)]">
           ¿Ya tienes cuenta?
           <a
             class="login__link font-medium text-kl-accent-text hover:underline"

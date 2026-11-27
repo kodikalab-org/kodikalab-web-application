@@ -10,9 +10,9 @@
   --mat-form-field-container-text-line-height: normal;
   --mat-button-outlined-container-height: 50px;
   --mat-button-outlined-container-shape: 12px;
-  --mat-button-outlined-outline-color: #34304a;
-  --mat-button-outlined-label-text-color: #e7e3f5;
+  --mat-button-outlined-outline-color: var(--kl-line-strong);
+  --mat-button-outlined-label-text-color: var(--kl-text-strong);
   --mat-button-outlined-label-text-size: 15px;
-  --mat-button-filled-disabled-container-color: #241f3f;
-  --mat-button-filled-disabled-label-text-color: #8d89a3;
+  --mat-button-filled-disabled-container-color: var(--kl-line-soft);
+  --mat-button-filled-disabled-label-text-color: var(--kl-text-muted);
 }

@@ -30,7 +30,7 @@ import { TeamPage } from './team-page';
       class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat"
     ></div>
     <header
-      class="sticky top-0 z-40 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/80 backdrop-blur-xl"
+      class="sticky top-0 z-40 border-0 border-b border-solid border-[var(--kl-line-soft)] bg-[var(--kl-chrome)]/80 backdrop-blur-xl"
     >
       <mat-toolbar class="mx-auto flex h-[68px] max-w-[1600px] gap-4 px-4 lg:px-11">
         <a

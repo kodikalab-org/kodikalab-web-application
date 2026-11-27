@@ -36,7 +36,7 @@
           conclusiones para evitar una evaluación incorrecta.
         </p>
       </section>
-      <mat-card class="gap-4 border border-solid border-[#2b2760] bg-kl-surface p-6">
+      <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-kl-surface p-6">
         @for (
           dato of [
             [
@@ -52,7 +52,7 @@
           ];
           track dato[0]
         ) {
-          <article class="rounded-xl bg-[#1e1536] p-4">
+          <article class="rounded-xl bg-[var(--kl-card-from)] p-4">
             <h2 class="mt-0 text-sm font-bold">{{ dato[0] }}</h2>
             <p class="text-sm text-kl-muted">{{ dato[1] }}</p>
             <span class="font-mono text-xs text-kl-accent-text">{{ dato[2] }}</span>
@@ -67,7 +67,7 @@
       <section aria-label="Resumen del rendimiento" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
         @for (indicador of indicadores; track indicador.etiqueta) {
           <mat-card
-            class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+            class="gap-2 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-5"
             ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
             ><strong class="font-display text-2xl">{{
               estado === 'igual-prioridad' && indicador.etiqueta === 'Áreas prioritarias'
@@ -92,13 +92,13 @@
       }
       <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <mat-card
-          class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          class="min-w-0 gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
         >
           <h2 class="m-0 text-xl font-bold">Resolución por tema</h2>
           <p class="m-0 text-sm text-kl-muted">De menor a mayor cobertura del equipo</p>
           @for (tema of temas; track tema.nombre) {
             <article
-              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4"
+              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4"
             >
               <h3 class="m-0 text-sm font-bold">{{ tema.nombre }}</h3>
               <p class="m-0 text-sm text-kl-muted">
@@ -143,7 +143,7 @@
         </mat-card>
         <aside class="flex min-w-0 flex-col gap-6">
           <mat-card
-            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 class="m-0 text-xl font-bold">Priorizar entrenamiento</h2>
             <form [formGroup]="form" class="flex flex-col gap-4">
@@ -179,7 +179,7 @@
             </p>
           </mat-card>
           <mat-card
-            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
             ><h2 class="m-0 text-xl font-bold">Criterio de comparación</h2>
             <p class="m-0 text-sm leading-5 text-kl-muted">
               Cobertura por tema = problemas distintos resueltos por el equipo / problemas distintos

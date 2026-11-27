@@ -23,7 +23,7 @@
   @if (asignacion(); as item) {
     <header class="mt-5 flex items-center gap-4">
       <span
-        class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-2xl font-bold text-white"
+        class="flex size-14 shrink-0 items-center justify-center rounded-xl bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-accent)] text-2xl font-bold text-white"
         ><span class="sr-only">Letra </span>{{ item.letter }}</span
       >
       <div>
@@ -67,12 +67,12 @@
 
     <div class="mt-6 grid items-start gap-6 md:grid-cols-2 xl:grid-cols-3">
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
         appearance="outlined"
       >
         <div class="p-5">
           <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-            <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+            <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
               <img src="images/app/file-accent.svg" alt="" width="20" height="20" />
             </span>
             Condiciones de realización
@@ -115,12 +115,12 @@
       </mat-card>
 
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
         appearance="outlined"
       >
         <div class="p-5">
           <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-            <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+            <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
               <img src="images/app/trophy-accent.svg" alt="" width="20" height="20" />
             </span>
             Competencia
@@ -162,12 +162,12 @@
 
       <div class="flex flex-col gap-6 md:col-span-2 xl:col-span-1 xl:row-span-2">
         <mat-card
-          class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+          class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
           appearance="outlined"
         >
           <div class="p-5">
             <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-              <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+              <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
                 <img src="images/app/chart-accent.svg" alt="" width="20" height="20" />
               </span>
               Tu avance
@@ -197,7 +197,7 @@
             <button
               mat-flat-button
               type="button"
-              class="mt-3 h-12 w-full bg-linear-to-b from-[#8a6cff] to-[#6e52f2] text-base shadow-[0_0_24px_rgba(115,87,243,.45)] disabled:opacity-50 disabled:shadow-none"
+              class="mt-3 h-12 w-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-accent)] text-base shadow-[0_0_24px_rgba(115,87,243,.45)] disabled:opacity-50 disabled:shadow-none"
               [disabled]="bloqueo() !== null"
               (click)="abrirRegistro(registro)"
             >
@@ -211,12 +211,12 @@
         </mat-card>
 
         <mat-card
-          class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+          class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
           appearance="outlined"
         >
           <div class="p-5">
             <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-              <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+              <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
                 <img src="images/app/external-white.svg" alt="" width="20" height="20" />
               </span>
               Continuar la práctica
@@ -244,13 +244,13 @@
       </div>
 
       <mat-card
-        class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560] md:col-span-2"
+        class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560] md:col-span-2"
         appearance="outlined"
       >
         <div class="p-5">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-              <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+              <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
                 <img src="images/app/clock-accent.svg" alt="" width="20" height="20" />
               </span>
               Mis intentos
@@ -313,7 +313,7 @@
 
     <dialog
       #registro
-      class="m-auto max-h-[calc(100dvh-2rem)] w-[min(640px,calc(100%-2rem))] overflow-y-auto rounded-2xl border border-solid border-[#8a6cff] bg-[#140d34] p-0 text-kl-text shadow-[0_0_40px_rgba(100,60,255,.45)] backdrop:bg-black/70"
+      class="m-auto max-h-[calc(100dvh-2rem)] w-[min(640px,calc(100%-2rem))] overflow-y-auto rounded-2xl border border-solid border-[var(--kl-cta-from)] bg-[var(--kl-card-via)] p-0 text-kl-text shadow-[0_0_40px_rgba(100,60,255,.45)] backdrop:bg-black/70"
       aria-labelledby="registro-titulo"
       (close)="registroAbierto.set(false)"
     >

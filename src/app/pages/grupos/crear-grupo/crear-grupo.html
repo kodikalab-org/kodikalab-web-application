@@ -69,12 +69,12 @@
       <div class="min-w-0">
         <ol
           aria-label="Pasos para crear un grupo"
-          class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-[#2b2760] bg-[#0e0a28]/70 p-0 xl:grid-cols-4"
+          class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-[var(--kl-line)] bg-[#0e0a28]/70 p-0 xl:grid-cols-4"
         >
           @for (titulo of pasos; track titulo; let i = $index) {
             <li
               [attr.aria-current]="paso === i + 1 ? 'step' : null"
-              class="flex min-h-16 items-center gap-3 border-0 border-r border-b border-solid border-[#1f1c44] p-3 text-xs"
+              class="flex min-h-16 items-center gap-3 border-0 border-r border-b border-solid border-[var(--kl-line-soft)] p-3 text-xs"
               [class.bg-kl-accent/20]="paso === i + 1"
             >
               <span
@@ -124,7 +124,7 @@
         }
         <mat-card
           appearance="outlined"
-          class="rounded-[18px] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
+          class="rounded-[18px] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
         >
           <div class="mb-6 flex items-center gap-3.5">
             <span
@@ -492,7 +492,7 @@
         </mat-card>
       </div>
       <aside
-        class="rounded-[18px] border border-solid border-[#2b2760] bg-[#0e0a28]/80 p-5 text-[13px]"
+        class="rounded-[18px] border border-solid border-[var(--kl-line)] bg-[#0e0a28]/80 p-5 text-[13px]"
       >
         <div class="mb-4 flex items-center gap-3">
           <img src="/images/grupos/resumen.svg" width="20" height="20" alt="" />
@@ -502,10 +502,10 @@
           </div>
         </div>
         <div
-          class="flex items-start gap-3 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-3"
+          class="flex items-start gap-3 rounded-[14px] border border-solid border-[var(--kl-line-soft)] bg-white/3 p-3"
         >
           <span
-            class="flex size-[76px] shrink-0 items-center justify-center rounded-[14px] bg-linear-to-br from-[#2a1c6e] to-[#4b36b8]"
+            class="flex size-[76px] shrink-0 items-center justify-center rounded-[14px] bg-linear-to-br from-[var(--kl-card-hi)] to-[#4b36b8]"
             ><img src="/images/grupos/grupo.svg" width="36" height="36" alt=""
           /></span>
           <div class="min-w-0">
@@ -524,7 +524,7 @@
             </div>
           </div>
         </div>
-        <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
+        <div class="mt-4 border-0 border-t border-solid border-[var(--kl-line-soft)] pt-3">
           <h3 class="m-0 flex items-center gap-2 text-sm">
             <img src="/images/grupos/calendario.svg" width="16" height="16" alt="" />Horario
           </h3>
@@ -532,7 +532,7 @@
             {{ paso === 1 ? 'Días y horas sin definir' : 'Martes y jueves de 19:00 a 21:00' }}
           </p>
         </div>
-        <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
+        <div class="mt-4 border-0 border-t border-solid border-[var(--kl-line-soft)] pt-3">
           <h3 class="m-0 flex items-center gap-2 text-sm">
             <img src="/images/grupos/candado.svg" width="16" height="16" alt="" />Acceso y
             visibilidad
@@ -555,7 +555,7 @@
       </aside>
     </div>
     <div
-      class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[#1f1c44] bg-[#060414]/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
+      class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[var(--kl-line-soft)] bg-[var(--kl-chrome)]/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
     >
       <p class="mb-0 text-xs text-kl-muted">
         Puedes guardar un borrador con solo el nombre y completarlo después. Se publica cuando tenga

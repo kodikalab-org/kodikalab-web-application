@@ -35,7 +35,7 @@
       <p role="status" class="m-0 text-sm text-kl-muted">Cargando tus equipos…</p>
     } @else if (teamsState() === 'error') {
       <mat-card
-        class="items-center gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6 text-center lg:py-12"
+        class="items-center gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6 text-center lg:py-12"
       >
         <h2 class="m-0 font-display text-2xl">No pudimos cargar tus equipos</h2>
         <p role="alert" class="m-0 max-w-[560px] text-sm text-kl-muted">
@@ -45,7 +45,7 @@
       </mat-card>
     } @else if (teams().length === 0) {
       <mat-card
-        class="items-center gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6 text-center lg:py-12"
+        class="items-center gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6 text-center lg:py-12"
       >
         <h2 class="m-0 font-display text-2xl">Aún no perteneces a ningún equipo activo</h2>
         <p class="m-0 max-w-[560px] text-sm text-kl-muted">
@@ -57,7 +57,7 @@
       <p role="status" class="m-0 text-sm text-kl-muted">Calculando tu progreso por tema…</p>
     } @else if (api.error(); as error) {
       <mat-card
-        class="items-center gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6 text-center lg:py-12"
+        class="items-center gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6 text-center lg:py-12"
       >
         <span class="rounded-full bg-[#34161a] px-3 py-1 text-xs text-kl-danger">{{
           errorView()?.chip
@@ -72,7 +72,7 @@
         </p>
         @if (error.affected.length > 0) {
           <dl
-            class="m-0 w-full max-w-[560px] rounded-xl border border-solid border-[#2b2760] bg-white/3 p-4 text-left text-sm"
+            class="m-0 w-full max-w-[560px] rounded-xl border border-solid border-[var(--kl-line)] bg-white/3 p-4 text-left text-sm"
           >
             <dt class="font-mono text-xs text-kl-danger">INFORMACIÓN AFECTADA</dt>
             @for (item of error.affected; track item.field) {
@@ -97,7 +97,7 @@
       >
         @for (indicator of indicators(); track indicator.label) {
           <mat-card
-            class="gap-1.5 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-3.5 lg:p-5"
+            class="gap-1.5 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-3.5 lg:p-5"
           >
             <span class="text-sm text-kl-muted">{{ indicator.label }}</span
             ><strong class="font-display text-2xl lg:text-[40px]">{{ indicator.value }}</strong
@@ -148,7 +148,7 @@
         }
         <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
           <mat-card
-            class="min-w-0 gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+            class="min-w-0 gap-3 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-4 lg:p-6"
           >
             <h2 class="m-0 text-xl font-bold">Progreso por tema</h2>
             <p class="m-0 text-sm text-kl-muted">
@@ -160,7 +160,7 @@
             @for (topic of progress.topics; track topic.topicId) {
               <article
                 class="flex flex-col gap-3 rounded-[14px] border border-solid bg-white/3 p-3.5 xl:flex-row xl:items-center xl:gap-4 xl:px-5 xl:py-4"
-                [class.border-[#2b2760]]="topic.status !== 'SIN_ACTIVIDAD'"
+                [class.border-[var(--kl-line)]]="topic.status !== 'SIN_ACTIVIDAD'"
                 [class.border-dashed]="topic.status === 'SIN_ACTIVIDAD'"
                 [class.border-[#3a3670]]="topic.status === 'SIN_ACTIVIDAD'"
               >
@@ -229,11 +229,11 @@
           </mat-card>
           <aside class="flex min-w-0 flex-col gap-4">
             <mat-card
-              class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+              class="gap-3 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-4 lg:p-6"
               ><h2 class="m-0 text-xl font-bold">Para reforzar</h2>
               @for (topic of reinforceTopics(); track topic.topicId) {
                 <div
-                  class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+                  class="flex justify-between gap-3 border-0 border-b border-solid border-[var(--kl-line-soft)] py-2 text-sm"
                 >
                   <strong>{{ topic.topicName }}</strong
                   ><span class="font-mono text-xs text-amber-400"
@@ -247,11 +247,11 @@
               }
             </mat-card>
             <mat-card
-              class="gap-3 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+              class="gap-3 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-4 lg:p-6"
               ><h2 class="m-0 text-xl font-bold">Fortalezas</h2>
               @for (topic of completedTopics(); track topic.topicId) {
                 <div
-                  class="flex justify-between gap-3 border-0 border-b border-solid border-[#1f1c44] py-2 text-sm"
+                  class="flex justify-between gap-3 border-0 border-b border-solid border-[var(--kl-line-soft)] py-2 text-sm"
                 >
                   <strong>{{ topic.topicName }}</strong
                   ><span class="font-mono text-xs text-green-400">100.00%</span>
@@ -263,7 +263,7 @@
               }
             </mat-card>
             <mat-card
-              class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-4 lg:p-6"
+              class="gap-2 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-4 lg:p-6"
               ><h2 class="m-0 text-xl font-bold">Cómo se calcula</h2>
               <p class="m-0 text-xs leading-relaxed text-kl-muted">
                 Cobertura = problemas distintos resueltos ÷ asignados a tu equipo. Un problema cuenta

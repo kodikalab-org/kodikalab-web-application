@@ -4,7 +4,7 @@
   --mat-card-elevated-container-color: transparent;
   --mat-card-elevated-container-shape: 18px;
   --mat-card-elevated-container-elevation: none;
-  --mat-button-outlined-outline-color: #6b52e0;
+  --mat-button-outlined-outline-color: var(--kl-cta-to);
   --mat-button-outlined-label-text-size: 14px;
   --mat-button-filled-label-text-size: 14px;
 }

@@ -10,7 +10,7 @@
         class="cursor-pointer rounded-full border border-solid px-3.5 py-1.5 text-[13px] text-kl-body"
         [class]="
           source() === 'codeforces'
-            ? 'border-[#8a6cff] bg-[#2a1f6e] text-white'
+            ? 'border-[var(--kl-cta-from)] bg-[var(--kl-selected)] text-white'
             : 'border-kl-border-strong bg-white/4'
         "
         [attr.aria-selected]="source() === 'codeforces'"
@@ -25,7 +25,7 @@
         class="cursor-pointer rounded-full border border-solid px-3.5 py-1.5 text-[13px] text-kl-body"
         [class]="
           source() === 'catalogo'
-            ? 'border-[#8a6cff] bg-[#2a1f6e] text-white'
+            ? 'border-[var(--kl-cta-from)] bg-[var(--kl-selected)] text-white'
             : 'border-kl-border-strong bg-white/4'
         "
         [attr.aria-selected]="source() === 'catalogo'"
@@ -107,7 +107,7 @@
     <h3 class="m-0 flex items-center gap-2.5 font-display text-base font-bold">
       Problemas del concurso
       <span
-        class="rounded-full border border-solid border-[#8a6cff] bg-[#2a1f6e] px-2.5 py-0.5 text-xs"
+        class="rounded-full border border-solid border-[var(--kl-cta-from)] bg-[var(--kl-selected)] px-2.5 py-0.5 text-xs"
       >
         {{ rows().length }}
       </span>
@@ -165,7 +165,7 @@
                     type="number"
                     min="0"
                     step="1"
-                    class="h-9 w-20 rounded-lg border border-solid border-[#34304a] bg-white/4 px-2 text-kl-heading"
+                    class="h-9 w-20 rounded-lg border border-solid border-[var(--kl-line-strong)] bg-white/4 px-2 text-kl-heading"
                     [attr.aria-label]="'Puntos de ' + row.problem.title"
                     [value]="row.score"
                     (input)="setScore(i, $event)"
@@ -174,7 +174,7 @@
                 <td class="py-2 pr-3">
                   <input
                     type="color"
-                    class="h-9 w-12 cursor-pointer rounded-lg border border-solid border-[#34304a] bg-transparent p-0.5"
+                    class="h-9 w-12 cursor-pointer rounded-lg border border-solid border-[var(--kl-line-strong)] bg-transparent p-0.5"
                     [attr.aria-label]="'Color del globo de ' + row.problem.title"
                     [value]="row.balloonColor"
                     (input)="setColor(i, $event)"

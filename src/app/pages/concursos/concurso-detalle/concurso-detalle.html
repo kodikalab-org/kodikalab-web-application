@@ -21,7 +21,7 @@
       </section>
     }
     @case ('denied') {
-      <section class="rounded-2xl border border-solid border-[#2b2760] bg-[#0b0824]/70 p-8 text-center">
+      <section class="rounded-2xl border border-solid border-[var(--kl-line)] bg-[var(--kl-card-to)]/70 p-8 text-center">
         <h1 class="m-0 text-xl font-medium">No tienes acceso a este concurso</h1>
         <p class="mt-2 mb-4 text-sm text-kl-muted">
           Solo puedes ver los concursos de los grupos donde tu membresía está activa.
@@ -32,7 +32,7 @@
     @default {
       @let c = competition()!;
       <header
-        class="rounded-[18px] border border-solid border-kl-accent/40 bg-linear-to-r from-[#1a1446]/80 to-[#0b0824]/90 p-5 shadow-[0_0_24px_#643cff22] sm:p-6"
+        class="rounded-[18px] border border-solid border-kl-accent/40 bg-linear-to-r from-[var(--kl-card-from)]/80 to-[var(--kl-card-to)]/90 p-5 shadow-[0_0_24px_#643cff22] sm:p-6"
       >
         <p class="mt-0 mb-2 font-mono text-xs text-kl-muted">
           <a routerLink="/inicio">Inicio</a> / <a routerLink="/concursos">Concursos</a> / {{ c.eventName }}
@@ -105,7 +105,7 @@
 
       @switch (tab()) {
         @case ('problemas') {
-          <section aria-label="Problemas" class="overflow-x-auto rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/60 via-[#140d34]/70 to-[#0a071a]/80">
+          <section aria-label="Problemas" class="overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80">
             @if (problems().length) {
               <table class="w-full min-w-[900px] border-collapse text-left text-sm" aria-label="Problemas del concurso">
                 <thead>
@@ -180,7 +180,7 @@
                           }
                           <button
                             type="button"
-                            class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-3 py-1.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                            class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-3 py-1.5 text-[13px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
                             [disabled]="registerBlock(row.status) !== null"
                             [attr.title]="registerBlock(row.status)"
                             [attr.aria-description]="registerBlock(row.status)"
@@ -228,7 +228,7 @@
             }
             @default {
               @let tabla = standings()!;
-              <section class="overflow-x-auto rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/60 via-[#140d34]/70 to-[#0a071a]/80">
+              <section class="overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80">
                 @if (tabla.rows.length) {
                   <table class="w-full min-w-[640px] border-collapse text-center text-sm" aria-label="Clasificación del concurso">
                     <thead>
@@ -295,13 +295,13 @@
         }
 
         @case ('grupo') {
-          <section class="rounded-2xl border border-solid border-[#2b2760] bg-[#0b0824]/70 p-6">
+          <section class="rounded-2xl border border-solid border-[var(--kl-line)] bg-[var(--kl-card-to)]/70 p-6">
             <h2 class="m-0 text-lg font-medium">Ranking de {{ team()?.name }}</h2>
             <p class="mt-2 mb-4 text-sm text-kl-body">
               Mira cómo va tu grupo en el ranking acumulado de problemas resueltos.
             </p>
             <a
-              class="inline-block rounded-lg bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-4 py-2 text-sm font-medium text-white"
+              class="inline-block rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-sm font-medium text-white"
               routerLink="/ranking"
               [queryParams]="{ teamId: teamId() }"
               >Ver ranking del grupo</a
@@ -311,7 +311,7 @@
 
         @case ('progreso') {
           @let p = progress();
-          <section aria-label="Mi progreso en el concurso" class="rounded-2xl border border-solid border-[#2b2760] bg-[#0b0824]/70 p-6">
+          <section aria-label="Mi progreso en el concurso" class="rounded-2xl border border-solid border-[var(--kl-line)] bg-[var(--kl-card-to)]/70 p-6">
             <div class="flex flex-wrap items-baseline justify-between gap-2">
               <h2 class="m-0 text-lg font-medium">Mi progreso</h2>
               <p class="m-0 font-mono text-2xl font-bold">{{ p.counts.RESUELTO }}/{{ p.total }}</p>
@@ -324,7 +324,7 @@
               [attr.aria-valuenow]="p.counts.RESUELTO"
               class="mt-3 h-2 overflow-hidden rounded-full bg-white/10"
             >
-              <div class="h-full rounded-full bg-linear-to-r from-[#8a6cff] to-[#6e52f2]" [style.width.%]="p.percent"></div>
+              <div class="h-full rounded-full bg-linear-to-r from-[var(--kl-cta-from)] to-[var(--kl-accent)]" [style.width.%]="p.percent"></div>
             </div>
             <dl class="mt-5 mb-0 grid gap-3 sm:grid-cols-4">
               <div class="rounded-xl border border-solid border-kl-border p-3">
@@ -365,7 +365,7 @@
       aria-labelledby="registrar-titulo"
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="true"
-      class="w-full max-w-[460px] rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446] to-[#09071a] p-6"
+      class="w-full max-w-[460px] rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)] to-[var(--kl-card-to)] p-6"
       [formGroup]="form"
       novalidate
       (click)="$event.stopPropagation()"
@@ -378,7 +378,7 @@
         <select
           aria-label="Lenguaje"
           formControlName="language"
-          class="mt-1.5 h-11 w-full rounded-xl border border-solid border-kl-border-strong bg-[#0b0824] px-3 text-kl-heading outline-none focus:border-kl-accent-text"
+          class="mt-1.5 h-11 w-full rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-to)] px-3 text-kl-heading outline-none focus:border-kl-accent-text"
         >
           @for (language of languages; track language) {
             <option [value]="language">{{ language }}</option>
@@ -416,7 +416,7 @@
         </button>
         <button
           type="submit"
-          class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+          class="cursor-pointer rounded-lg border-0 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           [disabled]="saving() || form.invalid"
         >
           {{ saving() ? 'Guardando…' : 'Guardar envío' }}

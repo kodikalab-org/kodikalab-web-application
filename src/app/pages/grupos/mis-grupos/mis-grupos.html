@@ -11,7 +11,7 @@
       @for (fila of [1, 2, 3]; track fila) {
         <div
           aria-hidden="true"
-          class="flex h-28 items-center gap-5 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface p-5"
+          class="flex h-28 items-center gap-5 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface p-5"
         >
           <span class="size-16 rounded-xl bg-white/5"></span>
           <div class="flex flex-1 flex-col gap-3">
@@ -43,7 +43,7 @@
 
     @if (coachVisible().length === 0) {
       <mat-card
-        class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+        class="items-center gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface px-6 py-14 text-center"
       >
         @if (segmentoCoach() === 'publicados') {
           <h2 class="m-0 text-xl">Todavía no has publicado grupos</h2>
@@ -63,7 +63,7 @@
         @for (item of coachVisible(); track item.groupId) {
           <mat-card
             appearance="outlined"
-            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_220px_220px]"
+            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-from)]/60 to-[var(--kl-card-to)]/80 p-5 xl:grid-cols-[minmax(0,1fr)_220px_220px]"
           >
             <div class="flex items-start gap-4">
               <span
@@ -172,7 +172,7 @@
 
     @if (practicanteVisible().length === 0) {
       <mat-card
-        class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+        class="items-center gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface px-6 py-14 text-center"
       >
         @switch (segmentoPracticante()) {
           @case ('activos') {
@@ -201,7 +201,7 @@
         @for (item of practicanteVisible(); track item.groupId) {
           <mat-card
             appearance="outlined"
-            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_200px_190px]"
+            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-from)]/60 to-[var(--kl-card-to)]/80 p-5 xl:grid-cols-[minmax(0,1fr)_200px_190px]"
           >
             <div class="flex items-start gap-4">
               <span

@@ -56,10 +56,10 @@
         </p>
       </section>
       <mat-card
-        class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+        class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
         ><h2 class="m-0 text-2xl font-bold">ICPC Regional 2026</h2>
         <dl
-          class="m-0 grid gap-4 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm sm:grid-cols-4"
+          class="m-0 grid gap-4 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm sm:grid-cols-4"
         >
           @for (
             dato of [
@@ -99,7 +99,7 @@
         </p>
       </section>
       <mat-card
-        class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+        class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
         ><dl class="m-0 flex flex-col gap-4 text-sm">
           @for (
             dato of [
@@ -167,7 +167,7 @@
       }
       <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,816fr)_minmax(0,360fr)]">
         <mat-card
-          class="min-w-0 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 p-6"
+          class="min-w-0 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 p-6"
         >
           <form [formGroup]="form" class="flex flex-col gap-4" aria-labelledby="titulo-formulario">
             <h2 id="titulo-formulario" class="m-0 text-xl leading-[26px] font-bold">
@@ -333,7 +333,7 @@
         </mat-card>
         <aside class="flex min-w-0 flex-col gap-6" aria-label="Contexto del historial">
           <mat-card
-            class="flex flex-col gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="flex flex-col gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 class="m-0 text-xl leading-[26px] font-bold">Antes de publicar</h2>
             <p class="m-0 text-sm leading-5 text-kl-muted">
@@ -342,12 +342,12 @@
             </p>
           </mat-card>
           <mat-card
-            class="flex flex-col gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="flex flex-col gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 id="historial" class="m-0 text-xl leading-[26px] font-bold">Últimos resultados</h2>
             @for (resultado of resultados; track resultado.nombre) {
               <article
-                class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4"
+                class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4"
               >
                 <h3 class="m-0 text-sm font-bold">{{ resultado.nombre }}</h3>
                 <p class="m-0 text-sm leading-5 text-kl-muted">

@@ -33,7 +33,7 @@ const PUNTO_ESTADO: Record<AssignmentStatus, string> = {
   SIN_INTENTOS: 'bg-kl-border-strong',
 };
 const COLOR_EQUIPO = [
-  'from-[#8a6cff] to-[#6e52f2]',
+  'from-[var(--kl-cta-from)] to-[var(--kl-accent)]',
   'from-teal-400 to-teal-600',
   'from-pink-500 to-rose-600',
 ];

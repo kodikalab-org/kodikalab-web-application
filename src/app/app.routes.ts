@@ -11,6 +11,12 @@ import { CONCURSOS_ROUTES } from './pages/concursos/concursos.routes';
 import { COACH_CONCURSOS_ROUTES } from './pages/coach/concursos/coach-concursos.routes';
 
 const appRoutes: Routes = [
+  { path: 'asistente', loadComponent: () => import('./pages/asistente/asistente').then((m) => m.Asistente) },
+  {
+    path: 'coach/asistente',
+    data: { coach: true },
+    loadComponent: () => import('./pages/asistente/asistente').then((m) => m.Asistente),
+  },
   { path: 'coach/ranking', loadComponent: () => import('./pages/ranking-equipo/ranking-equipo').then(m => m.RankingEquipo) },
   {
     path: 'recursos',

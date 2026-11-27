@@ -1,0 +1,37 @@
+@if (visible()) {
+  @if (store.panelOpen()) {
+    <section
+      id="agent-panel"
+      class="fixed inset-x-2 bottom-2 z-40 flex h-[min(640px,calc(100dvh-16px))] flex-col gap-3 rounded-2xl border border-solid border-kl-border-strong bg-kl-surface p-3 font-body text-kl-text shadow-2xl sm:right-4 sm:bottom-4 sm:left-auto sm:w-[420px]"
+      role="dialog"
+      aria-labelledby="agent-panel-title"
+      (keydown.escape)="store.panelOpen.set(false)"
+    >
+      <header class="flex items-center justify-between gap-2">
+        <h2 id="agent-panel-title" class="m-0 font-display text-lg font-bold">Asistente</h2>
+        <div class="flex items-center gap-1">
+          <a mat-button [routerLink]="fullPage()">Ampliar</a>
+          <button #closeButton mat-button type="button" (click)="store.panelOpen.set(false)">Cerrar</button>
+        </div>
+      </header>
+      <!-- Loaded on first use: the panel is in the root, so it must not grow the initial bundle. -->
+      @defer (on immediate) {
+        <app-agent-chat />
+      } @placeholder {
+        <p class="m-0 text-sm text-kl-muted" role="status">Cargando…</p>
+      }
+    </section>
+  } @else {
+    <button
+      mat-flat-button
+      type="button"
+      data-testid="agent-toggle"
+      class="fixed right-4 bottom-4 z-40 shadow-xl"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      (click)="store.panelOpen.set(true)"
+    >
+      Asistente
+    </button>
+  }
+}

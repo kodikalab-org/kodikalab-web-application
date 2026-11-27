@@ -22,12 +22,12 @@
     <div class="flex items-center gap-[18px] max-[641px]:gap-3">
       <div class="flex items-center gap-2.5">
         <span
-          class="flex size-[34px] items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-cta-from)] to-[#b987ff] text-[13px] font-semibold"
+          class="account-avatar flex size-[34px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-cta-from)] to-kl-violet text-[13px] font-semibold"
           aria-hidden="true"
           >{{ session.demo() ? 'CR' : 'KL' }}</span
         >
-        <span class="flex flex-col max-[641px]:hidden">
-          <span class="text-sm leading-4 font-normal">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
+        <span class="flex max-w-[220px] min-w-0 flex-col max-[641px]:hidden">
+          <span class="account-name truncate text-sm leading-4 font-normal" [title]="session.demo() ? 'Camila Rojas' : session.account()?.email">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
           <span class="text-xs leading-[14px] font-normal text-kl-muted">Practicante</span>
         </span>
       </div>

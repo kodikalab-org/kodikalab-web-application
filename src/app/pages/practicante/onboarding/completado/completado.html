@@ -22,12 +22,12 @@
     <div class="flex items-center gap-[18px] max-[641px]:gap-3">
       <div class="flex items-center gap-2.5">
         <span
-          class="flex size-[34px] items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-cta-from)] to-[#b987ff] text-[13px] font-semibold"
+          class="account-avatar flex size-[34px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-cta-from)] to-kl-violet text-[13px] font-semibold"
           aria-hidden="true"
-          >{{ session.demo() ? 'CR' : 'KL' }}</span
+          >{{ cuenta.initials }}</span
         >
-        <span class="flex flex-col max-[641px]:hidden">
-          <span class="text-sm leading-4 font-normal">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
+        <span class="flex max-w-[220px] min-w-0 flex-col max-[641px]:hidden">
+          <span class="account-name truncate text-sm leading-4 font-normal" [title]="cuenta.name">{{ cuenta.name }}</span>
           <span class="text-xs leading-[14px] font-normal text-kl-muted">Practicante</span>
         </span>
       </div>
@@ -118,7 +118,7 @@
       <ul class="m-0 flex list-none flex-wrap justify-center gap-2 p-0">
         @for (dato of estado === 'aviso-codeforces' && session.demo() ? resumenAviso : resumen; track dato) {
           <li
-            class="rounded-full border border-solid border-[#987eff]/40 bg-[var(--kl-accent)]/20 px-3 py-1.5 text-[13px] leading-[normal] text-[var(--kl-text-strong)]"
+            class="max-w-full rounded-full border border-solid [overflow-wrap:anywhere] border-kl-violet/40 bg-[var(--kl-accent)]/20 px-3 py-1.5 text-[13px] leading-[normal] text-[var(--kl-text-strong)]"
           >
             {{ dato }}
           </li>

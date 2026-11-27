@@ -119,7 +119,7 @@
             [attr.aria-label]="'Explorar problemas de Codeforces: ' + bucket.label"
             >{{ bucket.label }}</a
           ><span class="rating-track" aria-hidden="true"
-            ><span [style.width.%]="bucket.width"></span></span
+            ><span class="kl-bar" [style.width.%]="bucket.width"></span></span
           ><span
             class="bucket-count"
             [title]="bucket.percentage.toFixed(1) + ' % de los problemas resueltos'"

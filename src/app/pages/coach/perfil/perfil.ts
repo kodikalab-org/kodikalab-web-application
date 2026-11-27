@@ -22,6 +22,7 @@ import {
   crearSolicitudesDemo,
 } from '../../../data/perfil-coach-demo';
 import { EstadoSolicitud, SolicitudIngreso } from '../../../models/perfil-coach';
+import { plural } from '../../../shared/plural';
 
 type Pestania = 'info' | 'solicitudes' | 'ajustes';
 
@@ -128,9 +129,9 @@ export class CoachPerfil {
     { icono: 'images/perfil-coach/building-18.svg', texto: this.perfil.organizacion },
     {
       icono: 'images/perfil-coach/trophy-18.svg',
-      texto: `${this.perfil.anios} años de experiencia entrenando`,
+      texto: `${plural(this.perfil.anios, 'año')} de experiencia entrenando`,
     },
-  ]; }
+  ].filter((dato) => dato.texto); }
 
   protected readonly filas: readonly FilaAjuste[] = [
     {

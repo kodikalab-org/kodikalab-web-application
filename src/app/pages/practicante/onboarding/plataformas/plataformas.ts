@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -39,6 +39,8 @@ export class OnboardingPlataformas {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
   private readonly router = inject(Router);
+  // The app runs without zone.js: HTTP results must notify the view explicitly.
+  private readonly cdr = inject(ChangeDetectorRef);
   protected busy = false;
   protected error = '';
   constructor() {
@@ -66,7 +68,10 @@ export class OnboardingPlataformas {
       }));
       await this.router.navigateByUrl('/onboarding/practicante/completado');
     } catch (error) { this.error = apiError(error); }
-    finally { this.busy = false; }
+    finally {
+      this.busy = false;
+      this.cdr.markForCheck();
+    }
   }
   protected readonly plataformas = [
     { clave: 'codeforces', nombre: 'Codeforces', icono: 'images/onboarding/codeforces-34.svg' },

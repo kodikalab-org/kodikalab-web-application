@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,7 @@ import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../../core/profile-api';
 import { Session } from '../../../../core/session';
 import { apiError } from '../../../../core/api';
+import { plural } from '../../../../shared/plural';
 import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 
 @Component({
@@ -33,8 +34,15 @@ export class OnboardingPresentacion {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
   private readonly router = inject(Router);
+  // The app runs without zone.js: HTTP results must notify the view explicitly.
+  private readonly cdr = inject(ChangeDetectorRef);
   protected busy = false;
   protected error = '';
+  protected get resumenVistaPrevia(): string {
+    if (this.session.demo()) return 'Coach · Grafos y Programación Dinámica · Club de Programación Competitiva · 4 años';
+    const { especialidad, organizacion, anios } = this.profiles.coach;
+    return ['Coach', especialidad, organizacion, anios === null ? '' : plural(anios, 'año')].filter(Boolean).join(' · ');
+  }
   protected async guardar(omitir = false): Promise<void> {
     if (this.busy || (!omitir && this.form.invalid)) return;
     if (this.session.demo()) { await this.router.navigateByUrl('/onboarding/coach/completado'); return; }
@@ -48,7 +56,10 @@ export class OnboardingPresentacion {
         presentacion: omitir ? null : this.form.controls.presentacion.value || null }));
       await this.router.navigateByUrl('/onboarding/coach/completado');
     } catch (error) { this.error = apiError(error); }
-    finally { this.busy = false; }
+    finally {
+      this.busy = false;
+      this.cdr.markForCheck();
+    }
   }
   protected readonly form = new FormGroup({
     presentacion: new FormControl('', {

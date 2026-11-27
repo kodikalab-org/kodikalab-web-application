@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HeaderNavigation } from '../../../shared/header-navigation/header-navigation';
@@ -16,6 +16,7 @@ import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../core/profile-api';
 import { Session } from '../../../core/session';
 import { PractitionerProfile, apiError } from '../../../core/api';
+import { profileIdentity } from '../../../core/profile-identity';
 import { USUARIO_DEMO } from '../../../data/usuario-demo';
 import {
   CARRERAS_EDICION,
@@ -66,6 +67,8 @@ export class PerfilEditar {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
   private readonly router = inject(Router);
+  // The app runs without zone.js: HTTP results must notify the view explicitly.
+  private readonly cdr = inject(ChangeDetectorRef);
   protected busy = false;
   protected error = '';
   constructor() {
@@ -100,11 +103,16 @@ export class PerfilEditar {
         codeforcesHandle: v.codeforces || null, atcoderHandle: v.atcoder || null, vjudgeHandle: v.vjudge || null }));
       await this.router.navigate(['/perfil'], { queryParams: { estado: 'actualizado' } });
     } catch (error) { this.error = apiError(error); }
-    finally { this.busy = false; }
+    finally {
+      this.busy = false;
+      this.cdr.markForCheck();
+    }
   }
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly iniciales = this.session.demo() ? INFO_PERSONAL_DEMO.iniciales : 'KL';
+  protected readonly iniciales = this.session.demo()
+    ? INFO_PERSONAL_DEMO.iniciales
+    : profileIdentity(this.profiles.profile()?.fullName, '', '').initials;
   protected readonly carreras = CARRERAS_EDICION;
   protected readonly ciclos = CICLOS_EDICION;
   protected readonly distritos = DISTRITOS_EDICION;

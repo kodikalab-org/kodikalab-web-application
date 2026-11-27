@@ -1,8 +1,11 @@
+import { Loader } from '../../../shared/loader/loader';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { apiError } from '../../../core/api';
+import { plural } from '../../../shared/plural';
+import { nivelTexto } from '../mis-grupos/presentacion';
 import {
   AssignedProblem,
   MembershipStatus,
@@ -19,7 +22,7 @@ import {
  */
 @Component({
   selector: 'app-grupo-detalle',
-  imports: [RouterLink, MatButtonModule, MatCardModule],
+  imports: [Loader, RouterLink, MatButtonModule, MatCardModule],
   templateUrl: './grupo-detalle.html',
   styleUrl: './grupo-detalle.css',
 })
@@ -35,8 +38,17 @@ export class GrupoDetalle {
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
   protected readonly problemasError = signal('');
+  protected readonly problemasCargando = signal(true);
+  protected readonly nivelTexto = nivelTexto;
+  protected readonly plural = plural;
 
   constructor() {
+    this.cargar();
+  }
+
+  protected cargar(): void {
+    this.cargando.set(true);
+    this.error.set('');
     this.api.loadGroups().subscribe({
       next: (groups) => {
         const grupo = groups.find((item) => item.groupId === this.id);
@@ -93,10 +105,18 @@ export class GrupoDetalle {
     });
   }
 
-  private cargarProblemas(): void {
+  protected cargarProblemas(): void {
+    this.problemasCargando.set(true);
+    this.problemasError.set('');
     this.api.assignedProblems(this.id).subscribe({
-      next: (response) => this.problemas.set(response.items),
-      error: (error: unknown) => this.problemasError.set(apiError(error)),
+      next: (response) => {
+        this.problemas.set(response.items);
+        this.problemasCargando.set(false);
+      },
+      error: (error: unknown) => {
+        this.problemasError.set(apiError(error));
+        this.problemasCargando.set(false);
+      },
     });
   }
 }

@@ -221,4 +221,20 @@ describe('ConfigurarAsignacion', () => {
     await settle();
     expect(root.querySelector('[role="alert"]')?.textContent).toContain('No pudimos conectar');
   });
+
+  it('lets the coach retry when the competitions cannot be read', async () => {
+    const { root, settle } = await setup();
+    http.expectOne('/api/teams/me').flush([group(12, 'Equipo Alfa')]);
+    await settle();
+    http.expectOne((r) => r.url === '/api/competitions').flush({}, { status: 503, statusText: 'Unavailable' });
+    await settle();
+    const retry = Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.includes('Reintentar'));
+    expect(retry).toBeDefined();
+
+    retry!.click();
+    http.expectOne((r) => r.url === '/api/competitions')
+      .flush({ teamId: 12, total: 1, items: [competition(30, 'Simulacro semanal', 'PROGRAMADA')] });
+    await settle();
+    expect(root.textContent).toContain('Simulacro semanal');
+  });
 });

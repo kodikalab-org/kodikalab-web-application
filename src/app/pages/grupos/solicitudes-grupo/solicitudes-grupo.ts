@@ -1,6 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { Loader } from '../../../shared/loader/loader';
+import { plural } from '../../../shared/plural';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
@@ -19,6 +22,7 @@ type Estado = 'PENDIENTE' | 'ACLARACION_SOLICITADA' | 'ACTIVO' | 'EXPULSADO';
 @Component({
   selector: 'app-solicitudes-grupo',
   imports: [
+    Loader,
     RouterLink,
     FormsModule,
     MatButtonModule,
@@ -48,22 +52,38 @@ export class SolicitudesGrupo {
   protected readonly confirmandoExpulsion = signal<number | null>(null);
   protected readonly feedback = signal<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
 
+  protected readonly cargandoGrupos = signal(true);
+  protected readonly errorGrupos = signal('');
+  protected readonly cargandoSolicitudes = signal(false);
+  protected readonly errorSolicitudes = signal('');
+  private consulta?: Subscription;
+  protected readonly plural = plural;
+
   protected readonly selectedGroup = computed(() => {
     const id = this.selectedGroupId();
     return id === null ? null : this.groups().find((g) => g.groupId === id) ?? null;
   });
 
   constructor() {
+    this.cargarGrupos();
+  }
+
+  protected cargarGrupos(): void {
+    this.cargandoGrupos.set(true);
+    this.errorGrupos.set('');
     this.api.loadMine().subscribe({
       next: () => {
+        this.cargandoGrupos.set(false);
         const requested = Number(this.route.snapshot.queryParamMap.get('grupo'));
         const group =
           this.groups().find((g) => g.groupId === requested) ?? this.groups()[0] ?? null;
         this.selectedGroupId.set(group?.groupId ?? null);
         this.cargar();
       },
-      error: (error: unknown) =>
-        this.feedback.set({ tipo: 'error', texto: apiError(error) }),
+      error: (error: unknown) => {
+        this.cargandoGrupos.set(false);
+        this.errorGrupos.set(apiError(error));
+      },
     });
   }
 
@@ -103,7 +123,7 @@ export class SolicitudesGrupo {
         this.feedback.set({ tipo: 'ok', texto: response.message });
         this.selected.set(null);
         this.cargar();
-        this.api.loadMine().subscribe({ next: () => undefined });
+        this.api.loadMine().subscribe({ error: () => undefined });
       },
       error: (error: unknown) => {
         this.guardando.set(false);
@@ -133,7 +153,7 @@ export class SolicitudesGrupo {
         this.confirmandoExpulsion.set(null);
         this.feedback.set({ tipo: 'ok', texto: response.message });
         this.cargar();
-        this.api.loadMine().subscribe({ next: () => undefined });
+        this.api.loadMine().subscribe({ error: () => undefined });
       },
       error: (error: unknown) => {
         this.guardando.set(false);
@@ -153,7 +173,7 @@ export class SolicitudesGrupo {
         this.guardando.set(false);
         this.feedback.set({ tipo: 'ok', texto: response.message });
         this.cargar();
-        this.api.loadMine().subscribe({ next: () => undefined });
+        this.api.loadMine().subscribe({ error: () => undefined });
       },
       error: (error: unknown) => {
         this.guardando.set(false);
@@ -179,12 +199,20 @@ export class SolicitudesGrupo {
     return new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium' }).format(new Date(valor));
   }
 
-  private cargar(): void {
+  /** Replaces the list: earlier rows and answers still in flight never show under another filter. */
+  protected cargar(): void {
     const groupId = this.selectedGroupId();
     if (groupId === null) return;
-    this.api.loadRequests(groupId, this.estado()).subscribe({
-      error: (error: unknown) =>
-        this.feedback.set({ tipo: 'error', texto: apiError(error) }),
+    this.consulta?.unsubscribe();
+    this.requests.set([]);
+    this.errorSolicitudes.set('');
+    this.cargandoSolicitudes.set(true);
+    this.consulta = this.api.loadRequests(groupId, this.estado()).subscribe({
+      next: () => this.cargandoSolicitudes.set(false),
+      error: (error: unknown) => {
+        this.cargandoSolicitudes.set(false);
+        this.errorSolicitudes.set(apiError(error));
+      },
     });
   }
 }

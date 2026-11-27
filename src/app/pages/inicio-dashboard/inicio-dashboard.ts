@@ -12,11 +12,15 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Loader } from '../../shared/loader/loader';
+import { plural } from '../../shared/plural';
 import { SiteFooter } from '../../shared/site-footer/site-footer';
 
 @Component({
   selector: 'app-inicio-dashboard',
   imports: [
+    Loader,
     SiteFooter,
     HeaderNavigation,
     UserMenu,
@@ -121,6 +125,25 @@ export class InicioDashboard {
   protected readonly misMembresias = signal<PractitionerGroup[] | null>(null);
   protected readonly resueltos = signal<number | null>(null);
   protected readonly pendientesProblemas = signal<number | null>(null);
+  protected readonly errorGrupos = signal(false);
+  protected readonly errorProblemas = signal(false);
+  /** Demo variant without activity (`?estado=nuevo`). */
+  private readonly sinActividad;
+  /** The coach demo teams listed on this screen; the demo tiles are derived from them. */
+  private readonly equiposDemo = [
+    { iniciales: 'EA', nombre: 'Equipo Alfa', integrantes: 14, cupo: 20, horario: 'Mar y jue 7:00 p. m.', pendientes: 2 },
+    { iniciales: 'EB', nombre: 'Equipo Beta', integrantes: 10, cupo: 20, horario: 'Mié 6:00 p. m.', pendientes: 1 },
+  ];
+  protected readonly plural = plural;
+  protected readonly solicitudesPendientes = computed(() =>
+    (this.misGrupos() ?? []).reduce((total, grupo) => total + grupo.pendingRequests, 0),
+  );
+
+  /** True while the real teams or memberships have not arrived and nothing has failed. */
+  protected get cargandoGrupos(): boolean {
+    const datos = this.coach ? this.misGrupos() : this.misMembresias();
+    return !this.session.demo() && !this.errorGrupos() && datos === null;
+  }
 
   /** Pasos completados: cuenta y perfil siempre; grupo e integrantes según datos reales. */
   protected readonly pasosCompletados = computed(() => {
@@ -138,16 +161,22 @@ export class InicioDashboard {
   });
 
   protected readonly estadisticas = computed(() => {
+    const demo = !!this.session.demo();
+    const nuevo = demo && this.sinActividad();
     if (this.coach) {
-      const grupos = this.misGrupos();
+      const grupos = demo
+        ? nuevo ? [] : this.equiposDemo.map((e) => ({ activeMembers: e.integrantes, pendingRequests: e.pendientes }))
+        : this.misGrupos();
       if (grupos === null) {
+        const detalle = this.errorGrupos() ? 'No se pudo cargar' : 'Cargando…';
         return [
-          { valor: '—', etiqueta: 'Equipos a cargo', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon7', tono: 'text-kl-muted' },
-          { valor: '—', etiqueta: 'Integrantes activos', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon8', tono: 'text-kl-muted' },
-          { valor: '—', etiqueta: 'Solicitudes pendientes', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon9', tono: 'text-kl-muted' },
-          { valor: '—', etiqueta: 'Competencias', detalle: 'Cargando…', vacio: '', icono: '2-imgIcon10', tono: 'text-kl-muted' },
+          { valor: '—', etiqueta: 'Equipos a cargo', detalle, vacio: '', icono: '2-imgIcon7', tono: 'text-kl-muted' },
+          { valor: '—', etiqueta: 'Integrantes activos', detalle, vacio: '', icono: '2-imgIcon8', tono: 'text-kl-muted' },
+          { valor: '—', etiqueta: 'Solicitudes pendientes', detalle, vacio: '', icono: '2-imgIcon9', tono: 'text-kl-muted' },
+          { valor: '—', etiqueta: 'Competencias', detalle, vacio: '', icono: '2-imgIcon10', tono: 'text-kl-muted' },
         ];
       }
+      const programadas = nuevo ? 0 : this.competencias.length;
       const integrantes = grupos.reduce((total, grupo) => total + grupo.activeMembers, 0);
       const pendientes = grupos.reduce((total, grupo) => total + grupo.pendingRequests, 0);
       return [
@@ -176,9 +205,10 @@ export class InicioDashboard {
           tono: pendientes ? 'text-amber-300' : 'text-kl-muted',
         },
         {
-          valor: '0',
+          // No request feeds this count in a real session, so no number is shown there.
+          valor: demo ? String(programadas) : '—',
           etiqueta: 'Competencias',
-          detalle: 'Sin competencias registradas',
+          detalle: !demo ? 'Pendiente de integración' : programadas ? 'Programadas' : 'Ninguna programada',
           vacio: 'Ninguna programada',
           icono: '2-imgIcon10',
           tono: 'text-kl-muted',
@@ -186,8 +216,13 @@ export class InicioDashboard {
       ];
     }
 
-    if (!this.session.demo()) {
+    if (!demo) {
       const membresias = this.misMembresias();
+      const sinGrupos = this.errorGrupos() ? 'No se pudo cargar' : 'Cargando…';
+      const sinProblemas = this.errorGrupos() || this.errorProblemas() ? 'No se pudo cargar' : 'Cargando…';
+      const enEspera = (membresias ?? []).filter((item) =>
+        ['PENDIENTE', 'ACLARACION_SOLICITADA'].includes(item.membership.status),
+      ).length;
       const activos = (membresias ?? []).filter(
         (item) => item.membership.status === 'ACTIVO',
       ).length;
@@ -197,7 +232,7 @@ export class InicioDashboard {
         {
           valor: resueltos === null ? '—' : String(resueltos),
           etiqueta: 'Problemas resueltos',
-          detalle: resueltos === null ? 'Cargando…' : 'En tus grupos',
+          detalle: resueltos === null ? sinProblemas : 'En tus grupos',
           vacio: '',
           icono: '0-imgIcon6',
           tono: resueltos ? 'text-green-400' : 'text-kl-muted',
@@ -215,8 +250,8 @@ export class InicioDashboard {
           etiqueta: 'Mis grupos',
           detalle:
             membresias === null
-              ? 'Cargando…'
-              : `${activos} activo${activos === 1 ? '' : 's'} · ${membresias.length - activos} pendiente${membresias.length - activos === 1 ? '' : 's'}`,
+              ? sinGrupos
+              : `${plural(activos, 'activo')} · ${plural(enEspera, 'pendiente')}`,
           vacio: '',
           icono: '0-imgIcon8',
           tono: 'text-kl-muted',
@@ -224,11 +259,20 @@ export class InicioDashboard {
         {
           valor: pendientes === null ? '—' : String(pendientes),
           etiqueta: 'Problemas pendientes',
-          detalle: pendientes === null ? 'Cargando…' : 'Sin resolver',
+          detalle: pendientes === null ? sinProblemas : 'Sin resolver',
           vacio: '',
           icono: '0-imgIcon9',
           tono: pendientes ? 'text-amber-300' : 'text-kl-muted',
         },
+      ];
+    }
+
+    if (nuevo) {
+      return [
+        { valor: '0', etiqueta: 'Problemas resueltos', detalle: 'Empieza con tu primer problema', vacio: '', icono: '0-imgIcon6', tono: 'text-kl-muted' },
+        { valor: '—', etiqueta: 'Rating Codeforces', detalle: 'Vincula tu cuenta en el perfil', vacio: '', icono: '0-imgIcon7', tono: 'text-kl-muted' },
+        { valor: '0', etiqueta: 'Mis grupos', detalle: 'Únete a uno para entrenar', vacio: '', icono: '0-imgIcon8', tono: 'text-kl-muted' },
+        { valor: '0', etiqueta: 'Problemas pendientes', detalle: 'Aún no tienes asignaciones', vacio: '', icono: '0-imgIcon9', tono: 'text-kl-muted' },
       ];
     }
 
@@ -242,42 +286,31 @@ export class InicioDashboard {
 
   protected readonly grupos = computed(() => {
     if (this.coach) {
-      const reales = this.misGrupos();
-      if (reales !== null) {
-        return reales.map((grupo) => ({
-          id: grupo.groupId,
-          iniciales: this.inicialesDe(grupo.name),
-          nombre: grupo.name,
-          detalle: `${grupo.activeMembers}/${grupo.maxCapacity ?? '—'} integrantes · ${grupo.sessionSchedule ?? 'horario por definir'}`,
-          estado:
-            grupo.status === 'BORRADOR'
-              ? 'Borrador'
-              : grupo.pendingRequests > 0
-                ? `${grupo.pendingRequests} pendiente${grupo.pendingRequests === 1 ? '' : 's'}`
-                : 'Sin pendientes',
+      if (this.session.demo()) {
+        return this.equiposDemo.map((equipo) => ({
+          id: null,
+          iniciales: equipo.iniciales,
+          nombre: equipo.nombre,
+          detalle: `${equipo.integrantes}/${equipo.cupo} integrantes · ${equipo.horario}`,
+          estado: plural(equipo.pendientes, 'pendiente'),
         }));
       }
-      return [
-        {
-          id: null,
-          iniciales: 'EA',
-          nombre: 'Equipo Alfa',
-          detalle: '14/20 integrantes · Mar y jue 7:00 p. m.',
-          estado: '2 pendientes',
-        },
-        {
-          id: null,
-          iniciales: 'EB',
-          nombre: 'Equipo Beta',
-          detalle: '10/20 integrantes · Mié 6:00 p. m.',
-          estado: '1 pendiente',
-        },
-      ];
+      return (this.misGrupos() ?? []).map((grupo) => ({
+        id: grupo.groupId,
+        iniciales: this.inicialesDe(grupo.name),
+        nombre: grupo.name,
+        detalle: `${grupo.activeMembers}/${grupo.maxCapacity ?? '—'} integrantes · ${grupo.sessionSchedule ?? 'horario por definir'}`,
+        estado:
+          grupo.status === 'BORRADOR'
+            ? 'Borrador'
+            : grupo.pendingRequests > 0
+              ? plural(grupo.pendingRequests, 'pendiente')
+              : 'Sin pendientes',
+      }));
     }
 
-    const membresias = this.misMembresias();
-    if (membresias !== null) {
-      return membresias.map((item) => ({
+    if (!this.session.demo()) {
+      return (this.misMembresias() ?? []).map((item) => ({
         id: item.groupId,
         iniciales: this.inicialesDe(item.name),
         nombre: item.name,
@@ -299,21 +332,10 @@ export class InicioDashboard {
     this.coach = route.snapshot.data['coach'] === true;
     this.ruta = this.coach ? '/coach/inicio' : '/inicio';
     this.nuevo$ = route.queryParamMap.pipe(map((params) => !this.session.demo() || params.get('estado') === 'nuevo'));
-    if (this.coach && !this.session.demo()) {
-      this.api.loadMine().subscribe({
-        next: (mine) => this.misGrupos.set(mine.filter((g): g is CoachGroup => 'activeMembers' in g)),
-        error: () => this.misGrupos.set([]),
-      });
-    } else if (!this.coach && !this.session.demo()) {
-      this.api.loadMine().subscribe({
-        next: (mine) => {
-          const membresias = mine.filter((m): m is PractitionerGroup => 'membership' in m);
-          this.misMembresias.set(membresias);
-          this.cargarProblemas(membresias);
-        },
-        error: () => this.misMembresias.set([]),
-      });
-    }
+    this.sinActividad = toSignal(route.queryParamMap.pipe(map((params) => params.get('estado') === 'nuevo')), {
+      initialValue: false,
+    });
+    if (!this.session.demo()) this.cargar();
     this.temas = this.coach
       ? [
           { nombre: 'Teoría de números', valor: 22 },
@@ -348,6 +370,28 @@ export class InicioDashboard {
           : 'Tu coach te asignará problemas para practicar.',
       },
     ];
+  }
+
+  /** Loads the real teams and, for practitioners, their assigned problems. Also used to retry. */
+  protected cargar(): void {
+    this.errorGrupos.set(false);
+    this.errorProblemas.set(false);
+    this.misGrupos.set(null);
+    this.misMembresias.set(null);
+    this.resueltos.set(null);
+    this.pendientesProblemas.set(null);
+    this.api.loadMine().subscribe({
+      next: (mine) => {
+        if (this.coach) {
+          this.misGrupos.set(mine.filter((g): g is CoachGroup => 'activeMembers' in g));
+          return;
+        }
+        const membresias = mine.filter((m): m is PractitionerGroup => 'membership' in m);
+        this.misMembresias.set(membresias);
+        this.cargarProblemas(membresias);
+      },
+      error: () => this.errorGrupos.set(true),
+    });
   }
 
   private inicialesDe(nombre: string): string {
@@ -392,10 +436,7 @@ export class InicioDashboard {
         this.resueltos.set(items.filter((item) => item.status === 'RESUELTO').length);
         this.pendientesProblemas.set(items.filter((item) => item.status !== 'RESUELTO').length);
       },
-      error: () => {
-        this.resueltos.set(null);
-        this.pendientesProblemas.set(null);
-      },
+      error: () => this.errorProblemas.set(true),
     });
   }
 }

@@ -7,6 +7,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { map } from 'rxjs';
 import { Session } from '../../../../core/session';
 import { ProfileApi } from '../../../../core/profile-api';
+import { profileIdentity } from '../../../../core/profile-identity';
+import { NIVELES_EDICION } from '../../../../data/perfil-practicante-demo';
 import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 
 @Component({
@@ -18,11 +20,18 @@ import { SiteFooter } from '../../../../shared/site-footer/site-footer';
 export class OnboardingCompletado {
   protected readonly session = inject(Session);
   protected readonly profiles = inject(ProfileApi);
+  /** Header identity: the saved profile name when there is one, otherwise the account email. */
+  protected get cuenta() {
+    if (this.session.demo()) return { name: 'Camila Rojas', initials: 'CR' };
+    const email = this.session.account()?.email ?? '';
+    return profileIdentity(this.profiles.profile()?.fullName, email, email);
+  }
   protected get resumen(): string[] {
     if (this.session.demo()) return this.resumenDemo;
     const p = this.profiles.profile();
     if (p?.role !== 'PRACTICANTE') return [];
-    return [`Código ${p.codigoEstudiante}`, p.carrera, `${p.cicloAcademico}.º ciclo`, p.nivelCompetitivo,
+    const nivel = NIVELES_EDICION.find(n => n.valor === p.nivelCompetitivo)?.titulo ?? p.nivelCompetitivo;
+    return [`Código ${p.codigoEstudiante}`, p.carrera, `${p.cicloAcademico}.º ciclo`, `Nivel ${nivel}`,
       p.codeforcesHandle ? `Codeforces: ${p.codeforcesHandle}${p.codeforcesRating == null ? '' : ` · rating ${p.codeforcesRating}`}` : 'Codeforces sin vincular',
       ...(p.atcoderHandle ? [`AtCoder: ${p.atcoderHandle}`] : []), ...(p.vjudgeHandle ? [`VJudge: ${p.vjudgeHandle}`] : [])];
   }

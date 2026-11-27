@@ -18,7 +18,7 @@ const OTHER_TEAM_ASSIGNMENTS = 'Los problemas recibidos pertenecen a otro equipo
     description="Cada resolución conserva su contexto. El mismo problema en otro equipo tiene un registro independiente."
   >
     @if (progress(); as progress) {
-      <section class="rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
+      <section class="kl-card rounded-2xl border border-kl-border-strong bg-kl-surface p-5">
         <h2 class="font-display text-xl">Equipo {{ progress.teamId }}</h2>
         <p>Problemas distintos aceptados</p>
         <strong class="font-display text-4xl">{{ progress.acceptedProblems }}</strong>
@@ -29,21 +29,21 @@ const OTHER_TEAM_ASSIGNMENTS = 'Los problemas recibidos pertenecen a otro equipo
           La API no proporciona porcentaje, total asignado ni historial de actividad.
         </p>
       </section>
-      <section class="rounded-2xl border border-kl-border bg-kl-surface p-5">
+      <section class="kl-card rounded-2xl border border-kl-border bg-kl-surface p-5">
         <h2 class="font-display text-xl">Registrar resolución manual</h2>
         <p>
           Declaración provisional: no se ejecuta tu código ni se verifica automáticamente la
           evidencia.
         </p>
         @if (!busy() && !error() && !assignments().length) {
-          <p role="status">Este equipo no tiene problemas asignados.</p>
+          <p role="status" class="rounded-xl border border-dashed border-kl-border-strong bg-white/2 p-5 text-center text-sm text-kl-muted">Este equipo no tiene problemas asignados.</p>
         }
         <form [formGroup]="form" (ngSubmit)="register()" class="flex flex-col gap-4">
           <label class="flex min-w-0 flex-col gap-2"
             >Problema asignado
             <select
               aria-label="Problema asignado"
-              class="team-select"
+              class="team-select w-full max-w-full min-w-0 rounded-full border border-solid border-kl-border-strong bg-kl-inset px-4 py-2.5 text-sm text-kl-text"
               formControlName="competitionProblemId"
               [attr.disabled]="saving() || busy() || !assignments().length ? '' : null"
             >

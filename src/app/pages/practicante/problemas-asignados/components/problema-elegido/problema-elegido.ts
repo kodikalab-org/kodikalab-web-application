@@ -1,4 +1,5 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Loader } from '../../../../../shared/loader/loader';
+import { Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +27,7 @@ const PENALIZACION: Record<string, string> = {
 /** US-08/US-09 (practitioner): one assigned problem with its conditions, the personal attempts and the registration. */
 @Component({
   selector: 'app-problema-elegido',
-  imports: [RouterLink, MatButtonModule, MatCardModule, RegistroProblemasResueltos],
+  imports: [Loader, RouterLink, MatButtonModule, MatCardModule, RegistroProblemasResueltos],
   templateUrl: './problema-elegido.html',
   styleUrl: './problema-elegido.css',
   host: { class: 'block' },
@@ -85,6 +86,8 @@ export class ProblemaElegido {
   protected reintentar(): void {
     this.cargar();
   }
+
+  protected readonly formulario = viewChild<RegistroProblemasResueltos>('registroFormulario');
 
   protected abrirRegistro(dialogo: HTMLDialogElement): void {
     this.registroAbierto.set(true);

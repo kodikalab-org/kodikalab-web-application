@@ -182,6 +182,16 @@ describe('ProblemPicker', () => {
     expect(picker.rows()[0]).toMatchObject({ score: 250, balloonColor: '#00ff00' });
   });
 
+  it('keeps the previous score while the field is empty', () => {
+    const { picker, type, addByCode, importRequest, fixture } = setup();
+    addByCode('1850A');
+    importRequest().flush({ created: true, problem: A });
+    fixture.detectChanges();
+    type('Puntos de To My Critics', '250');
+    type('Puntos de To My Critics', '');
+    expect(picker.rows()[0].score).toBe(250);
+  });
+
   it('shows the 404, 503 and 400 messages of the import and keeps the typed code', () => {
     const { addByCode, importRequest, fixture, text, root } = setup();
     addByCode('9999Z');
@@ -323,5 +333,24 @@ describe('ProblemPicker', () => {
       http.expectNone('/api/problems/codeforces/import');
       expect(picker.rows().map((r) => r.problem.id)).toEqual([11]);
     });
+  });
+
+  it('retries a failed search without retyping it', () => {
+    vi.useFakeTimers();
+    const { type, fixture, root } = setup();
+    type('Buscar en Codeforces', 'dijkstra');
+    vi.advanceTimersByTime(300);
+    http.expectOne((r) => r.url === '/api/problems/codeforces/search')
+      .flush({}, { status: 503, statusText: 'Unavailable' });
+    fixture.detectChanges();
+
+    const retry = Array.from(root.querySelectorAll('button')).find((b) => b.textContent?.includes('Reintentar'));
+    expect(retry).toBeDefined();
+    retry!.click();
+    vi.advanceTimersByTime(300);
+
+    const request = http.expectOne((r) => r.url === '/api/problems/codeforces/search');
+    expect(request.request.params.get('q')).toBe('dijkstra');
+    request.flush([]);
   });
 });

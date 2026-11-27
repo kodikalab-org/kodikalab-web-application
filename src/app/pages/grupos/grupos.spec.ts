@@ -106,7 +106,7 @@ describe('Interfaces de grupos (US04, US05 y US06)', () => {
 
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain('Entrenamiento de Grafos');
-    expect(root.textContent).toContain('Mostrando 1 grupos');
+    expect(root.textContent).toContain('Mostrando 1 grupo');
   });
 
   it('conserva el equipo activo al navegar al ranking y al avance', async () => {

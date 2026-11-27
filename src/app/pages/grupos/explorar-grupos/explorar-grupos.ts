@@ -11,6 +11,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { apiError } from '../../../core/api';
+import { Loader } from '../../../shared/loader/loader';
+import { plural } from '../../../shared/plural';
 import {
   Clarification,
   Membership,
@@ -64,6 +66,7 @@ interface GrupoVm {
 @Component({
   selector: 'app-explorar-grupos',
   imports: [
+    Loader,
     A11yModule,
     RouterLink,
     ReactiveFormsModule,
@@ -95,6 +98,9 @@ export class ExplorarGrupos {
   protected readonly cargando = signal(true);
   /** Error al cargar el listado. */
   protected readonly errorCarga = signal('');
+  /** The memberships could not be read, so the cards cannot tell which groups are already joined. */
+  protected readonly errorMembresias = signal(false);
+  protected readonly plural = plural;
   /** Error al enviar un ingreso o una solicitud. */
   protected readonly error = signal('');
   protected readonly vista = signal<Vista>('');
@@ -314,6 +320,7 @@ export class ExplorarGrupos {
   protected cargar(): void {
     this.cargando.set(true);
     this.errorCarga.set('');
+    this.errorMembresias.set(false);
     this.api.loadGroups().subscribe({
       next: (groups) =>
         this.api.loadMine().subscribe({
@@ -322,6 +329,7 @@ export class ExplorarGrupos {
             this.cargando.set(false);
           },
           error: () => {
+            this.errorMembresias.set(true);
             this.datos.set({ groups, mine: [] });
             this.cargando.set(false);
           },

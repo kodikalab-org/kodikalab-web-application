@@ -11,6 +11,6 @@
   --mat-button-outlined-container-shape: 12px;
   --mat-button-outlined-container-height: 48px;
   --mat-button-outlined-label-text-size: 15px;
-  --mat-button-outlined-outline-color: #34304a;
-  --mat-button-outlined-label-text-color: #e7e3f5;
+  --mat-button-outlined-outline-color: var(--kl-line-strong);
+  --mat-button-outlined-label-text-color: var(--kl-text-strong);
 }

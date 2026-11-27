@@ -16,7 +16,7 @@
     </div>
     <a
       mat-flat-button
-      class="h-12 bg-linear-to-b from-[#8a6cff] to-[#6e52f2] px-6 text-base shadow-[0_0_24px_rgba(115,87,243,.45)]"
+      class="h-12 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-accent)] px-6 text-base shadow-[0_0_24px_rgba(115,87,243,.45)]"
       routerLink="/coach/asignar-problema"
     >
       Asignar problemas
@@ -42,7 +42,7 @@
       <button mat-stroked-button type="button" (click)="cargarEquipos()">Reintentar</button>
     </div>
   } @else if (equiposCargando()) {
-    <p class="mt-6 mb-0 text-sm text-kl-muted" role="status">Cargando tus equipos…</p>
+    <app-loader label="Cargando tus equipos…" [rows]="2" class="mt-6 mb-0" />
   } @else if (equipos().length === 0) {
     <p class="mt-6 mb-0 text-sm text-kl-body">
       No administras ningún equipo publicado, así que no hay asignaciones que mostrar.
@@ -57,7 +57,7 @@
       >
         @for (grupo of equipos(); track grupo.groupId; let i = $index) {
           <div
-            class="rounded-xl border border-solid border-kl-border bg-white/3 px-3 py-3 has-[.mat-mdc-radio-checked]:border-[#8a6cff] has-[.mat-mdc-radio-checked]:bg-[#241a5c]/60"
+            class="rounded-xl border border-solid border-kl-border bg-white/3 px-3 py-3 has-[.mat-mdc-radio-checked]:border-[var(--kl-cta-from)] has-[.mat-mdc-radio-checked]:bg-[var(--kl-card-hi)]/60"
           >
             <mat-radio-button
               class="block w-full [&_.mdc-form-field]:w-full [&_.mdc-label]:flex-1"
@@ -69,7 +69,7 @@
                   [class]="colorEquipo(i)"
                   >{{ iniciales(grupo.name) }}</span
                 >
-                <span>
+                <span class="min-w-0 wrap-anywhere">
                   <span class="block text-sm font-semibold text-kl-text">{{ grupo.name }}</span>
                   <span class="block text-xs text-kl-muted">{{ plural(grupo.activeMembers, 'integrante activo', 'integrantes activos') }}</span>
                 </span>
@@ -147,7 +147,7 @@
           </div>
 
           <mat-card
-            class="auth-card mt-4 rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card mt-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
             appearance="outlined"
           >
             <div class="p-4 md:p-5" [attr.aria-busy]="cargando()">
@@ -160,7 +160,7 @@
                   <button mat-stroked-button type="button" (click)="reintentar()">Reintentar</button>
                 </div>
               } @else if (cargando() && !lista()) {
-                <p class="m-0 text-sm text-kl-muted" role="status">Cargando los problemas asignados…</p>
+                <app-loader label="Cargando los problemas asignados…" [rows]="2" class="m-0" />
               } @else if (lista(); as datos) {
                 @if (datos.items.length === 0) {
                   <p class="m-0 text-sm text-kl-muted" role="status">
@@ -187,10 +187,10 @@
                   <ul class="problemas m-0 list-none p-0">
                     @for (problema of datos.items; track problema.competitionProblemId) {
                       <li
-                        class="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 border-0 border-t border-solid border-kl-divider px-2 py-3.5 text-sm xl:grid-cols-[40px_minmax(0,1.3fr)_minmax(0,1.1fr)_80px_minmax(0,1fr)_48px_110px]"
+                        class="grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 gap-y-2 wrap-anywhere border-0 border-t border-solid border-kl-divider px-2 py-3.5 text-sm xl:grid-cols-[40px_minmax(0,1.3fr)_minmax(0,1.1fr)_80px_minmax(0,1fr)_48px_110px]"
                       >
                         <span
-                          class="flex size-9 items-center justify-center rounded-lg bg-linear-to-b from-[#8a6cff] to-[#6e52f2] font-bold text-white"
+                          class="flex size-9 items-center justify-center rounded-lg bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-accent)] font-bold text-white"
                           ><span class="sr-only">Letra </span>{{ problema.letter }}</span
                         >
                         <div class="min-w-0">
@@ -250,12 +250,12 @@
 
         <aside class="flex flex-col gap-6" aria-label="Resumen del equipo">
           <mat-card
-            class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
             appearance="outlined"
           >
             <div class="p-5">
               <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-                <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+                <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
                   <img src="images/app/users-accent.svg" alt="" width="20" height="20" />
                 </span>
                 Resumen del equipo
@@ -266,7 +266,7 @@
                     class="flex justify-between gap-4 border-0 border-t border-solid border-kl-divider py-2.5 first:border-t-0"
                   >
                     <dt class="text-kl-muted">{{ dato.etiqueta }}</dt>
-                    <dd class="m-0 text-right font-medium">{{ dato.valor }}</dd>
+                    <dd class="m-0 min-w-0 text-right font-medium">{{ dato.valor }}</dd>
                   </div>
                 }
               </dl>
@@ -274,17 +274,19 @@
           </mat-card>
 
           <mat-card
-            class="auth-card rounded-2xl bg-linear-to-b from-[#201454]/60 via-[#140d34]/70 to-[#0a071a]/80 shadow-[0_0_30px_rgba(100,60,255,.18)] [--mat-card-outlined-container-shape:16px] [--mat-card-outlined-outline-color:#2d2560]"
+            class="auth-card rounded-2xl bg-linear-to-b from-[var(--kl-card-hi)]/60 via-[var(--kl-card-via)]/70 to-[var(--kl-card-to)]/80 [--mat-card-outlined-container-shape:16px]"
             appearance="outlined"
           >
             <div class="p-5">
               <h2 class="m-0 flex items-center gap-3 font-display text-lg font-bold">
-                <span class="flex size-9 items-center justify-center rounded-lg bg-[#2a1f6e]">
+                <span class="flex size-9 items-center justify-center rounded-lg bg-[var(--kl-selected)]">
                   <img src="images/app/trophy-accent.svg" alt="" width="20" height="20" />
                 </span>
                 Competencias del equipo
               </h2>
-              @if (competenciasEquipo().length === 0) {
+              @if (!resumenListo()) {
+                <p class="mt-3 mb-0 text-sm text-kl-muted">—</p>
+              } @else if (competenciasEquipo().length === 0) {
                 <p class="mt-3 mb-0 text-sm text-kl-muted">Sin competencias con problemas asignados.</p>
               }
               <ul class="m-0 mt-3 list-none p-0">
@@ -292,7 +294,7 @@
                   <li
                     class="flex items-center justify-between gap-3 border-0 border-t border-solid border-kl-divider py-3 first:border-t-0"
                   >
-                    <div>
+                    <div class="min-w-0 wrap-anywhere">
                       <p class="m-0 text-sm font-semibold text-kl-heading">{{ competencia.name }}</p>
                       <p class="m-0 text-xs text-kl-muted">
                         {{ competencia.status === 'PROGRAMADA' ? 'Empieza' : 'Termina' }}
@@ -300,7 +302,7 @@
                       </p>
                     </div>
                     <span
-                      class="rounded-full border border-solid px-2 py-0.5 text-[11px]"
+                      class="shrink-0 rounded-full border border-solid px-2 py-0.5 text-[11px]"
                       [class]="estadoCompetencia[competencia.status].badge"
                       >{{ estadoCompetencia[competencia.status].label }}</span
                     >

@@ -2,10 +2,7 @@
   <p role="note" class="m-0 bg-kl-accent p-3 text-center text-white">Demostración: datos de ejemplo, sin conexión a la API.</p>
 @if (contexto$ | async; as contexto) {
   @let estado = (estado$ | async) ?? '';
-  <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
-    <div
-      class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
-    ></div>
+  <div class="kl-page-bg relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
     <app-header [coach]="false" />
     <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
       <div>
@@ -22,7 +19,7 @@
       @if (estado === 'contexto-invalido') {
         <section
           role="alert"
-          class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+          class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
         >
           <strong class="text-kl-danger">Selecciona un equipo al que pertenezcas</strong>
           <p class="mb-0">
@@ -32,7 +29,7 @@
         </section>
         <dl class="m-0 text-sm">
           <dt class="mb-2 font-bold">Equipo activo</dt>
-          <dd class="m-0 rounded-xl bg-[#212121] p-3">Sin equipo válido</dd>
+          <dd class="m-0 rounded-xl bg-kl-inset p-3">Sin equipo válido</dd>
         </dl>
         <p class="m-0 text-xs text-kl-muted">Elige uno de tus grupos activos.</p>
         <div class="flex flex-col gap-3 sm:flex-row">
@@ -45,7 +42,7 @@
             >Seleccionar Grafos y DP</a
           >
         </div>
-        <mat-card class="gap-4 border border-solid border-[#2b2760] bg-kl-surface p-6"
+        <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-kl-surface p-6"
           ><h2 class="m-0 text-xl font-bold">Tus datos están protegidos</h2>
           <p class="m-0 text-sm text-kl-muted">
             El cambio de contexto no copia resoluciones entre equipos. Solo se puede registrar
@@ -55,7 +52,7 @@
       } @else if (estado === 'actividad-registrada') {
         <section
           role="status"
-          class="rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+          class="rounded-xl border border-solid border-green-400 bg-green-400/10 p-4 text-sm"
         >
           <strong class="text-green-400">Resolución registrada solo en Equipo Alfa</strong>
           <p class="mb-0">
@@ -65,20 +62,20 @@
         </section>
         <dl class="m-0 text-sm">
           <dt class="mb-2 font-bold">Equipo activo</dt>
-          <dd class="m-0 rounded-xl bg-[#212121] p-3">Equipo Alfa</dd>
+          <dd class="m-0 rounded-xl bg-kl-inset p-3">Equipo Alfa</dd>
         </dl>
         <section aria-label="Comparación entre equipos" class="grid grid-cols-2 gap-3">
-          <mat-card class="gap-3 border border-solid border-[#2b2760] bg-kl-surface p-5"
+          <mat-card class="gap-3 border border-solid border-[var(--kl-line)] bg-kl-surface p-5"
             ><span class="text-sm text-kl-muted">Resueltos en Alfa</span
             ><strong class="text-2xl">7 / 14</strong
             ><span class="text-xs text-kl-muted">Después del registro</span></mat-card
-          ><mat-card class="gap-3 border border-solid border-[#2b2760] bg-kl-surface p-5"
+          ><mat-card class="gap-3 border border-solid border-[var(--kl-line)] bg-kl-surface p-5"
             ><span class="text-sm text-kl-muted">Resueltos en Grafos y DP</span
             ><strong class="text-2xl">3 / 10</strong
             ><span class="text-xs text-kl-muted">Sin cambios</span></mat-card
           >
         </section>
-        <mat-card class="gap-4 border border-solid border-[#2b2760] bg-kl-surface p-6">
+        <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-kl-surface p-6">
           @for (
             fila of [
               ['Equipo Alfa', 'Resuelto', 'Actualizado'],
@@ -87,7 +84,7 @@
             track fila[0]
           ) {
             <article
-              class="grid gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm lg:grid-cols-4"
+              class="grid gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm lg:grid-cols-4"
             >
               <strong>Theatre Square · CF-1A</strong><span>{{ fila[0] }}</span
               ><span>{{ fila[1] }}</span
@@ -108,7 +105,7 @@
         <div class="flex flex-col gap-2">
           <span class="text-sm font-bold">Equipo activo</span>
           <div
-            class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm"
+            class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset p-3 text-sm"
           >
             {{ contexto.nombre }}
           </div>
@@ -125,9 +122,9 @@
         >
         <aside
           aria-live="polite"
-          class="flex flex-col gap-2 rounded-xl border border-solid border-[#ccb2ff] bg-[#1e1536] p-4 text-sm"
+          class="flex flex-col gap-2 rounded-xl border border-solid border-kl-accent-text bg-[var(--kl-card-from)] p-4 text-sm"
         >
-          <strong class="text-[#ccb2ff]">Estás consultando {{ contexto.nombre }}</strong
+          <strong class="text-kl-accent-text">Estás consultando {{ contexto.nombre }}</strong
           ><span>Las cifras y estados de esta pantalla pertenecen únicamente a este grupo.</span>
         </aside>
         <section
@@ -136,7 +133,7 @@
         >
           @for (indicador of contexto.indicadores; track indicador.etiqueta) {
             <mat-card
-              class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+              class="gap-2 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-5"
               ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
               ><strong class="font-display text-2xl">{{ indicador.valor }}</strong
               ><span class="text-xs text-kl-muted">{{ indicador.ayuda }}</span></mat-card
@@ -145,7 +142,7 @@
         </section>
         <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <mat-card
-            class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="min-w-0 gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 class="m-0 text-xl font-bold">Actividad en {{ contexto.nombre }}</h2>
             <table
@@ -157,7 +154,7 @@
                   contexto.nombre
                 }}
               </caption>
-              <thead class="bg-[#1e1536] text-kl-muted">
+              <thead class="bg-[var(--kl-card-from)] text-kl-muted">
                 <tr>
                   @for (titulo of ['Problema', 'Plataforma', 'Estado', 'Equipo']; track titulo) {
                     <th scope="col" class="p-3">{{ titulo }}</th>
@@ -191,10 +188,10 @@
             <ul class="m-0 flex list-none flex-col gap-4 p-0 lg:hidden">
               @for (fila of contexto.actividad; track fila.problema) {
                 <li
-                  class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm"
+                  class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm"
                 >
                   <strong>{{ fila.problema }}</strong
-                  ><span class="font-mono text-xs text-[#ccb2ff]">{{ contexto.nombre }}</span
+                  ><span class="font-mono text-xs text-kl-accent-text">{{ contexto.nombre }}</span
                   ><span class="text-kl-muted">Plataforma: {{ fila.plataforma }}</span
                   ><span class="text-kl-muted">Estado: {{ fila.estado }}</span>
                 </li>
@@ -203,7 +200,7 @@
           </mat-card>
           <aside class="flex min-w-0 flex-col gap-6">
             <mat-card
-              class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+              class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
               ><h2 class="m-0 text-xl font-bold">Un problema, dos registros</h2>
               <p class="m-0 text-sm leading-5 text-kl-muted">
                 Theatre Square está asignado en ambos grupos. En Equipo Alfa figura resuelto; en
@@ -211,7 +208,7 @@
               </p></mat-card
             >
             <mat-card
-              class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+              class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
               ><h2 class="m-0 text-xl font-bold">Qué cambia al seleccionar</h2>
               <p class="m-0 text-sm leading-5 text-kl-muted">
                 Se actualizan únicamente las asignaciones, el progreso y las métricas del grupo

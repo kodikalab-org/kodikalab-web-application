@@ -40,7 +40,7 @@
     class="main relative z-10 flex flex-1 items-center justify-center px-4 py-8 [@media(max-height:760px)]:p-4"
   >
     <mat-card
-      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[#201454]/75 via-[#140d34]/82 to-[#0a071a]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7 [@media(max-height:760px)]:px-8 [@media(max-height:760px)]:py-6 [@media(max-height:760px)_and_(max-width:640px)]:px-5"
+      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[var(--kl-card-hi)]/75 via-[var(--kl-card-via)]/82 to-[var(--kl-card-to)]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7 [@media(max-height:760px)]:px-8 [@media(max-height:760px)]:py-6 [@media(max-height:760px)_and_(max-width:640px)]:px-5"
       appearance="outlined"
     >
       @if ((estado$ | async) === 'cuenta-deshabilitada') {
@@ -48,9 +48,9 @@
         <p class="text-sm text-kl-muted">Accede a tu espacio de entrenamiento competitivo.</p>
         <dl class="flex w-full flex-col gap-3 text-sm">
           <dt class="font-bold">Correo institucional</dt>
-          <dd class="m-0 break-all rounded-xl bg-[#212121] p-3">camila.rojas@upc.edu.pe</dd>
+          <dd class="m-0 break-all rounded-xl bg-kl-inset p-3">camila.rojas@upc.edu.pe</dd>
           <dt class="font-bold">Contraseña</dt>
-          <dd class="m-0 rounded-xl bg-[#212121] p-3" aria-label="Contraseña oculta">
+          <dd class="m-0 rounded-xl bg-kl-inset p-3" aria-label="Contraseña oculta">
             ••••••••••••
           </dd>
         </dl>
@@ -194,7 +194,7 @@
 
           <button
             mat-flat-button
-            class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+            class="submit auth-submit w-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
             type="submit"
             [disabled]="form.invalid || busy"
           >
@@ -203,12 +203,12 @@
           </button>
 
           <div
-            class="separator h-px bg-linear-to-r from-transparent via-[#34304a] to-transparent"
+            class="separator h-px bg-linear-to-r from-transparent via-[var(--kl-line-strong)] to-transparent"
             aria-hidden="true"
           ></div>
 
           <a
-            class="register flex h-[54px] items-center justify-center gap-2 rounded-xl border border-solid border-[#34304a] text-[15px] text-[#e7e3f5] transition-colors hover:border-kl-accent [@media(max-height:760px)]:h-12"
+            class="register flex h-[54px] items-center justify-center gap-2 rounded-full border border-solid border-[var(--kl-line-strong)] text-[15px] text-[var(--kl-text-strong)] transition-colors hover:border-kl-accent [@media(max-height:760px)]:h-12"
             routerLink="/registro"
             (click)="pageStart.scrollIntoView({ behavior: 'instant' })"
           >

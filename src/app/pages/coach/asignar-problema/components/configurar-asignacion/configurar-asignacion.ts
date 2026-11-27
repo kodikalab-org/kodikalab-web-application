@@ -1,3 +1,4 @@
+import { Loader } from '../../../../../shared/loader/loader';
 import { Component, effect, inject, untracked } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,7 +14,7 @@ import { PasosAsignacion } from '../pasos-asignacion/pasos-asignacion';
 /** Step 2 of US-07: team, competition, and letter, score and balloon color of each selected problem. */
 @Component({
   selector: 'app-configurar-asignacion',
-  imports: [
+  imports: [Loader, 
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,

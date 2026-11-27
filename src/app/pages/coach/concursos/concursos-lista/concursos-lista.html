@@ -1,4 +1,4 @@
-<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+<div class="kl-page-bg relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
   <app-header [coach]="true" />
   <main class="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-12 md:px-10">
     <header class="flex flex-wrap items-end justify-between gap-4">
@@ -43,7 +43,7 @@
     @if (created(); as contest) {
       <p
         role="status"
-        class="mt-5 mb-0 rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+        class="mt-5 mb-0 rounded-xl border border-solid border-green-400 bg-green-400/10 p-4 text-sm wrap-anywhere"
       >
         El concurso «{{ contest.name }}» se creó correctamente.
         @if (teamId()) {
@@ -66,40 +66,46 @@
     } @else if (notice()) {
       <p
         role="status"
-        class="mt-5 mb-0 rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+        class="mt-5 mb-0 rounded-xl border border-solid border-green-400 bg-green-400/10 p-4 text-sm wrap-anywhere"
       >
         {{ notice() }}
       </p>
     }
     @if (teamsError()) {
-      <p role="alert" class="mt-5 mb-0 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm">
+      <p role="alert" class="mt-5 mb-0 rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm">
         {{ teamsError() }}
         <button mat-stroked-button type="button" (click)="loadTeams()">Reintentar</button>
       </p>
     }
     @if (error()) {
-      <p role="alert" class="mt-5 mb-0 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm">
+      <p role="alert" class="mt-5 mb-0 rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm">
         {{ error() }}
+        @if (loadFailed()) {
+          <button mat-stroked-button type="button" class="ml-2" (click)="reload()">Reintentar</button>
+        }
       </p>
+    }
+    @if (loadingTeams()) {
+      <app-loader label="Cargando tus grupos…" [rows]="1" class="mt-5 mb-0" />
     }
     @if (!loadingTeams() && !teamsError() && !teams().length) {
       <p class="mt-5 mb-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
         No tienes grupos publicados. Publica un grupo para poder crear concursos.
       </p>
-    } @else if (!teamId()) {
+    } @else if (!teamId() && !loadingTeams()) {
       <p class="mt-5 mb-0 rounded-xl border border-solid border-kl-border p-4 text-kl-muted">
         Selecciona un grupo para ver sus concursos.
       </p>
-    } @else {
+    } @else if (teamId() && !loadFailed()) {
       @if (loading()) {
-        <p class="mt-5 mb-0 text-kl-muted" aria-live="polite">Consultando concursos…</p>
+        <app-loader label="Consultando concursos…" [rows]="2" class="mt-5 mb-0" />
       }
       @for (section of sections(); track section.title) {
         <section class="mt-8" [attr.aria-labelledby]="'titulo-' + $index">
           <h2 [id]="'titulo-' + $index" class="m-0 mb-3 text-xl font-bold">{{ section.title }}</h2>
           @if (section.rows.length) {
             <div
-              class="overflow-x-auto rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86"
+              class="kl-card overflow-x-auto rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86"
             >
               <table class="w-full min-w-[760px] border-collapse text-left text-sm" [attr.aria-label]="section.label">
                 <thead>
@@ -115,7 +121,7 @@
                 <tbody>
                   @for (c of section.rows; track c.competitionId) {
                     <tr class="border-0 border-t border-solid border-kl-divider">
-                      <td class="px-4 py-3 font-semibold text-kl-heading">{{ c.eventName }}</td>
+                      <td class="min-w-[220px] px-4 py-3 font-semibold wrap-anywhere text-kl-heading">{{ c.eventName }}</td>
                       <td class="px-4 py-3 whitespace-nowrap">{{ formatStart(c.startsAt) }}</td>
                       <td class="px-4 py-3 whitespace-nowrap">
                         {{ formatDuration(c.startsAt, c.endsAt) }}

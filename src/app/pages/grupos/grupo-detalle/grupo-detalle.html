@@ -4,17 +4,18 @@
   </a>
 
   @if (error()) {
-    <section role="alert" class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
-      {{ error() }}
+    <section role="alert" class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
+      <p class="mt-0 mb-3">{{ error() }}</p>
+      <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
     </section>
   } @else if (cargando()) {
-    <p role="status" class="text-sm text-kl-muted">Cargando grupo…</p>
+    <app-loader label="Cargando grupo…" [rows]="2" />
   } @else if (grupo(); as grupo) {
     <mat-card
-      class="mb-6 gap-4 rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6"
+      class="kl-card mb-6 gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-6"
     >
       <div class="flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div class="min-w-0 wrap-anywhere">
           <h1 class="m-0 font-display text-[30px] font-bold tracking-[-0.6px]">{{ grupo.name }}</h1>
           <p class="mt-2 mb-0 max-w-[720px] text-sm text-kl-body">
             {{ grupo.description || 'Sin descripción.' }}
@@ -28,15 +29,15 @@
       <dl class="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-xl bg-white/4 p-3">
           <dt class="text-xs uppercase tracking-wide text-kl-muted">Nivel</dt>
-          <dd class="m-0 mt-1">{{ grupo.expectedLevel || 'Sin definir' }}</dd>
+          <dd class="m-0 mt-1">{{ nivelTexto(grupo.expectedLevel) }}</dd>
         </div>
         <div class="rounded-xl bg-white/4 p-3">
           <dt class="text-xs uppercase tracking-wide text-kl-muted">Cupo</dt>
-          <dd class="m-0 mt-1">{{ grupo.maxCapacity ?? 'Sin definir' }} integrantes</dd>
+          <dd class="m-0 mt-1">{{ grupo.maxCapacity === null ? 'Sin definir' : plural(grupo.maxCapacity, 'integrante') }}</dd>
         </div>
         <div class="rounded-xl bg-white/4 p-3">
           <dt class="text-xs uppercase tracking-wide text-kl-muted">Horario</dt>
-          <dd class="m-0 mt-1">{{ grupo.sessionSchedule || 'Por definir' }}</dd>
+          <dd class="m-0 mt-1 wrap-anywhere">{{ grupo.sessionSchedule || 'Por definir' }}</dd>
         </div>
         <div class="rounded-xl bg-white/4 p-3">
           <dt class="text-xs uppercase tracking-wide text-kl-muted">Visibilidad</dt>
@@ -48,10 +49,13 @@
     <section aria-label="Problemas asignados al grupo">
       <h2 class="mb-3 font-display text-xl">Problemas del grupo</h2>
 
-      @if (problemasError()) {
-        <p class="rounded-2xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
-          {{ problemasError() }}
-        </p>
+      @if (problemasCargando()) {
+        <app-loader label="Cargando problemas…" [rows]="3" />
+      } @else if (problemasError()) {
+        <div role="alert" class="rounded-2xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
+          <p class="mt-0 mb-3">{{ problemasError() }}</p>
+          <button mat-stroked-button type="button" (click)="cargarProblemas()">Reintentar</button>
+        </div>
       } @else if (problemas().length === 0) {
         <p class="rounded-2xl bg-kl-surface-raised p-10 text-center text-sm text-kl-muted">
           El coach todavía no asignó problemas a este grupo.
@@ -61,13 +65,13 @@
           @for (item of problemas(); track item.competitionProblemId) {
             <mat-card
               appearance="outlined"
-              class="flex flex-wrap items-center gap-4 rounded-2xl border-[#2b2760] bg-white/3 p-4"
+              class="flex flex-wrap items-center gap-4 rounded-2xl border-[var(--kl-line)] bg-white/3 p-4"
             >
               <span
                 class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-kl-accent/25 font-mono text-sm"
                 >{{ item.letter }}</span
               >
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 wrap-anywhere">
                 <p class="m-0 text-[15px] font-medium">{{ item.problem.title }}</p>
                 <p class="m-0 mt-1 text-xs text-kl-muted">
                   {{ item.problem.sourcePlatform || 'Plataforma' }} ·

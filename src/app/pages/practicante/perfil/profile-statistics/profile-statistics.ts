@@ -4,10 +4,11 @@ import { CodeforcesStats } from '../../../../core/codeforces-stats-api';
 import { StatisticsPlatform, STATISTICS_PLATFORMS, exampleStatistics } from './statistics-view';
 import { StatisticsCharts } from './statistics-charts';
 import { StatisticsMetrics } from './statistics-metrics';
+import { Loader } from '../../../../shared/loader/loader';
 
 @Component({
   selector: 'app-profile-statistics',
-  imports: [RouterLink, StatisticsCharts, StatisticsMetrics],
+  imports: [RouterLink, StatisticsCharts, StatisticsMetrics, Loader],
   templateUrl: './profile-statistics.html',
   styleUrl: './profile-statistics.css',
 })

@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { DatePipe } from '@angular/common';
 import { TeamPage } from '../../shared/team-page';
 import { TeamFrame } from '../../shared/team-frame';
+import { plural } from '../../shared/plural';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OfficialResult, TeamCompetition, positiveId } from '../../core/team-api';
 const DUPLICATE_RESULT =
@@ -27,14 +28,14 @@ const DUPLICATE_RESULT =
     [coach]="true"
   >
     @if (teamId()) {
-      <section class="rounded-2xl border border-kl-border bg-kl-surface p-5">
+      <section class="kl-card rounded-2xl border border-kl-border bg-kl-surface p-5">
         <h2 class="font-display text-xl">Participación en una competencia existente</h2>
         <form [formGroup]="lookup" (ngSubmit)="loadResult()" class="flex flex-wrap items-end gap-3">
           <label class="flex min-w-0 flex-1 flex-col gap-2"
             >Competencia
             <select
               aria-label="Competencia"
-              class="team-select"
+              class="team-select w-full max-w-full min-w-0 rounded-full border border-solid border-kl-border-strong bg-kl-inset px-4 py-2.5 text-sm text-kl-text"
               formControlName="competitionId"
               (change)="loadResult()"
               [attr.disabled]="saving() || busy() || !competitions().length ? '' : null"
@@ -52,7 +53,7 @@ const DUPLICATE_RESULT =
           </button>
         </form>
         @if (!busy() && !error() && !competitions().length) {
-          <p role="status">Este equipo no tiene competencias disponibles.</p>
+          <p role="status" class="rounded-xl border border-dashed border-kl-border-strong bg-white/2 p-5 text-center text-sm text-kl-muted">Este equipo no tiene competencias disponibles.</p>
         }
         @if (loadedId() && loadedId() === parsedCompetition()) {
           @if (result(); as result) {
@@ -115,15 +116,15 @@ const DUPLICATE_RESULT =
           </form>
         }
       </section>
-      <section class="rounded-2xl border border-kl-border bg-kl-surface p-5">
+      <section class="kl-card rounded-2xl border border-kl-border bg-kl-surface p-5">
         <h2 class="font-display text-xl">Historial confirmado</h2>
         <p>Los pendientes solo se consultan por competencia; no aparecen en este historial.</p>
         @for (item of history(); track item.id) {
-          <article class="border-t border-kl-border py-4">
+          <article class="wrap-anywhere border-t border-kl-border py-4">
             <h3>{{ item.eventName }}</h3>
             <p>
               {{ item.competitionEndsAt | date: 'mediumDate' }} · Posición
-              {{ item.finalPosition }} · {{ item.solvedProblems }} problemas resueltos
+              {{ item.finalPosition }} · {{ solvedText(item) }}
             </p>
             <button
               mat-stroked-button
@@ -136,7 +137,7 @@ const DUPLICATE_RESULT =
           </article>
         } @empty {
           @if (historyLoaded() && !busy() && !error()) {
-            <p>No hay resultados confirmados.</p>
+            <p class="rounded-xl border border-dashed border-kl-border-strong bg-white/2 p-5 text-center text-sm text-kl-muted">No hay resultados confirmados.</p>
           } @else if (!historyLoaded() && !busy() && !error()) {
             <p role="status">El historial aún no está disponible. Reintenta la consulta del equipo.</p>
           }
@@ -164,6 +165,9 @@ export class ResultsLive extends TeamPage {
       Validators.pattern(/^\d+$/),
     ]),
   });
+  protected solvedText(item: OfficialResult): string {
+    return plural(item.solvedProblems ?? 0, 'problema resuelto', 'problemas resueltos');
+  }
   parsedCompetition() {
     return positiveId(this.lookup.controls.competitionId.value);
   }

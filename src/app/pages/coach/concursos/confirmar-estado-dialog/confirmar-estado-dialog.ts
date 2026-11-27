@@ -14,7 +14,7 @@ export interface ConfirmStatusData {
   imports: [MatDialogModule, MatButtonModule],
   template: `
     <h2 mat-dialog-title>{{ target === 'EN_CURSO' ? 'Iniciar concurso' : 'Finalizar concurso' }}</h2>
-    <mat-dialog-content>
+    <mat-dialog-content class="wrap-anywhere">
       @if (target === 'EN_CURSO') {
         <p>
           ¿Iniciar «{{ data.name }}» ahora? El concurso pasará a <strong>En curso</strong>.

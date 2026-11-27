@@ -29,17 +29,25 @@
       class="mb-5 rounded-xl border border-solid p-4 text-sm"
       [class]="
         aviso.tipo === 'ok'
-          ? 'border-green-400 bg-[#0f2a1b] text-green-300'
-          : 'border-kl-danger bg-[#34161a] text-kl-danger'
+          ? 'border-green-400 bg-green-400/10 text-green-300'
+          : 'border-kl-danger bg-kl-danger/10 text-kl-danger'
       "
     >
       {{ aviso.texto }}
     </section>
   }
 
-  @if (groups().length === 0) {
+  @if (cargandoGrupos()) {
+    <app-loader label="Cargando tus grupos…" [rows]="3" />
+  } @else if (errorGrupos()) {
+    <section role="alert" class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
+      <strong class="text-kl-danger">No pudimos cargar tus grupos</strong>
+      <p class="mb-3">{{ errorGrupos() }}</p>
+      <button mat-stroked-button type="button" (click)="cargarGrupos()">Reintentar</button>
+    </section>
+  } @else if (groups().length === 0) {
     <mat-card
-      class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+      class="items-center gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface px-6 py-14 text-center"
       ><h2 class="m-0 text-xl">Todavía no tienes grupos</h2>
       <p class="m-0 text-sm text-kl-muted">
         Crea un grupo para empezar a recibir solicitudes de ingreso.
@@ -61,13 +69,21 @@
       </mat-button-toggle-group>
       @if (selectedGroup(); as group) {
         <p class="m-0 text-xs text-kl-muted">
-          {{ group.activeMembers }} / {{ group.maxCapacity ?? '—' }} integrantes · código
+          {{ group.activeMembers }} / {{ group.maxCapacity === null ? '— integrantes' : plural(group.maxCapacity, 'integrante') }} · código
           <span class="font-mono">{{ group.invitationCode }}</span>
         </p>
       }
     </div>
 
-    @if (requests().length === 0) {
+    @if (cargandoSolicitudes()) {
+      <app-loader label="Cargando solicitudes…" [rows]="3" />
+    } @else if (errorSolicitudes()) {
+      <section role="alert" class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
+        <strong class="text-kl-danger">No pudimos cargar las solicitudes</strong>
+        <p class="mb-3">{{ errorSolicitudes() }}</p>
+        <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
+      </section>
+    } @else if (requests().length === 0) {
       <p class="rounded-2xl bg-kl-surface-raised p-10 text-center text-sm text-kl-muted">
         @if (estado() === 'ACTIVO') {
           Este grupo todavía no tiene integrantes activos.
@@ -82,24 +98,26 @@
         @for (request of requests(); track request.membershipId) {
           <mat-card
             appearance="outlined"
-            class="grid items-center gap-4 rounded-2xl border-[#2b2760] bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 lg:grid-cols-[minmax(0,1fr)_200px_180px]"
+            class="grid items-center gap-4 rounded-2xl border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/60 to-[var(--kl-card-to)]/80 p-5 lg:grid-cols-[minmax(0,1fr)_200px_180px]"
           >
             <div class="flex items-start gap-4">
               <span
                 class="mt-1 flex size-12 shrink-0 items-center justify-center rounded-xl bg-kl-accent/25 text-sm font-semibold"
                 >{{ iniciales(request) }}</span
               >
-              <div class="min-w-0">
+              <div class="min-w-0 wrap-anywhere">
                 <h2 class="mt-0 mb-1 text-base font-medium">{{ nombrePracticante(request) }}</h2>
-                <p class="m-0 text-xs text-kl-muted">
-                  {{ request.practitioner?.studentCode }} ·
-                  {{ request.practitioner?.career }} · ciclo
-                  {{ request.practitioner?.academicCycle }}
-                </p>
-                <p class="mt-1 mb-0 text-xs text-kl-body">
-                  Nivel {{ request.practitioner?.competitiveLevel }} · Codeforces
-                  {{ request.practitioner?.codeforcesHandle || 'sin registrar' }}
-                </p>
+                @if (request.practitioner; as perfil) {
+                  <p class="m-0 text-xs text-kl-muted">
+                    {{ perfil.studentCode }} · {{ perfil.career }} · ciclo {{ perfil.academicCycle }}
+                  </p>
+                  <p class="mt-1 mb-0 text-xs text-kl-body">
+                    Nivel {{ perfil.competitiveLevel }} · Codeforces
+                    {{ perfil.codeforcesHandle || 'sin registrar' }}
+                  </p>
+                } @else {
+                  <p class="m-0 text-xs text-kl-muted">Datos del perfil no disponibles</p>
+                }
               </div>
             </div>
             <div class="text-xs text-kl-body">
@@ -175,13 +193,13 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="solicitud-titulo"
-      class="relative mx-auto w-full max-w-[560px] rounded-[22px] border border-solid border-kl-accent bg-linear-to-b from-[#1a1446] to-[#09071a] p-7 shadow-[0_0_24px_#643cff55]"
+      class="kl-card relative mx-auto w-full max-w-[560px] rounded-[22px] border border-solid border-kl-accent bg-linear-to-b from-[var(--kl-card-from)] to-[var(--kl-card-to)] p-7 shadow-[0_0_24px_#643cff55]"
     >
       <button
         type="button"
         (click)="cerrar()"
         aria-label="Cerrar solicitud"
-        class="absolute top-5 right-5 flex size-8 items-center justify-center rounded-lg text-xl text-kl-body"
+        class="absolute top-5 right-5 flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-white/8 text-xl text-kl-body"
       >
         ✕
       </button>
@@ -195,7 +213,7 @@
           class="flex size-[56px] shrink-0 items-center justify-center rounded-[14px] bg-kl-accent/25"
           >{{ iniciales(request) }}</span
         >
-        <div>
+        <div class="min-w-0 wrap-anywhere">
           <h3 class="m-0 text-lg font-medium">{{ nombrePracticante(request) }}</h3>
           <p class="mt-1 mb-0 text-xs text-kl-muted">
             {{ selectedGroup()?.name }} ·
@@ -204,7 +222,7 @@
         </div>
       </div>
 
-      <dl class="m-0 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-4 text-sm">
+      <dl class="m-0 rounded-[14px] border border-solid border-[var(--kl-line-soft)] bg-white/3 p-4 text-sm">
         @for (
           fila of [
             ['Carrera', (request.practitioner?.career ?? '—') + ' · ' + (request.practitioner?.academicCycle ?? '—') + '.° ciclo'],
@@ -254,6 +272,14 @@
           ></textarea>
           <mat-hint align="end">{{ mensaje().length }} / 500</mat-hint>
         </mat-form-field>
+      }
+
+      @if (feedback(); as aviso) {
+        @if (aviso.tipo === 'error') {
+          <p role="alert" class="mt-4 mb-0 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-3 text-sm">
+            {{ aviso.texto }}
+          </p>
+        }
       }
 
       <div class="mt-5 flex flex-wrap justify-end gap-3">

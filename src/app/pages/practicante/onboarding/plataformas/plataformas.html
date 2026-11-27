@@ -22,12 +22,12 @@
     <div class="flex items-center gap-[18px] max-[641px]:gap-3">
       <div class="flex items-center gap-2.5">
         <span
-          class="flex size-[34px] items-center justify-center rounded-full bg-linear-to-br from-[#7b4dff] to-[#b987ff] text-[13px] font-semibold"
+          class="account-avatar flex size-[34px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-cta-from)] to-kl-violet text-[13px] font-semibold"
           aria-hidden="true"
           >{{ session.demo() ? 'CR' : 'KL' }}</span
         >
-        <span class="flex flex-col max-[641px]:hidden">
-          <span class="text-sm leading-4 font-normal">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
+        <span class="flex max-w-[220px] min-w-0 flex-col max-[641px]:hidden">
+          <span class="account-name truncate text-sm leading-4 font-normal" [title]="session.demo() ? 'Camila Rojas' : session.account()?.email">{{ session.demo() ? 'Camila Rojas' : session.account()?.email }}</span>
           <span class="text-xs leading-[14px] font-normal text-kl-muted">Practicante</span>
         </span>
       </div>
@@ -45,7 +45,7 @@
 
   <main class="relative z-10 flex flex-1 items-center justify-center px-4 py-10">
     <mat-card
-      class="auth-card w-full max-w-[820px] font-normal gap-6 bg-linear-to-b from-[#201454]/75 via-[#140d34]/83 to-[#0a071a]/92 px-11 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7"
+      class="auth-card w-full max-w-[820px] font-normal gap-6 bg-linear-to-b from-[var(--kl-card-hi)]/75 via-[var(--kl-card-via)]/83 to-[var(--kl-card-to)]/92 px-11 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7"
       appearance="outlined"
     >
       <ol class="m-0 flex list-none items-center gap-3.5 p-0" aria-label="Progreso del perfil">
@@ -68,7 +68,7 @@
         </li>
         <li class="h-0.5 min-w-4 flex-1 rounded-sm bg-kl-accent" aria-hidden="true"></li>
         <li class="flex items-center gap-2.5" aria-current="step">
-          <span class="flex size-8 shrink-0 items-center justify-center rounded-2xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] text-sm font-semibold drop-shadow-[0_2px_6px_rgba(168,129,254,.55)]">3</span>
+          <span class="flex size-8 shrink-0 items-center justify-center rounded-2xl bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] text-sm font-semibold drop-shadow-[0_2px_6px_rgba(168,129,254,.55)]">3</span>
           <span class="text-sm font-medium">Plataformas</span>
         </li>
       </ol>
@@ -89,7 +89,7 @@
         @for (plataforma of plataformas; track plataforma.clave) {
           <div class="flex flex-col gap-1">
             <div
-              class="flex items-center gap-3.5 rounded-[14px] border border-solid border-[#2a2640] bg-white/2 px-4 py-3 max-[641px]:flex-wrap"
+              class="flex items-center gap-3.5 rounded-[14px] border border-solid border-[var(--kl-line-soft)] bg-white/2 px-4 py-3 max-[641px]:flex-wrap"
             >
               <img [src]="plataforma.icono" alt="" width="34" height="34" />
               <label
@@ -149,7 +149,7 @@
           @if (busy || (session.demo() && estado === 'guardando')) {
             <button
               mat-flat-button
-              class="auth-submit bg-[#241f3f] px-7 text-[#8d89a3] max-[641px]:w-full"
+              class="auth-submit bg-[var(--kl-line-soft)] px-7 text-[var(--kl-text-muted)] max-[641px]:w-full"
               type="button"
               disabled
               aria-busy="true"
@@ -165,13 +165,13 @@
             </button>
           } @else {
             <div class="flex items-center gap-5 max-[641px]:flex-col-reverse max-[641px]:items-stretch max-[641px]:gap-3">
-              <button type="button" [disabled]="busy" (click)="guardar(true)"
-                class="text-[15px] font-medium text-kl-accent-text hover:underline max-[641px]:text-center"
+              <button mat-button type="button" [disabled]="busy" (click)="guardar(true)"
+                class="px-4 text-[15px] font-medium text-kl-accent-text max-[641px]:w-full"
                 >Omitir por ahora</button
               >
               <button
                 mat-flat-button
-                class="auth-submit bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-7 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none max-[641px]:w-full"
+                class="auth-submit bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-7 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none max-[641px]:w-full"
                 type="button"
                 (click)="guardar()"
                 [disabled]="form.invalid"

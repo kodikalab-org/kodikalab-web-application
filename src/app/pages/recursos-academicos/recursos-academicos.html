@@ -1,7 +1,6 @@
 @if (estado$ | async; as estado) {
-  <div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
-    <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/recursos/fondo-movil.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat lg:bg-[url('/images/recursos/fondo.svg')] lg:bg-size-[100%_900px]"></div>
-    <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75">
+  <div class="kl-page-bg relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+    <header class="sticky top-0 z-40 backdrop-blur-xl border-0 border-b border-solid border-[var(--kl-line-soft)] bg-[var(--kl-chrome)]/75">
       <mat-toolbar class="flex h-[60px] justify-between gap-4 px-4 font-body font-normal lg:h-[68px] lg:px-14">
         <a [routerLink]="coach ? '/coach/inicio' : '/inicio'" class="flex items-center gap-2 text-xl font-bold">
           <picture><source media="(min-width: 1024px)" srcset="/images/recursos/logo.svg" /><img src="/images/recursos/logo-movil.svg" alt="" /></picture>Kodikalab
@@ -19,7 +18,7 @@
         <p class="mt-2 mb-0 text-base text-kl-muted">Material de apoyo según el tema y la dificultad del reto que estás practicando.</p>
       </div>
       @if (estado === 'contexto-no-disponible') {
-        <section role="alert" class="flex flex-col gap-2 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
+        <section role="alert" class="flex flex-col gap-2 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
           <strong class="text-kl-danger">No está disponible el contexto del problema</strong>
           <span>No pudimos identificar el tema ni la dificultad. No se mostraron materiales para evitar sugerencias no relacionadas.</span>
         </section>
@@ -28,26 +27,26 @@
         </div>
       } @else {
         <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,816fr)_minmax(0,360fr)]">
-          <mat-card class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6">
+          <mat-card class="min-w-0 gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6">
             <h2 class="m-0 text-xl font-bold">Material de apoyo</h2>
             @switch (estado) {
               @case ('catalogo-no-disponible') {
-                <section role="alert" class="flex flex-col gap-2 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
+                <section role="alert" class="flex flex-col gap-2 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
                   <strong class="text-kl-danger">No pudimos consultar el catálogo</strong><span>El servicio de recursos no está disponible. Conservamos el contexto de Camino mínimo en grilla; no se mostraron resultados ajenos al problema.</span>
                 </section>
                 <div class="flex flex-col gap-3 sm:flex-row"><button mat-flat-button disabled>Reintentar consulta</button><button mat-stroked-button disabled>Volver al problema</button></div>
               }
               @default {
                 @if (estado === 'relacionados') {
-                  <section role="status" class="flex flex-col gap-2 rounded-xl border border-solid border-[#fbbf24] bg-[#2e2410] p-4 text-sm"><strong class="text-[#fbbf24]">No hay materiales vinculados directamente</strong><span>Estas son alternativas de temas relacionados, no coincidencias directas. Revisa su relación con el problema antes de utilizarlas.</span></section>
+                  <section role="status" class="flex flex-col gap-2 rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm"><strong class="text-amber-400">No hay materiales vinculados directamente</strong><span>Estas son alternativas de temas relacionados, no coincidencias directas. Revisa su relación con el problema antes de utilizarlas.</span></section>
                 } @else {
-                  <section role="status" class="flex flex-col gap-2 rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"><strong class="text-[#60b0ff]">Recursos relacionados con tu reto</strong><span>Grafos y caminos mínimos, de nivel intermedio. Estos materiales apoyan las ideas necesarias para resolverlo.</span></section>
+                  <section role="status" class="flex flex-col gap-2 rounded-xl border border-solid border-kl-blue bg-kl-blue/15 p-4 text-sm"><strong class="text-kl-cyan">Recursos relacionados con tu reto</strong><span>Grafos y caminos mínimos, de nivel intermedio. Estos materiales apoyan las ideas necesarias para resolverlo.</span></section>
                 }
                 @for (recurso of estado === 'relacionados' ? relacionados : pertinentes; track recurso.nombre) {
-                  <article class="flex min-w-0 flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm">
+                  <article class="flex min-w-0 flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm">
                     <h3 class="m-0 text-sm font-bold">{{ recurso.nombre }}</h3>
                     <p class="m-0 text-kl-muted">{{ recurso.detalle }}</p>
-                    <p class="m-0 font-mono text-xs text-[#ccb2ff]">{{ estado === 'relacionados' ? 'Tema relacionado · No es coincidencia directa' : 'Coincidencia por tema y dificultad' }}</p>
+                    <p class="m-0 font-mono text-xs text-kl-accent-text">{{ estado === 'relacionados' ? 'Tema relacionado · No es coincidencia directa' : 'Coincidencia por tema y dificultad' }}</p>
                     <p class="m-0 text-kl-muted">Relación: {{ recurso.relacion }}</p>
                     <button mat-flat-button disabled class="w-full self-start sm:w-auto">Abrir recurso</button>
                   </article>
@@ -57,10 +56,10 @@
             }
           </mat-card>
           <aside class="flex min-w-0 flex-col gap-6">
-            <mat-card class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6">
+            <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6">
               <h2 class="m-0 text-xl font-bold">Problema en contexto</h2><p class="m-0 text-sm leading-5 text-kl-muted">Camino mínimo en grilla<br />Tema: grafos · Caminos mínimos<br />Dificultad: intermedio<br />Equipo: Equipo Alfa</p>
             </mat-card>
-            <mat-card class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"><h2 class="m-0 text-xl font-bold">Aprende, no copies</h2><p class="m-0 text-sm leading-5 text-kl-muted">Los recursos explican conceptos y técnicas. Úsalos para construir tu propia solución y comprobar tus ideas.</p></mat-card>
+            <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"><h2 class="m-0 text-xl font-bold">Aprende, no copies</h2><p class="m-0 text-sm leading-5 text-kl-muted">Los recursos explican conceptos y técnicas. Úsalos para construir tu propia solución y comprobar tus ideas.</p></mat-card>
           </aside>
         </div>
       }

@@ -1,5 +1,5 @@
 <section
-  class="stats-panel"
+  class="stats-panel kl-card"
   aria-labelledby="titulo-estadisticas"
   [attr.aria-busy]="supported() && loading()"
 >
@@ -49,15 +49,15 @@
       </div>
     </div>
   } @else if (loading()) {
+    <app-loader class="mt-5" label="Cargando estadísticas de Codeforces" [rows]="0" />
     <div class="stats-skeleton animate-pulse motion-reduce:animate-none" aria-hidden="true">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div class="wide"></div>
-      <div class="wide"></div>
+      <div class="kl-skeleton"></div>
+      <div class="kl-skeleton"></div>
+      <div class="kl-skeleton"></div>
+      <div class="kl-skeleton"></div>
+      <div class="kl-skeleton wide"></div>
+      <div class="kl-skeleton wide"></div>
     </div>
-    <span class="sr-only" role="status">Cargando estadísticas de Codeforces</span>
   } @else if (failed()) {
     <div class="stats-empty error-state" role="alert">
       <span class="status-badge warning">Fuente no disponible</span>

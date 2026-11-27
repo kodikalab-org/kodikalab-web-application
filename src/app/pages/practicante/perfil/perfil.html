@@ -29,7 +29,7 @@
   />
 
   <mat-toolbar
-    class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1100px]:px-4"
+    class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[var(--kl-line-soft)] bg-[var(--kl-chrome)]/75 px-11 font-body max-[1100px]:px-4"
   >
     <div class="flex min-w-0 items-center gap-2 xl:gap-14">
       <a class="inline-flex items-center gap-2.5" routerLink="/inicio" aria-label="Kodikalab, inicio">
@@ -42,7 +42,7 @@
     </div>
     <div class="flex items-center gap-[22px] max-[641px]:gap-3">
       <button
-        class="flex h-10 w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5 text-left font-body text-[14px] text-[#8d89a3] max-[1439px]:w-[260px] max-[900px]:hidden"
+        class="flex h-10 w-[400px] cursor-pointer items-center gap-3 rounded-xl border border-solid border-[var(--kl-line)] bg-white/4 px-3.5 text-left font-body text-[14px] text-[var(--kl-text-muted)] max-[1439px]:w-[260px] max-[900px]:hidden"
         type="button"
         aria-label="Buscar problemas, usuarios, concursos"
         disabled
@@ -51,7 +51,7 @@
         <img src="images/perfil/search-18.svg" alt="" width="18" height="18" />
         <span class="min-w-0 flex-1 truncate">Buscar problemas, usuarios, concursos…</span>
         <span
-          class="rounded-md border border-solid border-[#34304a] px-[7px] py-[3px] font-mono text-[11px]"
+          class="rounded-md border border-solid border-[var(--kl-line-strong)] px-[7px] py-[3px] font-mono text-[11px]"
           >⌘ K</span
         >
       </button>
@@ -75,17 +75,17 @@
           </p>
         </div>
         <nav
-          class="flex shrink-0 gap-1 rounded-[14px] border border-solid border-[#3b3480] bg-[#14103c]/70 p-[5px] max-[641px]:w-full"
+          class="flex shrink-0 gap-1 rounded-full border border-solid border-[var(--kl-line-strong)] bg-[var(--kl-card-via)]/70 p-[5px] max-[641px]:w-full"
           aria-label="Vista del perfil"
         >
           <a
-            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] bg-linear-to-b from-[#7357f3] to-[#5a3fe0] text-[15px] font-medium text-kl-text max-[641px]:w-auto max-[641px]:flex-1"
+            class="flex h-[42px] w-44 items-center justify-center rounded-full bg-linear-to-b from-[var(--kl-accent)] to-[var(--kl-cta-to)] text-[15px] font-medium text-kl-text max-[641px]:w-auto max-[641px]:flex-1"
             routerLink="/perfil"
             aria-current="page"
             >Visualizar perfil</a
           >
           <a
-            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] text-[15px] font-medium text-kl-body max-[641px]:w-auto max-[641px]:flex-1"
+            class="flex h-[42px] w-44 items-center justify-center rounded-full text-[15px] font-medium text-kl-body max-[641px]:w-auto max-[641px]:flex-1"
             routerLink="/perfil/editar"
             >Editar perfil</a
           >
@@ -103,14 +103,14 @@
       }
 
       <div
-        class="flex gap-11 border-0 border-b border-solid border-[#1f1c44] max-[900px]:grid max-[900px]:grid-cols-2 max-[900px]:gap-x-4 max-[900px]:gap-y-2"
+        class="flex gap-11 border-0 border-b border-solid border-[var(--kl-line-soft)] max-[900px]:grid max-[900px]:grid-cols-2 max-[900px]:gap-x-4 max-[900px]:gap-y-2"
         role="tablist"
         aria-label="Secciones del perfil"
       >
         @for (pestana of pestanas; track pestana.id) {
           @if (vista.pestana === pestana.id) {
             <a
-              class="inline-flex items-center gap-2.5 border-0 border-b-2 border-solid border-[#7357f3] px-1 pb-3.5 text-[15px] font-semibold text-kl-accent-text max-[641px]:text-[13px] [&_img]:shrink-0"
+              class="inline-flex items-center gap-2.5 border-0 border-b-2 border-solid border-[var(--kl-accent)] px-1 pb-3.5 text-[15px] font-semibold text-kl-accent-text max-[641px]:text-[13px] [&_img]:shrink-0"
               role="tab"
               aria-selected="true"
               aria-controls="panel-perfil"
@@ -145,13 +145,13 @@
             <div class="grid grid-cols-1 items-start gap-5 min-[1280px]:grid-cols-[minmax(0,0.62fr)_minmax(0,1.38fr)]">
               <!-- Información personal -->
               <section
-                class="min-w-0 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+                class="kl-card min-w-0 rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
                 aria-labelledby="titulo-info"
               >
                 <div class="flex flex-wrap items-center justify-between gap-3">
                   <div class="flex items-center gap-3">
                     <span
-                      class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                      class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25"
                     >
                       <img src="images/perfil/tab-user-active-20.svg" alt="" width="20" height="20" />
                     </span>
@@ -165,7 +165,7 @@
                   @if (vista.estado !== 'cargando') {
                     <a
                       mat-stroked-button
-                      class="shrink-0 whitespace-nowrap bg-[#7357f3]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
+                      class="shrink-0 whitespace-nowrap bg-[var(--kl-accent)]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
                       routerLink="/perfil/editar"
                     >
                       <img src="images/perfil/pencil-16.svg" alt="" width="16" height="16" />
@@ -175,26 +175,27 @@
                 </div>
 
                 @if (vista.estado === 'cargando') {
+                  <app-loader class="mt-4" label="Cargando tu perfil" [rows]="0" />
                   <div class="mt-4 flex animate-pulse flex-col gap-3.5 motion-reduce:animate-none" aria-hidden="true">
                     <div class="flex gap-5">
-                      <div class="size-[118px] shrink-0 rounded-full bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                      <div class="size-[118px] shrink-0 rounded-full kl-skeleton"></div>
                       <div class="flex min-w-0 flex-1 flex-col gap-3">
-                        <div class="h-[22px] w-[223px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
-                        <div class="h-4 w-[149px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                        <div class="h-[22px] w-[223px] max-w-full rounded-lg kl-skeleton"></div>
+                        <div class="h-4 w-[149px] max-w-full rounded-lg kl-skeleton"></div>
                       </div>
                     </div>
-                    <div class="h-4 w-[408px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
-                    <div class="h-4 w-[357px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
-                    <div class="h-4 w-[306px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
-                    <div class="h-[90px] w-[510px] max-w-full rounded-lg bg-linear-to-r from-white/5 via-white/10 to-white/5"></div>
+                    <div class="h-4 w-[408px] max-w-full rounded-lg kl-skeleton"></div>
+                    <div class="h-4 w-[357px] max-w-full rounded-lg kl-skeleton"></div>
+                    <div class="h-4 w-[306px] max-w-full rounded-lg kl-skeleton"></div>
+                    <div class="h-[90px] w-[510px] max-w-full rounded-lg kl-skeleton"></div>
                   </div>
                 } @else {
                   <div class="mt-4 flex items-center gap-6 max-[641px]:flex-col max-[641px]:items-start">
                     <div
-                      class="size-[118px] shrink-0 rounded-full bg-linear-to-br from-[#8d6df8] to-[#4d2ff5] p-[3px]"
+                      class="size-[118px] shrink-0 rounded-full bg-linear-to-br from-[var(--kl-cta-from)] to-kl-blue p-[3px]"
                     >
                       <div
-                        class="profile-avatar flex h-[112px] w-full items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold"
+                        class="profile-avatar flex h-[112px] w-full items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-card-hi)] to-[var(--kl-cta-to)] font-display text-[40px] font-bold"
                         aria-hidden="true"
                       >
                         {{ info.iniciales }}
@@ -208,7 +209,7 @@
                       <div class="flex flex-wrap items-center gap-2.5">
                         <span class="text-[14px] text-kl-body">{{ info.usuario }}</span>
                         <span
-                          class="inline-flex items-center gap-1.5 rounded-full border border-solid border-[#6b52e0] bg-[#7357f3]/20 px-3 py-1 text-[13px] font-medium text-[#c4b5fd]"
+                          class="inline-flex items-center gap-1.5 rounded-full border border-solid border-[var(--kl-cta-to)] bg-[var(--kl-accent)]/20 px-3 py-1 text-[13px] font-medium text-[#c4b5fd]"
                         >
                           <img src="images/perfil/star-14.svg" alt="" width="14" height="14" />
                           {{ info.rol }}
@@ -217,7 +218,7 @@
                     </div>
                   </div>
 
-                  <ul class="m-0 mt-4 flex list-none flex-col gap-2.5 p-0 text-[14px] text-[#e7e3f5]">
+                  <ul class="m-0 mt-4 flex list-none flex-col gap-2.5 p-0 text-[14px] [overflow-wrap:anywhere] text-[var(--kl-text-strong)] [&_img]:shrink-0">
                     <li class="flex items-center gap-3">
                       <img src="images/perfil/info-card-18.svg" alt="" width="18" height="18" />
                       {{ info.carreraCiclo }}
@@ -236,7 +237,7 @@
                     </li>
                   </ul>
 
-                  <p class="m-0 mt-4 text-[14px] leading-[21px] font-light text-[#d7d3e8]">
+                  <p class="m-0 mt-4 text-[14px] leading-[21px] font-light [overflow-wrap:anywhere] text-[var(--kl-text-strong)]">
                     {{ info.objetivo }}
                   </p>
 
@@ -244,7 +245,7 @@
                     <h3 class="m-0 text-[14px] font-semibold">Plataformas competitivas</h3>
                     @if (vista.estado === 'sin-plataformas' || (!session.demo() && plataformas.length === 0)) {
                       <div
-                        class="flex flex-col items-center gap-2.5 rounded-[14px] border border-dashed border-[#3b3480] p-[18px] text-center"
+                        class="flex flex-col items-center gap-2.5 rounded-[14px] border border-dashed border-[var(--kl-line-strong)] p-[18px] text-center"
                       >
                         <p class="m-0 text-[15px] font-medium">Aún no vinculas plataformas</p>
                         <p class="m-0 text-[13px] text-kl-muted">
@@ -252,7 +253,7 @@
                         </p>
                         <a
                           mat-stroked-button
-                          class="mt-1 bg-[#7357f3]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
+                          class="mt-1 bg-[var(--kl-accent)]/12 px-4 [--mat-button-outlined-container-height:40px] [--mat-button-outlined-container-shape:10px] [--mat-button-outlined-label-text-color:#e7e3f5] [--mat-button-outlined-label-text-size:14px] [--mat-button-outlined-label-text-weight:400] [--mat-button-outlined-outline-color:#6b52e0]"
                           routerLink="/perfil/editar"
                           fragment="plataformas"
                         >
@@ -267,7 +268,7 @@
                         @for (plataforma of plataformas; track plataforma.nombre) {
                           <li class="min-w-0">
                             <a
-                              class="flex items-center gap-2.5 rounded-xl border border-solid border-[#26224d] bg-white/3 px-3.5 py-3"
+                              class="flex items-center gap-2.5 rounded-xl border border-solid border-[var(--kl-line-soft)] bg-white/3 px-3.5 py-3"
                               [routerLink]="session.demo() ? '/practicante/plataformas' : '/perfil/editar'"
                               [fragment]="session.demo() ? undefined : 'plataformas'"
                             >
@@ -276,7 +277,7 @@
                                 <span class="text-[14px] font-semibold">{{ plataforma.nombre }}</span>
                                 <span class="flex items-center gap-[7px] text-[13px] text-kl-body">
                                   <span class="size-[9px] shrink-0 rounded-full bg-[#4ade80]"></span>
-                                  <span class="truncate">{{ plataforma.usuario }}</span>
+                                  <span class="truncate" [title]="plataforma.usuario">{{ plataforma.usuario }}</span>
                                 </span>
                               </span>
                               <img
@@ -314,12 +315,12 @@
 
           @case ('solicitudes') {
             <section
-              class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              class="kl-card rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
               aria-labelledby="titulo-solicitudes"
             >
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                  <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                  <span class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25">
                     <img src="images/perfil/tab-users-active-20.svg" alt="" width="20" height="20" />
                   </span>
                   <h2
@@ -337,7 +338,7 @@
               @if (vista.estado === 'vacio') {
                 <div class="mt-4 flex flex-col items-center gap-3 px-4 py-[70px] text-center">
                   <span
-                    class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
+                    class="flex size-[72px] items-center justify-center rounded-[20px] bg-[var(--kl-accent)]/20"
                   >
                     <img src="images/perfil/empty-users-34.svg" alt="" width="34" height="34" />
                   </span>
@@ -347,7 +348,7 @@
                   </p>
                   <button
                     mat-flat-button
-                    class="mt-1.5 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-[26px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
+                    class="mt-1.5 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-[26px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
                     type="button"
                   >
                     Explorar grupos
@@ -371,11 +372,11 @@
                     }
                   </mat-chip-listbox>
                   <label
-                    class="flex h-[38px] w-[260px] items-center gap-2.5 rounded-[10px] border border-solid border-[#34304a] bg-white/4 px-3.5 max-[641px]:w-full"
+                    class="flex h-[38px] w-[260px] items-center gap-2.5 rounded-[10px] border border-solid border-[var(--kl-line-strong)] bg-white/4 px-3.5 max-[641px]:w-full"
                   >
                     <img src="images/perfil/search-16-solicitudes.svg" alt="" width="16" height="16" />
                     <input
-                      class="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[14px] text-[#e7e3f5] outline-none placeholder:text-[#8d89a3]"
+                      class="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[14px] text-[var(--kl-text-strong)] outline-none placeholder:text-[var(--kl-text-muted)]"
                       type="text"
                       formControlName="busqueda"
                       placeholder="Buscar grupo…"
@@ -388,10 +389,10 @@
                 <ul class="m-0 mt-4 flex list-none flex-col gap-4 p-0">
                   @for (solicitud of solicitudes; track solicitud.grupo) {
                     <li
-                      class="flex items-center gap-4 border-0 border-b border-solid border-[#1f1c44] px-1 py-3.5"
+                      class="flex items-center gap-4 border-0 border-b border-solid border-[var(--kl-line-soft)] px-1 py-3.5"
                     >
                       <span
-                        class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-[14px] font-semibold"
+                        class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[var(--kl-line-strong)] bg-[var(--kl-accent)]/22 text-[14px] font-semibold"
                         aria-hidden="true"
                         >{{ solicitud.inicial }}</span
                       >
@@ -424,20 +425,20 @@
                   <p class="m-0 text-[13px] text-kl-muted">Mostrando 1–6 de 6 solicitudes</p>
                   <div class="flex gap-2">
                     <button
-                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      class="cursor-pointer rounded-full border border-solid border-[var(--kl-line-strong)] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
                       type="button"
                     >
                       Anterior
                     </button>
                     <button
-                      class="cursor-pointer rounded-full border border-solid border-[#8a6cff] bg-[#7357f3]/30 px-3.5 py-[7px] font-body text-[13px] text-kl-text"
+                      class="cursor-pointer rounded-full border border-solid border-[var(--kl-cta-from)] bg-[var(--kl-accent)]/30 px-3.5 py-[7px] font-body text-[13px] text-kl-text"
                       type="button"
                       aria-current="page"
                     >
                       1
                     </button>
                     <button
-                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      class="cursor-pointer rounded-full border border-solid border-[var(--kl-line-strong)] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
                       type="button"
                     >
                       Siguiente
@@ -450,11 +451,11 @@
 
           @case ('submissions') {
             <section
-              class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              class="kl-card rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
               aria-labelledby="titulo-submissions"
             >
               <div class="flex items-center gap-3">
-                <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                <span class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25">
                   <img src="images/perfil/tab-file-active-20.svg" alt="" width="20" height="20" />
                 </span>
                 <h2
@@ -468,7 +469,7 @@
               @if (vista.estado === 'vacio') {
                 <div class="mt-4 flex flex-col items-center gap-3 px-4 py-[70px] text-center">
                   <span
-                    class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
+                    class="flex size-[72px] items-center justify-center rounded-[20px] bg-[var(--kl-accent)]/20"
                   >
                     <img src="images/perfil/empty-file-34.svg" alt="" width="34" height="34" />
                   </span>
@@ -479,7 +480,7 @@
                   </p>
                   <button
                     mat-flat-button
-                    class="mt-1.5 bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-[26px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
+                    class="mt-1.5 bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-[26px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
                     type="button"
                   >
                     Ir al catálogo de problemas
@@ -493,11 +494,11 @@
                   novalidate
                 >
                   <label
-                    class="flex h-[38px] w-[280px] items-center gap-2.5 rounded-[10px] border border-solid border-[#34304a] bg-white/4 px-3.5 max-[641px]:w-full"
+                    class="flex h-[38px] w-[280px] items-center gap-2.5 rounded-[10px] border border-solid border-[var(--kl-line-strong)] bg-white/4 px-3.5 max-[641px]:w-full"
                   >
                     <img src="images/perfil/search-16-submissions.svg" alt="" width="16" height="16" />
                     <input
-                      class="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[14px] text-[#e7e3f5] outline-none placeholder:text-[#8d89a3]"
+                      class="min-w-0 flex-1 border-0 bg-transparent p-0 font-body text-[14px] text-[var(--kl-text-strong)] outline-none placeholder:text-[var(--kl-text-muted)]"
                       type="text"
                       formControlName="busqueda"
                       placeholder="Buscar problema…"
@@ -529,7 +530,7 @@
                           track columna
                         ) {
                           <th
-                            class="border-0 border-b border-solid border-[#1f1c44] px-3 py-2.5 text-[13px] font-medium text-kl-muted"
+                            class="border-0 border-b border-solid border-[var(--kl-line-soft)] px-3 py-2.5 text-[13px] font-medium text-kl-muted"
                             scope="col"
                           >
                             {{ columna }}
@@ -541,7 +542,7 @@
                       @for (submission of submissions; track submission.problema) {
                         <tr>
                           <th
-                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-left text-[14px] font-normal"
+                            class="h-[50px] border-0 border-b border-solid border-[var(--kl-line-soft)] px-3 text-left text-[14px] font-normal"
                             scope="row"
                           >
                             <button
@@ -552,11 +553,11 @@
                             </button>
                           </th>
                           <td
-                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] text-[#e7e3f5]"
+                            class="h-[50px] border-0 border-b border-solid border-[var(--kl-line-soft)] px-3 text-[14px] text-[var(--kl-text-strong)]"
                           >
                             {{ submission.lenguaje }}
                           </td>
-                          <td class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3">
+                          <td class="h-[50px] border-0 border-b border-solid border-[var(--kl-line-soft)] px-3">
                             <span
                               class="inline-flex items-center rounded-full border border-solid px-3 py-1 text-[12px] font-medium whitespace-nowrap"
                               [class]="clasesVeredicto[submission.veredicto]"
@@ -564,17 +565,17 @@
                             >
                           </td>
                           <td
-                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] text-[#e7e3f5]"
+                            class="h-[50px] border-0 border-b border-solid border-[var(--kl-line-soft)] px-3 text-[14px] text-[var(--kl-text-strong)]"
                           >
                             {{ submission.tiempo }}
                           </td>
                           <td
-                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] text-[#e7e3f5]"
+                            class="h-[50px] border-0 border-b border-solid border-[var(--kl-line-soft)] px-3 text-[14px] text-[var(--kl-text-strong)]"
                           >
                             {{ submission.memoria }}
                           </td>
                           <td
-                            class="h-[50px] border-0 border-b border-solid border-[#17153a] px-3 text-[14px] whitespace-nowrap text-[#e7e3f5]"
+                            class="h-[50px] border-0 border-b border-solid border-[var(--kl-line-soft)] px-3 text-[14px] whitespace-nowrap text-[var(--kl-text-strong)]"
                           >
                             {{ submission.fecha }}
                           </td>
@@ -588,7 +589,7 @@
                   <p class="m-0 text-[13px] text-kl-muted">Mostrando 1–8 de 248 submissions</p>
                   <div class="flex flex-wrap gap-2">
                     <button
-                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      class="cursor-pointer rounded-full border border-solid border-[var(--kl-line-strong)] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
                       type="button"
                     >
                       Anterior
@@ -596,7 +597,7 @@
                     @for (pagina of paginasSubmissions; track pagina) {
                       @if ($first) {
                         <button
-                          class="cursor-pointer rounded-full border border-solid border-[#8a6cff] bg-[#7357f3]/30 px-3.5 py-[7px] font-body text-[13px] text-kl-text"
+                          class="cursor-pointer rounded-full border border-solid border-[var(--kl-cta-from)] bg-[var(--kl-accent)]/30 px-3.5 py-[7px] font-body text-[13px] text-kl-text"
                           type="button"
                           aria-current="page"
                         >
@@ -604,7 +605,7 @@
                         </button>
                       } @else {
                         <button
-                          class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                          class="cursor-pointer rounded-full border border-solid border-[var(--kl-line-strong)] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
                           type="button"
                         >
                           {{ pagina }}
@@ -612,7 +613,7 @@
                       }
                     }
                     <button
-                      class="cursor-pointer rounded-full border border-solid border-[#34304a] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
+                      class="cursor-pointer rounded-full border border-solid border-[var(--kl-line-strong)] bg-white/3 px-3.5 py-[7px] font-body text-[13px] text-kl-body"
                       type="button"
                     >
                       Siguiente
@@ -625,11 +626,11 @@
 
           @case ('ajustes') {
             <section
-              class="rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              class="kl-card rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
               aria-labelledby="titulo-ajustes"
             >
               <div class="flex items-center gap-3">
-                <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+                <span class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25">
                   <img
                     src="images/perfil/tab-settings-active-20.svg"
                     alt=""
@@ -648,10 +649,10 @@
               <form class="mt-4 flex flex-col gap-4" [formGroup]="formAjustes" novalidate>
                 @for (fila of filasAjustes; track fila.titulo) {
                   <div
-                    class="flex items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5 not-last:border-b max-[641px]:flex-wrap"
+                    class="flex items-center gap-4 border-0 border-solid border-[var(--kl-line-soft)] px-1 py-3.5 not-last:border-b max-[641px]:flex-wrap"
                   >
                     <span
-                      class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                      class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25"
                     >
                       <img [src]="fila.icono" alt="" width="22" height="22" />
                     </span>

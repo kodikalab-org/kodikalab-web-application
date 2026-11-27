@@ -1,4 +1,7 @@
 <div class="min-h-dvh overflow-clip bg-kl-bg text-kl-text">
+  @if (navigating()) {
+    <div class="kl-route-progress" role="progressbar" aria-label="Cargando la pantalla"></div>
+  }
   <router-outlet />
   <app-agent-panel />
 </div>

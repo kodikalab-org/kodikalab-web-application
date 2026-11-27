@@ -23,6 +23,13 @@
   --color-kl-accent-text: var(--kl-accent-text);
   --color-kl-accent-link: var(--kl-accent-link);
   --color-kl-danger: var(--kl-danger);
+  --color-kl-violet: var(--kl-violet);
+  --color-kl-blue: var(--kl-blue);
+  --color-kl-cyan: var(--kl-cyan);
+  --color-kl-pink: var(--kl-pink);
+  --color-kl-amber: var(--kl-amber);
+  --color-kl-line: var(--kl-line);
+  --color-kl-line-soft: var(--kl-line-soft);
   --font-body: var(--kl-font-body);
   --font-display: var(--kl-font-display);
   --spacing-gutter: var(--gutter);
@@ -33,31 +40,51 @@
 :root {
   color-scheme: dark;
 
-  /* Kodikalab palette (from Figma) */
-  --kl-bg: #04030a;
-  --kl-bg-alt: #06050d;
-  --kl-surface: #080711;
-  --kl-surface-inset: #07060d;
-  --kl-surface-raised: #1b1830;
-  --kl-border: #1e1b2b;
-  --kl-border-strong: #2c2a3a;
-  --kl-divider: #15131f;
+  /* Kodikalab Nebula palette */
+  --kl-violet: #8b6cff;
+  --kl-blue: #4f7dff;
+  --kl-cyan: #38d4f5;
+  --kl-pink: #ec6fd6;
+  --kl-amber: #ffbd59;
+
+  /* Structural tokens shared by the templates. White text on both CTA stops passes 4.5:1. */
+  --kl-line: #343071;
+  --kl-line-strong: #433d6e;
+  --kl-line-soft: #29254f;
+  --kl-card-hi: #2a1f66;
+  --kl-card-from: #221c55;
+  --kl-card-via: #1b1744;
+  --kl-card-to: #141132;
+  --kl-chrome: #0c0a20;
+  --kl-selected: #332785;
+  --kl-cta-from: #7655f5;
+  --kl-cta-to: #5a43d6;
+  --kl-text-strong: #ebe8fb;
+
+  --kl-bg: #0e0c24;
+  --kl-bg-alt: #100e2a;
+  --kl-surface: #161334;
+  --kl-surface-inset: #121029;
+  --kl-surface-raised: #26214f;
+  --kl-border: #2e2a58;
+  --kl-border-strong: #433d78;
+  --kl-divider: #221f45;
   --kl-text: #ffffff;
-  --kl-text-heading: #f1eeff;
-  --kl-text-body: #cfcbe0;
-  --kl-text-soft: #b9b5cc;
-  --kl-text-muted: #a39fb8;
-  --kl-text-faint: #8f8ba5;
-  --kl-text-inactive: #9a96ad;
-  --kl-accent: #7357f3;
-  --kl-accent-strong: #6e52f2;
-  --kl-accent-bar: #8a6cff;
-  --kl-accent-text: #a98bff;
-  --kl-accent-link: #9b7dff;
+  --kl-text-heading: #f4f2ff;
+  --kl-text-body: #d3d0ea;
+  --kl-text-soft: #c2bedd;
+  --kl-text-muted: #aca8cc;
+  --kl-text-faint: #9894ba;
+  --kl-text-inactive: #a19dc0;
+  --kl-accent: #6a4df0;
+  --kl-accent-strong: #6446ea;
+  --kl-accent-bar: #8b6cff;
+  --kl-accent-text: #b29cff;
+  --kl-accent-link: #a68cff;
   --kl-danger: #f87171;
 
-  --kl-font-body: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --kl-font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --kl-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --kl-font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Angular Material system tokens (dark) */
   --mat-sys-primary: var(--kl-accent);
@@ -174,6 +201,12 @@ app-registro {
 
 app-root {
   display: block;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--kl-font-display);
 }
 
 *,
@@ -452,4 +485,157 @@ input[type='time']::-webkit-calendar-picker-indicator {
 
 .mat-mdc-select-panel .mat-mdc-option {
   color: var(--kl-text);
+}
+/* Discord-style buttons. `!important` inside the base layer outranks the important utilities in the templates,
+   so the shape is defined once instead of on every button. */
+@layer base {
+  .mdc-button {
+    border-radius: 9999px !important;
+  }
+}
+
+.mdc-button {
+  --mat-button-text-container-shape: 9999px;
+  --mat-button-filled-container-shape: 9999px;
+  --mat-button-outlined-container-shape: 9999px;
+  --mat-button-protected-container-shape: 9999px;
+  --mat-button-tonal-container-shape: 9999px;
+  transition:
+    translate 160ms ease,
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+.mdc-button:not(:disabled):not([aria-disabled='true']):hover {
+  translate: 0 -2px;
+}
+
+.mdc-button:not(:disabled):not([aria-disabled='true']):active {
+  translate: 0 0;
+  filter: brightness(0.94);
+}
+
+.mat-mdc-unelevated-button:not(:disabled):hover {
+  box-shadow: 0 10px 24px -8px rgb(106 77 240 / 0.85);
+}
+
+.mat-mdc-outlined-button {
+  background-color: rgb(255 255 255 / 0.04);
+}
+
+/* Soft glow around card edges and logos. Layered and important so it replaces per-template shadows. */
+@layer base {
+  mat-card.mat-mdc-card,
+  .kl-card {
+    border-color: rgb(139 108 255 / 0.34) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      inset 0 0 40px -22px rgb(139 108 255 / 0.85),
+      0 0 22px -6px rgb(139 108 255 / 0.38),
+      0 18px 48px -22px rgb(79 125 255 / 0.7) !important;
+  }
+}
+
+img[src*='logo-4'],
+img[src$='dashboard/0-imgIcon1.svg'] {
+  filter: drop-shadow(0 0 10px rgb(139 108 255 / 0.85)) drop-shadow(0 0 24px rgb(79 125 255 / 0.5));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mdc-button {
+    transition: none;
+  }
+
+  .mdc-button:hover {
+    translate: 0 0 !important;
+  }
+}
+
+/* The brand wave background, pinned to the viewport so long or short screens never end in a flat color. */
+.kl-page-bg {
+  background-image: url('/images/dashboard/0-imgIcon.svg');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* Loading states: component skeletons and the route progress bar. */
+.kl-skeleton {
+  border-radius: 14px;
+  background: linear-gradient(100deg, rgb(139 108 255 / 0.1) 30%, rgb(79 125 255 / 0.28) 50%, rgb(139 108 255 / 0.1) 70%);
+  background-size: 220% 100%;
+  animation: kl-shimmer 1.4s linear infinite;
+}
+
+.kl-spinner {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid rgb(139 108 255 / 0.3);
+  border-top-color: var(--kl-cyan);
+  animation: kl-spin 0.8s linear infinite;
+}
+
+.kl-route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--kl-violet), var(--kl-blue), var(--kl-cyan), var(--kl-pink));
+  transform-origin: left;
+  animation: kl-progress 6s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+@keyframes kl-shimmer {
+  from { background-position: 120% 0; }
+  to { background-position: -100% 0; }
+}
+
+@keyframes kl-spin {
+  to { rotate: 360deg; }
+}
+
+@keyframes kl-progress {
+  from { transform: scaleX(0.05); }
+  to { transform: scaleX(0.92); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-skeleton,
+  .kl-spinner,
+  .kl-route-progress {
+    animation: none;
+  }
+}
+
+/* Charts. Layered and important so one rule replaces the per-template fill colors; status colors are left alone. */
+@layer base {
+  .kl-bar:not([class*='amber']):not([class*='red']):not([class*='green']) {
+    background-image: linear-gradient(90deg, var(--kl-violet), var(--kl-blue), var(--kl-cyan)) !important;
+  }
+}
+
+.kl-column {
+  min-height: 8px;
+  background: linear-gradient(to top, var(--kl-blue), var(--kl-violet) 60%, var(--kl-pink));
+  transform-origin: bottom;
+  animation: kl-grow 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.kl-column--low {
+  background: linear-gradient(to top, #e08a1e, var(--kl-amber));
+}
+
+@keyframes kl-grow {
+  from { transform: scaleY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-column {
+    animation: none;
+  }
 }

@@ -1,10 +1,7 @@
 @if (session.demo()) {
   <p role="note" class="m-0 bg-kl-accent p-3 text-center text-white">Demostración: datos de ejemplo, sin conexión a la API.</p>
-<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+<div class="kl-page-bg relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
   @let estado = (estado$ | async) ?? '';
-  <div
-    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
-  ></div>
   <app-header [coach]="true" />
   <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
     <div>
@@ -20,7 +17,7 @@
     </div>
     <div class="flex flex-col gap-2">
       <span class="text-sm font-bold">Equipo</span>
-      <div class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm">
+      <div class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset p-3 text-sm">
         Equipo Alfa
       </div>
       <span class="text-xs text-kl-muted">Reporte del grupo que administras · últimos 30 días</span>
@@ -28,7 +25,7 @@
     @if (estado === 'insuficiente') {
       <section
         role="alert"
-        class="rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+        class="rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
       >
         <strong class="text-kl-danger">No hay información suficiente para emitir un reporte</strong>
         <p class="mb-0">
@@ -36,7 +33,7 @@
           conclusiones para evitar una evaluación incorrecta.
         </p>
       </section>
-      <mat-card class="gap-4 border border-solid border-[#2b2760] bg-kl-surface p-6">
+      <mat-card class="gap-4 border border-solid border-[var(--kl-line)] bg-kl-surface p-6">
         @for (
           dato of [
             [
@@ -52,7 +49,7 @@
           ];
           track dato[0]
         ) {
-          <article class="rounded-xl bg-[#1e1536] p-4">
+          <article class="rounded-xl bg-[var(--kl-card-from)] p-4">
             <h2 class="mt-0 text-sm font-bold">{{ dato[0] }}</h2>
             <p class="text-sm text-kl-muted">{{ dato[1] }}</p>
             <span class="font-mono text-xs text-kl-accent-text">{{ dato[2] }}</span>
@@ -67,7 +64,7 @@
       <section aria-label="Resumen del rendimiento" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
         @for (indicador of indicadores; track indicador.etiqueta) {
           <mat-card
-            class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+            class="gap-2 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-5"
             ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
             ><strong class="font-display text-2xl">{{
               estado === 'igual-prioridad' && indicador.etiqueta === 'Áreas prioritarias'
@@ -81,7 +78,7 @@
       @if (estado === 'igual-prioridad') {
         <section
           role="status"
-          class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+          class="rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm"
         >
           <strong class="text-amber-400">Hay dos temas con el mismo nivel de resolución</strong>
           <p class="mb-0">
@@ -92,13 +89,13 @@
       }
       <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <mat-card
-          class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          class="min-w-0 gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
         >
           <h2 class="m-0 text-xl font-bold">Resolución por tema</h2>
           <p class="m-0 text-sm text-kl-muted">De menor a mayor cobertura del equipo</p>
           @for (tema of temas; track tema.nombre) {
             <article
-              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4"
+              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4"
             >
               <h3 class="m-0 text-sm font-bold">{{ tema.nombre }}</h3>
               <p class="m-0 text-sm text-kl-muted">
@@ -108,7 +105,7 @@
                     : tema.detalle
                 }}
               </p>
-              <span class="font-mono text-xs text-[#ccb2ff]"
+              <span class="font-mono text-xs text-kl-accent-text"
                 >{{
                   estado === 'igual-prioridad' && tema.nombre === 'Geometría' ? 25 : tema.cobertura
                 }}% de resolución</span
@@ -121,15 +118,15 @@
                 "
                 aria-valuemin="0"
                 aria-valuemax="100"
-                class="h-1.5 overflow-hidden rounded-full bg-[#2e2e2e]"
+                class="h-1.5 overflow-hidden rounded-full bg-kl-raised"
               >
                 <div
-                  class="h-full rounded-full"
-                  [style.background-color]="
+                  class="kl-bar h-full rounded-full"
+                  [class]="
                     tema.cobertura === 25 ||
                     (estado === 'igual-prioridad' && tema.nombre === 'Geometría')
-                      ? '#fbbf24'
-                      : 'var(--kl-accent)'
+                      ? 'bg-amber-400'
+                      : 'bg-kl-accent'
                   "
                   [style.width.%]="
                     estado === 'igual-prioridad' && tema.nombre === 'Geometría'
@@ -143,7 +140,7 @@
         </mat-card>
         <aside class="flex min-w-0 flex-col gap-6">
           <mat-card
-            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           >
             <h2 class="m-0 text-xl font-bold">Priorizar entrenamiento</h2>
             <form [formGroup]="form" class="flex flex-col gap-4">
@@ -179,7 +176,7 @@
             </p>
           </mat-card>
           <mat-card
-            class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+            class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
             ><h2 class="m-0 text-xl font-bold">Criterio de comparación</h2>
             <p class="m-0 text-sm leading-5 text-kl-muted">
               Cobertura por tema = problemas distintos resueltos por el equipo / problemas distintos

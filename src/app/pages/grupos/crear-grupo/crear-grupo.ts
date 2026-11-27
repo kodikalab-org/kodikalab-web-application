@@ -1,3 +1,4 @@
+import { Loader } from '../../../shared/loader/loader';
 import { AsyncPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,6 +13,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { map, switchMap, tap } from 'rxjs';
 import { apiError } from '../../../core/api';
 import { CoachGroup, CreateGroupRequest, TeamsApi } from '../../../core/teams-api';
+import { plural } from '../../../shared/plural';
 
 const NIVELES: Record<string, string> = {
   Principiante: 'PRINCIPIANTE',
@@ -21,7 +23,7 @@ const NIVELES: Record<string, string> = {
 
 @Component({
   selector: 'app-crear-grupo',
-  imports: [
+  imports: [Loader, 
     AsyncPipe,
     RouterLink,
     ReactiveFormsModule,
@@ -48,6 +50,9 @@ export class CrearGrupo {
   /** Borrador que se está continuando (`?borrador=<id>`); `null` al crear un grupo nuevo. */
   protected readonly borradorId = signal<number | null>(null);
   protected readonly cargandoBorrador = signal(false);
+  /** The draft requested in the URL could not be fetched; saving now would create a duplicate. */
+  protected readonly errorBorrador = signal('');
+  private borradorSolicitado = 0;
 
   protected readonly pasos = ['Información general', 'Horario', 'Acceso y visibilidad', 'Resumen'];
   protected readonly ayudas = [
@@ -91,7 +96,10 @@ export class CrearGrupo {
 
   constructor(private readonly route: ActivatedRoute) {
     const borrador = Number(route.snapshot.queryParamMap.get('borrador'));
-    if (Number.isInteger(borrador) && borrador > 0) this.cargarBorrador(borrador);
+    if (Number.isInteger(borrador) && borrador > 0) {
+      this.borradorSolicitado = borrador;
+      this.cargarBorrador(borrador);
+    }
     this.estado$ = route.queryParamMap.pipe(
       map((params) => params.get('estado') ?? ''),
       tap((estado) => {
@@ -156,7 +164,7 @@ export class CrearGrupo {
   }
 
   private enviar(draft: boolean): void {
-    if (this.guardando()) return;
+    if (this.guardando() || this.cargandoBorrador() || this.errorBorrador()) return;
     this.error.set('');
     this.exito.set('');
 
@@ -213,6 +221,7 @@ export class CrearGrupo {
   /** US04: carga un borrador del coach (`GET /teams/me`) en el formulario para continuarlo. */
   private cargarBorrador(id: number): void {
     this.cargandoBorrador.set(true);
+    this.errorBorrador.set('');
     this.api.loadMine().subscribe({
       next: (mine) => {
         this.cargandoBorrador.set(false);
@@ -242,9 +251,22 @@ export class CrearGrupo {
       },
       error: (error: unknown) => {
         this.cargandoBorrador.set(false);
-        this.error.set(apiError(error));
+        this.errorBorrador.set(apiError(error));
       },
     });
+  }
+
+  protected reintentarBorrador(): void {
+    this.cargarBorrador(this.borradorSolicitado);
+  }
+
+  protected resumenHorario(): string {
+    return this.horarioTexto() ?? 'Días y horas sin definir';
+  }
+
+  protected cupoTexto(): string {
+    const cupo = this.general.controls.cupo.value;
+    return cupo === null ? 'Sin definir' : plural(cupo, 'integrante');
   }
 
   /** Guarda los cambios del borrador y, si corresponde, lo publica. */

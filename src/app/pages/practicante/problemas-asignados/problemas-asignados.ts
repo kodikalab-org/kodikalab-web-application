@@ -1,3 +1,4 @@
+import { Loader } from '../../../shared/loader/loader';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -33,7 +34,7 @@ const PUNTO_ESTADO: Record<AssignmentStatus, string> = {
   SIN_INTENTOS: 'bg-kl-border-strong',
 };
 const COLOR_EQUIPO = [
-  'from-[#8a6cff] to-[#6e52f2]',
+  'from-[var(--kl-cta-from)] to-[var(--kl-accent)]',
   'from-teal-400 to-teal-600',
   'from-pink-500 to-rose-600',
 ];
@@ -49,7 +50,7 @@ interface CompetenciaFiltro {
 /** US-08 (practitioner): problems assigned to the teams the practitioner belongs to, with their own state. */
 @Component({
   selector: 'app-problemas-asignados',
-  imports: [
+  imports: [Loader, 
     ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
@@ -94,7 +95,9 @@ export class ProblemasAsignados {
   protected readonly competencias = signal<CompetenciaFiltro[]>([]);
   protected readonly dificultades = signal<string[]>([]);
   /** Last answer of the team without filters: the progress and the competitions of the side panel. */
-  private readonly base = signal<AssignedProblemItem[]>([]);
+  private readonly base = signal<AssignedProblemItem[] | null>(null);
+  /** False while loading or after a failure: the side panel must not report zeros it does not know. */
+  protected readonly resumenListo = computed(() => this.base() !== null);
 
   protected readonly form = new FormGroup({
     equipo: new FormControl('', { nonNullable: true }),
@@ -113,7 +116,7 @@ export class ProblemasAsignados {
   );
 
   protected readonly resumen = computed(() => {
-    const items = this.base();
+    const items = this.base() ?? [];
     return {
       total: items.length,
       resueltos: items.filter((item) => item.status === 'RESUELTO').length,
@@ -127,7 +130,7 @@ export class ProblemasAsignados {
   });
   protected readonly competenciasEquipo = computed(() => {
     const vistas = new Map<number, CompetenciaFiltro>();
-    for (const item of this.base()) {
+    for (const item of this.base() ?? []) {
       vistas.set(item.competition.id, {
         id: item.competition.id,
         name: item.competition.name,
@@ -229,7 +232,7 @@ export class ProblemasAsignados {
     this.equipoId.set(id);
     this.competencias.set([]);
     this.dificultades.set([]);
-    this.base.set([]);
+    this.base.set(null);
     this.lista.set(null);
     this.form.patchValue(
       { busqueda: '', competencia: '', estado: '', dificultad: '', miEstado: '', orden: '', sentido: 'asc' },

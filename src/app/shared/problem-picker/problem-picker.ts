@@ -1,3 +1,4 @@
+import { Loader } from '../loader/loader';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -58,7 +59,7 @@ const DEBOUNCE_MS = 300;
  */
 @Component({
   selector: 'app-problem-picker',
-  imports: [CodeforcesCodeAdd, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [Loader, CodeforcesCodeAdd, MatFormFieldModule, MatInputModule, MatButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './problem-picker.html',
   styleUrl: './problem-picker.css',
@@ -150,6 +151,11 @@ export class ProblemPicker {
     this.trigger.next({ term: value.trim(), source: this.source() });
   }
 
+  protected retrySearch() {
+    this.searchError.set('');
+    this.trigger.next({ term: this.query().trim(), source: this.source() });
+  }
+
   /** Enter inside a field of the picker must not submit the contest form around it. */
   protected stopEnter(event: Event) {
     if ((event.target as HTMLElement).tagName === 'INPUT') event.preventDefault();
@@ -213,8 +219,10 @@ export class ProblemPicker {
   }
 
   protected setScore(index: number, event: Event) {
-    const value = Number((event.target as HTMLInputElement).value);
-    if (!Number.isFinite(value) || value < 0) return;
+    const typed = (event.target as HTMLInputElement).value.trim();
+    const value = Number(typed);
+    // An empty field is an edit in progress, not a score of zero.
+    if (!typed || !Number.isFinite(value) || value < 0) return;
     this.patch(index, { score: Math.trunc(value) });
   }
 

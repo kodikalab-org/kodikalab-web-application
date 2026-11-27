@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,6 +12,7 @@ import { firstValueFrom, map, tap } from 'rxjs';
 import { ProfileApi } from '../../../core/profile-api';
 import { Session } from '../../../core/session';
 import { apiError } from '../../../core/api';
+import { profileIdentity } from '../../../core/profile-identity';
 import { PERFIL_COACH_DEMO } from '../../../data/perfil-coach-demo';
 
 const MAX_ANIOS = 60;
@@ -37,6 +38,8 @@ export class CoachPerfilEditar {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
   private readonly router = inject(Router);
+  // The app runs without zone.js: HTTP results must notify the view explicitly.
+  private readonly cdr = inject(ChangeDetectorRef);
   protected busy = false;
   protected error = '';
   constructor() {
@@ -48,9 +51,13 @@ export class CoachPerfilEditar {
   }
   private readonly ruta = inject(ActivatedRoute);
 
-  protected readonly perfil = this.session.demo() ? PERFIL_COACH_DEMO : {
-    ...PERFIL_COACH_DEMO, nombre: this.session.account()?.email ?? '', iniciales: 'KL',
-  };
+  protected readonly perfil = this.session.demo() ? PERFIL_COACH_DEMO : this.cuentaActual();
+
+  private cuentaActual() {
+    const email = this.session.account()?.email ?? '';
+    const identity = profileIdentity(this.profiles.profile()?.fullName, email, email);
+    return { ...PERFIL_COACH_DEMO, nombre: identity.name, iniciales: identity.initials };
+  }
   protected readonly maxPresentacion = MAX_PRESENTACION;
 
   protected readonly form = new FormGroup({
@@ -104,7 +111,10 @@ export class CoachPerfilEditar {
         organizacionClub: v.organizacion || null, aniosExperiencia: v.anios!, presentacion: v.presentacion || null }));
       await this.router.navigate(['/coach/perfil'], { queryParams: { estado: 'actualizado' } });
     } catch (error) { this.error = apiError(error); }
-    finally { this.busy = false; }
+    finally {
+      this.busy = false;
+      this.cdr.markForCheck();
+    }
   }
 
   private aplicarEstado(errores: boolean): void {

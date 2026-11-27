@@ -11,7 +11,7 @@
   </p>
   <div class="mb-6">
     <span class="mb-2 block text-sm font-medium">Equipo</span>
-    <div class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm">
+    <div class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset p-3 text-sm">
       Equipo Alfa
     </div>
     <p class="mt-2 mb-0 text-xs text-kl-muted">Gestión de postulaciones</p>
@@ -19,13 +19,13 @@
   @if (error$ | async; as error) {
     <section
       role="alert"
-      class="mb-6 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+      class="mb-6 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
     >
       <strong class="text-kl-danger">{{ error.titulo }}</strong>
       <p class="mb-0">{{ error.detalle }}</p>
     </section>
-    <mat-card class="gap-3 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface p-6"
-      ><article class="rounded-xl bg-[#1e1536] p-4">
+    <mat-card class="gap-3 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface p-6"
+      ><article class="rounded-xl bg-[var(--kl-card-from)] p-4">
         <h2 class="mt-0 text-sm font-bold">Camila Rojas</h2>
         <p class="text-sm text-kl-muted">Información de la postulación sin decisión aplicada.</p>
         <span class="font-mono text-xs text-kl-accent-text">{{ error.estado }}</span>
@@ -39,7 +39,7 @@
     <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       <mat-card
         appearance="outlined"
-        class="rounded-2xl bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
+        class="rounded-2xl bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/85 p-6"
         ><h2 class="mt-0 mb-4 font-display text-2xl font-bold">Camila Rojas</h2>
         <p class="mt-0 mb-4 text-sm leading-5 text-kl-muted">
           Practicante · Ingeniería de Software · Nivel intermedio
@@ -47,9 +47,9 @@
         <div
           role="status"
           class="mb-4 rounded-xl border border-solid p-4 text-sm leading-5"
-          [class]="guardado ? 'border-green-400 bg-[#102a19]' : 'border-[#60b0ff] bg-[#0e2238]'"
+          [class]="guardado ? 'border-green-400 bg-green-400/10' : 'border-kl-blue bg-kl-blue/15'"
         >
-          <strong class="block" [class]="guardado ? 'text-green-400' : 'text-[#60b0ff]'">{{
+          <strong class="block" [class]="guardado ? 'text-green-400' : 'text-kl-cyan'">{{
             guardado ? 'Aclaración solicitada' : 'La postulación seguirá pendiente'
           }}</strong>
           <p class="mt-2 mb-0">
@@ -103,7 +103,7 @@
         </form>
       </mat-card>
       <aside
-        class="rounded-2xl border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-6"
+        class="kl-card rounded-2xl border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/85 p-6"
       >
         <h2 class="mt-0 mb-4 text-xl font-bold">Estado actual</h2>
         <p class="m-0 text-sm leading-5 text-kl-muted">

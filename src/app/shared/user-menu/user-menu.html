@@ -7,7 +7,7 @@
   class="min-w-0 px-1"
 >
   <span
-    class="flex size-[38px] items-center justify-center rounded-full bg-linear-to-br from-kl-accent to-[#b780ff] text-xs text-white"
+    class="flex size-[38px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-kl-accent to-kl-violet text-xs text-white"
     >{{ displayInitials }}</span
   ><img src="/images/dashboard/0-imgIcon5.svg" width="16" height="16" alt="" />
 </button>
@@ -18,7 +18,7 @@
       aria-hidden="true"
       >{{ displayInitials }}</span
     >
-    <div>
+    <div class="min-w-0 wrap-anywhere">
       <strong class="block text-sm font-medium text-kl-heading">{{ displayName }}</strong
       ><span class="mt-1 block text-xs text-kl-muted"
         >{{ coach ? 'Coach' : 'Practicante' }} · {{ session.demo() ? 'Vista de demostración' : 'Sesión iniciada' }}</span

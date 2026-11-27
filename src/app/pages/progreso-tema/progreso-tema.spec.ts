@@ -238,4 +238,26 @@ describe('ProgresoTema', () => {
     retry.click();
     http.expectOne(`${BASE}/teams/me`);
   });
+  it('writes single counts in singular', () => {
+    const fixture = setup();
+    flushTeams([team(1, 'Equipo Alfa')]);
+    http.expectOne(progressUrl(1)).flush(
+      progress(1, [topic({ assignedProblems: 1, solvedProblems: 1, unsolvedProblems: 0, needsReinforcement: true })]),
+    );
+    fixture.detectChanges();
+    expect(text(fixture)).toContain('1 asignado · 1 resuelto');
+    expect(text(fixture)).not.toContain('1 asignados');
+    expect(text(fixture)).not.toMatch(/1s*temas/);
+  });
+  it('colors status bars with classes the shared bar gradient leaves alone', () => {
+    const fixture = setup();
+    flushTeams([team(1, 'Equipo Alfa')]);
+    http.expectOne(progressUrl(1)).flush(
+      progress(1, [topic({ needsReinforcement: true }), topic({ topicId: 2, status: 'COMPLETADO', coveragePercentage: 100 })]),
+    );
+    fixture.detectChanges();
+    const bars = [...fixture.nativeElement.querySelectorAll('.kl-bar')] as HTMLElement[];
+    expect(bars[0].className).toContain('amber');
+    expect(bars[1].className).toContain('green');
+  });
 });

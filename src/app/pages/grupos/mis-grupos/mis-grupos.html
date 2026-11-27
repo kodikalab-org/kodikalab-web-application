@@ -1,26 +1,12 @@
 <section aria-label="Mis grupos" class="min-w-0">
   @if (error()) {
-    <section role="alert" class="mb-6 rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm">
+    <section role="alert" class="mb-6 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm">
       <strong class="text-kl-danger">No pudimos cargar tus grupos</strong>
       <p class="mb-3">{{ error() }}</p>
       <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
     </section>
   } @else if (cargando()) {
-    <p role="status" class="mt-0 text-sm text-kl-muted">Cargando tus grupos…</p>
-    <div aria-busy="true" aria-label="Cargando tus grupos" class="flex flex-col gap-3">
-      @for (fila of [1, 2, 3]; track fila) {
-        <div
-          aria-hidden="true"
-          class="flex h-28 items-center gap-5 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface p-5"
-        >
-          <span class="size-16 rounded-xl bg-white/5"></span>
-          <div class="flex flex-1 flex-col gap-3">
-            <span class="h-4 w-1/2 rounded bg-white/5"></span
-            ><span class="h-3 w-3/4 rounded bg-white/5"></span>
-          </div>
-        </div>
-      }
-    </div>
+    <app-loader label="Cargando tus grupos…" [rows]="3" />
   } @else if (coach()) {
     <mat-button-toggle-group
       hideSingleSelectionIndicator
@@ -43,7 +29,7 @@
 
     @if (coachVisible().length === 0) {
       <mat-card
-        class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+        class="items-center gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface px-6 py-14 text-center"
       >
         @if (segmentoCoach() === 'publicados') {
           <h2 class="m-0 text-xl">Todavía no has publicado grupos</h2>
@@ -63,14 +49,14 @@
         @for (item of coachVisible(); track item.groupId) {
           <mat-card
             appearance="outlined"
-            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_220px_220px]"
+            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-from)]/60 to-[var(--kl-card-to)]/80 p-5 xl:grid-cols-[minmax(0,1fr)_220px_220px]"
           >
             <div class="flex items-start gap-4">
               <span
                 class="mt-2 flex size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-xl font-semibold {{ tono(item) }}"
                 >{{ iniciales(item.name) }}</span
               >
-              <div class="min-w-0">
+              <div class="min-w-0 wrap-anywhere">
                 <h2 class="mt-0 mb-2 text-base font-medium">{{ item.name }}</h2>
                 <div class="mb-2 flex flex-wrap gap-2 text-[11px]">
                   <span
@@ -172,7 +158,7 @@
 
     @if (practicanteVisible().length === 0) {
       <mat-card
-        class="items-center gap-4 rounded-2xl border border-solid border-[#2b2760] bg-kl-surface px-6 py-14 text-center"
+        class="items-center gap-4 rounded-2xl border border-solid border-[var(--kl-line)] bg-kl-surface px-6 py-14 text-center"
       >
         @switch (segmentoPracticante()) {
           @case ('activos') {
@@ -201,14 +187,14 @@
         @for (item of practicanteVisible(); track item.groupId) {
           <mat-card
             appearance="outlined"
-            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[#1a1446]/60 to-[#09071a]/80 p-5 xl:grid-cols-[minmax(0,1fr)_200px_190px]"
+            class="grid items-center gap-4 rounded-2xl bg-linear-to-b from-[var(--kl-card-from)]/60 to-[var(--kl-card-to)]/80 p-5 xl:grid-cols-[minmax(0,1fr)_200px_190px]"
           >
             <div class="flex items-start gap-4">
               <span
                 class="mt-2 flex size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-xl font-semibold {{ tono(item) }}"
                 >{{ iniciales(item.name) }}</span
               >
-              <div class="min-w-0">
+              <div class="min-w-0 wrap-anywhere">
                 <h2 class="mt-0 mb-2 text-base font-medium">{{ item.name }}</h2>
                 <div class="mb-2 flex flex-wrap gap-2 text-[11px]">
                   <span
@@ -272,7 +258,7 @@
                 class="rounded-xl border border-solid border-kl-accent/40 bg-white/4 p-4 text-sm xl:col-span-3"
               >
                 <p class="m-0 text-xs uppercase tracking-wide text-kl-muted">Aclaración del coach</p>
-                <p class="my-2">{{ item.membership.clarification?.request }}</p>
+                <p class="my-2 wrap-anywhere">{{ item.membership.clarification?.request }}</p>
                 <label [for]="'respuesta-' + item.groupId" class="mb-1 block text-xs text-kl-body"
                   >Tu respuesta</label
                 >

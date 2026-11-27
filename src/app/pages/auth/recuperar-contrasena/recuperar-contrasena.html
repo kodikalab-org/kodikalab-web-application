@@ -34,7 +34,7 @@
     class="main relative z-10 flex flex-1 items-center justify-center px-4 py-8 [@media(max-height:760px)]:p-4"
   >
     <mat-card
-      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[#201454]/75 via-[#140d34]/82 to-[#0a071a]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7 [@media(max-height:760px)]:px-8 [@media(max-height:760px)]:py-6 [@media(max-height:760px)_and_(max-width:640px)]:px-5"
+      class="card auth-card w-full max-w-[540px] items-center bg-linear-to-b from-[var(--kl-card-hi)]/75 via-[var(--kl-card-via)]/82 to-[var(--kl-card-to)]/90 px-10 py-9 shadow-[0_0_40px_rgba(100,60,255,.35),inset_0_0_1px_rgba(120,90,255,.25)] max-[641px]:px-5 max-[641px]:py-7 [@media(max-height:760px)]:px-8 [@media(max-height:760px)]:py-6 [@media(max-height:760px)_and_(max-width:640px)]:px-5"
       appearance="outlined"
     >
       @let paso = (paso$ | async) ?? 'correo';
@@ -49,8 +49,8 @@
       <div class="mt-5 flex w-full flex-col items-center gap-2" role="group" aria-label="Progreso de recuperación">
         <div class="flex w-full max-w-[220px] gap-2" aria-hidden="true">
           <span class="h-1 flex-1 rounded-full bg-kl-accent"></span>
-          <span class="h-1 flex-1 rounded-full" [class]="paso === 'correo' ? 'bg-[#34304a]' : 'bg-kl-accent'"></span>
-          <span class="h-1 flex-1 rounded-full" [class]="paso === 'nueva' ? 'bg-kl-accent' : 'bg-[#34304a]'"></span>
+          <span class="h-1 flex-1 rounded-full" [class]="paso === 'correo' ? 'bg-[var(--kl-line-strong)]' : 'bg-kl-accent'"></span>
+          <span class="h-1 flex-1 rounded-full" [class]="paso === 'nueva' ? 'bg-kl-accent' : 'bg-[var(--kl-line-strong)]'"></span>
         </div>
         <p class="m-0 text-xs text-kl-muted">
           Paso {{ paso === 'correo' ? 1 : paso === 'codigo' ? 2 : 3 }} de 3
@@ -69,7 +69,7 @@
           </p>
 
           <section
-            class="mt-5 w-full rounded-xl border border-solid border-[#34304a] bg-white/3 p-4 text-sm text-kl-body"
+            class="mt-5 w-full rounded-xl border border-solid border-[var(--kl-line-strong)] bg-white/3 p-4 text-sm text-kl-body"
             aria-label="Cómo recuperar tu contraseña"
           >
             <p class="m-0 mb-3 font-medium text-kl-text">Así recuperas tu contraseña</p>
@@ -124,7 +124,7 @@
             </div>
             <button
               mat-flat-button
-              class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+              class="submit auth-submit w-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
               type="submit"
               [disabled]="correoForm.invalid || busy()"
             >
@@ -140,7 +140,7 @@
           >
             Ingresa el código
           </h1>
-          <p class="card__subtitle mt-2.5 mb-0 text-center text-base leading-6 font-light text-kl-body">
+          <p class="card__subtitle mt-2.5 mb-0 text-center text-base leading-6 font-light [overflow-wrap:anywhere] text-kl-body">
             Enviamos un código de {{ codeLength }} dígitos a
             <strong class="font-medium text-kl-text">{{ maskedEmail }}</strong>. Revisa también tu carpeta de
             correo no deseado.
@@ -181,7 +181,7 @@
             </div>
             <button
               mat-flat-button
-              class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+              class="submit auth-submit w-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
               type="submit"
               [disabled]="codigoForm.invalid || busy()"
             >
@@ -205,7 +205,7 @@
               >
             </div>
             @if (resent()) {
-              <p role="status" class="m-0 text-center text-xs text-kl-body">
+              <p role="status" class="m-0 text-center text-xs [overflow-wrap:anywhere] text-kl-body">
                 Te enviamos un código nuevo a {{ maskedEmail }}.
               </p>
             }
@@ -300,7 +300,7 @@
 
             <button
               mat-flat-button
-              class="submit auth-submit w-full bg-linear-to-b from-[#8d6df8] to-[#6244e8] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
+              class="submit auth-submit w-full bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] disabled:opacity-55 disabled:drop-shadow-none"
               type="submit"
               [disabled]="nuevaForm.invalid || busy()"
             >

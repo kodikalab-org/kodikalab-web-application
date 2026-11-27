@@ -5,6 +5,7 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CodeforcesStatsApi, CodeforcesStats } from '../../../core/codeforces-stats-api';
 import { ProfileStatistics } from './profile-statistics/profile-statistics';
+import { Loader } from '../../../shared/loader/loader';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
 import { profileIdentity } from '../../../core/profile-identity';
@@ -22,6 +23,7 @@ import {
   FILTROS_SOLICITUD_DEMO,
   IDIOMAS_AJUSTES,
   INFO_PERSONAL_DEMO,
+  NIVELES_EDICION,
   LENGUAJES_FILTRO,
   PAGINAS_SUBMISSIONS_DEMO,
   PERIODOS_FILTRO,
@@ -61,6 +63,7 @@ function resolverVista(tab: string | null, estado: string | null) {
   selector: 'app-perfil',
   imports: [
     ProfileStatistics,
+    Loader,
     HeaderNavigation,
     UserMenu,
     AsyncPipe,
@@ -151,7 +154,8 @@ export class Perfil {
     return { iniciales: identity.initials, nombreCompleto: identity.name, email: identity.email, usuario: '', rol: 'Practicante',
       carreraCiclo: p?.role === 'PRACTICANTE' ? `${p.carrera} · ${p.cicloAcademico}.º ciclo` : '',
       universidad: 'Comunidad GPC UPC', ubicacion: p?.role === 'PRACTICANTE' ? p.district || 'Distrito no indicado' : '',
-      nivelCodigo: p?.role === 'PRACTICANTE' ? `${p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
+      nivelCodigo: p?.role === 'PRACTICANTE'
+        ? `${NIVELES_EDICION.find(n => n.valor === p.nivelCompetitivo)?.titulo ?? p.nivelCompetitivo} · ${p.codigoEstudiante}` : '',
       objetivo: p?.role === 'PRACTICANTE' ? p.goal || 'Objetivo no indicado' : '' };
   }
   protected get plataformas() {

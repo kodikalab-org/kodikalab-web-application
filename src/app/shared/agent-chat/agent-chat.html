@@ -1,6 +1,12 @@
+@if (teamsFailed()) {
+  <div class="flex flex-wrap items-center gap-2" role="alert">
+    <p class="m-0 text-sm text-kl-muted">No pudimos cargar tus equipos. Puedes nombrar el equipo en tu mensaje.</p>
+    <button mat-button type="button" (click)="loadTeams()">Reintentar</button>
+  </div>
+}
 <div class="flex flex-wrap items-center justify-between gap-2">
   @if (coach() && coachTeams().length) {
-    <mat-form-field class="min-w-0 flex-1" subscriptSizing="dynamic">
+    <mat-form-field class="min-w-0 flex-1" appearance="outline" subscriptSizing="dynamic">
       <mat-label>Equipo</mat-label>
       <mat-select [value]="store.teamId()" (valueChange)="store.teamId.set($event)">
         <mat-option [value]="null">Sin equipo seleccionado</mat-option>
@@ -17,7 +23,7 @@
 
 <div
   #history
-  class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-xl border border-solid border-kl-border bg-kl-inset p-3"
+  class="kl-card flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-2xl border border-solid border-kl-border bg-linear-to-b from-[var(--kl-card-from)]/55 via-kl-inset/45 to-[var(--kl-card-to)]/55 p-4"
   role="log"
   aria-live="polite"
   aria-label="Conversación con el asistente"
@@ -39,25 +45,28 @@
 
   @for (message of store.messages(); track message.id) {
     @if (message.author === 'user') {
-      <p class="m-0 max-w-[85%] self-end whitespace-pre-wrap break-words rounded-xl bg-kl-accent px-3 py-2 text-sm text-white">
+      <p class="m-0 max-w-[85%] self-end whitespace-pre-wrap wrap-anywhere rounded-2xl bg-kl-accent px-3 py-2 text-sm text-white">
         <span class="sr-only">Tú: </span>{{ message.text }}
       </p>
     } @else {
-      <div [attr.data-message]="message.id" class="flex min-w-0 shrink-0 flex-col gap-3 self-stretch rounded-xl bg-kl-raised p-3 text-sm text-kl-body">
-        <p class="m-0 whitespace-pre-wrap break-words"><span class="sr-only">Asistente: </span>{{ message.text }}</p>
+      <div [attr.data-message]="message.id" class="flex min-w-0 shrink-0 flex-col gap-3 self-stretch rounded-2xl border border-solid border-kl-border-strong bg-kl-raised/70 p-3 wrap-anywhere text-sm text-kl-body">
+        <p class="m-0 whitespace-pre-wrap"><span class="sr-only">Asistente: </span>{{ message.text }}</p>
 
         @if (message.response?.chart; as chart) {
           <figure class="m-0">
             <figcaption class="mb-2 font-bold text-kl-heading">{{ chart.title }}</figcaption>
+            @if (!chart.labels.length) {
+              <p class="m-0 text-xs text-kl-muted">Sin datos para mostrar.</p>
+            }
             <ul class="m-0 flex list-none flex-col gap-2 p-0">
               @for (bar of bars(chart); track $index) {
                 <li>
                   <div class="flex justify-between gap-2">
-                    <span class="min-w-0 break-words">{{ bar.label }}</span>
-                    <span class="shrink-0">{{ bar.value }}{{ chart.unit }}</span>
+                    <span class="min-w-0">{{ bar.label }}</span>
+                    <span class="shrink-0">{{ bar.value === null ? 'Sin dato' : bar.value + chart.unit }}</span>
                   </div>
                   <div class="mt-1 h-2 rounded-full bg-kl-border-strong" aria-hidden="true">
-                    <div class="h-2 rounded-full bg-kl-accent" [style.width.%]="bar.width"></div>
+                    <div class="kl-bar h-2 rounded-full bg-kl-accent" [style.width.%]="bar.width"></div>
                   </div>
                 </li>
               }
@@ -66,9 +75,9 @@
         }
 
         @if (message.response?.problems; as problems) {
-          <ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-2 p-0">
+          <ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))] gap-2 p-0">
             @for (problem of problems; track $index) {
-              <li class="rounded-lg border border-solid border-kl-border-strong bg-kl-surface p-3">
+              <li class="min-w-0 rounded-xl border border-solid border-kl-border-strong bg-kl-surface/70 p-3">
                 @if (webUrl(problem.url); as url) {
                   <a class="font-bold text-kl-accent-link" [href]="url" target="_blank" rel="noopener noreferrer">
                     {{ problem.title }}<span class="sr-only"> (se abre en otra pestaña)</span>
@@ -89,9 +98,11 @@
         @if (message.response?.teams; as found) {
           <ul class="m-0 flex list-none flex-col gap-2 p-0">
             @for (team of found; track team.groupId) {
-              <li class="rounded-lg border border-solid border-kl-border-strong bg-kl-surface p-3">
+              <li class="rounded-xl border border-solid border-kl-border-strong bg-kl-surface/70 p-3">
                 <strong class="text-kl-heading">{{ team.name }}</strong>
-                <p class="mt-1 mb-0 text-xs text-kl-muted">{{ team.expectedLevel }} · {{ team.sessionSchedule }}</p>
+                @if (teamSummary(team); as summary) {
+                  <p class="mt-1 mb-0 text-xs text-kl-muted">{{ summary }}</p>
+                }
                 @for (difference of team.differences ?? []; track $index) {
                   <p class="mt-1 mb-0 text-xs">{{ difference }}</p>
                 }
@@ -101,7 +112,7 @@
         }
 
         @if (message.response?.action; as action) {
-          <div class="rounded-lg border border-solid border-kl-accent p-3">
+          <div class="rounded-xl border border-solid border-kl-accent p-3">
             <p class="m-0">{{ action.summary }}</p>
             <p class="mt-1 mb-0 text-xs text-kl-muted">La confirmación todavía no está disponible.</p>
           </div>
@@ -111,16 +122,16 @@
   }
 
   @if (store.sending()) {
-    <p class="m-0 text-sm text-kl-muted" role="status">El asistente está respondiendo…</p>
+    <app-loader label="El asistente está respondiendo…" [rows]="1" class="shrink-0" />
   }
 </div>
 
 @if (store.error(); as error) {
-  <p class="m-0 text-sm text-kl-danger" role="alert">{{ error }}</p>
+  <p class="m-0 text-sm wrap-anywhere text-kl-danger" role="alert">{{ error }}</p>
 }
 
 <form class="flex items-end gap-2" (submit)="submit($event)">
-  <mat-form-field class="min-w-0 flex-1" subscriptSizing="dynamic">
+  <mat-form-field class="min-w-0 flex-1" appearance="outline" subscriptSizing="dynamic">
     <mat-label>Tu mensaje</mat-label>
     <textarea
       matInput

@@ -1,4 +1,5 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Loader } from '../../../../shared/loader/loader';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -72,6 +73,7 @@ const MESSAGES: Record<string, Record<string, string>> = {
 @Component({
   selector: 'app-concurso-nuevo',
   imports: [
+    Loader,
     AppHeader,
     SiteFooter,
     RouterLink,

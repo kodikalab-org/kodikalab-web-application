@@ -20,7 +20,7 @@
     }
 
     <mat-toolbar
-      class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[#1b1840] bg-[#060414]/75 px-11 font-body max-[1000px]:px-6 max-[641px]:h-[60px] max-[641px]:px-4"
+      class="auth-header sticky top-0 z-40 backdrop-blur-xl flex h-[68px] items-center justify-between gap-4 border-0 border-b border-solid border-[var(--kl-line-soft)] bg-[var(--kl-chrome)]/75 px-11 font-body max-[1000px]:px-6 max-[641px]:h-[60px] max-[641px]:px-4"
     >
       <div class="flex min-w-0 items-center gap-2 xl:gap-14">
         <a class="inline-flex items-center gap-2.5" routerLink="/coach/inicio" aria-label="Kodikalab, inicio">
@@ -39,16 +39,16 @@
       </div>
       <div class="flex items-center gap-[22px] max-[641px]:gap-3">
         <div
-          class="flex h-10 w-[400px] items-center gap-3 rounded-xl border border-solid border-[#2f2b5e] bg-white/4 px-3.5 max-[1400px]:w-[260px] max-[1000px]:hidden"
+          class="flex h-10 w-[400px] items-center gap-3 rounded-xl border border-solid border-[var(--kl-line)] bg-white/4 px-3.5 max-[1400px]:w-[260px] max-[1000px]:hidden"
           role="search"
           aria-label="Buscador"
         >
           <img src="images/perfil-coach/search-18.svg" alt="" width="18" height="18" />
-          <span class="flex-1 truncate text-sm text-[#8d89a3]"
+          <span class="flex-1 truncate text-sm text-[var(--kl-text-muted)]"
             >Buscar problemas, usuarios, concursos…</span
           >
           <span
-            class="rounded-md border border-solid border-[#34304a] px-[7px] py-[3px] font-mono text-[11px] text-[#8d89a3]"
+            class="rounded-md border border-solid border-[var(--kl-line-strong)] px-[7px] py-[3px] font-mono text-[11px] text-[var(--kl-text-muted)]"
             >⌘ K</span
           >
         </div>
@@ -67,17 +67,17 @@
           </p>
         </div>
         <nav
-          class="flex shrink-0 gap-1 rounded-[14px] border border-solid border-[#3b3480] bg-[#14103c]/70 p-[5px] max-[641px]:w-full"
+          class="flex shrink-0 gap-1 rounded-full border border-solid border-[var(--kl-line-strong)] bg-[var(--kl-card-via)]/70 p-[5px] max-[641px]:w-full"
           aria-label="Modo del perfil"
         >
           <a
-            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] bg-linear-to-b from-[#7357f3] to-[#5a3fe0] text-[15px] font-medium max-[641px]:w-auto max-[641px]:flex-1"
+            class="flex h-[42px] w-44 items-center justify-center rounded-full bg-linear-to-b from-[var(--kl-accent)] to-[var(--kl-cta-to)] text-[15px] font-medium max-[641px]:w-auto max-[641px]:flex-1"
             routerLink="/coach/perfil"
             aria-current="page"
             >Visualizar perfil</a
           >
           <a
-            class="flex h-[42px] w-44 items-center justify-center rounded-[10px] text-[15px] font-medium text-kl-body max-[641px]:w-auto max-[641px]:flex-1"
+            class="flex h-[42px] w-44 items-center justify-center rounded-full text-[15px] font-medium text-kl-body max-[641px]:w-auto max-[641px]:flex-1"
             routerLink="/coach/perfil/editar"
             >Editar perfil</a
           >
@@ -95,7 +95,7 @@
       }
 
       <nav
-        class="flex flex-wrap gap-x-11 gap-y-3 border-0 border-b border-solid border-[#1f1c44] max-[641px]:gap-x-6"
+        class="flex flex-wrap gap-x-11 gap-y-3 border-0 border-b border-solid border-[var(--kl-line-soft)] max-[641px]:gap-x-6"
         aria-label="Secciones del perfil"
       >
         @for (pestania of pestanias; track pestania.id) {
@@ -103,7 +103,7 @@
             class="inline-flex shrink-0 items-center gap-2.5 border-0 border-b-2 border-solid px-1 pb-3.5 text-[15px] whitespace-nowrap"
             [class]="
               pestania.id === vista.pestania
-                ? 'border-[#7357f3] font-semibold text-kl-accent-text'
+                ? 'border-[var(--kl-accent)] font-semibold text-kl-accent-text'
                 : 'border-transparent text-kl-body'
             "
             routerLink="/coach/perfil"
@@ -127,13 +127,13 @@
             class="grid grid-cols-1 items-start gap-5 min-[1280px]:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] [&>section]:min-w-0"
           >
             <section
-              class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              class="kl-card flex flex-col gap-4 rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
               aria-labelledby="info-titulo"
             >
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                   <span
-                    class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                    class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25"
                   >
                     <img
                       src="images/perfil-coach/user-20-active.svg"
@@ -151,7 +151,7 @@
                 </div>
                 <a
                   mat-stroked-button
-                  class="h-10 rounded-[10px] border border-solid border-[#6b52e0] bg-[#7357f3]/12 px-4 text-sm whitespace-nowrap text-[#e7e3f5]"
+                  class="h-10 rounded-[10px] border border-solid border-[var(--kl-cta-to)] bg-[var(--kl-accent)]/12 px-4 text-sm whitespace-nowrap text-[var(--kl-text-strong)]"
                   routerLink="/coach/perfil/editar"
                 >
                   <img src="images/perfil-coach/pencil-16.svg" alt="" width="16" height="16" />
@@ -161,10 +161,10 @@
 
               <div class="flex items-center gap-6 max-[641px]:flex-col max-[641px]:items-start max-[641px]:gap-4">
                 <span
-                  class="flex size-[118px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#8d6df8] to-[#4d2ff5] max-[641px]:size-24"
+                  class="flex size-[118px] shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-cta-from)] to-kl-blue max-[641px]:size-24"
                 >
                   <span
-                    class="profile-avatar flex size-28 items-center justify-center rounded-full bg-linear-to-br from-[#2a1c6e] to-[#5a3ad0] font-display text-[40px] font-bold max-[641px]:size-[90px] max-[641px]:text-[32px]"
+                    class="profile-avatar flex size-28 items-center justify-center rounded-full bg-linear-to-br from-[var(--kl-card-hi)] to-[var(--kl-cta-to)] font-display text-[40px] font-bold max-[641px]:size-[90px] max-[641px]:text-[32px]"
                     aria-hidden="true"
                     >{{ perfil.iniciales }}</span
                   >
@@ -191,27 +191,27 @@
                 </div>
               </div>
 
-              <ul class="m-0 flex list-none flex-col gap-2.5 p-0">
+              <ul class="m-0 flex list-none flex-col gap-2.5 p-0 [overflow-wrap:anywhere] [&_img]:shrink-0">
                 @for (dato of datosPerfil; track dato.texto) {
-                  <li class="flex items-center gap-3 text-sm text-[#e7e3f5]">
+                  <li class="flex items-center gap-3 text-sm text-[var(--kl-text-strong)]">
                     <img [src]="dato.icono" alt="" width="18" height="18" />
                     {{ dato.texto }}
                   </li>
                 }
               </ul>
 
-              <p class="m-0 text-sm leading-[21px] font-light text-[#d7d3e8]">
+              <p class="m-0 text-sm leading-[21px] font-light [overflow-wrap:anywhere] text-[var(--kl-text-strong)]">
                 {{ perfil.presentacion }}
               </p>
             </section>
 
             <section
-              class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+              class="kl-card flex flex-col gap-4 rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
               aria-labelledby="equipos-titulo"
             >
               <div class="flex items-center gap-3">
                 <span
-                  class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                  class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25"
                 >
                   <img
                     src="images/perfil-coach/users-20-active.svg"
@@ -231,7 +231,7 @@
               <ul class="m-0 flex list-none gap-3 p-0 max-[641px]:flex-col">
                 @for (estadistica of estadisticas(); track estadistica.etiqueta) {
                   <li
-                    class="flex min-w-0 flex-1 items-center gap-3.5 rounded-[14px] border border-solid border-[#26224d] bg-white/3 px-4 py-3.5"
+                    class="flex min-w-0 flex-1 items-center gap-3.5 rounded-[14px] border border-solid border-[var(--kl-line-soft)] bg-white/3 px-4 py-3.5"
                   >
                     <span
                       class="flex size-[46px] shrink-0 items-center justify-center rounded-xl"
@@ -250,22 +250,35 @@
                 }
               </ul>
 
+              @if (!session.demo()) {
+                @if (errorEquipos()) {
+                <div class="flex flex-col items-start gap-3" role="alert">
+                  <p class="m-0 text-sm text-kl-danger">No pudimos cargar tus equipos.</p>
+                  <button mat-stroked-button type="button" (click)="cargarEquipos()">Reintentar</button>
+                </div>
+                } @else if (equiposReales() === null) {
+                  <app-loader label="Cargando tus equipos…" />
+                } @else if (equipos.length === 0) {
+                  <p class="m-0 py-4 text-center text-sm text-kl-muted">Aún no tienes equipos.</p>
+                }
+              }
               <ul class="m-0 flex list-none flex-col p-0">
                 @for (equipo of equipos; track equipo.nombre; let ultimo = $last) {
                   <li
-                    class="flex items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
+                    class="flex items-center gap-4 border-0 border-solid border-[var(--kl-line-soft)] px-1 py-3.5"
                     [class]="ultimo ? '' : 'border-b'"
                   >
                     <span
-                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-sm font-semibold"
+                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[var(--kl-line-strong)] bg-[var(--kl-accent)]/22 text-sm font-semibold"
                       aria-hidden="true"
                       >{{ equipo.iniciales }}</span
                     >
                     <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
-                      <span class="text-base font-semibold">{{ equipo.nombre }}</span>
+                      <span class="text-base font-semibold [overflow-wrap:anywhere]">{{ equipo.nombre }}</span>
                       <span class="text-[13px] text-kl-muted"
-                        >{{ equipo.integrantes }}/{{ equipo.capacidad }} integrantes ·
-                        {{ equipo.horario }}</span
+                        >{{ equipo.integrantes }}{{ equipo.capacidad ? '/' + equipo.capacidad : '' }} integrantes{{
+                          equipo.horario ? ' · ' + equipo.horario : ''
+                        }}</span
                       >
                     </span>
                     <img
@@ -281,7 +294,7 @@
               <div>
                 <button
                   mat-flat-button
-                  class="h-[46px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] max-[641px]:w-full"
+                  class="h-[46px] rounded-xl bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-6 drop-shadow-[0_2px_7px_rgba(168,129,254,.55)] max-[641px]:w-full"
                   type="button"
                   disabled
                   title="La pantalla de creación de equipos todavía no está integrada"
@@ -296,13 +309,13 @@
 
         @case ('solicitudes') {
           <section
-            class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+            class="kl-card flex flex-col gap-4 rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
             aria-labelledby="solicitudes-titulo"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-3">
                 <span
-                  class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                  class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25"
                 >
                   <img
                     src="images/perfil-coach/users-20-active.svg"
@@ -321,10 +334,29 @@
               <p class="m-0 text-[13px] text-kl-muted">Pendiente → Aceptada o Rechazada</p>
             </div>
 
-            @if (vista.estado === 'vacio' || solicitudes.length === 0) {
+            @if (!session.demo() && errorEquipos()) {
+              <div class="flex flex-col items-start gap-3" role="alert">
+                  <p class="m-0 text-sm text-kl-danger">No pudimos cargar tus equipos.</p>
+                  <button mat-stroked-button type="button" (click)="cargarEquipos()">Reintentar</button>
+                </div>
+            } @else if (!session.demo() && equiposReales() === null) {
+              <app-loader label="Cargando tus equipos…" />
+            } @else if (!session.demo() && equiposConSolicitudes().length) {
+              <ul class="m-0 flex list-none flex-col gap-3 p-0">
+                @for (equipo of equiposConSolicitudes(); track equipo.groupId) {
+                  <li class="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-solid border-kl-line-soft bg-white/3 px-4 py-3.5">
+                    <span class="flex min-w-0 flex-col gap-1">
+                      <span class="text-base font-semibold [overflow-wrap:anywhere]">{{ equipo.name }}</span>
+                      <span class="text-[13px] text-amber-300">{{ textoSolicitudes(equipo.pendingRequests) }}</span>
+                    </span>
+                    <a mat-flat-button routerLink="/coach/grupos/solicitudes" [queryParams]="{ grupo: equipo.groupId }">Revisar</a>
+                  </li>
+                }
+              </ul>
+            } @else if (vista.estado === 'vacio' || solicitudes.length === 0) {
               <div class="flex flex-col items-center gap-3 px-2 py-[70px] text-center">
                 <span
-                  class="flex size-[72px] items-center justify-center rounded-[20px] bg-[#7357f3]/20"
+                  class="flex size-[72px] items-center justify-center rounded-[20px] bg-[var(--kl-accent)]/20"
                 >
                   <img src="images/perfil-coach/inbox-34.svg" alt="" width="34" height="34" />
                 </span>
@@ -355,16 +387,16 @@
               <ul class="m-0 flex list-none flex-col p-0">
                 @for (solicitud of solicitudes; track solicitud.nombre; let ultima = $last) {
                   <li
-                    class="flex flex-wrap items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
+                    class="flex flex-wrap items-center gap-4 border-0 border-solid border-[var(--kl-line-soft)] px-1 py-3.5"
                     [class]="ultima ? '' : 'border-b'"
                   >
                     <span
-                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-[#7357f3]/22 text-sm font-semibold"
+                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[var(--kl-line-strong)] bg-[var(--kl-accent)]/22 text-sm font-semibold"
                       aria-hidden="true"
                       >{{ solicitud.iniciales }}</span
                     >
                     <span class="flex min-w-[200px] flex-1 flex-col gap-[3px]">
-                      <span class="text-base font-semibold">{{ solicitud.nombre }}</span>
+                      <span class="text-base font-semibold [overflow-wrap:anywhere]">{{ solicitud.nombre }}</span>
                       <span class="text-[13px] text-kl-muted"
                         >Solicita unirse a {{ solicitud.equipo }} · Nivel
                         {{ solicitud.nivel }}</span
@@ -387,7 +419,7 @@
                           </button>
                           <button
                             mat-flat-button
-                            class="h-[42px] rounded-xl bg-linear-to-b from-[#8d6df8] to-[#6244e8] px-[22px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
+                            class="h-[42px] rounded-xl bg-linear-to-b from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-[22px] drop-shadow-[0_2px_7px_rgba(168,129,254,.55)]"
                             type="button"
                             [attr.aria-label]="'Aceptar a ' + solicitud.nombre"
                             (click)="resolver(solicitud, 'aceptada')"
@@ -420,11 +452,11 @@
 
         @case ('ajustes') {
           <section
-            class="flex flex-col gap-4 rounded-[18px] border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 via-[#110d2e]/79 to-[#09071a]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
+            class="kl-card flex flex-col gap-4 rounded-[18px] border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 via-[var(--kl-card-via)]/79 to-[var(--kl-card-to)]/86 px-6 py-[22px] shadow-[0_0_24px_rgba(100,60,255,.18)]"
             aria-labelledby="ajustes-titulo"
           >
             <div class="flex items-center gap-3">
-              <span class="flex size-9 items-center justify-center rounded-[10px] bg-[#7357f3]/25">
+              <span class="flex size-9 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25">
                 <img
                   src="images/perfil-coach/settings-20-active.svg"
                   alt=""
@@ -443,11 +475,11 @@
             <form class="flex flex-col" [formGroup]="formAjustes" novalidate>
               @for (fila of filas; track fila.titulo; let ultima = $last) {
                 <div
-                  class="flex flex-wrap items-center gap-4 border-0 border-solid border-[#1f1c44] px-1 py-3.5"
+                  class="flex flex-wrap items-center gap-4 border-0 border-solid border-[var(--kl-line-soft)] px-1 py-3.5"
                   [class]="ultima ? '' : 'border-b'"
                 >
                   <span
-                    class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-[#7357f3]/25"
+                    class="flex size-[46px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--kl-accent)]/25"
                   >
                     <img [src]="fila.icono" alt="" width="22" height="22" />
                   </span>

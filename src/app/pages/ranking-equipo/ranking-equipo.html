@@ -1,10 +1,7 @@
 @if (session.demo()) {
   <p role="note" class="m-0 bg-kl-accent p-3 text-center text-white">Demostración: datos de ejemplo, sin conexión a la API.</p>
-<div class="relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
+<div class="kl-page-bg relative isolate min-h-dvh overflow-clip bg-kl-bg font-body text-kl-text">
   @let estado = (estado$ | async) ?? '';
-  <div
-    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[900px] bg-[url('/images/progreso-ranking/fondo.svg')] bg-size-[1440px_900px] bg-position-[right_top] bg-no-repeat [mask-image:linear-gradient(to_bottom,black_80%,transparent)] lg:bg-size-[100%_900px]"
-  ></div>
   <app-header [coach]="false" />
   <main class="mx-auto flex max-w-[1440px] flex-col gap-6 px-4 py-4 lg:px-[120px] lg:py-8">
     <div>
@@ -20,7 +17,7 @@
     </div>
     <div class="flex flex-col gap-2">
       <span class="text-sm font-bold">Equipo</span>
-      <div class="rounded-xl border border-solid border-kl-border-strong bg-[#212121] p-3 text-sm">
+      <div class="rounded-xl border border-solid border-kl-border-strong bg-kl-inset p-3 text-sm">
         Equipo Alfa
       </div>
       <span class="text-xs text-kl-muted"
@@ -30,7 +27,7 @@
     @if (estado === 'inconsistentes') {
       <section
         role="alert"
-        class="rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+        class="rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm"
       >
         <strong class="text-amber-400">No pudimos actualizar el ranking</strong>
         <p class="mb-0">
@@ -46,9 +43,9 @@
     @if (estado === 'compartidas') {
       <section
         role="status"
-        class="rounded-xl border border-solid border-[#60b0ff] bg-[#0e2238] p-4 text-sm"
+        class="rounded-xl border border-solid border-kl-blue bg-kl-blue/15 p-4 text-sm"
       >
-        <strong class="text-[#60b0ff]">Dos integrantes comparten el segundo puesto</strong>
+        <strong class="text-kl-cyan">Dos integrantes comparten el segundo puesto</strong>
         <p class="mb-0">
           Camila y Valeria tienen 16 problemas distintos resueltos. Se utiliza posición compartida;
           el siguiente puesto es el cuarto.
@@ -58,7 +55,7 @@
     <section aria-label="Resumen del ranking" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
       @for (indicador of indicadores; track indicador.etiqueta) {
         <mat-card
-          class="gap-2 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-5"
+          class="gap-2 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-5"
           ><span class="text-sm text-kl-muted">{{ indicador.etiqueta }}</span
           ><strong class="font-display text-2xl">{{
             estado === 'compartidas' && indicador.etiqueta === 'Tu posición'
@@ -77,7 +74,7 @@
     </section>
     <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
       <mat-card
-        class="min-w-0 gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+        class="min-w-0 gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
       >
         <h2 class="m-0 text-xl font-bold">
           {{
@@ -95,7 +92,7 @@
           <caption class="sr-only">
             Clasificación de Equipo Alfa, primeros cinco integrantes
           </caption>
-          <thead class="bg-[#1e1536] text-kl-muted">
+          <thead class="bg-[var(--kl-card-from)] text-kl-muted">
             <tr>
               @for (titulo of ['Posición', 'Integrante', 'Resueltos', 'Estado']; track titulo) {
                 <th scope="col" class="p-3">{{ titulo }}</th>
@@ -137,10 +134,10 @@
             track integrante.nombre
           ) {
             <li
-              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[#1e1536] p-4 text-sm"
+              class="flex flex-col gap-2 rounded-xl border border-solid border-kl-border-strong bg-[var(--kl-card-from)] p-4 text-sm"
             >
               <strong>{{ integrante.posicion }}</strong
-              ><span class="font-mono text-xs text-[#ccb2ff]">{{ integrante.estado }}</span
+              ><span class="font-mono text-xs text-kl-accent-text">{{ integrante.estado }}</span
               ><span class="text-kl-muted">Integrante: {{ integrante.nombre }}</span
               ><span class="text-kl-muted">Resueltos: {{ integrante.resueltos }}</span>
             </li>
@@ -150,7 +147,7 @@
       </mat-card>
       <aside class="flex min-w-0 flex-col gap-6">
         <mat-card
-          class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           ><h2 class="m-0 text-xl font-bold">Cómo se ordena</h2>
           <p class="m-0 text-sm leading-5 text-kl-muted">
             Cada problema distinto cuenta una vez por integrante y equipo. Los registros pendientes
@@ -158,7 +155,7 @@
           </p></mat-card
         >
         <mat-card
-          class="gap-4 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/72 to-[#09071a]/86 p-6"
+          class="gap-4 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/72 to-[var(--kl-card-to)]/86 p-6"
           ><h2 class="m-0 text-xl font-bold">Tu avance</h2>
           <p class="m-0 text-sm leading-5 text-kl-muted">
             Has resuelto 16 problemas en Equipo Alfa. Tu actividad en Grafos y DP no modifica este

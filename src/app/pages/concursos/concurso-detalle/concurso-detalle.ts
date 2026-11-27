@@ -1,3 +1,4 @@
+import { Loader } from '../../../shared/loader/loader';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -37,7 +38,7 @@ const LANGUAGES = ['C++17', 'Python 3.11', 'Java 17', 'JavaScript (Node 20)', 'K
 /** `/concursos/:teamId/:competitionId`: Codeforces-style contest page (problems, standings, group, progress). */
 @Component({
   selector: 'app-concurso-detalle',
-  imports: [RouterLink, ReactiveFormsModule, CdkTrapFocus],
+  imports: [Loader, RouterLink, ReactiveFormsModule, CdkTrapFocus],
   templateUrl: './concurso-detalle.html',
   host: { class: 'block' },
 })

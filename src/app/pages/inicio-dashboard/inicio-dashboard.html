@@ -19,7 +19,7 @@
     >Saltar al contenido</a
   >
   <header
-    class="sticky top-0 z-40 shrink-0 border-b border-[#2b2760] bg-[#060414]/90 shadow-[0_6px_24px_#04030a66] backdrop-blur-xl"
+    class="sticky top-0 z-40 shrink-0 border-b border-[var(--kl-line)] bg-[var(--kl-chrome)]/90 shadow-[0_6px_24px_#04030a66] backdrop-blur-xl"
   >
     <mat-toolbar class="mx-auto flex h-[68px] max-w-[1600px] gap-2 px-4 sm:gap-5 lg:px-11">
       <a
@@ -79,7 +79,7 @@
     class="mx-auto w-full max-w-[1600px] flex-1 px-4 pt-[30px] pb-14 sm:px-7 lg:px-14"
   >
     <div class="mb-6 flex flex-wrap items-center justify-between gap-5">
-      <div>
+      <div class="min-w-0">
         <h1 class="m-0 break-all font-display text-[32px] font-bold tracking-[-1px]">
           Hola, {{ nombre }}
         </h1>
@@ -99,7 +99,7 @@
         <a
           mat-flat-button
           routerLink="/coach/grupos/crear"
-          class="h-[52px] rounded-xl bg-linear-to-br from-[#9a75ff] to-[#643bff] px-7 shadow-[0_0_24px_#7357f380]"
+          class="h-[52px] rounded-xl bg-linear-to-br from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-7 shadow-[0_0_24px_#7357f380]"
         >
           Crear grupo<img
             src="/images/dashboard/2-imgIcon6.svg"
@@ -112,7 +112,7 @@
         <button
           mat-flat-button
           [matMenuTriggerFor]="pendiente"
-          class="h-[52px] rounded-xl bg-linear-to-br from-[#9a75ff] to-[#643bff] px-7 shadow-[0_0_24px_#7357f380]"
+          class="h-[52px] rounded-xl bg-linear-to-br from-[var(--kl-cta-from)] to-[var(--kl-cta-to)] px-7 shadow-[0_0_24px_#7357f380]"
         >
           Resolver problema<img
             [src]="'/images/dashboard/0-imgIconArrowRight.svg'"
@@ -125,7 +125,7 @@
     </div>
     @if (nuevo) {
       <mat-card
-        class="mb-6 border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-6 shadow-[0_0_24px_#643cff2e]"
+        class="mb-6 border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-6 shadow-[0_0_24px_#643cff2e]"
       >
         <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
           <h2 class="m-0 flex items-center gap-3 font-display text-lg">
@@ -162,21 +162,35 @@
         </ol>
       </mat-card>
     }
+    @if (errorGrupos() || errorProblemas()) {
+      <section
+        role="alert"
+        class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
+      >
+        <span><strong class="text-kl-danger">No pudimos cargar tu actividad.</strong> Revisa tu conexión e inténtalo de nuevo.</span>
+        <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
+      </section>
+    }
     <section
       aria-label="Resumen de actividad"
       class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
       @for (dato of estadisticas(); track dato.etiqueta; let i = $index) {
         <mat-card
-          class="flex flex-row items-center gap-3.5 border border-solid border-[#25203b] bg-white/3 px-4 py-3.5"
-          ><span
-            class="flex size-[46px] shrink-0 items-center justify-center rounded-xl bg-kl-accent/15"
-            ><img [src]="'/images/dashboard/' + dato.icono + '.svg'" width="24" height="24" alt=""
-          /></span>
+          class="flex flex-col gap-3 rounded-2xl border border-solid border-kl-line bg-white/3 p-4"
+          ><div class="flex items-center justify-between gap-3">
+            <span class="text-xs font-semibold tracking-wide text-kl-muted uppercase">{{ dato.etiqueta }}</span>
+            <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-kl-accent/20"
+              ><img [src]="'/images/dashboard/' + dato.icono + '.svg'" width="22" height="22" alt=""
+            /></span>
+          </div>
           <div>
-            <strong class="block font-display text-2xl">{{ dato.valor }}</strong
-            ><span class="block text-[13px] text-kl-body">{{ dato.etiqueta }}</span
-            ><span class="mt-1 block text-xs" [class]="dato.tono">{{ dato.detalle }}</span>
+            @if (dato.detalle === 'Cargando…') {
+              <span class="kl-skeleton block h-10 w-24" aria-hidden="true"></span>
+            } @else {
+              <strong class="block font-display text-4xl leading-10" [class.text-kl-muted]="dato.valor === '0' || dato.valor === '—'">{{ dato.valor }}</strong>
+            }
+            <span class="mt-2 block text-xs" [class]="dato.tono">{{ dato.detalle }}</span>
           </div></mat-card
         >
       }
@@ -190,7 +204,7 @@
           [attr.aria-label]="coach ? 'Solicitudes pendientes' : 'Problemas para ti'"
         >
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -208,12 +222,20 @@
                   vacio;
                   context: {
                     icono: coach ? '3-imgIcon13' : '1-imgIcon12',
-                    nombre: coach
-                      ? 'No tienes solicitudes pendientes'
-                      : 'Aún no tienes problemas asignados',
-                    descripcion: coach
-                      ? 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.'
-                      : 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.',
+                    nombre: !coach
+                      ? 'Aún no tienes problemas asignados'
+                      : cargandoGrupos || errorGrupos()
+                        ? 'Solicitudes no disponibles'
+                        : solicitudesPendientes() > 0
+                          ? 'Tienes ' + plural(solicitudesPendientes(), 'solicitud pendiente', 'solicitudes pendientes')
+                          : 'No tienes solicitudes pendientes',
+                    descripcion: !coach
+                      ? 'Cuando tu coach te asigne problemas, los verás aquí para organizar tu práctica.'
+                      : cargandoGrupos || errorGrupos()
+                        ? 'Aparecerán cuando se carguen tus equipos.'
+                        : solicitudesPendientes() > 0
+                          ? 'Usa «Ver todas» para aceptarlas o rechazarlas.'
+                          : 'Cuando un practicante pida unirse a tus grupos, aparecerá aquí para que lo aceptes o lo rechaces.',
                     accion: coach ? '' : 'Explorar grupos',
                   }
                 "
@@ -221,7 +243,7 @@
             } @else if (coach) {
               @for (solicitud of solicitudes; track solicitud.nombre) {
                 <div
-                  class="flex flex-wrap items-center gap-4 border-b border-[#1f1c44] py-5 last:border-0"
+                  class="flex flex-wrap items-center gap-4 border-b border-[var(--kl-line-soft)] py-5 last:border-0"
                 >
                   <span
                     class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-kl-accent/25 text-sm"
@@ -242,7 +264,7 @@
             } @else {
               @for (problema of problemas; track problema.nombre) {
                 <div
-                  class="grid grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#1f1c44] py-5 last:border-0 sm:flex sm:gap-4"
+                  class="grid grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 border-b border-[var(--kl-line-soft)] py-5 last:border-0 sm:flex sm:gap-4"
                 >
                   <span
                     class="flex size-[42px] shrink-0 items-center justify-center rounded-xl bg-kl-accent/25"
@@ -266,7 +288,7 @@
         </section>
         <section #progresoSeccion id="progreso" class="scroll-mt-24" aria-label="Progreso por tema">
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -297,32 +319,24 @@
                   Cobertura de Equipo Alfa en competencias finalizadas
                 </p>
               }
-              @for (tema of temas; track tema.nombre) {
-                <div
-                  class="my-2 grid grid-cols-[1fr_40px] items-center gap-x-4 gap-y-2 text-sm sm:grid-cols-[190px_1fr_44px]"
-                >
-                  <span>{{ tema.nombre }}</span>
-                  <div
-                    role="progressbar"
-                    [attr.aria-label]="tema.nombre"
-                    [attr.aria-valuenow]="tema.valor"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    class="col-start-1 row-start-2 h-2.5 overflow-hidden rounded-full bg-[#2a2750] sm:col-start-2 sm:row-start-1"
-                  >
+              <ul class="m-0 grid list-none grid-flow-col auto-cols-fr items-end gap-2 p-0 sm:gap-4">
+                @for (tema of temas; track tema.nombre) {
+                  <li class="flex min-w-0 flex-col items-center gap-2 text-center">
+                    <span class="font-display text-lg font-bold sm:text-2xl">{{ tema.valor }}%</span>
                     <div
-                      class="h-full rounded-full bg-linear-to-r from-[#6419ff] to-[#a881fe]"
-                      [class.bg-amber-400]="tema.valor < 35"
-                      [class.bg-none]="tema.valor < 35"
-                      [style.width.%]="tema.valor"
-                    ></div>
-                  </div>
-                  <span
-                    class="col-start-2 row-start-1 text-right font-mono text-xs text-kl-body sm:col-start-3"
-                    >{{ tema.valor }}%</span
-                  >
-                </div>
-              }
+                      role="progressbar"
+                      [attr.aria-label]="tema.nombre"
+                      [attr.aria-valuenow]="tema.valor"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      class="flex h-44 w-full max-w-16 items-end overflow-hidden rounded-2xl bg-white/5"
+                    >
+                      <div class="kl-column w-full rounded-2xl" [class.kl-column--low]="tema.valor < 35" [style.height.%]="tema.valor"></div>
+                    </div>
+                    <span class="text-[11px] leading-4 break-words text-kl-body sm:text-xs">{{ tema.nombre }}</span>
+                  </li>
+                }
+              </ul>
               <p
                 class="mb-0 mt-5 flex items-center gap-2.5 rounded-xl border border-solid border-amber-300/35 bg-amber-300/7 p-3 text-[13px] text-amber-200"
               >
@@ -344,7 +358,7 @@
           [attr.aria-label]="coach ? 'Mis equipos' : 'Mis grupos'"
         >
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -356,7 +370,13 @@
                 }
               "
             />
-            @if ((nuevo && session.demo()) || grupos().length === 0) {
+            @if (cargandoGrupos) {
+              <app-loader [label]="coach ? 'Cargando tus equipos…' : 'Cargando tus grupos…'" [rows]="2" />
+            } @else if (!session.demo() && errorGrupos()) {
+              <p class="m-0 text-[13px] text-kl-muted">
+                {{ coach ? 'No pudimos cargar tus equipos.' : 'No pudimos cargar tus grupos.' }}
+              </p>
+            } @else if ((nuevo && session.demo()) || grupos().length === 0) {
               <ng-container
                 *ngTemplateOutlet="
                   vacio;
@@ -371,13 +391,13 @@
                 "
               />
             } @else {
-              @for (grupo of grupos(); track grupo.nombre) {
-                <div class="flex items-center gap-4 border-b border-[#1f1c44] py-3.5 last:border-0">
+              @for (grupo of grupos(); track grupo.id ?? grupo.nombre) {
+                <div class="flex items-center gap-4 border-b border-[var(--kl-line-soft)] py-3.5 last:border-0">
                   <span
-                    class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[#3b3480] bg-kl-accent/25 text-sm"
+                    class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-solid border-[var(--kl-line-strong)] bg-kl-accent/25 text-sm"
                     >{{ grupo.iniciales }}</span
                   >
-                  <div class="min-w-0 flex-1">
+                  <div class="min-w-0 flex-1 wrap-anywhere">
                     <strong class="text-[15px]">{{ grupo.nombre }}</strong>
                     <p class="mb-0 mt-1 text-xs text-kl-muted">{{ grupo.detalle }}</p>
                     <span
@@ -388,6 +408,7 @@
                   <a
                     mat-icon-button
                     [routerLink]="coach ? '/coach/grupos/solicitudes' : (grupo.id ? ['/grupos', grupo.id] : '/grupos')"
+                    [queryParams]="coach && grupo.id ? { grupo: grupo.id } : null"
                     [attr.aria-label]="'Ver ' + grupo.nombre"
                   >
                     <img src="/images/dashboard/0-imgIcon14.svg" width="18" height="18" alt="" />
@@ -404,7 +425,7 @@
           aria-label="Próximas competencias"
         >
           <mat-card
-            class="border border-solid border-[#2b2760] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
+            class="border border-solid border-[var(--kl-line)] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/90 p-4 shadow-[0_0_24px_#643cff2e] sm:p-6"
           >
             <ng-container
               *ngTemplateOutlet="
@@ -432,7 +453,7 @@
             } @else {
               @for (competencia of competencias; track competencia.nombre) {
                 <div
-                  class="flex flex-wrap items-center gap-3 border-b border-[#1f1c44] py-5 last:border-0"
+                  class="flex flex-wrap items-center gap-3 border-b border-[var(--kl-line-soft)] py-5 last:border-0"
                 >
                   <span
                     class="flex size-[42px] items-center justify-center rounded-xl bg-kl-accent/25"
@@ -480,7 +501,7 @@
   let-accion="accion"
 >
   <div
-    class="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-dotted border-[#3b3480] bg-white/2 px-5 py-7 text-center"
+    class="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-dotted border-[var(--kl-line-strong)] bg-white/2 px-5 py-7 text-center"
   >
     @if (icono) {
       <span class="mb-3 flex size-[52px] items-center justify-center rounded-xl bg-kl-accent/25"

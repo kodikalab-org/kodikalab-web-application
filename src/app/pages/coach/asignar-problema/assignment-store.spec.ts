@@ -235,4 +235,25 @@ describe('AssignmentStore', () => {
     expect(store.teamId()).toBeNull();
     session.logout();
   });
+
+  it('keeps loading when the answer of a previously chosen team arrives first', () => {
+    store.selectTeam(8);
+    store.selectTeam(9);
+    const [first, second] = http.match((req) => req.url === '/api/competitions');
+
+    first.flush({ teamId: 8, total: 0, items: [] });
+    expect(store.competitionsLoading()).toBe(true);
+
+    second.flush({ teamId: 9, total: 0, items: [] });
+    expect(store.competitionsLoading()).toBe(false);
+  });
+
+  it('stops loading when the team is cleared while its competitions are in flight', () => {
+    store.selectTeam(8);
+    const request = http.expectOne((req) => req.url === '/api/competitions');
+
+    store.selectTeam(null);
+    expect(store.competitionsLoading()).toBe(false);
+    request.flush({ teamId: 8, total: 0, items: [] });
+  });
 });

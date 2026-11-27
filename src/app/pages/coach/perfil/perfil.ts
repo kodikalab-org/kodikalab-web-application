@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Session } from '../../../core/session';
 import { ProfileApi } from '../../../core/profile-api';
 import { profileIdentity } from '../../../core/profile-identity';
@@ -22,6 +22,10 @@ import {
   crearSolicitudesDemo,
 } from '../../../data/perfil-coach-demo';
 import { EstadoSolicitud, SolicitudIngreso } from '../../../models/perfil-coach';
+import { plural } from '../../../shared/plural';
+import { CoachGroup, TeamsApi } from '../../../core/teams-api';
+import { Loader } from '../../../shared/loader/loader';
+import { iniciales } from '../../grupos/mis-grupos/presentacion';
 
 type Pestania = 'info' | 'solicitudes' | 'ajustes';
 
@@ -50,6 +54,7 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
 @Component({
   selector: 'app-coach-perfil',
   imports: [
+    Loader,
     HeaderNavigation,
     UserMenu,
     AsyncPipe,
@@ -68,7 +73,28 @@ const PESTANIAS: readonly Pestania[] = ['info', 'solicitudes', 'ajustes'];
 export class CoachPerfil {
   protected readonly session = inject(Session);
   private readonly profiles = inject(ProfileApi);
-  constructor() { if (!this.session.demo()) this.formAjustes.disable(); }
+  private readonly teamsApi = inject(TeamsApi);
+  /** Real teams of the signed-in coach; null until the server answers. */
+  protected readonly equiposReales = signal<CoachGroup[] | null>(null);
+  protected readonly errorEquipos = signal(false);
+  constructor() {
+    if (this.session.demo()) return;
+    this.formAjustes.disable();
+    this.cargarEquipos();
+  }
+  protected cargarEquipos(): void {
+    this.errorEquipos.set(false);
+    this.teamsApi.loadMine().subscribe({
+      next: (teams) => this.equiposReales.set(teams.filter((team): team is CoachGroup => !('membership' in team))),
+      error: () => this.errorEquipos.set(true),
+    });
+  }
+  protected equiposConSolicitudes(): CoachGroup[] {
+    return (this.equiposReales() ?? []).filter((team) => team.pendingRequests > 0);
+  }
+  protected textoSolicitudes(cantidad: number): string {
+    return plural(cantidad, 'solicitud pendiente', 'solicitudes pendientes');
+  }
   protected salir(): void { this.session.logout(); this.profiles.reset(); }
   private readonly ruta = inject(ActivatedRoute);
 
@@ -116,7 +142,17 @@ export class CoachPerfil {
       anios: p?.role === 'COACH' ? p.aniosExperiencia : 0,
       presentacion: p?.role === 'COACH' ? p.presentacion ?? '' : '' };
   }
-  protected get equipos() { return this.session.demo() ? EQUIPOS_COACH_DEMO : []; }
+  protected get equipos(): readonly { nombre: string; iniciales: string; integrantes: number; capacidad: number | null; horario: string | null }[] {
+    if (this.session.demo()) return EQUIPOS_COACH_DEMO;
+    return (this.equiposReales() ?? []).map((team) => ({
+      nombre: team.name, iniciales: iniciales(team.name), integrantes: team.activeMembers,
+      capacidad: team.maxCapacity, horario: team.sessionSchedule,
+    }));
+  }
+  private total(valor: (team: CoachGroup) => number): number | string {
+    const teams = this.equiposReales();
+    return teams ? teams.reduce((suma, team) => suma + valor(team), 0) : '—';
+  }
   protected readonly solicitudes: SolicitudIngreso[] = this.session.demo() ? crearSolicitudesDemo() : [];
   protected readonly filtros = ['Pendientes', 'Todas', 'Equipo Alfa', 'Equipo Beta'];
 
@@ -128,9 +164,9 @@ export class CoachPerfil {
     { icono: 'images/perfil-coach/building-18.svg', texto: this.perfil.organizacion },
     {
       icono: 'images/perfil-coach/trophy-18.svg',
-      texto: `${this.perfil.anios} años de experiencia entrenando`,
+      texto: `${plural(this.perfil.anios, 'año')} de experiencia entrenando`,
     },
-  ]; }
+  ].filter((dato) => dato.texto); }
 
   protected readonly filas: readonly FilaAjuste[] = [
     {
@@ -174,19 +210,19 @@ export class CoachPerfil {
   protected estadisticas() {
     return [
       {
-        valor: this.session.demo() ? this.equipos.length : '—',
+        valor: this.session.demo() ? this.equipos.length : this.total(() => 1),
         etiqueta: 'Equipos a cargo',
         icono: 'images/perfil-coach/stat-teams-24.svg',
         fondo: 'bg-[rgba(167,139,250,0.14)]',
       },
       {
-        valor: this.session.demo() ? ESTADISTICAS_COACH_DEMO.integrantesActivos : '—',
+        valor: this.session.demo() ? ESTADISTICAS_COACH_DEMO.integrantesActivos : this.total((team) => team.activeMembers),
         etiqueta: 'Integrantes activos',
         icono: 'images/perfil-coach/stat-members-24.svg',
         fondo: 'bg-[rgba(74,222,128,0.14)]',
       },
       {
-        valor: this.session.demo() ? this.pendientes() : '—',
+        valor: this.session.demo() ? this.pendientes() : this.total((team) => team.pendingRequests),
         etiqueta: 'Solicitudes pendientes',
         icono: 'images/perfil-coach/stat-pending-24.svg',
         fondo: 'bg-[rgba(251,191,36,0.14)]',

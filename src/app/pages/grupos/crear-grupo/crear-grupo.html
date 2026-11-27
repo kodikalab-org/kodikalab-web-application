@@ -22,7 +22,12 @@
     </div>
   </div>
   @if (cargandoBorrador()) {
-    <p role="status" class="mt-0 mb-4 text-sm text-kl-muted">Cargando tu borrador…</p>
+    <app-loader label="Cargando tu borrador…" [rows]="2" class="mt-0 mb-4" />
+  } @else if (errorBorrador()) {
+    <section role="alert" class="mt-0 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-3 text-sm">
+      <span><strong>No pudimos cargar tu borrador.</strong> {{ errorBorrador() }}</span>
+      <button mat-stroked-button type="button" (click)="reintentarBorrador()">Reintentar</button>
+    </section>
   } @else if (borradorId() !== null) {
     <p
       role="status"
@@ -47,7 +52,7 @@
     @if (error()) {
       <section
         role="alert"
-        class="mb-4 self-end rounded-xl border border-solid border-kl-danger bg-[#34161a] p-4 text-sm"
+        class="mb-4 self-end rounded-xl border border-solid border-kl-danger bg-kl-danger/10 p-4 text-sm"
       >
         <strong>No se pudo guardar el grupo</strong>
         <p class="mb-0">{{ error() }}</p>
@@ -56,7 +61,7 @@
     @if (exito()) {
       <section
         role="status"
-        class="mb-4 self-end rounded-xl border border-solid border-green-400 bg-[#0f2a1b] p-4 text-sm"
+        class="mb-4 self-end rounded-xl border border-solid border-green-400 bg-green-400/10 p-4 text-sm"
       >
         <strong>Borrador guardado</strong>
         <p class="mb-0">{{ exito() }}</p>
@@ -69,12 +74,12 @@
       <div class="min-w-0">
         <ol
           aria-label="Pasos para crear un grupo"
-          class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-[#2b2760] bg-[#0e0a28]/70 p-0 xl:grid-cols-4"
+          class="m-0 mb-4 grid list-none grid-cols-2 overflow-hidden rounded-2xl border border-solid border-[var(--kl-line)] bg-[var(--kl-chrome)]/70 p-0 xl:grid-cols-4"
         >
           @for (titulo of pasos; track titulo; let i = $index) {
             <li
               [attr.aria-current]="paso === i + 1 ? 'step' : null"
-              class="flex min-h-16 items-center gap-3 border-0 border-r border-b border-solid border-[#1f1c44] p-3 text-xs"
+              class="flex min-h-16 items-center gap-3 border-0 border-r border-b border-solid border-[var(--kl-line-soft)] p-3 text-xs"
               [class.bg-kl-accent/20]="paso === i + 1"
             >
               <span
@@ -101,7 +106,7 @@
         @if (estado === 'perfil-incompleto' || estado === 'conexion') {
           <section
             role="alert"
-            class="mb-4 rounded-xl border border-solid border-amber-400 bg-[#2e2410] p-4 text-sm"
+            class="mb-4 rounded-xl border border-solid border-amber-400 bg-amber-400/10 p-4 text-sm"
           >
             <strong class="text-amber-400">{{
               estado === 'perfil-incompleto'
@@ -124,7 +129,7 @@
         }
         <mat-card
           appearance="outlined"
-          class="rounded-[18px] bg-linear-to-b from-[#1a1446]/75 to-[#09071a]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
+          class="rounded-[18px] bg-linear-to-b from-[var(--kl-card-from)]/75 to-[var(--kl-card-to)]/85 p-5 shadow-[0_0_24px_#643cff2e] sm:p-6"
         >
           <div class="mb-6 flex items-center gap-3.5">
             <span
@@ -192,7 +197,7 @@
                     ></mat-form-field
                   >
                   <p class="mt-1.5 mb-0 flex justify-between gap-2 text-xs text-kl-muted">
-                    <span>Máximo 120 caracteres.</span><span>0/120</span>
+                    <span>Máximo 120 caracteres.</span><span>{{ general.controls.nombre.value.length }}/120</span>
                   </p>
                 </div>
                 <div>
@@ -217,7 +222,7 @@
                   >
                   <p class="mt-1.5 mb-0 flex justify-between gap-2 text-xs text-kl-muted">
                     <span>Cuéntales a los practicantes el objetivo y la dinámica del grupo.</span
-                    ><span>0/500</span>
+                    ><span>{{ general.controls.descripcion.value.length }}/500</span>
                   </p>
                 </div>
                 <div class="grid gap-5 sm:grid-cols-2">
@@ -360,9 +365,9 @@
                   class="rounded-[14px] border border-solid border-kl-border-strong bg-white/2 p-4"
                 >
                   <p class="m-0 text-[13px] text-kl-body">Así se mostrará en el grupo</p>
-                  <p class="my-2 font-mono text-sm">Martes y jueves de 19:00 a 21:00</p>
+                  <p class="my-2 font-mono text-sm">{{ resumenHorario() }}</p>
                   <p class="m-0 text-xs text-kl-muted">
-                    Se guarda como texto de horario (máx. 150 caracteres). Vista de ejemplo.
+                    Se guarda como texto de horario (máx. 150 caracteres).
                   </p>
                 </div>
               </form>
@@ -451,18 +456,17 @@
                           ? [
                               [
                                 'Nombre',
-                                general.controls.nombre.value || 'Entrenamiento de Grafos',
+                                general.controls.nombre.value || 'Sin nombre',
                               ],
                               [
                                 'Descripción',
-                                general.controls.descripcion.value ||
-                                  'Preparación para competencias ICPC con enfoque en grafos y programación dinámica.',
+                                general.controls.descripcion.value || 'Sin descripción.',
                               ],
-                              ['Nivel objetivo', general.controls.nivel.value || 'Intermedio'],
-                              ['Cupo máximo', (general.controls.cupo.value ?? 15) + ' integrantes'],
+                              ['Nivel objetivo', general.controls.nivel.value || 'Sin definir'],
+                              ['Cupo máximo', cupoTexto()],
                             ]
                           : seccion === 2
-                            ? [['Días y horas', 'Martes y jueves de 19:00 a 21:00']]
+                            ? [['Días y horas', resumenHorario()]]
                             : [
                                 ['Visibilidad', acceso.controls.visibilidad.value],
                                 ['Estado al crear', 'Activo'],
@@ -474,7 +478,7 @@
                           class="grid gap-2 border-0 border-b border-solid border-kl-divider py-3 sm:grid-cols-[140px_1fr]"
                         >
                           <dt class="text-kl-muted">{{ fila[0] }}</dt>
-                          <dd class="m-0 break-words sm:text-right">{{ fila[1] }}</dd>
+                          <dd class="m-0 min-w-0 wrap-anywhere sm:text-right">{{ fila[1] }}</dd>
                         </div>
                       }
                     </dl>
@@ -484,7 +488,6 @@
                   class="m-0 rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-3 text-xs text-kl-body"
                 >
                   Al crear el grupo se genera su código de invitación y quedas como responsable.
-                  Esta es una maqueta: no se creará un grupo real.
                 </p>
               </div>
             }
@@ -492,7 +495,7 @@
         </mat-card>
       </div>
       <aside
-        class="rounded-[18px] border border-solid border-[#2b2760] bg-[#0e0a28]/80 p-5 text-[13px]"
+        class="kl-card min-w-0 rounded-[18px] border border-solid border-[var(--kl-line)] bg-[var(--kl-chrome)]/80 p-5 text-[13px]"
       >
         <div class="mb-4 flex items-center gap-3">
           <img src="/images/grupos/resumen.svg" width="20" height="20" alt="" />
@@ -502,17 +505,17 @@
           </div>
         </div>
         <div
-          class="flex items-start gap-3 rounded-[14px] border border-solid border-[#26224d] bg-white/3 p-3"
+          class="flex items-start gap-3 rounded-[14px] border border-solid border-[var(--kl-line-soft)] bg-white/3 p-3"
         >
           <span
-            class="flex size-[76px] shrink-0 items-center justify-center rounded-[14px] bg-linear-to-br from-[#2a1c6e] to-[#4b36b8]"
+            class="flex size-[76px] shrink-0 items-center justify-center rounded-[14px] bg-linear-to-br from-[var(--kl-card-hi)] to-kl-accent"
             ><img src="/images/grupos/grupo.svg" width="36" height="36" alt=""
           /></span>
           <div class="min-w-0">
             <h3 class="m-0 break-words font-display text-base">
               {{ general.controls.nombre.value || 'Nombre del grupo' }}
             </h3>
-            <p class="my-2 line-clamp-3 text-xs text-kl-muted">
+            <p class="my-2 line-clamp-3 wrap-anywhere text-xs text-kl-muted">
               {{ general.controls.descripcion.value || 'La descripción aparecerá aquí.' }}
             </p>
             <div class="flex flex-wrap gap-2 text-xs text-kl-body">
@@ -524,15 +527,15 @@
             </div>
           </div>
         </div>
-        <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
+        <div class="mt-4 border-0 border-t border-solid border-[var(--kl-line-soft)] pt-3">
           <h3 class="m-0 flex items-center gap-2 text-sm">
             <img src="/images/grupos/calendario.svg" width="16" height="16" alt="" />Horario
           </h3>
           <p class="mt-2 mb-0 text-kl-body">
-            {{ paso === 1 ? 'Días y horas sin definir' : 'Martes y jueves de 19:00 a 21:00' }}
+            {{ paso === 1 ? 'Días y horas sin definir' : resumenHorario() }}
           </p>
         </div>
-        <div class="mt-4 border-0 border-t border-solid border-[#1f1c44] pt-3">
+        <div class="mt-4 border-0 border-t border-solid border-[var(--kl-line-soft)] pt-3">
           <h3 class="m-0 flex items-center gap-2 text-sm">
             <img src="/images/grupos/candado.svg" width="16" height="16" alt="" />Acceso y
             visibilidad
@@ -544,7 +547,7 @@
         <div
           class="mt-4 rounded-xl border border-solid border-kl-accent-text/40 bg-kl-accent-text/10 p-3"
         >
-          <strong class="flex items-center gap-2 text-sm text-[#c4b5fd]"
+          <strong class="flex items-center gap-2 text-sm text-kl-accent-text"
             ><img src="/images/grupos/info.svg" width="16" height="16" alt="" />Campos
             obligatorios</strong
           >
@@ -555,7 +558,7 @@
       </aside>
     </div>
     <div
-      class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[#1f1c44] bg-[#060414]/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
+      class="mt-8 flex flex-col justify-between gap-4 border-0 border-t border-solid border-[var(--kl-line-soft)] bg-[var(--kl-chrome)]/95 py-4 lg:mt-auto lg:flex-row lg:items-center"
     >
       <p class="mb-0 text-xs text-kl-muted">
         Puedes guardar un borrador con solo el nombre y completarlo después. Se publica cuando tenga
@@ -569,7 +572,7 @@
           mat-stroked-button
           type="button"
           (click)="guardarBorrador()"
-          [disabled]="guardando() || !general.controls.nombre.value.trim()"
+          [disabled]="guardando() || cargandoBorrador() || !!errorBorrador() || !general.controls.nombre.value.trim()"
         >
           <img src="/images/grupos/guardar.svg" width="18" height="18" alt="" />{{
             guardando() ? 'Guardando…' : 'Guardar borrador'
@@ -579,7 +582,7 @@
           type="button"
           (click)="continuar(paso)"
           [disabled]="
-            guardando() || estado === 'perfil-incompleto'
+            guardando() || cargandoBorrador() || errorBorrador() || estado === 'perfil-incompleto'
               ? true
               : paso === 1
                 ? general.invalid

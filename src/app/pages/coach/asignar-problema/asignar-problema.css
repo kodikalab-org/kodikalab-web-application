@@ -9,5 +9,5 @@
   --mat-paginator-container-text-font: var(--kl-font-body);
   --mat-paginator-container-text-size: 13px;
   --mat-paginator-enabled-icon-color: var(--kl-text);
-  --mat-paginator-disabled-icon-color: #5f5a78;
+  --mat-paginator-disabled-icon-color: var(--kl-border-strong);
 }

@@ -291,4 +291,16 @@ describe('ProblemasAsignados (practitioner)', () => {
     expect(root.textContent).toContain('no perteneces a ningún equipo');
     expect(Array.from(root.querySelectorAll('a')).map((a) => a.getAttribute('href'))).toContain('/grupos');
   });
+
+  it('does not claim zero assignments in the side panel when the list cannot be read', async () => {
+    const { root, loadTeams, list, settle } = await setup();
+    await loadTeams();
+    list().flush({}, { status: 503, statusText: 'Unavailable' });
+    await settle();
+
+    const aside = root.querySelector('aside')!.textContent!;
+    expect(aside).not.toContain('0/0');
+    expect(aside).not.toContain('Sin competencias con problemas asignados.');
+    expect(aside).toContain('\u2014');
+  });
 });
